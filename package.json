@@ -1,0 +1,15 @@
+{
+  "name": "bookflow",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Bo khung F00.1 cho BookFlow AI",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "kiem-tra:cau-truc": "node scripts/kiem-tra-cau-truc.mjs",
+    "test:f00": "node --test scripts/tests/kiem-tra-cau-truc.test.mjs",
+    "test": "npm run test:f00"
+  }
+}

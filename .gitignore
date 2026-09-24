@@ -1,18 +1,40 @@
+# Biến môi trường thật; giữ các file mẫu
 .env
 .env.*
 !.env.example
 
+# Node.js / Python
 node_modules/
 .venv/
+venv/
 __pycache__/
-*.pyc
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
+# Build / test / log
 dist/
 build/
 coverage/
+.nyc_output/
 *.log
-.DS_Store
+logs/
+.cache/
+tmp/
+temp/
 
+# File khách hàng, backup và dump; KHÔNG loại *.sql (migration)
 uploads/
 *.dump
+*.backup
 *.sql.gz
+*.sql.zst
+infrastructure/postgres/data/
+infrastructure/minio/data/
+infrastructure/redis/data/
+
+# Hệ điều hành / IDE
+.DS_Store
+.idea/
+.vscode/

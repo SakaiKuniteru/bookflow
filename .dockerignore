@@ -1,0 +1,28 @@
+# Chỉ ảnh hưởng khi dùng BookFlow/ làm Docker build context.
+# Mỗi ứng dụng sẽ có .dockerignore riêng tại frontend/, backend/, ai-service/.
+
+.git
+.gitignore
+**/node_modules
+**/.venv
+**/venv
+**/__pycache__
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+**/dist
+**/build
+**/coverage
+**/*.log
+**/uploads
+**/*.dump
+**/*.backup
+**/*.sql.gz
+**/*.sql.zst
+
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
