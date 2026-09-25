@@ -1,13 +1,15 @@
-import { Router } from 'express';
-import { authenticate, kiemTraCsrf } from '../../common/middlewares/authenticate.js';
-import { authorize } from '../../common/middlewares/authorize.js';
-import { tenantScope } from '../../common/middlewares/tenant-scope.js';
-import * as controller from './don-vi.controller.js';
+const { Router } = require('express');
+const { authenticate } = require('../../common/middlewares/authenticate.js');
+const { authorize } = require('../../common/middlewares/authorize.js');
+const { tenantScope } = require('../../common/middlewares/tenant-scope.js');
+const controller = require('./don-vi.controller.js');
 
-export const donViRouter = Router();
+const router = Router();
 
-donViRouter.use(authenticate);
-donViRouter.post('/', kiemTraCsrf, controller.taoDonVi);
-donViRouter.post('/', kiemTraCsrf, controller.taoDonVi);
-donViRouter.get('/hien-tai', tenantScope, controller.donViHienTai);
-donViRouter.patch('/hien-tai', tenantScope, kiemTraCsrf, authorize('units.manage'), controller.capNhatDonVi);
+router.use(authenticate);
+router.get('/tham-gia', controller.danhSachDonVi);
+router.post('/', controller.taoDonVi);
+router.get('/hien-tai', tenantScope, controller.donViHienTai);
+router.patch('/hien-tai', tenantScope, authorize('units.manage'), controller.capNhatDonVi);
+
+module.exports = router;

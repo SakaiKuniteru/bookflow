@@ -1,23 +1,22 @@
-import { Router } from 'express';
-import { authenticate, kiemTraCsrf } from '../../common/middlewares/authenticate.js';
-import { authorize } from '../../common/middlewares/authorize.js';
-import * as controller from './phan-quyen.controller.js';
+const { Router } = require('express');
+const { authenticate } = require('../../common/middlewares/authenticate.js');
+const { authorize } = require('../../common/middlewares/authorize.js');
+const controller = require('./phan-quyen.controller.js');
 
-export const phanQuyenRouter = Router();
+const router = Router();
 
-phanQuyenRouter.use(authenticate);
-phanQuyenRouter.get('/toi/quyen', controller.quyenCuaToi);
+router.use(authenticate);
+router.get('/toi/quyen', controller.quyenCuaToi);
+router.use(authorize('roles.manage'));
+router.get('/quyen', controller.danhMucQuyen);
+router.get('/vai-tro', controller.danhSachVaiTro);
+router.get('/vai-tro/:vaiTroId/quyen', controller.quyenCuaVaiTro);
+router.get('/thanh-vien/:thanhVienId/vai-tro', controller.vaiTroCuaThanhVien);
+router.post('/vai-tro', controller.taoVaiTro);
+router.patch('/vai-tro/:vaiTroId', controller.suaVaiTro);
+router.delete('/vai-tro/:vaiTroId', controller.voHieuVaiTro);
+router.put('/vai-tro/:vaiTroId/quyen', controller.thayQuyenVaiTro);
+router.post('/thanh-vien/:thanhVienId/vai-tro', controller.ganVaiTro);
+router.delete('/thanh-vien/:thanhVienId/vai-tro/:ganVaiTroId', controller.thuHoiVaiTro);
 
-phanQuyenRouter.use(authorize('roles.manage'));
-phanQuyenRouter.get('/quyen', controller.danhMucQuyen);
-phanQuyenRouter.get('/vai-tro', controller.danhSachVaiTro);
-phanQuyenRouter.get('/vai-tro/:vaiTroId/quyen', controller.quyenCuaVaiTro);
-phanQuyenRouter.get('/thanh-vien/:thanhVienId/vai-tro', controller.vaiTroCuaThanhVien);
-
-phanQuyenRouter.use(kiemTraCsrf);
-phanQuyenRouter.post('/vai-tro', controller.taoVaiTro);
-phanQuyenRouter.patch('/vai-tro/:vaiTroId', controller.suaVaiTro);
-phanQuyenRouter.delete('/vai-tro/:vaiTroId', controller.voHieuVaiTro);
-phanQuyenRouter.put('/vai-tro/:vaiTroId/quyen', controller.thayQuyenVaiTro);
-phanQuyenRouter.post('/thanh-vien/:thanhVienId/vai-tro', controller.ganVaiTro);
-phanQuyenRouter.delete('/thanh-vien/:thanhVienId/vai-tro/:ganVaiTroId', controller.thuHoiVaiTro);
+module.exports = router;

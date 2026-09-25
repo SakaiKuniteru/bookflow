@@ -1,6 +1,6 @@
-import { AppError } from '../errors/AppError.js';
+const { AppError } = require('../errors/AppError.js');
 
-export function xuLyLoi(error, req, res, _next) {
+function xuLyLoi(error, req, res, _next) {
     if (res.headersSent) return _next(error);
     const laLoiNghiepVu = error instanceof AppError;
     const laLoiJson = error?.type === 'entity.parse.failed';
@@ -14,3 +14,5 @@ export function xuLyLoi(error, req, res, _next) {
         error: { code, message, details: laLoiNghiepVu ? error.details : [] }
     });
 }
+
+module.exports = { xuLyLoi };

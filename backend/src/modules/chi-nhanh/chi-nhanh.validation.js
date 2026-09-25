@@ -1,4 +1,4 @@
-import { AppError } from '../../common/errors/AppError.js';
+const { AppError } = require('../../common/errors/AppError.js');
 
 const UUID = /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
 const TRUONG_TAO = [
@@ -22,7 +22,7 @@ function loiDuLieu(message) {
     return new AppError({ code: 'INVALID_INPUT', message, status: 422 });
 }
 
-export function uuidHopLe(value, ten = 'ID') {
+function uuidHopLe(value, ten = 'ID') {
     if (typeof value !== 'string' || !UUID.test(value)) throw loiDuLieu(`${ten} không hợp lệ`);
     return value;
 }
@@ -77,23 +77,31 @@ function chuanHoa(body, taoMoi) {
     return ketQua;
 }
 
-export function chiNhanhMoiHopLe(body) {
+function chiNhanhMoiHopLe(body) {
     return chuanHoa(body, true);
 }
 
-export function capNhatChiNhanhHopLe(body) {
+function capNhatChiNhanhHopLe(body) {
     return chuanHoa(body, false);
 }
 
-export function trangThaiChiNhanhHopLe(body) {
+function trangThaiChiNhanhHopLe(body) {
     if (!body || typeof body !== 'object' || Array.isArray(body) || Object.keys(body).length !== 1) throw loiDuLieu('Dữ liệu trạng thái không hợp lệ');
     if (!['DANG_DUNG', 'TAM_KHOA'].includes(body.trang_thai)) throw loiDuLieu('Trạng thái chi nhánh không hợp lệ');
     return body.trang_thai;
 }
 
-export function phanCongHopLe(body) {
+function phanCongHopLe(body) {
     if (!body || typeof body !== 'object' || Array.isArray(body)) throw loiDuLieu('Dữ liệu phân công không hợp lệ');
     if (Object.keys(body).some(ten => ten !== 'la_chi_nhanh_chinh')) throw loiDuLieu('Dữ liệu phân công có trường không được phép');
     if (body.la_chi_nhanh_chinh !== undefined && typeof body.la_chi_nhanh_chinh !== 'boolean') throw loiDuLieu('Chi nhánh chính phải là boolean');
     return { la_chi_nhanh_chinh: body.la_chi_nhanh_chinh ?? false };
 }
+
+module.exports = {
+    uuidHopLe,
+    chiNhanhMoiHopLe,
+    capNhatChiNhanhHopLe,
+    trangThaiChiNhanhHopLe,
+    phanCongHopLe
+};

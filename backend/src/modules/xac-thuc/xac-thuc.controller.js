@@ -1,109 +1,115 @@
-import * as service from './xac-thuc.service.js';
-
-const cauHinhCookie = () => ({
-    httpOnly: true, secure: process.env.APP_ENV !== 'dev',
-    sameSite: 'strict', path: '/api', maxAge: 7 * 86400000
-});
-
-function ganCookie(req, res, phien) {
-    res.cookie('bookflow_sid', phien.token, cauHinhCookie());
-    res.cookie('bookflow_csrf', phien.csrf, { ...cauHinhCookie(), httpOnly: false });
-}
-
-function xoaCookie(res) {
-    res.clearCookie('bookflow_sid', { ...cauHinhCookie(), maxAge: undefined });
-    res.clearCookie('bookflow_csrf', { ...cauHinhCookie(), maxAge: undefined, httpOnly: false });
-}
+const service = require('./xac-thuc.service.js');
 
 function tra(req, res, data, status = 200) {
-    res.status(status).json({ success: true, request_id: req.requestId, data });
+    res.set('Cache-Control', 'no-store');
+    return res.status(status).json({ success: true, request_id: req.requestId, data });
 }
 
-const xuLy = handler => async (req, res, next) => {
-    try { await handler(req, res); }
-    catch (error) { next(error); }
-};
-
-export const dangKy = xuLy(async (req, res) => {
-    const data = await service.dangKy(req.body ?? {});
-    tra(req, res, data, 201);
-});
-
-export const xacNhanDangKy = xuLy(async (req, res) => {
-    const data = await service.xacNhanDangKy(req.body ?? {});
-    tra(req, res, data);
-});
-
-export const guiLaiOtpDangKy = xuLy(async (req, res) => {
-    const data = await service.guiLaiOtpDangKy(req.body ?? {});
-    tra(req, res, data, 202);
-});
-
-export const dangNhap = xuLy(async (req, res) => {
-    const data = await service.dangNhap(req.body ?? {});
-    if (data.phien) {
-        ganCookie(req, res, data.phien);
-        delete data.phien;
+class XacThucController {
+    async dangKy(req, res, next) {
+        try {
+            const data = await service.dangKy(req.body ?? {});
+            return tra(req, res, data, 201);
+        } catch (error) { next(error); }
     }
-    tra(req, res, data, data.yeu_cau_kich_hoat ? 202 : 200);
-});
 
-export const hoanTatNhanVien = xuLy(async (req, res) => {
-    const data = await service.hoanTatNhanVien(req.body ?? {}, req.requestId);
-    ganCookie(req, res, data.phien);
-    delete data.phien;
-    tra(req, res, data);
-});
+    async xacNhanDangKy(req, res, next) {
+        try {
+            const data = await service.xacNhanDangKy(req.body ?? {});
+            return tra(req, res, data);
+        } catch (error) { next(error); }
+    }
 
-export const me = xuLy(async (req, res) => {
-    const data = await service.layNguoiDung(req.auth);
-    tra(req, res, data);
-});
+    async guiLaiOtpDangKy(req, res, next) {
+        try {
+            const data = await service.guiLaiOtpDangKy(req.body ?? {});
+            return tra(req, res, data, 202);
+        } catch (error) { next(error); }
+    }
 
-export const lamMoiPhien = xuLy(async (req, res) => {
-    const data = await service.lamMoiPhien(req.auth);
-    ganCookie(req, res, data.phien);
-    tra(req, res, { thong_bao: 'Đã làm mới phiên' });
-});
+    async dangNhap(req, res, next) {
+        try {
+            const data = await service.dangNhap(req.body ?? {});
+            return tra(req, res, data, data.yeu_cau_kich_hoat ? 202 : 200);
+        } catch (error) { next(error); }
+    }
 
-export const dangXuat = xuLy(async (req, res) => {
-    const data = await service.dangXuat(req.auth);
-    xoaCookie(res);
-    tra(req, res, data);
-});
+    async hoanTatNhanVien(req, res, next) {
+        try {
+            const data = await service.hoanTatNhanVien(req.body ?? {}, req.requestId);
+            return tra(req, res, data);
+        } catch (error) { next(error); }
+    }
 
-export const quenMatKhau = xuLy(async (req, res) => {
-    const data = await service.quenMatKhau(req.body ?? {});
-    tra(req, res, data, 202);
-});
+    async me(req, res, next) {
+        try {
+            const data = await service.layNguoiDung(req.auth);
+            return tra(req, res, data);
+        } catch (error) { next(error); }
+    }
 
-export const datLaiMatKhau = xuLy(async (req, res) => {
-    const data = await service.datLaiMatKhau(req.body ?? {});
-    tra(req, res, data);
-});
+    async lamMoiPhien(req, res, next) {
+        try {
+            const data = await service.lamMoiPhien(req.body ?? {});
+            return tra(req, res, data);
+        } catch (error) { next(error); }
+    }
 
-export const yeuCauDoiMatKhau = xuLy(async (req, res) => {
-    const data = await service.yeuCauDoiMatKhau(req.auth.taiKhoanId, req.body ?? {});
-    tra(req, res, data, 202);
-});
+    async dangXuat(req, res, next) {
+        try {
+            const data = await service.dangXuat(req.auth);
+            return tra(req, res, data);
+        } catch (error) { next(error); }
+    }
 
-export const doiMatKhau = xuLy(async (req, res) => {
-    const data = await service.doiMatKhau(req.auth.taiKhoanId, req.body ?? {});
-    xoaCookie(res);
-    tra(req, res, data);
-});
+    async quenMatKhau(req, res, next) {
+        try {
+            const data = await service.quenMatKhau(req.body ?? {});
+            return tra(req, res, data, 202);
+        } catch (error) { next(error); }
+    }
 
-export const chonDonVi = xuLy(async (req, res) => {
-    const data = await service.chonDonVi(req.auth, req.body ?? {});
-    tra(req, res, data);
-});
+    async datLaiMatKhau(req, res, next) {
+        try {
+            const data = await service.datLaiMatKhau(req.body ?? {});
+            return tra(req, res, data);
+        } catch (error) { next(error); }
+    }
 
-export const taoNhanVienBoiAdmin = xuLy(async (req, res) => {
-    const data = await service.taoNhanVienBoiAdmin(req.auth, req.body ?? {}, req.requestId);
-    tra(req, res, data, 201);
-});
+    async yeuCauDoiMatKhau(req, res, next) {
+        try {
+            const data = await service.yeuCauDoiMatKhau(req.auth.taiKhoanId, req.body ?? {});
+            return tra(req, res, data, 202);
+        } catch (error) { next(error); }
+    }
 
-export const guiLaiThuMoiNhanVien = xuLy(async (req, res) => {
-    const data = await service.guiLaiThuMoiNhanVien(req.auth, req.params.taiKhoanId, req.requestId);
-    tra(req, res, data);
-});
+    async doiMatKhau(req, res, next) {
+        try {
+            const data = await service.doiMatKhau(req.auth.taiKhoanId, req.body ?? {});
+            return tra(req, res, data);
+        } catch (error) { next(error); }
+    }
+
+    async chonDonVi(req, res, next) {
+        try {
+            const data = await service.chonDonVi(req.auth, req.body ?? {});
+            return tra(req, res, data);
+        } catch (error) { next(error); }
+    }
+
+    async taoNhanVienBoiAdmin(req, res, next) {
+        try {
+            const data = await service.taoNhanVienBoiAdmin(req.auth, req.body ?? {}, req.requestId);
+            return tra(req, res, data, 201);
+        } catch (error) { next(error); }
+    }
+
+    async guiLaiThuMoiNhanVien(req, res, next) {
+        try {
+            const data = await service.guiLaiThuMoiNhanVien(req.auth, req.params.taiKhoanId, req.requestId);
+            return tra(req, res, data);
+        } catch (error) { next(error); }
+    }
+}
+
+module.exports = new XacThucController();

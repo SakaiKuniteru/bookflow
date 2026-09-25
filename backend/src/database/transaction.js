@@ -1,6 +1,6 @@
-import { layPool } from './pool.js';
+const databasePool = require('./pool.js');
 
-export async function trongGiaoDich(callback, { pool = layPool() } = {}) {
+async function trongGiaoDich(callback, { pool = databasePool.layPool() } = {}) {
     if (typeof callback !== 'function') throw new TypeError('callback phải là hàm');
     const client = await pool.connect();
     let loiKetNoi = null;
@@ -20,3 +20,5 @@ export async function trongGiaoDich(callback, { pool = layPool() } = {}) {
         client.release(loiKetNoi);
     }
 }
+
+module.exports = { trongGiaoDich };

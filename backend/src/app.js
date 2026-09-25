@@ -1,16 +1,14 @@
-import express from 'express';
-import cookieParser from 'cookie-parser';
-import { apiRouter } from './routes/index.js';
-import { AppError } from './common/errors/AppError.js';
-import { ganRequestId } from './common/middlewares/request-id.js';
-import { xuLyLoi } from './common/middlewares/error-handler.js';
+const express = require('express');
+const apiRouter = require('./routes/index.js');
+const { AppError } = require('./common/errors/AppError.js');
+const { ganRequestId } = require('./common/middlewares/request-id.js');
+const { xuLyLoi } = require('./common/middlewares/error-handler.js');
 
-export function taoUngDung({ kiemTraSanSang = null } = {}) {
+function taoUngDung({ kiemTraSanSang = null } = {}) {
     const app = express();
     app.disable('x-powered-by');
     app.use(ganRequestId);
     app.use(express.json({ limit: '1mb' }));
-    app.use(cookieParser());
     app.get('/health', (req, res) => res.status(200).json({ success: true, request_id: req.requestId, data: { status: 'ok', service: 'backend' } }));
     app.get('/ready', async (req, res, next) => {
         try {
@@ -24,3 +22,5 @@ export function taoUngDung({ kiemTraSanSang = null } = {}) {
     app.use(xuLyLoi);
     return app;
 }
+
+module.exports = { taoUngDung };

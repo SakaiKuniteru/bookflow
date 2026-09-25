@@ -1,23 +1,22 @@
-import { Router } from 'express';
-import { authenticate, kiemTraCsrf } from '../../common/middlewares/authenticate.js';
-import { authorize } from '../../common/middlewares/authorize.js';
-import { tenantScope } from '../../common/middlewares/tenant-scope.js';
-import { branchScope } from '../../common/middlewares/branch-scope.js';
-import * as controller from './chi-nhanh.controller.js';
+const { Router } = require('express');
+const { authenticate } = require('../../common/middlewares/authenticate.js');
+const { authorize } = require('../../common/middlewares/authorize.js');
+const { tenantScope } = require('../../common/middlewares/tenant-scope.js');
+const { branchScope } = require('../../common/middlewares/branch-scope.js');
+const controller = require('./chi-nhanh.controller.js');
 
-export const chiNhanhRouter = Router();
+const router = Router();
 
-chiNhanhRouter.use(authenticate, tenantScope);
+router.use(authenticate, tenantScope);
+router.get('/', controller.danhSachChiNhanh);
+router.get('/dang-chon', branchScope, controller.chiNhanhDangChon);
+router.post('/chon', controller.chonChiNhanh);
+router.post('/', authorize('branches.manage'), controller.taoChiNhanh);
+router.get('/:chiNhanhId', controller.chiTietChiNhanh);
+router.patch('/:chiNhanhId', controller.capNhatChiNhanh);
+router.patch('/:chiNhanhId/trang-thai', authorize('branches.manage'), controller.doiTrangThaiChiNhanh);
+router.get('/:chiNhanhId/nhan-vien', controller.danhSachNhanVien);
+router.put('/:chiNhanhId/nhan-vien/:thanhVienId', controller.phanCongNhanVien);
+router.delete('/:chiNhanhId/nhan-vien/:thanhVienId', controller.boPhanCongNhanVien);
 
-chiNhanhRouter.get('/', controller.danhSachChiNhanh);
-chiNhanhRouter.get('/dang-chon', branchScope, controller.chiNhanhDangChon);
-chiNhanhRouter.post('/chon', kiemTraCsrf, controller.chonChiNhanh);
-chiNhanhRouter.post('/', kiemTraCsrf, authorize('branches.manage'), controller.taoChiNhanh);
-
-chiNhanhRouter.get('/:chiNhanhId', controller.chiTietChiNhanh);
-chiNhanhRouter.patch('/:chiNhanhId', kiemTraCsrf, controller.capNhatChiNhanh);
-chiNhanhRouter.patch('/:chiNhanhId/trang-thai', kiemTraCsrf, authorize('branches.manage'), controller.doiTrangThaiChiNhanh);
-
-chiNhanhRouter.get('/:chiNhanhId/nhan-vien', controller.danhSachNhanVien);
-chiNhanhRouter.put('/:chiNhanhId/nhan-vien/:thanhVienId', kiemTraCsrf, controller.phanCongNhanVien);
-chiNhanhRouter.delete('/:chiNhanhId/nhan-vien/:thanhVienId', kiemTraCsrf, controller.boPhanCongNhanVien);
+module.exports = router;

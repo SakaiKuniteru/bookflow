@@ -2,7 +2,7 @@
   "name": "@bookflow/database",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
+  "type": "commonjs",
   "description": "Database migrations for BookFlow AI",
   "engines": {
     "node": ">=20.6"

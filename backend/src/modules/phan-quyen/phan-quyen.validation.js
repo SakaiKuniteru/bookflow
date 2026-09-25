@@ -1,4 +1,4 @@
-import { AppError } from '../../common/errors/AppError.js';
+const { AppError } = require('../../common/errors/AppError.js');
 
 const UUID = /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
 const PHAM_VI = ['DON_VI', 'CHI_NHANH', 'CA_NHAN'];
@@ -17,12 +17,12 @@ function chuoiHopLe(value, ten, min, max) {
     return value.trim();
 }
 
-export function uuidHopLe(value, ten = 'ID') {
+function uuidHopLe(value, ten = 'ID') {
     if (typeof value !== 'string' || !UUID.test(value)) throw loiDuLieu(`${ten} không hợp lệ`);
     return value;
 }
 
-export function vaiTroMoiHopLe(body) {
+function vaiTroMoiHopLe(body) {
     kiemTraTruong(body, ['ma_vai_tro', 'ten_vai_tro', 'mo_ta']);
     const ma_vai_tro = chuoiHopLe(body.ma_vai_tro, 'Mã vai trò', 3, 60).toUpperCase();
     const ten_vai_tro = chuoiHopLe(body.ten_vai_tro, 'Tên vai trò', 3, 120);
@@ -32,14 +32,14 @@ export function vaiTroMoiHopLe(body) {
     return { ma_vai_tro, ten_vai_tro, mo_ta };
 }
 
-export function suaVaiTroHopLe(body) {
+function suaVaiTroHopLe(body) {
     kiemTraTruong(body, ['ten_vai_tro', 'mo_ta']);
     const ten_vai_tro = chuoiHopLe(body.ten_vai_tro, 'Tên vai trò', 3, 120);
     const mo_ta = body.mo_ta == null ? null : chuoiHopLe(body.mo_ta, 'Mô tả', 1, 2000);
     return { ten_vai_tro, mo_ta };
 }
 
-export function danhSachQuyenHopLe(body) {
+function danhSachQuyenHopLe(body) {
     kiemTraTruong(body, ['quyen']);
     if (!Array.isArray(body.quyen) || body.quyen.length > 100) throw loiDuLieu('Danh sách quyền không hợp lệ');
     const daCo = new Set();
@@ -54,10 +54,12 @@ export function danhSachQuyenHopLe(body) {
     });
 }
 
-export function ganVaiTroHopLe(body) {
+function ganVaiTroHopLe(body) {
     kiemTraTruong(body, ['vai_tro_id', 'chi_nhanh_id']);
     return {
         vai_tro_id: uuidHopLe(body.vai_tro_id, 'Vai trò'),
         chi_nhanh_id: body.chi_nhanh_id == null ? null : uuidHopLe(body.chi_nhanh_id, 'Chi nhánh')
     };
 }
+
+module.exports = { uuidHopLe, vaiTroMoiHopLe, suaVaiTroHopLe, danhSachQuyenHopLe, ganVaiTroHopLe };

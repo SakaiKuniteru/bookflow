@@ -1,60 +1,79 @@
-import * as service from './chi-nhanh.service.js';
+const service = require('./chi-nhanh.service.js');
 
 function tra(req, res, data, status = 200) {
-    res.status(status).json({ success: true, request_id: req.requestId, data });
+    return res.status(status).json({ success: true, request_id: req.requestId, data });
 }
 
-const xuLy = handler => async (req, res, next) => {
-    try { await handler(req, res); }
-    catch (error) { next(error); }
-};
+class ChiNhanhController {
+    async danhSachChiNhanh(req, res, next) {
+        try {
+            const data = await service.danhSachChiNhanh(req.auth);
+            return tra(req, res, data);
+        } catch (error) { next(error); }
+    }
 
-export const danhSachChiNhanh = xuLy(async (req, res) => {
-    const data = await service.danhSachChiNhanh(req.auth);
-    tra(req, res, data);
-});
+    async chiTietChiNhanh(req, res, next) {
+        try {
+            const data = await service.chiTietChiNhanh(req.auth, req.params.chiNhanhId);
+            return tra(req, res, data);
+        } catch (error) { next(error); }
+    }
 
-export const chiTietChiNhanh = xuLy(async (req, res) => {
-    const data = await service.chiTietChiNhanh(req.auth, req.params.chiNhanhId);
-    tra(req, res, data);
-});
+    async taoChiNhanh(req, res, next) {
+        try {
+            const data = await service.taoChiNhanh(req.auth, req.body ?? {}, req.requestId);
+            return tra(req, res, data, 201);
+        } catch (error) { next(error); }
+    }
 
-export const taoChiNhanh = xuLy(async (req, res) => {
-    const data = await service.taoChiNhanh(req.auth, req.body ?? {}, req.requestId);
-    tra(req, res, data, 201);
-});
+    async capNhatChiNhanh(req, res, next) {
+        try {
+            const data = await service.capNhatChiNhanh(req.auth, req.params.chiNhanhId, req.body ?? {}, req.requestId);
+            return tra(req, res, data);
+        } catch (error) { next(error); }
+    }
 
-export const capNhatChiNhanh = xuLy(async (req, res) => {
-    const data = await service.capNhatChiNhanh(req.auth, req.params.chiNhanhId, req.body ?? {}, req.requestId);
-    tra(req, res, data);
-});
+    async doiTrangThaiChiNhanh(req, res, next) {
+        try {
+            const data = await service.doiTrangThaiChiNhanh(req.auth, req.params.chiNhanhId, req.body ?? {}, req.requestId);
+            return tra(req, res, data);
+        } catch (error) { next(error); }
+    }
 
-export const doiTrangThaiChiNhanh = xuLy(async (req, res) => {
-    const data = await service.doiTrangThaiChiNhanh(req.auth, req.params.chiNhanhId, req.body ?? {}, req.requestId);
-    tra(req, res, data);
-});
+    async chonChiNhanh(req, res, next) {
+        try {
+            const data = await service.chonChiNhanh(req.auth, req.body ?? {});
+            return tra(req, res, data);
+        } catch (error) { next(error); }
+    }
 
-export const chonChiNhanh = xuLy(async (req, res) => {
-    const data = await service.chonChiNhanh(req.auth, req.body ?? {});
-    tra(req, res, data);
-});
+    async chiNhanhDangChon(req, res, next) {
+        try {
+            const data = await service.chiNhanhDangChon(req.auth);
+            return tra(req, res, data);
+        } catch (error) { next(error); }
+    }
 
-export const chiNhanhDangChon = xuLy(async (req, res) => {
-    const data = await service.chiNhanhDangChon(req.auth);
-    tra(req, res, data);
-});
+    async danhSachNhanVien(req, res, next) {
+        try {
+            const data = await service.danhSachNhanVien(req.auth, req.params.chiNhanhId);
+            return tra(req, res, data);
+        } catch (error) { next(error); }
+    }
 
-export const danhSachNhanVien = xuLy(async (req, res) => {
-    const data = await service.danhSachNhanVien(req.auth, req.params.chiNhanhId);
-    tra(req, res, data);
-});
+    async phanCongNhanVien(req, res, next) {
+        try {
+            const data = await service.phanCongNhanVien(req.auth, req.params.chiNhanhId, req.params.thanhVienId, req.body ?? {}, req.requestId);
+            return tra(req, res, data, 200);
+        } catch (error) { next(error); }
+    }
 
-export const phanCongNhanVien = xuLy(async (req, res) => {
-    const data = await service.phanCongNhanVien(req.auth, req.params.chiNhanhId, req.params.thanhVienId, req.body ?? {}, req.requestId);
-    tra(req, res, data, 200);
-});
+    async boPhanCongNhanVien(req, res, next) {
+        try {
+            const data = await service.boPhanCongNhanVien(req.auth, req.params.chiNhanhId, req.params.thanhVienId, req.requestId);
+            return tra(req, res, data);
+        } catch (error) { next(error); }
+    }
+}
 
-export const boPhanCongNhanVien = xuLy(async (req, res) => {
-    const data = await service.boPhanCongNhanVien(req.auth, req.params.chiNhanhId, req.params.thanhVienId, req.requestId);
-    tra(req, res, data);
-});
+module.exports = new ChiNhanhController();

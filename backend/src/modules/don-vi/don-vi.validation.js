@@ -1,4 +1,4 @@
-import { AppError } from '../../common/errors/AppError.js';
+const { AppError } = require('../../common/errors/AppError.js');
 
 const TRUONG_TAO = ['ma_don_vi', 'ten_hien_thi', 'email_lien_he', 'ten_phap_ly', 'ma_so_thue', 'so_dien_thoai', 'website', 'mui_gio', 'ngon_ngu'];
 const TRUONG_SUA = TRUONG_TAO.filter(ten => ten !== 'ma_don_vi');
@@ -53,10 +53,12 @@ function chuanHoa(body, taoMoi) {
     return ketQua;
 }
 
-export function donViMoiHopLe(body) {
+function donViMoiHopLe(body) {
     return chuanHoa(body, true);
 }
 
-export function capNhatDonViHopLe(body) {
+function capNhatDonViHopLe(body) {
     return chuanHoa(body, false);
 }
+
+module.exports = { donViMoiHopLe, capNhatDonViHopLe };

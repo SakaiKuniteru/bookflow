@@ -1,6 +1,6 @@
-import { createClient } from 'redis';
+const { createClient } = require('redis');
 
-export async function kiemTraRedis(cauHinh) {
+async function kiemTraRedis(cauHinh) {
     const client = createClient({
         socket: {
             host: cauHinh.host,
@@ -18,3 +18,5 @@ export async function kiemTraRedis(cauHinh) {
         if (client.isOpen) await client.quit().catch(() => client.destroy());
     }
 }
+
+module.exports = { kiemTraRedis };
