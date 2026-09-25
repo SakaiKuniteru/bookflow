@@ -34,6 +34,12 @@ export function docMoiTruong(env = process.env) {
         storage: {
             endpoint: urlHttp(env, 'STORAGE_ENDPOINT'),
             healthUrl: urlHttp(env, 'STORAGE_HEALTH_URL')
-        }
+        },
+        email: docCauHinhEmail(env)
     };
+}
+export function docCauHinhEmail(env = process.env) {
+    const otpSecret = chuoiBatBuoc(env, 'OTP_SECRET');
+    if (!/^[0-9a-fA-F]{64,}$/.test(otpSecret)) throw new Error('OTP_SECRET phải là chuỗi hex ít nhất 32 byte');
+    return { host: chuoiBatBuoc(env, 'SMTP_HOST'), port: congHopLe(env, 'SMTP_PORT', 587), user: chuoiBatBuoc(env, 'SMTP_USER'), password: chuoiBatBuoc(env, 'SMTP_PASSWORD'), from: chuoiBatBuoc(env, 'SMTP_FROM'), loginUrl: urlHttp(env, 'PUBLIC_LOGIN_URL'), otpSecret };
 }

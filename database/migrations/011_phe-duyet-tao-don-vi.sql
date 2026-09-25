@@ -1,0 +1,34 @@
+INSERT INTO quyen (ma_quyen, ten_quyen, nhom_quyen, mo_ta, la_quyen_nhay_cam)
+VALUES (
+    'units.manage',
+    'Quản lý thông tin đơn vị',
+    'don_vi',
+    'Cập nhật thông tin đơn vị trong phạm vi được cấp',
+    TRUE
+)
+ON CONFLICT (ma_quyen) DO NOTHING;
+
+INSERT INTO vai_tro_quyen (don_vi_id, vai_tro_id, quyen_id, pham_vi)
+SELECT vt.don_vi_id, vt.id, q.id, 'DON_VI'
+FROM vai_tro vt
+JOIN quyen q ON q.ma_quyen = 'units.manage'
+WHERE vt.ma_vai_tro = 'QUAN_TRI' AND vt.la_vai_tro_he_thong = TRUE
+ON CONFLICT (don_vi_id, vai_tro_id, quyen_id, pham_vi) DO NOTHING;
+
+CREATE TABLE phep_tao_don_vi (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tai_khoan_id UUID NOT NULL REFERENCES tai_khoan(id),
+    ma_phieu_duyet VARCHAR(100) NOT NULL UNIQUE,
+    ngay_tao TIMESTAMPTZ NOT NULL DEFAULT now(),
+    ngay_het_han TIMESTAMPTZ NOT NULL,
+    ngay_su_dung TIMESTAMPTZ,
+    don_vi_da_tao_id UUID REFERENCES don_vi(id),
+    CONSTRAINT ck_phep_tao_don_vi_su_dung CHECK (
+        (ngay_su_dung IS NULL AND don_vi_da_tao_id IS NULL)
+        OR (ngay_su_dung IS NOT NULL AND don_vi_da_tao_id IS NOT NULL)
+    )
+);
+
+CREATE INDEX idx_phep_tao_don_vi_tai_khoan
+ON phep_tao_don_vi (tai_khoan_id, ngay_het_han)
+WHERE ngay_su_dung IS NULL;
