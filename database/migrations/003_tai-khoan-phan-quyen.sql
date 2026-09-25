@@ -1,0 +1,452 @@
+CREATE TABLE tai_khoan (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    ngay_tao TIMESTAMPTZ NOT NULL DEFAULT now(),
+    ngay_cap_nhat TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    email VARCHAR(254) NOT NULL,
+    so_dien_thoai VARCHAR(30),
+
+    mat_khau_bam TEXT,
+    ho_ten VARCHAR(200) NOT NULL,
+
+    -- FK sang tep_dinh_kem tao o migration file.
+    anh_dai_dien_tep_id UUID,
+
+    email_da_xac_minh BOOLEAN
+        NOT NULL DEFAULT FALSE,
+
+    so_dien_thoai_da_xac_minh BOOLEAN
+        NOT NULL DEFAULT FALSE,
+
+    trang_thai VARCHAR(24)
+        NOT NULL DEFAULT 'CHO_XAC_MINH',
+
+    ngay_dang_nhap_cuoi TIMESTAMPTZ,
+
+    so_lan_dang_nhap_sai INTEGER
+        NOT NULL DEFAULT 0,
+
+    khoa_den TIMESTAMPTZ,
+
+    phien_ban_xac_thuc INTEGER
+        NOT NULL DEFAULT 1,
+
+    ngay_dong_tai_khoan TIMESTAMPTZ,
+
+    CONSTRAINT ck_tai_khoan_dang_nhap_sai
+        CHECK (so_lan_dang_nhap_sai >= 0),
+
+    CONSTRAINT ck_tai_khoan_phien_ban
+        CHECK (phien_ban_xac_thuc >= 1)
+);
+
+CREATE UNIQUE INDEX uq_tai_khoan_email
+ON tai_khoan (lower(email));
+
+CREATE TABLE phien_dang_nhap (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    ngay_tao TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    tai_khoan_id UUID NOT NULL
+        REFERENCES tai_khoan(id),
+
+    ma_phien_bam CHAR(64) NOT NULL UNIQUE,
+
+    thiet_bi VARCHAR(255),
+    nen_tang VARCHAR(30),
+    dia_chi_ip INET,
+    user_agent TEXT,
+
+    ngay_het_han TIMESTAMPTZ NOT NULL,
+    ngay_thu_hoi TIMESTAMPTZ,
+    ly_do_thu_hoi VARCHAR(100),
+    lan_su_dung_cuoi TIMESTAMPTZ
+);
+
+CREATE INDEX idx_phien_dang_nhap_tai_khoan
+ON phien_dang_nhap (
+    tai_khoan_id,
+    ngay_het_han
+);
+
+
+CREATE TABLE ma_xac_minh (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    ngay_tao TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    tai_khoan_id UUID
+        REFERENCES tai_khoan(id),
+
+    dia_chi_dich VARCHAR(254) NOT NULL,
+    muc_dich VARCHAR(30) NOT NULL,
+    ma_bam CHAR(64) NOT NULL,
+
+    ngay_het_han TIMESTAMPTZ NOT NULL,
+    ngay_su_dung TIMESTAMPTZ,
+
+    so_lan_thu SMALLINT NOT NULL DEFAULT 0,
+    so_lan_gui SMALLINT NOT NULL DEFAULT 1,
+    ngay_gui_cuoi TIMESTAMPTZ NOT NULL,
+
+    CONSTRAINT ck_ma_xac_minh_so_lan
+        CHECK (
+            so_lan_thu >= 0
+            AND so_lan_gui >= 1
+        )
+);
+
+CREATE INDEX idx_ma_xac_minh_dia_chi
+ON ma_xac_minh (
+    dia_chi_dich,
+    muc_dich,
+    ngay_het_han
+);
+
+
+CREATE TABLE thanh_vien_don_vi (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    don_vi_id UUID NOT NULL
+        REFERENCES don_vi(id),
+
+    ngay_tao TIMESTAMPTZ NOT NULL DEFAULT now(),
+    ngay_cap_nhat TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    nguoi_tao_id UUID REFERENCES tai_khoan(id),
+    nguoi_cap_nhat_id UUID REFERENCES tai_khoan(id),
+
+    tai_khoan_id UUID NOT NULL
+        REFERENCES tai_khoan(id),
+
+    ma_nhan_vien VARCHAR(40),
+    chuc_danh VARCHAR(120),
+    email_cong_viec VARCHAR(254),
+    so_dien_thoai_cong_viec VARCHAR(30),
+
+    ngay_moi TIMESTAMPTZ,
+    ngay_gia_nhap TIMESTAMPTZ,
+    ngay_nghi_viec TIMESTAMPTZ,
+
+    trang_thai VARCHAR(24)
+        NOT NULL DEFAULT 'CHO_MOI',
+
+    nguoi_moi_id UUID,
+
+    CONSTRAINT uq_thanh_vien_don_vi_tai_khoan
+        UNIQUE (don_vi_id, tai_khoan_id),
+
+    CONSTRAINT uq_thanh_vien_don_vi_id
+        UNIQUE (don_vi_id, id)
+);
+
+CREATE UNIQUE INDEX uq_thanh_vien_ma_nhan_vien
+ON thanh_vien_don_vi (
+    don_vi_id,
+    ma_nhan_vien
+)
+WHERE ma_nhan_vien IS NOT NULL;
+
+ALTER TABLE thanh_vien_don_vi
+ADD CONSTRAINT fk_thanh_vien_nguoi_moi
+FOREIGN KEY (
+    don_vi_id,
+    nguoi_moi_id
+)
+REFERENCES thanh_vien_don_vi (
+    don_vi_id,
+    id
+);
+
+
+CREATE TABLE thanh_vien_chi_nhanh (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    don_vi_id UUID NOT NULL
+        REFERENCES don_vi(id),
+
+    ngay_tao TIMESTAMPTZ NOT NULL DEFAULT now(),
+    ngay_cap_nhat TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    nguoi_tao_id UUID REFERENCES tai_khoan(id),
+    nguoi_cap_nhat_id UUID REFERENCES tai_khoan(id),
+
+    thanh_vien_don_vi_id UUID NOT NULL,
+    chi_nhanh_id UUID NOT NULL,
+
+    la_chi_nhanh_chinh BOOLEAN
+        NOT NULL DEFAULT FALSE,
+
+    ngay_bat_dau DATE NOT NULL,
+    ngay_ket_thuc DATE,
+
+    trang_thai VARCHAR(24)
+        NOT NULL DEFAULT 'HIEU_LUC',
+
+    CONSTRAINT fk_tvcn_thanh_vien
+        FOREIGN KEY (
+            don_vi_id,
+            thanh_vien_don_vi_id
+        )
+        REFERENCES thanh_vien_don_vi (
+            don_vi_id,
+            id
+        ),
+
+    CONSTRAINT fk_tvcn_chi_nhanh
+        FOREIGN KEY (
+            don_vi_id,
+            chi_nhanh_id
+        )
+        REFERENCES chi_nhanh (
+            don_vi_id,
+            id
+        )
+);
+
+CREATE INDEX idx_thanh_vien_chi_nhanh
+ON thanh_vien_chi_nhanh (
+    don_vi_id,
+    thanh_vien_don_vi_id,
+    chi_nhanh_id
+);
+
+
+CREATE TABLE vai_tro (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    don_vi_id UUID NOT NULL
+        REFERENCES don_vi(id),
+
+    ngay_tao TIMESTAMPTZ NOT NULL DEFAULT now(),
+    ngay_cap_nhat TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    nguoi_tao_id UUID REFERENCES tai_khoan(id),
+    nguoi_cap_nhat_id UUID REFERENCES tai_khoan(id),
+
+    ma_vai_tro VARCHAR(60) NOT NULL,
+    ten_vai_tro VARCHAR(120) NOT NULL,
+    mo_ta TEXT,
+
+    la_vai_tro_he_thong BOOLEAN
+        NOT NULL DEFAULT FALSE,
+
+    trang_thai VARCHAR(24)
+        NOT NULL DEFAULT 'DANG_DUNG',
+
+    CONSTRAINT uq_vai_tro_ma
+        UNIQUE (don_vi_id, ma_vai_tro),
+
+    CONSTRAINT uq_vai_tro_don_vi_id
+        UNIQUE (don_vi_id, id)
+);
+
+
+CREATE TABLE quyen (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    ngay_tao TIMESTAMPTZ NOT NULL DEFAULT now(),
+    ngay_cap_nhat TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    ma_quyen VARCHAR(120) NOT NULL UNIQUE,
+    ten_quyen VARCHAR(160) NOT NULL,
+    nhom_quyen VARCHAR(80) NOT NULL,
+    mo_ta TEXT NOT NULL,
+
+    la_quyen_nhay_cam BOOLEAN
+        NOT NULL DEFAULT FALSE,
+
+    trang_thai VARCHAR(24)
+        NOT NULL DEFAULT 'DANG_DUNG'
+);
+
+
+CREATE TABLE vai_tro_quyen (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    don_vi_id UUID NOT NULL
+        REFERENCES don_vi(id),
+
+    ngay_tao TIMESTAMPTZ NOT NULL DEFAULT now(),
+    ngay_cap_nhat TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    nguoi_tao_id UUID REFERENCES tai_khoan(id),
+    nguoi_cap_nhat_id UUID REFERENCES tai_khoan(id),
+
+    vai_tro_id UUID NOT NULL,
+    quyen_id UUID NOT NULL REFERENCES quyen(id),
+
+    pham_vi VARCHAR(24)
+        NOT NULL DEFAULT 'DON_VI',
+
+    CONSTRAINT fk_vai_tro_quyen_vai_tro
+        FOREIGN KEY (
+            don_vi_id,
+            vai_tro_id
+        )
+        REFERENCES vai_tro (
+            don_vi_id,
+            id
+        ),
+
+    CONSTRAINT uq_vai_tro_quyen
+        UNIQUE (
+            don_vi_id,
+            vai_tro_id,
+            quyen_id,
+            pham_vi
+        )
+);
+
+
+CREATE TABLE thanh_vien_vai_tro (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    don_vi_id UUID NOT NULL
+        REFERENCES don_vi(id),
+
+    ngay_tao TIMESTAMPTZ NOT NULL DEFAULT now(),
+    ngay_cap_nhat TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    nguoi_tao_id UUID REFERENCES tai_khoan(id),
+    nguoi_cap_nhat_id UUID REFERENCES tai_khoan(id),
+
+    thanh_vien_don_vi_id UUID NOT NULL,
+    vai_tro_id UUID NOT NULL,
+    chi_nhanh_id UUID,
+
+    ngay_bat_dau TIMESTAMPTZ
+        NOT NULL DEFAULT now(),
+
+    ngay_ket_thuc TIMESTAMPTZ,
+
+    nguoi_cap_id UUID,
+    ly_do TEXT,
+
+    CONSTRAINT fk_tvvt_thanh_vien
+        FOREIGN KEY (
+            don_vi_id,
+            thanh_vien_don_vi_id
+        )
+        REFERENCES thanh_vien_don_vi (
+            don_vi_id,
+            id
+        ),
+
+    CONSTRAINT fk_tvvt_vai_tro
+        FOREIGN KEY (
+            don_vi_id,
+            vai_tro_id
+        )
+        REFERENCES vai_tro (
+            don_vi_id,
+            id
+        ),
+
+    CONSTRAINT fk_tvvt_chi_nhanh
+        FOREIGN KEY (
+            don_vi_id,
+            chi_nhanh_id
+        )
+        REFERENCES chi_nhanh (
+            don_vi_id,
+            id
+        ),
+
+    CONSTRAINT fk_tvvt_nguoi_cap
+        FOREIGN KEY (
+            don_vi_id,
+            nguoi_cap_id
+        )
+        REFERENCES thanh_vien_don_vi (
+            don_vi_id,
+            id
+        )
+);
+
+CREATE INDEX idx_thanh_vien_vai_tro
+ON thanh_vien_vai_tro (
+    don_vi_id,
+    thanh_vien_don_vi_id,
+    ngay_ket_thuc
+);
+
+
+CREATE TABLE nhat_ky_dang_nhap (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    ngay_tao TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    tai_khoan_id UUID REFERENCES tai_khoan(id),
+    email_da_nhap VARCHAR(254),
+
+    ket_qua VARCHAR(24) NOT NULL,
+    dia_chi_ip INET,
+    user_agent TEXT,
+    ma_ly_do VARCHAR(60),
+
+    phien_dang_nhap_id UUID
+        REFERENCES phien_dang_nhap(id)
+);
+
+CREATE INDEX idx_nhat_ky_dang_nhap
+ON nhat_ky_dang_nhap (
+    tai_khoan_id,
+    ngay_tao
+);
+
+
+-- Hoan thien FK cua chi_nhanh sau khi da co tai_khoan
+-- va thanh_vien_don_vi.
+
+ALTER TABLE chi_nhanh
+ADD CONSTRAINT fk_chi_nhanh_nguoi_tao
+FOREIGN KEY (nguoi_tao_id)
+REFERENCES tai_khoan(id);
+
+ALTER TABLE chi_nhanh
+ADD CONSTRAINT fk_chi_nhanh_nguoi_cap_nhat
+FOREIGN KEY (nguoi_cap_nhat_id)
+REFERENCES tai_khoan(id);
+
+ALTER TABLE chi_nhanh
+ADD CONSTRAINT fk_chi_nhanh_quan_ly
+FOREIGN KEY (
+    don_vi_id,
+    quan_ly_thanh_vien_id
+)
+REFERENCES thanh_vien_don_vi (
+    don_vi_id,
+    id
+);
+
+
+-- Gan trigger ngay_cap_nhat cho cac bang co cot nay.
+
+DO $$
+DECLARE
+    ten_bang TEXT;
+BEGIN
+    FOREACH ten_bang IN ARRAY ARRAY[
+        'tai_khoan',
+        'thanh_vien_don_vi',
+        'thanh_vien_chi_nhanh',
+        'vai_tro',
+        'quyen',
+        'vai_tro_quyen',
+        'thanh_vien_vai_tro'
+    ]
+    LOOP
+        EXECUTE format(
+            'CREATE TRIGGER %I
+             BEFORE UPDATE ON %I
+             FOR EACH ROW
+             EXECUTE FUNCTION public.cap_nhat_ngay_cap_nhat()',
+            'trg_' || ten_bang || '_ngay_cap_nhat',
+            ten_bang
+        );
+    END LOOP;
+END;
+$$;

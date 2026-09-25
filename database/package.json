@@ -1,0 +1,17 @@
+{
+  "name": "@bookflow/database",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Database migrations for BookFlow AI",
+  "engines": {
+    "node": ">=20.6"
+  },
+  "scripts": {
+    "migrate": "node --env-file=../.env scripts/migrate.js",
+    "test:migration": "node --env-file=../.env --test tests/migration.test.js"
+  },
+  "dependencies": {
+    "pg": "^8.23.0"
+  }
+}

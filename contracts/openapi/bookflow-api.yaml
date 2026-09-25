@@ -1,0 +1,186 @@
+openapi: 3.1.0
+
+info:
+  title: BookFlow Backend API
+  version: 0.1.0
+  description: |
+    Hợp đồng API nghiệp vụ của BookFlow.
+
+    JSON sử dụng snake_case.
+    Tiền sử dụng chuỗi decimal, không sử dụng floating-point.
+    Thời điểm sử dụng ISO 8601 UTC.
+
+servers:
+  - url: http://localhost:3001
+    description: Backend API trên máy phát triển
+
+tags:
+  - name: HeThong
+    description: Kiểm tra trạng thái dịch vụ
+
+paths:
+  /health:
+    get:
+      security: []
+
+      tags:
+        - HeThong
+
+      operationId: kiemTraSucKhoeBackend
+
+      summary: Kiểm tra Backend API
+
+      description: |
+        Endpoint kiểm tra tiến trình Backend API.
+        Không yêu cầu đăng nhập.
+        Không trả thông tin bí mật hoặc dữ liệu khách hàng.
+
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+
+      responses:
+        '200':
+          description: Backend API đang hoạt động
+
+          headers:
+            X-Request-Id:
+              description: Mã theo dõi request
+              schema:
+                type: string
+
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+              example:
+                success: true
+                request_id: req-health-001
+                data:
+                  status: ok
+                  service: backend
+
+        '500':
+          $ref: '#/components/responses/LoiApi'
+
+components:
+  parameters:
+    RequestId:
+      name: X-Request-Id
+      in: header
+      required: false
+      description: |
+        Nếu không truyền, backend tự tạo request ID.
+        Response trả lại request ID để phục vụ truy vết.
+
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 128
+
+  responses:
+    LoiApi:
+      description: Phản hồi lỗi theo định dạng chung
+
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/loi-api.schema.json'
+
+  schemas:
+    ThanhCong:
+      type: object
+
+      required:
+        - success
+        - request_id
+        - data
+
+      properties:
+        success:
+          const: true
+
+        request_id:
+          type: string
+          minLength: 1
+
+        data:
+          type: object
+
+        meta:
+          type:
+            - object
+            - 'null'
+
+    HealthResponse:
+      allOf:
+        - $ref: '#/components/schemas/ThanhCong'
+
+        - type: object
+          properties:
+            data:
+              type: object
+
+              required:
+                - status
+                - service
+
+              properties:
+                status:
+                  type: string
+                  enum:
+                    - ok
+
+                service:
+                  type: string
+                  enum:
+                    - backend
+
+    PhanTrang:
+      type: object
+
+      required:
+        - trang
+        - kich_thuoc_trang
+        - tong_ban_ghi
+        - tong_trang
+
+      properties:
+        trang:
+          type: integer
+          minimum: 1
+
+        kich_thuoc_trang:
+          type: integer
+          minimum: 1
+          maximum: 100
+
+        tong_ban_ghi:
+          type: integer
+          minimum: 0
+
+        tong_trang:
+          type: integer
+          minimum: 0
+
+    SoTien:
+      type: string
+      description: |
+        Số tiền decimal dạng chuỗi.
+        Ví dụ: "125000.00".
+        Không sử dụng JSON number cho giá trị tiền.
+
+      pattern: '^-?(0|[1-9][0-9]*)\.[0-9]{2}$'
+
+      examples:
+        - '125000.00'
+        - '0.00'
+
+    ThoiDiemUtc:
+      type: string
+      format: date-time
+      pattern: 'Z$'
+
+      description: |
+        Thời điểm ISO 8601 UTC, kết thúc bằng Z.
+        Ví dụ: 2026-09-25T01:00:00Z.

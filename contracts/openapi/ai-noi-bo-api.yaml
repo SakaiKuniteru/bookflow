@@ -1,0 +1,334 @@
+openapi: 3.1.0
+
+info:
+  title: BookFlow AI Internal API
+  version: 0.1.0
+  description: |
+    API nội bộ giữa Backend Express và FastAPI.
+
+    Chỉ backend đã được xác thực mới được tạo
+    và kiểm tra tác vụ AI.
+
+    Timeout của HTTP request khác với thời gian
+    xử lý job nền của AI Worker.
+
+servers:
+  - url: http://ai-api:8000
+    description: FastAPI trong mạng Docker nội bộ
+
+security:
+  - TokenNoiBo: []
+
+tags:
+  - name: HeThong
+  - name: TacVuAI
+
+paths:
+  /health:
+    get:
+      tags:
+        - HeThong
+
+      operationId: kiemTraSucKhoeAi
+
+      summary: Kiểm tra FastAPI
+
+      security: []
+
+      parameters:
+        - $ref: '#/components/parameters/RequestIdKhongBatBuoc'
+
+      responses:
+        '200':
+          description: FastAPI đang hoạt động
+
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+              example:
+                success: true
+                request_id: req-ai-health-001
+                data:
+                  status: ok
+                  service: ai-api
+
+  /internal/ai/jobs:
+    post:
+      tags:
+        - TacVuAI
+
+      operationId: taoTacVuAi
+
+      summary: Tạo tác vụ AI nền
+
+      description: |
+        Backend xác thực người dùng và kiểm tra
+        quyền trước khi gửi yêu cầu.
+
+        FastAPI xác thực token nội bộ và kiểm tra
+        phạm vi dữ liệu được phép xử lý.
+
+        Một idempotency_key không được tạo
+        nhiều job tương đương khi request được gửi lại.
+
+      parameters:
+        - $ref: '#/components/parameters/RequestIdBatBuoc'
+        - $ref: '#/components/parameters/Timeout'
+
+      requestBody:
+        required: true
+
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaoTacVu'
+
+      responses:
+        '202':
+          description: Đã tiếp nhận tác vụ
+
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhanHoiTacVu'
+
+        '400':
+          $ref: '#/components/responses/LoiApi'
+
+        '401':
+          $ref: '#/components/responses/LoiApi'
+
+        '403':
+          $ref: '#/components/responses/LoiApi'
+
+        '409':
+          $ref: '#/components/responses/LoiApi'
+
+        '429':
+          $ref: '#/components/responses/LoiApi'
+
+        '503':
+          $ref: '#/components/responses/LoiApi'
+
+  /internal/ai/jobs/{job_id}:
+    get:
+      tags:
+        - TacVuAI
+
+      operationId: layTrangThaiTacVuAi
+
+      summary: Lấy trạng thái tác vụ AI
+
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+
+        - $ref: '#/components/parameters/RequestIdBatBuoc'
+
+        - $ref: '#/components/parameters/Timeout'
+
+      responses:
+        '200':
+          description: Trạng thái tác vụ
+
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhanHoiTacVu'
+
+        '401':
+          $ref: '#/components/responses/LoiApi'
+
+        '403':
+          $ref: '#/components/responses/LoiApi'
+
+        '404':
+          $ref: '#/components/responses/LoiApi'
+
+        '503':
+          $ref: '#/components/responses/LoiApi'
+
+components:
+  securitySchemes:
+    TokenNoiBo:
+      type: http
+      scheme: bearer
+      bearerFormat: Internal token
+      description: |
+        Token nội bộ do backend sử dụng.
+        Token thật lấy từ biến môi trường hoặc
+        secret manager, không lưu trong source.
+
+  parameters:
+    RequestIdKhongBatBuoc:
+      name: X-Request-Id
+      in: header
+      required: false
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 128
+
+    RequestIdBatBuoc:
+      name: X-Request-Id
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 128
+
+    Timeout:
+      name: X-Timeout-Ms
+      in: header
+      required: false
+
+      description: |
+        Timeout của HTTP request, tính bằng mili giây.
+        Server giới hạn tối đa 30000 ms.
+        Không phải timeout thực thi job nền.
+
+      schema:
+        type: integer
+        minimum: 1000
+        maximum: 30000
+        default: 10000
+
+  responses:
+    LoiApi:
+      description: Lỗi theo định dạng chung
+
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/loi-api.schema.json'
+
+  schemas:
+    HealthResponse:
+      type: object
+
+      required:
+        - success
+        - request_id
+        - data
+
+      properties:
+        success:
+          const: true
+
+        request_id:
+          type: string
+          minLength: 1
+
+        data:
+          type: object
+
+          required:
+            - status
+            - service
+
+          properties:
+            status:
+              type: string
+              enum:
+                - ok
+
+            service:
+              type: string
+              enum:
+                - ai-api
+
+    TaoTacVu:
+      type: object
+
+      required:
+        - don_vi_id
+        - loai_tac_vu
+        - idempotency_key
+        - du_lieu
+
+      properties:
+        don_vi_id:
+          type: string
+          format: uuid
+
+        loai_tac_vu:
+          type: string
+          enum:
+            - LAP_CHI_MUC_SACH
+
+        idempotency_key:
+          type: string
+          minLength: 8
+          maxLength: 120
+
+        du_lieu:
+          type: object
+
+          required:
+            - dau_sach_id
+
+          properties:
+            dau_sach_id:
+              type: string
+              format: uuid
+
+          additionalProperties: false
+
+      additionalProperties: false
+
+    TacVu:
+      type: object
+
+      required:
+        - job_id
+        - trang_thai
+
+      properties:
+        job_id:
+          type: string
+          format: uuid
+
+        trang_thai:
+          type: string
+
+          enum:
+            - CHO_XU_LY
+            - DANG_XU_LY
+            - HOAN_TAT
+            - THAT_BAI
+
+        ket_qua:
+          type:
+            - object
+            - 'null'
+
+        ma_loi:
+          type:
+            - string
+            - 'null'
+
+    PhanHoiTacVu:
+      type: object
+
+      required:
+        - success
+        - request_id
+        - data
+
+      properties:
+        success:
+          const: true
+
+        request_id:
+          type: string
+          minLength: 1
+
+        data:
+          $ref: '#/components/schemas/TacVu'

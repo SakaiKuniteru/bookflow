@@ -1,0 +1,12 @@
+{
+  "success": true,
+  "request_id": "req-ai-job-002",
+  "data": {
+    "job_id": "33333333-3333-4333-8333-333333333333",
+    "trang_thai": "HOAN_TAT",
+    "ket_qua": {
+      "so_muc_da_lap_chi_muc": 1
+    },
+    "ma_loi": null
+  }
+}
