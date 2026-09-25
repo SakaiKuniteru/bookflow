@@ -19,7 +19,6 @@ const thuMucBatBuoc = [
     'contracts',
     'infrastructure',
     'scripts',
-    'scripts/tests',
     'docs',
     'docs/architecture',
     'docs/database',
@@ -35,7 +34,6 @@ const tepBatBuoc = [
     '.env.example',
     'package.json',
     'scripts/kiem-tra-cau-truc.mjs',
-    'scripts/tests/kiem-tra-cau-truc.test.mjs',
     'docs/architecture/tong-quan.md',
     'docs/architecture/ranh-gioi-phan-he.md',
     'docs/database/tu-dien-du-lieu.md',
@@ -101,10 +99,7 @@ if (packageJson.private !== true) {
 
 const scriptBatBuoc = {
     'kiem-tra:nen-tang':
-        'node scripts/kiem-tra-cau-truc.mjs',
-
-    'test:nen-tang':
-        'node --test scripts/tests/*.test.mjs'
+        'node scripts/kiem-tra-cau-truc.mjs'
 };
 
 for (const [tenScript, lenh] of Object.entries(

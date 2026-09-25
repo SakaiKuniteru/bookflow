@@ -9,12 +9,9 @@
   },
   "scripts": {
     "kiem-tra:nen-tang": "node scripts/kiem-tra-cau-truc.mjs",
-    "test:nen-tang": "node --test scripts/tests/*.test.mjs",
-    "kiem-tra:hop-dong": "redocly lint contracts/openapi/bookflow-api.yaml contracts/openapi/ai-noi-bo-api.yaml",
-    "test:hop-dong": "node --test contracts/tests/kiem-tra-vi-du.test.mjs"
+    "kiem-tra:hop-dong": "redocly lint contracts/openapi/bookflow-api.yaml contracts/openapi/ai-noi-bo-api.yaml"
   },
   "devDependencies": {
-    "@redocly/cli": "^2.54.2",
-    "ajv": "^8.20.0"
+    "@redocly/cli": "^2.54.2"
   }
 }

@@ -353,11 +353,11 @@ test('GET /health tra status ok', async () => {
 **Tạo code theo chuỗi:**
 
 ```text
-backend/src/modules/don-vi/           # CRUD và phạm vi đơn vị
-backend/src/modules/chi-nhanh/        # Chi nhánh thuộc đơn vị
 backend/src/modules/tai-khoan/        # Tài khoản và hồ sơ
 backend/src/modules/xac-thuc/         # Đăng nhập, phiên, đổi/đặt lại mật khẩu
 backend/src/modules/phan-quyen/       # Vai trò, quyền, gán quyền
+backend/src/modules/don-vi/           # CRUD và phạm vi đơn vị
+backend/src/modules/chi-nhanh/        # Chi nhánh thuộc đơn vị
 backend/src/common/middlewares/       # authenticate/authorize/tenant-scope/branch-scope
 ```
 

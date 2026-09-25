@@ -63,6 +63,50 @@ paths:
         '500':
           $ref: '#/components/responses/LoiApi'
 
+  /ready:
+    get:
+      security: []
+      tags: [HeThong]
+      operationId: kiemTraSanSangBackend
+      summary: Kiểm tra các dịch vụ thiết yếu của Backend
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          description: Backend và các dịch vụ thiết yếu sẵn sàng
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ThanhCong'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        required: [status, service, dependencies]
+                        properties:
+                          status:
+                            type: string
+                            const: ready
+                          service:
+                            type: string
+                            const: backend
+                          dependencies:
+                            type: object
+                            required: [database, redis, storage]
+                            properties:
+                              database:
+                                type: string
+                                const: ok
+                              redis:
+                                type: string
+                                const: ok
+                              storage:
+                                type: string
+                                const: ok
+        '503':
+          $ref: '#/components/responses/LoiApi'
+
 components:
   parameters:
     RequestId:

@@ -22,8 +22,7 @@ Luồng dự kiến: trình duyệt → Nginx → frontend/backend; backend → 
 Yêu cầu: Node.js 20 trở lên. F00.1 dùng các module có sẵn của Node.js; **không cần `npm install`**.
 
 ```bash
-npm run kiem-tra:cau-truc
-npm run test:f00
+npm run kiem-tra:nen-tang
 ```
 
 Các lệnh trên chỉ kiểm tra bộ khung. `build`, `dev`, `migrate`, Docker Compose và API sẽ được bổ sung ở các bước tiếp theo **sau khi script tương ứng được viết**.
@@ -44,5 +43,5 @@ Giữ tiếng Anh cho lớp kỹ thuật (`frontend`, `backend`, `database`, `ro
 - `main`: phiên bản ổn định. `dev`: nhánh phát triển. Không commit trực tiếp lên `main`.
 - Không commit `.env`, mật khẩu, token, khóa API, private key, dữ liệu khách hàng, bản dump hoặc file upload thật.
 - `.env.example` chỉ mô tả tên biến và giá trị mẫu; không phải cấu hình Production.
-- Kiểm tra `git status` và `git diff --cached` trước mỗi commit.
+- Sau mỗi lần sửa: kiểm tra `git diff --check`, `git diff --stat`, `git diff` và `git status --short` trước khi commit.
 - F00.1 không tự kết nối hoặc đẩy code lên GitHub.

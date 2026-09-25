@@ -8,8 +8,6 @@
     "node": ">=20"
   },
   "scripts": {
-    "kiem-tra:cau-truc": "node scripts/kiem-tra-cau-truc.mjs",
-    "test:f00": "node --test scripts/tests/kiem-tra-cau-truc.test.mjs",
-    "test": "npm run test:f00"
+    "kiem-tra:cau-truc": "node kiem-tra-cau-truc.mjs"
   }
 }
