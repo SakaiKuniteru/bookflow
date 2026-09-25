@@ -6,7 +6,7 @@ const { docCauHinhToken } = require('../../config/environment.js');
 const thoiHan = docCauHinhToken();
 const ISSUER = 'bookflow-backend';
 const AUDIENCE = 'bookflow-api';
-const UUID = /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
+const ID = /^[1-9]\d{0,9}$/;
 const REFRESH_TOKEN = /^[A-Za-z0-9_-]{43}$/;
 
 class TokenService {
@@ -35,11 +35,11 @@ class TokenService {
     }
 
     async taoAccessToken({ taiKhoanId, phienId, phienBan }) {
-        return new SignJWT({ loai: 'access', sid: phienId, pv: Number(phienBan) })
+        return new SignJWT({ loai: 'access', sid: String(phienId), pv: Number(phienBan) })
             .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
             .setIssuer(ISSUER)
             .setAudience(AUDIENCE)
-            .setSubject(taiKhoanId)
+            .setSubject(String(taiKhoanId))
             .setIssuedAt()
             .setExpirationTime(`${this.ACCESS_TOKEN_TTL}s`)
             .sign(this.khoaJwt());
@@ -62,8 +62,8 @@ class TokenService {
         const hopLe = payload.loai === 'access'
             && typeof payload.sub === 'string'
             && typeof payload.sid === 'string'
-            && UUID.test(payload.sub)
-            && UUID.test(payload.sid)
+            && ID.test(payload.sub) && Number(payload.sub) <= 2147483647
+            && ID.test(payload.sid) && Number(payload.sid) <= 2147483647
             && Number.isSafeInteger(payload.pv)
             && payload.pv >= 1
             && Number.isInteger(payload.iat)
@@ -71,7 +71,7 @@ class TokenService {
             && payload.exp > payload.iat
             && payload.exp - payload.iat <= this.ACCESS_TOKEN_TTL;
         if (!hopLe) throw this.loiAccessToken();
-        return { taiKhoanId: payload.sub, phienId: payload.sid, phienBan: payload.pv };
+        return { taiKhoanId: Number(payload.sub), phienId: Number(payload.sid), phienBan: payload.pv };
     }
 }
 

@@ -165,7 +165,7 @@ class PhanQuyenRepository {
         const { rows } = await query(
             `SELECT id FROM thanh_vien_vai_tro
              WHERE don_vi_id = $1 AND thanh_vien_don_vi_id = $2 AND vai_tro_id = $3
-               AND chi_nhanh_id IS NOT DISTINCT FROM $4::uuid AND ngay_ket_thuc IS NULL LIMIT 1`,
+               AND chi_nhanh_id IS NOT DISTINCT FROM $4::integer AND ngay_ket_thuc IS NULL LIMIT 1`,
             [donViId, thanhVienId, vaiTroId, chiNhanhId], client
         );
         return rows[0] ?? null;

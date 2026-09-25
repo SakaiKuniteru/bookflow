@@ -352,14 +352,63 @@ test('GET /health tra status ok', async () => {
 
 **Tạo code theo chuỗi:**
 
-```text
-backend/src/modules/tai-khoan/        # Tài khoản và hồ sơ
-backend/src/modules/xac-thuc/         # Đăng nhập, phiên, đổi/đặt lại mật khẩu
-backend/src/modules/phan-quyen/       # Vai trò, quyền, gán quyền
-backend/src/modules/don-vi/           # CRUD và phạm vi đơn vị
-backend/src/modules/chi-nhanh/        # Chi nhánh thuộc đơn vị
-backend/src/common/middlewares/       # authenticate/authorize/tenant-scope/branch-scope
-```
+backend/src/modules/
+├── tai-khoan/               # Tài khoản và hồ sơ
+├── xac-thuc/                # Đăng nhập, phiên, đổi/đặt lại mật khẩu
+├── phan-quyen/              # Vai trò, quyền, gán quyền
+├── don-vi/                  # CRUD và phạm vi đơn vị
+├── chi-nhanh/               # Chi nhánh thuộc đơn vị
+│
+├── nhan-vien/               # Danh sách nhân viên, mời tham gia, trạng thái làm việc,
+│                           # điều chuyển chi nhánh và quản lý phân công
+├── tep-tin/                 # Upload, quản lý ảnh sách, ảnh đại diện, logo và quyền truy cập file
+│
+├── tac-gia/                 # Danh mục tác giả
+├── the-loai/                # Danh mục thể loại sách
+├── nha-xuat-ban/            # Danh mục nhà xuất bản
+├── sach/                    # Đầu sách, thông tin sách, ISBN, tác giả, thể loại
+├── phien-ban-sach/          # Phiên bản, ấn bản, định dạng và giá sách
+│
+├── nha-cung-cap/            # Danh mục và thông tin nhà cung cấp
+├── kho/                     # Kho thuộc chi nhánh, vị trí lưu trữ
+├── nhap-kho/                # Phiếu nhập, nhập từ nhà cung cấp, kiểm nhận
+├── ton-kho/                 # Số lượng tồn, tồn theo kho/chi nhánh, lịch sử biến động
+├── chuyen-kho/              # Điều chuyển sách giữa các kho và chi nhánh
+├── kiem-kho/                # Kiểm kê, đối chiếu và điều chỉnh tồn kho
+│
+├── khach-hang/              # Hồ sơ khách hàng, lịch sử giao dịch
+├── hoi-vien/                # Hạng hội viên, chính sách và quyền lợi
+│
+├── gio-hang/                # Giỏ hàng và các mặt hàng được chọn
+├── don-hang/                # Đơn hàng, trạng thái xử lý, giao và nhận hàng
+├── ban-hang/                # Bán tại quầy (POS), bán trực tuyến
+├── thanh-toan/              # Phương thức thanh toán, giao dịch, hoàn tiền
+├── cong-no/                 # Các khoản phải thu, phải trả và đối soát
+├── tien-coc/                # Thu, giữ và hoàn tiền cọc
+│
+├── dat-truoc/               # Đặt trước sách và xử lý khi có sách
+├── muon-tra/                # Mượn, thuê, giao sách và trả từng cuốn
+├── gia-han/                 # Gia hạn thời gian mượn/thuê
+├── phi-phat/                # Phí quá hạn, mất hoặc hư hỏng sách
+│
+├── thong-bao/               # Thông báo trong hệ thống, email và trạng thái đã đọc
+├── bao-cao/                 # Báo cáo bán hàng, tồn kho, mượn/trả, doanh thu
+└── ai/                      # Tích hợp AI: gợi ý sách, tìm kiếm và trợ lý nội bộ
+
+backend/src/common/
+├── middlewares/             # authenticate/authorize/tenant-scope/branch-scope
+├── errors/                  # AppError và xử lý lỗi chung
+├── security/                # Token, mật khẩu và tiện ích bảo mật
+└── utils/                   # Hàm dùng chung, định dạng và chuẩn hóa dữ liệu
+
+backend/src/integrations/
+├── email-client.js          # Gửi email qua SMTP
+├── email-template.js        # Template email và OTP
+├── redis.js                 # Kết nối Redis
+└── storage.js               # Kết nối dịch vụ lưu trữ file
+
+backend/src/services/
+└── ready.service.js         # Kiểm tra trạng thái các dịch vụ phụ thuộc
 
 **Hàm cần triển khai trong service:** `taoTaiKhoan`, `dangNhap`, `lamMoiPhien` hoặc luồng phiên tương đương, `dangXuat`, `kiemTraQuyen`, `layPhamViDuLieu`, `kiemTraChiNhanh`. Hash mật khẩu bằng thư viện phù hợp; phiên/cookie có cấu hình bảo mật. `don_vi_id` và `chi_nhanh_id` phải được suy ra từ phiên/quyền đã xác minh, **không tin ID tùy ý trong request của client**.
 

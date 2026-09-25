@@ -1,5 +1,5 @@
 -- Chay SAU migration 001-008. Khong chinh sua migration da ap dung.
-ALTER TABLE tai_khoan ADD COLUMN ten_dang_nhap VARCHAR(40), ADD COLUMN bat_buoc_doi_mat_khau BOOLEAN NOT NULL DEFAULT FALSE, ADD COLUMN mat_khau_tam_het_han TIMESTAMPTZ, ADD COLUMN don_vi_kich_hoat_id UUID REFERENCES don_vi(id);
+ALTER TABLE tai_khoan ADD COLUMN ten_dang_nhap VARCHAR(40), ADD COLUMN bat_buoc_doi_mat_khau BOOLEAN NOT NULL DEFAULT FALSE, ADD COLUMN mat_khau_tam_het_han TIMESTAMPTZ, ADD COLUMN don_vi_kich_hoat_id INTEGER REFERENCES don_vi(id);
 CREATE UNIQUE INDEX uq_tai_khoan_ten_dang_nhap ON tai_khoan (lower(ten_dang_nhap)) WHERE ten_dang_nhap IS NOT NULL;
 ALTER TABLE tai_khoan ADD CONSTRAINT ck_tk_ten_dang_nhap CHECK (ten_dang_nhap IS NULL OR ten_dang_nhap ~ '^[A-Za-z0-9._-]{3,40}$');
 ALTER TABLE tai_khoan ADD CONSTRAINT ck_tk_mat_khau_tam CHECK (NOT bat_buoc_doi_mat_khau OR (mat_khau_tam_het_han IS NOT NULL AND don_vi_kich_hoat_id IS NOT NULL));

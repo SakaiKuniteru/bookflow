@@ -22,8 +22,8 @@ CHECK (phien_ban_xac_thuc >= 1);
 -- vẫn phải được kiểm tra trong service của F05.
 
 ALTER TABLE phien_dang_nhap
-ADD COLUMN don_vi_dang_chon_id UUID,
-ADD COLUMN chi_nhanh_dang_chon_id UUID;
+ADD COLUMN don_vi_dang_chon_id INTEGER,
+ADD COLUMN chi_nhanh_dang_chon_id INTEGER;
 
 ALTER TABLE phien_dang_nhap
 ADD CONSTRAINT fk_phien_don_vi_dang_chon

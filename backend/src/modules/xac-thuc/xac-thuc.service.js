@@ -10,6 +10,13 @@ const xacThucContext = require('./xac-thuc.context.js');
 const repo = require('./xac-thuc.repository.js');
 
 class XacThucService {
+    idHopLe(value, ten = 'ID') {
+        const dungDinhDang = typeof value === 'number' ? Number.isInteger(value) : typeof value === 'string' && /^[1-9]\d*$/.test(value);
+        const id = Number(value);
+        if (!dungDinhDang || !Number.isSafeInteger(id) || id < 1 || id > 2147483647) throw loiXacThuc(`${ten} không hợp lệ`);
+        return id;
+    }
+
     loiDangNhap() { return loiXacThuc('Thông tin đăng nhập không hợp lệ', 401, 'LOGIN_FAILED'); }
 
     loiOtp() { return loiXacThuc('OTP không hợp lệ hoặc đã hết hạn', 422, 'INVALID_OTP'); }
@@ -235,7 +242,7 @@ class XacThucService {
     }
 
     async chonDonVi(auth, { don_vi_id } = {}) {
-        if (typeof don_vi_id !== 'string' || !/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(don_vi_id)) throw loiXacThuc('ID đơn vị không hợp lệ');
+        don_vi_id = this.idHopLe(don_vi_id, 'ID đơn vị');
         const row = await repo.chonDonViPhien(auth.phienId, auth.taiKhoanId, don_vi_id);
         if (!row) throw loiXacThuc('Không có quyền truy cập đơn vị', 403, 'FORBIDDEN');
         return xacThucContext.taoNguCanhDangNhap({
@@ -298,7 +305,8 @@ class XacThucService {
     }
 
     async guiLaiThuMoiNhanVien(auth, taiKhoanId, requestId) {
-        if (!/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(taiKhoanId ?? '') || !auth.donViId) throw loiXacThuc('Nhân viên hoặc đơn vị không hợp lệ');
+        taiKhoanId = this.idHopLe(taiKhoanId, 'Nhân viên');
+        if (!auth.donViId) throw loiXacThuc('Nhân viên hoặc đơn vị không hợp lệ');
         return trongGiaoDich(async client => {
             if (!await repo.coQuyenQuanLyNhanVien(auth.taiKhoanId, auth.donViId, client)) throw loiXacThuc('Không có quyền', 403, 'FORBIDDEN');
             const tk = await repo.layNhanVienChoKichHoat(taiKhoanId, auth.donViId, client);

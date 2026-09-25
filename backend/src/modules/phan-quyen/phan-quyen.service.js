@@ -1,6 +1,6 @@
 const { AppError } = require('../../common/errors/AppError.js');
 const { trongGiaoDich } = require('../../database/transaction.js');
-const { danhSachQuyenHopLe, ganVaiTroHopLe, suaVaiTroHopLe, uuidHopLe, vaiTroMoiHopLe } = require('./phan-quyen.validation.js');
+const { danhSachQuyenHopLe, ganVaiTroHopLe, suaVaiTroHopLe, idHopLe, vaiTroMoiHopLe } = require('./phan-quyen.validation.js');
 const repo = require('./phan-quyen.repository.js');
 
 class PhanQuyenService {
@@ -88,7 +88,7 @@ class PhanQuyenService {
     }
 
     async quyenCuaVaiTro(auth, vaiTroId) {
-        uuidHopLe(vaiTroId, 'Vai trò');
+        vaiTroId = idHopLe(vaiTroId, 'Vai trò');
         await this.yeuCauQuanTri(auth);
         if (!await repo.layVaiTro(auth.donViId, vaiTroId)) throw this.loi('Không tìm thấy vai trò', 404, 'NOT_FOUND');
         return { quyen: await repo.quyenCuaVaiTro(auth.donViId, vaiTroId) };
@@ -114,7 +114,7 @@ class PhanQuyenService {
     }
 
     async suaVaiTro(auth, vaiTroId, body, requestId) {
-        uuidHopLe(vaiTroId, 'Vai trò');
+        vaiTroId = idHopLe(vaiTroId, 'Vai trò');
         const duLieu = suaVaiTroHopLe(body);
         return trongGiaoDich(async client => {
             await this.yeuCauQuanTri(auth, client);
@@ -130,7 +130,7 @@ class PhanQuyenService {
     }
 
     async voHieuVaiTro(auth, vaiTroId, requestId) {
-        uuidHopLe(vaiTroId, 'Vai trò');
+        vaiTroId = idHopLe(vaiTroId, 'Vai trò');
         return trongGiaoDich(async client => {
             await this.yeuCauQuanTri(auth, client);
             await this.vaiTroDuocSua(auth.donViId, vaiTroId, client);
@@ -145,7 +145,7 @@ class PhanQuyenService {
     }
 
     async thayQuyenVaiTro(auth, vaiTroId, body, requestId) {
-        uuidHopLe(vaiTroId, 'Vai trò');
+        vaiTroId = idHopLe(vaiTroId, 'Vai trò');
         const danhSach = danhSachQuyenHopLe(body);
         return trongGiaoDich(async client => {
             await this.yeuCauQuanTri(auth, client);
@@ -174,14 +174,14 @@ class PhanQuyenService {
     }
 
     async vaiTroCuaThanhVien(auth, thanhVienId) {
-        uuidHopLe(thanhVienId, 'Thành viên');
+        thanhVienId = idHopLe(thanhVienId, 'Thành viên');
         await this.yeuCauQuanTri(auth);
         if (!await repo.layThanhVien(auth.donViId, thanhVienId)) throw this.loi('Không tìm thấy thành viên', 404, 'NOT_FOUND');
         return { vai_tro: await repo.vaiTroCuaThanhVien(auth.donViId, thanhVienId) };
     }
 
     async ganVaiTro(auth, thanhVienId, body, requestId) {
-        uuidHopLe(thanhVienId, 'Thành viên');
+        thanhVienId = idHopLe(thanhVienId, 'Thành viên');
         const duLieu = ganVaiTroHopLe(body);
         return trongGiaoDich(async client => {
             await this.yeuCauQuanTri(auth, client);
@@ -216,8 +216,8 @@ class PhanQuyenService {
     }
 
     async thuHoiVaiTro(auth, thanhVienId, ganVaiTroId, requestId) {
-        uuidHopLe(thanhVienId, 'Thành viên');
-        uuidHopLe(ganVaiTroId, 'Lần gán vai trò');
+        thanhVienId = idHopLe(thanhVienId, 'Thành viên');
+        ganVaiTroId = idHopLe(ganVaiTroId, 'Lần gán vai trò');
         return trongGiaoDich(async client => {
             await this.yeuCauQuanTri(auth, client);
             const thanhVien = await repo.layThanhVien(auth.donViId, thanhVienId, client, true);

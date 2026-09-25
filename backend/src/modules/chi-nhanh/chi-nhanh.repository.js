@@ -203,7 +203,7 @@ class ChiNhanhRepository {
         await query(
             `UPDATE phien_dang_nhap SET chi_nhanh_dang_chon_id = NULL
              WHERE don_vi_dang_chon_id = $1 AND chi_nhanh_dang_chon_id = $2
-               AND ($3::uuid IS NULL OR tai_khoan_id = $3)`,
+               AND ($3::integer IS NULL OR tai_khoan_id = $3)`,
             [donViId, chiNhanhId, taiKhoanId], client
         );
     }

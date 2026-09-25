@@ -1,6 +1,6 @@
 const { AppError } = require('../../common/errors/AppError.js');
 
-const UUID = /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
+const MAX_ID = 2147483647;
 const PHAM_VI = ['DON_VI', 'CHI_NHANH', 'CA_NHAN'];
 
 function loiDuLieu(message) {
@@ -17,9 +17,11 @@ function chuoiHopLe(value, ten, min, max) {
     return value.trim();
 }
 
-function uuidHopLe(value, ten = 'ID') {
-    if (typeof value !== 'string' || !UUID.test(value)) throw loiDuLieu(`${ten} không hợp lệ`);
-    return value;
+function idHopLe(value, ten = 'ID') {
+    const dungDinhDang = typeof value === 'number' ? Number.isInteger(value) : typeof value === 'string' && /^[1-9]\d*$/.test(value);
+    const id = Number(value);
+    if (!dungDinhDang || !Number.isSafeInteger(id) || id < 1 || id > MAX_ID) throw loiDuLieu(`${ten} không hợp lệ`);
+    return id;
 }
 
 function vaiTroMoiHopLe(body) {
@@ -57,9 +59,9 @@ function danhSachQuyenHopLe(body) {
 function ganVaiTroHopLe(body) {
     kiemTraTruong(body, ['vai_tro_id', 'chi_nhanh_id']);
     return {
-        vai_tro_id: uuidHopLe(body.vai_tro_id, 'Vai trò'),
-        chi_nhanh_id: body.chi_nhanh_id == null ? null : uuidHopLe(body.chi_nhanh_id, 'Chi nhánh')
+        vai_tro_id: idHopLe(body.vai_tro_id, 'Vai trò'),
+        chi_nhanh_id: body.chi_nhanh_id == null ? null : idHopLe(body.chi_nhanh_id, 'Chi nhánh')
     };
 }
 
-module.exports = { uuidHopLe, vaiTroMoiHopLe, suaVaiTroHopLe, danhSachQuyenHopLe, ganVaiTroHopLe };
+module.exports = { idHopLe, vaiTroMoiHopLe, suaVaiTroHopLe, danhSachQuyenHopLe, ganVaiTroHopLe };

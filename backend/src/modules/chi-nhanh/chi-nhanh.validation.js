@@ -1,6 +1,6 @@
 const { AppError } = require('../../common/errors/AppError.js');
 
-const UUID = /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
+const MAX_ID = 2147483647;
 const TRUONG_TAO = [
     'ma_chi_nhanh', 'ten_chi_nhanh', 'loai_chi_nhanh', 'dia_chi_chi_tiet',
     'ma_tinh_thanh', 'ten_tinh_thanh', 'ma_phuong_xa', 'ten_phuong_xa',
@@ -22,9 +22,11 @@ function loiDuLieu(message) {
     return new AppError({ code: 'INVALID_INPUT', message, status: 422 });
 }
 
-function uuidHopLe(value, ten = 'ID') {
-    if (typeof value !== 'string' || !UUID.test(value)) throw loiDuLieu(`${ten} không hợp lệ`);
-    return value;
+function idHopLe(value, ten = 'ID') {
+    const dungDinhDang = typeof value === 'number' ? Number.isInteger(value) : typeof value === 'string' && /^[1-9]\d*$/.test(value);
+    const id = Number(value);
+    if (!dungDinhDang || !Number.isSafeInteger(id) || id < 1 || id > MAX_ID) throw loiDuLieu(`${ten} không hợp lệ`);
+    return id;
 }
 
 function chuanHoa(body, taoMoi) {
@@ -40,7 +42,7 @@ function chuanHoa(body, taoMoi) {
             continue;
         }
         if (ten === 'quan_ly_thanh_vien_id') {
-            ketQua[ten] = uuidHopLe(giaTri, 'Quản lý chi nhánh');
+            ketQua[ten] = idHopLe(giaTri, 'Quản lý chi nhánh');
             continue;
         }
         if (ten === 'cho_nhan_tai_quay' || ten === 'cho_ban_truc_tuyen') {
@@ -99,7 +101,7 @@ function phanCongHopLe(body) {
 }
 
 module.exports = {
-    uuidHopLe,
+    idHopLe,
     chiNhanhMoiHopLe,
     capNhatChiNhanhHopLe,
     trangThaiChiNhanhHopLe,

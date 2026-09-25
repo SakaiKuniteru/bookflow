@@ -1,7 +1,7 @@
 const { AppError } = require('../../common/errors/AppError.js');
 const { trongGiaoDich } = require('../../database/transaction.js');
 const phanQuyenService = require('../phan-quyen/phan-quyen.service.js');
-const { capNhatChiNhanhHopLe, chiNhanhMoiHopLe, phanCongHopLe, trangThaiChiNhanhHopLe, uuidHopLe } = require('./chi-nhanh.validation.js');
+const { capNhatChiNhanhHopLe, chiNhanhMoiHopLe, phanCongHopLe, trangThaiChiNhanhHopLe, idHopLe } = require('./chi-nhanh.validation.js');
 const repo = require('./chi-nhanh.repository.js');
 const xacThucContext = require('../xac-thuc/xac-thuc.context.js');
 
@@ -22,7 +22,7 @@ class ChiNhanhService {
     }
 
     async chiTietChiNhanh(auth, chiNhanhId) {
-        uuidHopLe(chiNhanhId, 'Chi nhánh');
+        chiNhanhId = idHopLe(chiNhanhId, 'Chi nhánh');
         const chiNhanh = await repo.layChiNhanh(auth.donViId, chiNhanhId);
         if (!chiNhanh) throw loi('Không tìm thấy chi nhánh', 404, 'NOT_FOUND');
         const quanLyDonVi = await phanQuyenService.kiemTraQuyen(auth, 'branches.manage');
@@ -52,7 +52,7 @@ class ChiNhanhService {
     }
 
     async capNhatChiNhanh(auth, chiNhanhId, body, requestId) {
-        uuidHopLe(chiNhanhId, 'Chi nhánh');
+        chiNhanhId = idHopLe(chiNhanhId, 'Chi nhánh');
         const duLieu = capNhatChiNhanhHopLe(body);
         return trongGiaoDich(async client => {
             const chiNhanh = await repo.layChiNhanh(auth.donViId, chiNhanhId, client, true);
@@ -74,7 +74,7 @@ class ChiNhanhService {
     }
 
     async doiTrangThaiChiNhanh(auth, chiNhanhId, body, requestId) {
-        uuidHopLe(chiNhanhId, 'Chi nhánh');
+        chiNhanhId = idHopLe(chiNhanhId, 'Chi nhánh');
         const trangThai = trangThaiChiNhanhHopLe(body);
         return trongGiaoDich(async client => {
             const chiNhanh = await repo.layChiNhanh(auth.donViId, chiNhanhId, client, true);
@@ -99,7 +99,7 @@ class ChiNhanhService {
 
     async chonChiNhanh(auth, body) {
         if (!body || typeof body !== 'object' || Array.isArray(body) || Object.keys(body).length !== 1) throw loi('Dữ liệu chọn chi nhánh không hợp lệ', 422, 'INVALID_INPUT');
-        const chiNhanhId = uuidHopLe(body.chi_nhanh_id, 'Chi nhánh');
+        const chiNhanhId = idHopLe(body.chi_nhanh_id, 'Chi nhánh');
         return trongGiaoDich(async client => {
             const chiNhanh = await repo.layChiNhanh(auth.donViId, chiNhanhId, client, true);
             if (!chiNhanh || chiNhanh.trang_thai !== 'DANG_DUNG') throw loi('Chi nhánh không hoạt động', 404, 'NOT_FOUND');
@@ -123,15 +123,15 @@ class ChiNhanhService {
     }
 
     async danhSachNhanVien(auth, chiNhanhId) {
-        uuidHopLe(chiNhanhId, 'Chi nhánh');
+        chiNhanhId = idHopLe(chiNhanhId, 'Chi nhánh');
         if (!await repo.layChiNhanh(auth.donViId, chiNhanhId)) throw loi('Không tìm thấy chi nhánh', 404, 'NOT_FOUND');
         await yeuCauQuanLy(auth, chiNhanhId);
         return { nhan_vien: await repo.danhSachNhanVienChiNhanh(auth.donViId, chiNhanhId) };
     }
 
     async phanCongNhanVien(auth, chiNhanhId, thanhVienId, body, requestId) {
-        uuidHopLe(chiNhanhId, 'Chi nhánh');
-        uuidHopLe(thanhVienId, 'Thành viên');
+        chiNhanhId = idHopLe(chiNhanhId, 'Chi nhánh');
+        thanhVienId = idHopLe(thanhVienId, 'Thành viên');
         const { la_chi_nhanh_chinh: laChinh } = phanCongHopLe(body);
         return trongGiaoDich(async client => {
             const chiNhanh = await repo.layChiNhanh(auth.donViId, chiNhanhId, client, true);
@@ -160,8 +160,8 @@ class ChiNhanhService {
     }
 
     async boPhanCongNhanVien(auth, chiNhanhId, thanhVienId, requestId) {
-        uuidHopLe(chiNhanhId, 'Chi nhánh');
-        uuidHopLe(thanhVienId, 'Thành viên');
+        chiNhanhId = idHopLe(chiNhanhId, 'Chi nhánh');
+        thanhVienId = idHopLe(thanhVienId, 'Thành viên');
         return trongGiaoDich(async client => {
             const chiNhanh = await repo.layChiNhanh(auth.donViId, chiNhanhId, client, true);
             if (!chiNhanh) throw loi('Không tìm thấy chi nhánh', 404, 'NOT_FOUND');
