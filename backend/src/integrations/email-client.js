@@ -26,7 +26,7 @@ class EmailService {
         this.transporter ??= nodemailer.createTransport(this.cauHinhMail());
         const cfg = docCauHinhEmail();
         try {
-            await this.transporter.sendMail({
+            const ketQua = await this.transporter.sendMail({
                 from: this.diaChiNguoiGui(cfg),
                 to: { name: tenNguoiNhan?.trim() || '', address: den },
                 subject: tieuDe,
@@ -35,7 +35,19 @@ class EmailService {
                 disableFileAccess: true,
                 disableUrlAccess: true
             });
-        } catch {
+            console.info(JSON.stringify({
+                event: 'EMAIL_SMTP_ACCEPTED',
+                accepted: ketQua.accepted?.length ?? 0,
+                rejected: ketQua.rejected?.length ?? 0
+            }));
+        } catch (error) {
+            console.error(JSON.stringify({
+                event: 'EMAIL_SMTP_ERROR',
+                code: error?.code ?? null,
+                response_code: error?.responseCode ?? null,
+                command: error?.command ?? null,
+                name: error?.name ?? null
+            }));
             throw new AppError({ code: 'EMAIL_UNAVAILABLE', message: 'Không gửi được email, vui lòng thử lại', status: 503 });
         }
     }
