@@ -1,0 +1,16 @@
+const { Router } = require('express');
+const { authenticate } = require('../../common/middlewares/authenticate.js');
+const { tenantScope } = require('../../common/middlewares/tenant-scope.js');
+const { authorize } = require('../../common/middlewares/authorize.js');
+const controller = require('./gio-hang.controller.js');
+const router = Router();
+router.use(authenticate,tenantScope);
+router.get('/',authorize('carts.read'),controller.xuLy('danhSach'));
+router.post('/',authorize('carts.manage'),controller.xuLy('tao',201));
+router.get('/:gioHangId',authorize('carts.read'),controller.xuLy('chiTiet'));
+router.post('/:gioHangId/mat-hang',authorize('carts.manage'),controller.xuLy('themMatHang',201));
+router.patch('/:gioHangId/mat-hang/:matHangId',authorize('carts.manage'),controller.xuLy('suaMatHang'));
+router.delete('/:gioHangId/mat-hang/:matHangId',authorize('carts.manage'),controller.xuLy('xoaMatHang'));
+router.delete('/:gioHangId/mat-hang',authorize('carts.manage'),controller.xuLy('lamRong'));
+router.post('/:gioHangId/huy',authorize('carts.manage'),controller.xuLy('huy'));
+module.exports = router;

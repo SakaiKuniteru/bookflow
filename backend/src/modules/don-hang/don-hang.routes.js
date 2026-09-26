@@ -1,0 +1,12 @@
+const { Router } = require('express');
+const { authenticate } = require('../../common/middlewares/authenticate.js');
+const { tenantScope } = require('../../common/middlewares/tenant-scope.js');
+const { authorize } = require('../../common/middlewares/authorize.js');
+const controller = require('./don-hang.controller.js');
+const router = Router();
+router.use(authenticate,tenantScope);
+router.get('/',authorize('orders.read'),controller.xuLy('danhSach'));
+router.post('/',authorize('orders.manage'),controller.xuLy('tao',201));
+router.get('/:donHangId',authorize('orders.read'),controller.xuLy('chiTiet'));
+router.post('/:donHangId/trang-thai',authorize('orders.manage'),controller.xuLy('doiTrangThai'));
+module.exports = router;

@@ -18,6 +18,9 @@ const chuyenKhoRouter = require('../modules/chuyen-kho/chuyen-kho.routes.js');
 const kiemKhoRouter = require('../modules/kiem-kho/kiem-kho.routes.js');
 const khachHangRouter = require('../modules/khach-hang/khach-hang.routes.js');
 const hoiVienRouter = require('../modules/hoi-vien/hoi-vien.routes.js');
+const gioHangRouter = require('../modules/gio-hang/gio-hang.routes.js');
+const donHangRouter = require('../modules/don-hang/don-hang.routes.js');
+const banHangRouter = require('../modules/ban-hang/ban-hang.routes.js');
 
 const apiRouter = Router();
 
@@ -40,5 +43,8 @@ apiRouter.use('/chuyen-kho', chuyenKhoRouter);
 apiRouter.use('/kiem-kho', kiemKhoRouter);
 apiRouter.use('/khach-hang',khachHangRouter);
 apiRouter.use('/hoi-vien',hoiVienRouter);
+apiRouter.use('/gio-hang',gioHangRouter);
+apiRouter.use('/don-hang',donHangRouter);
+apiRouter.use('/ban-hang',banHangRouter);
 
 module.exports = apiRouter;
