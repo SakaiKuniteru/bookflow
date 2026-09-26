@@ -24,6 +24,8 @@ const banHangRouter = require('../modules/ban-hang/ban-hang.routes.js');
 const thanhToanRouter = require('../modules/thanh-toan/thanh-toan.routes.js');
 const congNoRouter = require('../modules/cong-no/cong-no.routes.js');
 const tienCocRouter = require('../modules/tien-coc/tien-coc.routes.js');
+const datTruocRouter = require('../modules/dat-truoc/dat-truoc.routes.js');
+const muonTraRouter = require('../modules/muon-tra/muon-tra.routes.js');
 
 const apiRouter = Router();
 
@@ -52,5 +54,7 @@ apiRouter.use('/ban-hang',banHangRouter);
 apiRouter.use('/thanh-toan',thanhToanRouter);
 apiRouter.use('/cong-no',congNoRouter);
 apiRouter.use('/tien-coc',tienCocRouter);
+apiRouter.use('/dat-truoc',datTruocRouter);
+apiRouter.use('/muon-tra',muonTraRouter);
 
 module.exports = apiRouter;

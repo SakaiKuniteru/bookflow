@@ -1,0 +1,18 @@
+const { Router } = require('express');
+const { authenticate } = require('../../common/middlewares/authenticate.js');
+const { tenantScope } = require('../../common/middlewares/tenant-scope.js');
+const { authorize } = require('../../common/middlewares/authorize.js');
+const controller = require('./muon-tra.controller.js');
+const router = Router();
+router.use(authenticate,tenantScope);
+router.get('/',authorize('books.read'),controller.xuLy('danhSach'));
+router.post('/',authorize('books.create'),controller.xuLy('tao',201));
+router.post('/xu-ly-qua-han',authorize('loans.return'),controller.xuLy('quaHan'));
+router.get('/:id',authorize('books.read'),controller.xuLy('chiTiet'));
+router.post('/:id/giao',authorize('books.create'),controller.xuLy('giao'));
+router.post('/:id/tra',authorize('loans.return'),controller.xuLy('tra'));
+router.post('/:id/gia-han',authorize('books.create'),controller.xuLy('taoGiaHan',201));
+router.get('/:id/gia-han',authorize('books.read'),controller.xuLy('danhSachGiaHan'));
+router.post('/gia-han/:id/duyet',authorize('books.create'),controller.xuLy('duyetGiaHan'));
+router.post('/:id/phi-phat',authorize('books.create'),controller.xuLy('taoPhat',201));
+module.exports = router;

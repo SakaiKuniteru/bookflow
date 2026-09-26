@@ -1,0 +1,18 @@
+const { Router } = require('express');
+const { authenticate } = require('../../common/middlewares/authenticate.js');
+const { tenantScope } = require('../../common/middlewares/tenant-scope.js');
+const { authorize } = require('../../common/middlewares/authorize.js');
+const controller = require('./dat-truoc.controller.js');
+const router = Router();
+router.use(authenticate,tenantScope);
+router.get('/',authorize('books.read'),controller.xuLy('danhSach'));
+router.post('/',authorize('books.create'),controller.xuLy('tao',201));
+router.post('/xu-ly-het-han',authorize('books.create'),controller.xuLy('hetHan'));
+router.post('/phan-bo-tu-dong/:phienBanSachId',authorize('books.create'),controller.xuLy('tuDongPhanBo'));
+router.get('/:id',authorize('books.read'),controller.xuLy('chiTiet'));
+router.post('/:id/phan-bo',authorize('books.create'),controller.xuLy('phanBo'));
+router.post('/:id/thong-bao',authorize('books.create'),controller.xuLy('thongBao'));
+router.post('/:id/cho-nhan',authorize('books.create'),controller.xuLy('choNhan'));
+router.post('/:id/nhan-sach',authorize('books.create'),controller.xuLy('nhanSach'));
+router.post('/:id/huy',authorize('books.create'),controller.xuLy('huy'));
+module.exports = router;
