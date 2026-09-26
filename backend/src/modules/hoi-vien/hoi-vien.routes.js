@@ -1,0 +1,18 @@
+const { Router } = require('express');
+const { authenticate } = require('../../common/middlewares/authenticate.js');
+const { tenantScope } = require('../../common/middlewares/tenant-scope.js');
+const { authorize } = require('../../common/middlewares/authorize.js');
+const controller = require('./hoi-vien.controller.js');
+const router = Router();
+router.use(authenticate,tenantScope);
+router.get('/hang',authorize('members.read'),controller.xuLy('danhSachHang'));
+router.post('/hang',authorize('members.manage'),controller.xuLy('taoHang',201));
+router.get('/hang/:hangId',authorize('members.read'),controller.xuLy('chiTietHang'));
+router.patch('/hang/:hangId',authorize('members.manage'),controller.xuLy('suaHang'));
+router.post('/hang/:hangId/chinh-sach',authorize('members.manage'),controller.xuLy('taoChinhSach',201));
+router.get('/',authorize('members.read'),controller.xuLy('danhSach'));
+router.post('/',authorize('members.manage'),controller.xuLy('dangKy',201));
+router.get('/:hoiVienId',authorize('members.read'),controller.xuLy('chiTiet'));
+router.post('/:hoiVienId/chuyen-hang',authorize('members.manage'),controller.xuLy('chuyenHang'));
+router.post('/:hoiVienId/giao-dich-diem',authorize('members.manage'),controller.xuLy('giaoDichDiem',201));
+module.exports = router;

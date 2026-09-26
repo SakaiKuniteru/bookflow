@@ -61,4 +61,3 @@ CREATE TABLE IF NOT EXISTS chi_tiet_kiem_kho (
     ngay_cap_nhat TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE UNIQUE INDEX IF NOT EXISTS uq_chi_tiet_kiem_kho ON chi_tiet_kiem_kho (don_vi_id,phieu_kiem_kho_id,phien_ban_sach_id,vi_tri_kho_id) NULLS NOT DISTINCT;
-CREATE UNIQUE INDEX IF NOT EXISTS uq_bien_dong_chuyen_xuat ON bien_dong_ton_kho (ma_tham_chieu,chi_tiet_phieu_nhap_id) WHERE loai_bien_dong = 'DIEU_CHUYEN_RA';

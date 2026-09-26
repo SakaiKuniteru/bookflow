@@ -16,6 +16,8 @@ const nhapKhoRouter = require('../modules/nhap-kho/nhap-kho.routes.js');
 const tonKhoRouter = require('../modules/ton-kho/ton-kho.routes.js');
 const chuyenKhoRouter = require('../modules/chuyen-kho/chuyen-kho.routes.js');
 const kiemKhoRouter = require('../modules/kiem-kho/kiem-kho.routes.js');
+const khachHangRouter = require('../modules/khach-hang/khach-hang.routes.js');
+const hoiVienRouter = require('../modules/hoi-vien/hoi-vien.routes.js');
 
 const apiRouter = Router();
 
@@ -36,5 +38,7 @@ apiRouter.use('/nhap-kho', nhapKhoRouter);
 apiRouter.use('/ton-kho', tonKhoRouter);
 apiRouter.use('/chuyen-kho', chuyenKhoRouter);
 apiRouter.use('/kiem-kho', kiemKhoRouter);
+apiRouter.use('/khach-hang',khachHangRouter);
+apiRouter.use('/hoi-vien',hoiVienRouter);
 
 module.exports = apiRouter;

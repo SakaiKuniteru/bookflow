@@ -1,0 +1,173 @@
+CREATE TABLE IF NOT EXISTS khach_hang (
+    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    don_vi_id INTEGER NOT NULL REFERENCES don_vi(id),
+    tai_khoan_id INTEGER REFERENCES tai_khoan(id),
+    ma_khach_hang VARCHAR(40) NOT NULL,
+    loai_khach_hang VARCHAR(20) NOT NULL DEFAULT 'CA_NHAN' CHECK (loai_khach_hang IN ('CA_NHAN','TO_CHUC')),
+    ho_ten VARCHAR(200) NOT NULL,
+    ten_to_chuc VARCHAR(255),
+    ma_so_thue VARCHAR(30),
+    ngay_sinh DATE,
+    gioi_tinh VARCHAR(20),
+    email VARCHAR(255),
+    so_dien_thoai VARCHAR(30),
+    anh_dai_dien_id INTEGER,
+    nguon_khach_hang VARCHAR(50),
+    nguoi_gioi_thieu_id INTEGER REFERENCES khach_hang(id),
+    ghi_chu TEXT,
+    trang_thai VARCHAR(20) NOT NULL DEFAULT 'HOAT_DONG' CHECK (trang_thai IN ('HOAT_DONG','TAM_KHOA','NGUNG_HOAT_DONG')),
+    dong_y_email BOOLEAN NOT NULL DEFAULT FALSE,
+    dong_y_sms BOOLEAN NOT NULL DEFAULT FALSE,
+    dong_y_ca_nhan_hoa BOOLEAN NOT NULL DEFAULT FALSE,
+    thoi_diem_dong_y TIMESTAMPTZ,
+    nguoi_tao_id INTEGER REFERENCES tai_khoan(id),
+    ngay_tao TIMESTAMPTZ NOT NULL DEFAULT now(),
+    ngay_cap_nhat TIMESTAMPTZ NOT NULL DEFAULT now(),
+    ngay_xoa TIMESTAMPTZ,
+    CONSTRAINT uq_khach_hang_ma UNIQUE (don_vi_id,ma_khach_hang),
+    CONSTRAINT uq_khach_hang_don_vi_id UNIQUE (don_vi_id,id),
+    CONSTRAINT ck_khach_hang_to_chuc CHECK (loai_khach_hang <> 'TO_CHUC' OR ten_to_chuc IS NOT NULL)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_khach_hang_tai_khoan ON khach_hang(don_vi_id,tai_khoan_id) WHERE tai_khoan_id IS NOT NULL AND ngay_xoa IS NULL;
+CREATE INDEX IF NOT EXISTS idx_khach_hang_tim_kiem ON khach_hang(don_vi_id,ho_ten,so_dien_thoai);
+CREATE TABLE IF NOT EXISTS dia_chi_khach_hang (
+    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    don_vi_id INTEGER NOT NULL,
+    khach_hang_id INTEGER NOT NULL,
+    loai_dia_chi VARCHAR(20) NOT NULL DEFAULT 'GIAO_HANG' CHECK (loai_dia_chi IN ('GIAO_HANG','XUAT_HOA_DON','KHAC')),
+    nguoi_nhan VARCHAR(200),
+    so_dien_thoai VARCHAR(30),
+    quoc_gia VARCHAR(100) NOT NULL DEFAULT 'Việt Nam',
+    tinh_thanh VARCHAR(150),
+    phuong_xa VARCHAR(150),
+    dia_chi_chi_tiet TEXT NOT NULL,
+    ma_buu_chinh VARCHAR(20),
+    mac_dinh BOOLEAN NOT NULL DEFAULT FALSE,
+    ngay_tao TIMESTAMPTZ NOT NULL DEFAULT now(),
+    ngay_cap_nhat TIMESTAMPTZ NOT NULL DEFAULT now(),
+    FOREIGN KEY (don_vi_id,khach_hang_id) REFERENCES khach_hang(don_vi_id,id) ON DELETE RESTRICT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_dia_chi_mac_dinh ON dia_chi_khach_hang(don_vi_id,khach_hang_id,loai_dia_chi) WHERE mac_dinh = TRUE;
+CREATE TABLE IF NOT EXISTS lien_he_khach_hang (
+    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    don_vi_id INTEGER NOT NULL,
+    khach_hang_id INTEGER NOT NULL,
+    ho_ten VARCHAR(200) NOT NULL,
+    chuc_vu VARCHAR(100),
+    email VARCHAR(255),
+    so_dien_thoai VARCHAR(30),
+    la_lien_he_chinh BOOLEAN NOT NULL DEFAULT FALSE,
+    ghi_chu TEXT,
+    ngay_tao TIMESTAMPTZ NOT NULL DEFAULT now(),
+    FOREIGN KEY (don_vi_id,khach_hang_id) REFERENCES khach_hang(don_vi_id,id) ON DELETE RESTRICT
+);
+CREATE TABLE IF NOT EXISTS tuong_tac_khach_hang (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    don_vi_id INTEGER NOT NULL,
+    khach_hang_id INTEGER NOT NULL,
+    loai_tuong_tac VARCHAR(30) NOT NULL CHECK (loai_tuong_tac IN ('GOI_DIEN','EMAIL','TIN_NHAN','HO_TRO','GHI_CHU','KHIEU_NAI','KHAC')),
+    tieu_de VARCHAR(255),
+    noi_dung TEXT,
+    ket_qua TEXT,
+    thoi_gian_hen TIMESTAMPTZ,
+    nguoi_phu_trach_id INTEGER REFERENCES tai_khoan(id),
+    nguoi_tao_id INTEGER REFERENCES tai_khoan(id),
+    ngay_tao TIMESTAMPTZ NOT NULL DEFAULT now(),
+    FOREIGN KEY (don_vi_id,khach_hang_id) REFERENCES khach_hang(don_vi_id,id) ON DELETE RESTRICT
+);
+CREATE INDEX IF NOT EXISTS idx_tuong_tac_khach_hang ON tuong_tac_khach_hang(don_vi_id,khach_hang_id,ngay_tao DESC);
+CREATE TABLE IF NOT EXISTS hang_hoi_vien (
+    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    don_vi_id INTEGER NOT NULL REFERENCES don_vi(id),
+    ma_hang VARCHAR(40) NOT NULL,
+    ten_hang VARCHAR(150) NOT NULL,
+    thu_tu INTEGER NOT NULL DEFAULT 0,
+    diem_toi_thieu BIGINT NOT NULL DEFAULT 0 CHECK (diem_toi_thieu >= 0),
+    chi_tieu_toi_thieu NUMERIC(18,2) NOT NULL DEFAULT 0 CHECK (chi_tieu_toi_thieu >= 0),
+    mau_hien_thi VARCHAR(20),
+    mo_ta TEXT,
+    trang_thai VARCHAR(20) NOT NULL DEFAULT 'HOAT_DONG' CHECK (trang_thai IN ('HOAT_DONG','NGUNG_HOAT_DONG')),
+    ngay_tao TIMESTAMPTZ NOT NULL DEFAULT now(),
+    ngay_cap_nhat TIMESTAMPTZ NOT NULL DEFAULT now(),
+    UNIQUE (don_vi_id,ma_hang),
+    UNIQUE (don_vi_id,id)
+);
+CREATE TABLE IF NOT EXISTS chinh_sach_hoi_vien (
+    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    don_vi_id INTEGER NOT NULL,
+    hang_hoi_vien_id INTEGER NOT NULL,
+    phien_ban INTEGER NOT NULL DEFAULT 1 CHECK (phien_ban > 0),
+    ty_le_tich_diem NUMERIC(12,6) NOT NULL DEFAULT 0 CHECK (ty_le_tich_diem >= 0),
+    so_tien_moi_diem NUMERIC(18,2) CHECK (so_tien_moi_diem > 0),
+    gia_tri_moi_diem NUMERIC(18,2) NOT NULL DEFAULT 0 CHECK (gia_tri_moi_diem >= 0),
+    giam_gia_phan_tram NUMERIC(5,2) NOT NULL DEFAULT 0 CHECK (giam_gia_phan_tram BETWEEN 0 AND 100),
+    giam_gia_toi_da NUMERIC(18,2) CHECK (giam_gia_toi_da >= 0),
+    mien_phi_van_chuyen BOOLEAN NOT NULL DEFAULT FALSE,
+    so_lan_gia_han_mien_phi INTEGER NOT NULL DEFAULT 0 CHECK (so_lan_gia_han_mien_phi >= 0),
+    so_ngay_muon_them INTEGER NOT NULL DEFAULT 0 CHECK (so_ngay_muon_them >= 0),
+    han_su_dung_diem_ngay INTEGER CHECK (han_su_dung_diem_ngay > 0),
+    dieu_kien JSONB NOT NULL DEFAULT '{}'::jsonb,
+    quyen_loi JSONB NOT NULL DEFAULT '{}'::jsonb,
+    hieu_luc_tu TIMESTAMPTZ NOT NULL,
+    hieu_luc_den TIMESTAMPTZ,
+    nguoi_tao_id INTEGER REFERENCES tai_khoan(id),
+    ngay_tao TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CHECK (hieu_luc_den IS NULL OR hieu_luc_den > hieu_luc_tu),
+    UNIQUE (don_vi_id,hang_hoi_vien_id,phien_ban),
+    FOREIGN KEY (don_vi_id,hang_hoi_vien_id) REFERENCES hang_hoi_vien(don_vi_id,id)
+);
+CREATE TABLE IF NOT EXISTS hoi_vien (
+    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    don_vi_id INTEGER NOT NULL,
+    khach_hang_id INTEGER NOT NULL,
+    hang_hoi_vien_id INTEGER NOT NULL,
+    ma_hoi_vien VARCHAR(40) NOT NULL,
+    ngay_tham_gia TIMESTAMPTZ NOT NULL DEFAULT now(),
+    ngay_het_han TIMESTAMPTZ,
+    ngay_xet_hang TIMESTAMPTZ,
+    tong_diem_tich_luy BIGINT NOT NULL DEFAULT 0 CHECK (tong_diem_tich_luy >= 0),
+    diem_kha_dung BIGINT NOT NULL DEFAULT 0 CHECK (diem_kha_dung >= 0),
+    diem_dang_giu BIGINT NOT NULL DEFAULT 0 CHECK (diem_dang_giu >= 0),
+    tong_chi_tieu_hop_le NUMERIC(18,2) NOT NULL DEFAULT 0 CHECK (tong_chi_tieu_hop_le >= 0),
+    trang_thai VARCHAR(20) NOT NULL DEFAULT 'HOAT_DONG' CHECK (trang_thai IN ('HOAT_DONG','TAM_KHOA','HET_HAN')),
+    ngay_tao TIMESTAMPTZ NOT NULL DEFAULT now(),
+    ngay_cap_nhat TIMESTAMPTZ NOT NULL DEFAULT now(),
+    UNIQUE (don_vi_id,khach_hang_id),
+    UNIQUE (don_vi_id,ma_hoi_vien),
+    UNIQUE (don_vi_id,id),
+    FOREIGN KEY (don_vi_id,khach_hang_id) REFERENCES khach_hang(don_vi_id,id),
+    FOREIGN KEY (don_vi_id,hang_hoi_vien_id) REFERENCES hang_hoi_vien(don_vi_id,id)
+);
+CREATE TABLE IF NOT EXISTS lich_su_hang_hoi_vien (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    don_vi_id INTEGER NOT NULL,
+    hoi_vien_id INTEGER NOT NULL,
+    hang_cu_id INTEGER,
+    hang_moi_id INTEGER NOT NULL,
+    ly_do TEXT,
+    nguoi_thuc_hien_id INTEGER REFERENCES tai_khoan(id),
+    ngay_thay_doi TIMESTAMPTZ NOT NULL DEFAULT now(),
+    FOREIGN KEY (don_vi_id,hoi_vien_id) REFERENCES hoi_vien(don_vi_id,id),
+    FOREIGN KEY (don_vi_id,hang_cu_id) REFERENCES hang_hoi_vien(don_vi_id,id),
+    FOREIGN KEY (don_vi_id,hang_moi_id) REFERENCES hang_hoi_vien(don_vi_id,id)
+);
+CREATE TABLE IF NOT EXISTS giao_dich_diem_hoi_vien (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    don_vi_id INTEGER NOT NULL,
+    hoi_vien_id INTEGER NOT NULL,
+    loai_giao_dich VARCHAR(30) NOT NULL CHECK (loai_giao_dich IN ('TICH_DIEM','DOI_DIEM','HOAN_DIEM','DIEU_CHINH_TANG','DIEU_CHINH_GIAM','HET_HAN','GIU_DIEM','HUY_GIU_DIEM')),
+    so_diem_thay_doi BIGINT NOT NULL CHECK (so_diem_thay_doi <> 0),
+    diem_truoc BIGINT NOT NULL CHECK (diem_truoc >= 0),
+    diem_sau BIGINT NOT NULL CHECK (diem_sau >= 0),
+    loai_tham_chieu VARCHAR(40),
+    tham_chieu_id BIGINT,
+    khoa_chong_trung VARCHAR(150),
+    ngay_het_han TIMESTAMPTZ,
+    ghi_chu TEXT,
+    nguoi_thuc_hien_id INTEGER REFERENCES tai_khoan(id),
+    ngay_tao TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CHECK (diem_sau = diem_truoc + so_diem_thay_doi),
+    FOREIGN KEY (don_vi_id,hoi_vien_id) REFERENCES hoi_vien(don_vi_id,id)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_giao_dich_diem_chong_trung ON giao_dich_diem_hoi_vien(don_vi_id,khoa_chong_trung) WHERE khoa_chong_trung IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_giao_dich_diem_hoi_vien ON giao_dich_diem_hoi_vien(don_vi_id,hoi_vien_id,ngay_tao DESC);
