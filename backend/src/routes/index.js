@@ -9,6 +9,9 @@ const tacGiaRouter = require('../modules/tac-gia/tac-gia.routes.js');
 const theLoaiRouter = require('../modules/the-loai/the-loai.routes.js');
 const nhaXuatBanRouter = require('../modules/nha-xuat-ban/nha-xuat-ban.routes.js');
 const phienBanSachRouter = require('../modules/phien-ban-sach/phien-ban-sach.routes.js');
+const sachRouter = require('../modules/sach/sach.routes.js');
+const nhaCungCapRouter = require('../modules/nha-cung-cap/nha-cung-cap.routes.js');
+const khoRouter = require('../modules/kho/kho.routes.js');
 
 const apiRouter = Router();
 
@@ -22,5 +25,8 @@ apiRouter.use('/tac-gia', tacGiaRouter);
 apiRouter.use('/the-loai', theLoaiRouter);
 apiRouter.use('/nha-xuat-ban', nhaXuatBanRouter);
 apiRouter.use('/phien-ban-sach', phienBanSachRouter);
+apiRouter.use('/sach', sachRouter);
+apiRouter.use('/nha-cung-cap', nhaCungCapRouter);
+apiRouter.use('/kho', khoRouter);
 
 module.exports = apiRouter;

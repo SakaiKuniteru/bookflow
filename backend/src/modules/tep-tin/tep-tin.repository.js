@@ -31,9 +31,9 @@ async function dangDuocSuDung(id) {
         ['don_vi', 'logo_tep_id'],
         ['tai_khoan', 'anh_dai_dien_tep_id']
     ];
-    const { rows } = await query(`SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name IN ('dau_sach','phien_ban_sach','tep_sach','tac_gia','the_loai_sach','nha_xuat_ban')`);
+    const { rows } = await query(`SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name IN ('dau_sach','phien_ban_sach','tep_sach','tac_gia','the_loai_sach','nha_xuat_ban','anh_dau_sach')`);
     const daCo = new Set(rows.map(row => row.table_name));
-    if (daCo.has('dau_sach')) checks.push(['dau_sach', 'anh_bia_chinh_id']);
+    if (daCo.has('anh_dau_sach')) checks.push(['anh_dau_sach', 'tep_dinh_kem_id']);
     if (daCo.has('phien_ban_sach')) checks.push(['phien_ban_sach', 'anh_bia_chinh_id']);
     if (daCo.has('tep_sach')) checks.push(['tep_sach', 'tep_dinh_kem_id']);
     if (daCo.has('tac_gia')) checks.push(['tac_gia', 'anh_dai_dien_tep_id']);
