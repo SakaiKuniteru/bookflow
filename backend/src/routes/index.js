@@ -26,6 +26,8 @@ const congNoRouter = require('../modules/cong-no/cong-no.routes.js');
 const tienCocRouter = require('../modules/tien-coc/tien-coc.routes.js');
 const datTruocRouter = require('../modules/dat-truoc/dat-truoc.routes.js');
 const muonTraRouter = require('../modules/muon-tra/muon-tra.routes.js');
+const giaHanRoutes = require('../modules/gia-han/gia-han.routes.js');
+const phiPhatRoutes = require('../modules/phi-phat/phi-phat.routes.js');
 
 const apiRouter = Router();
 
@@ -56,5 +58,7 @@ apiRouter.use('/cong-no',congNoRouter);
 apiRouter.use('/tien-coc',tienCocRouter);
 apiRouter.use('/dat-truoc',datTruocRouter);
 apiRouter.use('/muon-tra',muonTraRouter);
+apiRouter.use('/gia-han', giaHanRoutes);
+apiRouter.use('/phi-phat', phiPhatRoutes);
 
 module.exports = apiRouter;
