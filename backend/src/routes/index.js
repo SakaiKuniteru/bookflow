@@ -21,6 +21,9 @@ const hoiVienRouter = require('../modules/hoi-vien/hoi-vien.routes.js');
 const gioHangRouter = require('../modules/gio-hang/gio-hang.routes.js');
 const donHangRouter = require('../modules/don-hang/don-hang.routes.js');
 const banHangRouter = require('../modules/ban-hang/ban-hang.routes.js');
+const thanhToanRouter = require('../modules/thanh-toan/thanh-toan.routes.js');
+const congNoRouter = require('../modules/cong-no/cong-no.routes.js');
+const tienCocRouter = require('../modules/tien-coc/tien-coc.routes.js');
 
 const apiRouter = Router();
 
@@ -46,5 +49,8 @@ apiRouter.use('/hoi-vien',hoiVienRouter);
 apiRouter.use('/gio-hang',gioHangRouter);
 apiRouter.use('/don-hang',donHangRouter);
 apiRouter.use('/ban-hang',banHangRouter);
+apiRouter.use('/thanh-toan',thanhToanRouter);
+apiRouter.use('/cong-no',congNoRouter);
+apiRouter.use('/tien-coc',tienCocRouter);
 
 module.exports = apiRouter;

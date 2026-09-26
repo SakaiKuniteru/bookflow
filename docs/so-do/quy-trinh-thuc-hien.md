@@ -1,7 +1,7 @@
 # BOOKFLOW AI — QUY TRÌNH VIẾT CODE THEO FOLDER VÀ FILE
 
 **Tên file:** `quy-trinh-thuc-hien.md`  
-**Phiên bản:** 3.0 — hướng dẫn thực thi code, thay cho checklist chỉ tạo thư mục/file.  
+**Phiên bản:** 3.1 — cập nhật lộ trình BE trước, bổ sung quy trình F17 theo cấu trúc `ai-service/` đã chốt.  
 **Áp dụng cho:** cấu trúc BookFlow AI 1.1; frontend Handlebars + Bootstrap + JavaScript, backend Node.js + Express, Python FastAPI/RQ, PostgreSQL + pgvector, Redis/BullMQ, MinIO, Nginx, Docker Compose.  
 **Nhánh phát triển đang dùng:** `dev`. `main` là nhánh phát hành. Không sử dụng `develop` trong tài liệu này.
 
@@ -47,10 +47,11 @@ F00  Repository + cấu hình gốc + script kiểm tra cấu trúc
                         ├── F14  Giỏ hàng + POS + bán online
                         └── F15  Đặt trước + mượn miễn phí + thuê + trả
                                │
-                               └── F16  BullMQ + thông báo + nhắc hạn
-
-F17  AI API + AI Worker + pgvector (sau khi có sách/hợp đồng/quyền)
-F18  Báo cáo + SaaS + Nginx + CI/build/deploy/backup
+                               └── F16  BullMQ + thông báo + hoàn thiện báo cáo BE
+                                      │
+                                      └── F17  AI API + AI Worker + pgvector (CHỈ sau BE)
+                                             │
+                                             └── F18  Báo cáo FE + SaaS + Nginx + CI/build/deploy/backup
 ```
 
 **Một chức năng được coi là code xong khi có đủ:** đường đi dữ liệu; hàm gọi nhau; dữ liệu trả đúng contract; kiểm tra quyền và lỗi; test; lệnh chạy; kết quả xác nhận. Tất cả được thực hiện trên nhánh `dev` hoặc nhánh `feature/...` tạo từ `dev`.
@@ -352,6 +353,7 @@ test('GET /health tra status ok', async () => {
 
 **Tạo code theo chuỗi:**
 
+```text
 backend/src/modules/
 ├── tai-khoan/               # Tài khoản và hồ sơ
 ├── xac-thuc/                # Đăng nhập, phiên, đổi/đặt lại mật khẩu
@@ -409,6 +411,116 @@ backend/src/integrations/
 
 backend/src/services/
 └── ready.service.js         # Kiểm tra trạng thái các dịch vụ phụ thuộc
+```
+
+```text
+ai-service/
+├── pyproject.toml
+├── Dockerfile
+├── .env.example
+├── README.md
+│
+├── app/
+│   ├── __init__.py
+│   ├── main.py
+│   │
+│   ├── core/
+│   │   ├── config.py
+│   │   ├── security.py
+│   │   ├── dependencies.py
+│   │   ├── exceptions.py
+│   │   ├── logging.py
+│   │   └── rate_limit.py
+│   │
+│   ├── api/
+│   │   ├── health.py
+│   │   └── internal/
+│   │       ├── jobs.py
+│   │       ├── search.py
+│   │       ├── recommendations.py
+│   │       ├── chat.py
+│   │       ├── sources.py
+│   │       └── feedback.py
+│   │
+│   ├── schemas/
+│   │   ├── common.py
+│   │   ├── jobs.py
+│   │   ├── search.py
+│   │   ├── recommendations.py
+│   │   ├── chat.py
+│   │   └── sources.py
+│   │
+│   ├── integrations/
+│   │   ├── postgres.py
+│   │   ├── redis.py
+│   │   ├── storage.py
+│   │   └── backend_client.py
+│   │
+│   ├── providers/
+│   │   ├── base.py
+│   │   ├── llm.py
+│   │   └── embeddings.py
+│   │
+│   ├── services/
+│   │   ├── indexing/
+│   │   │   ├── book_indexer.py
+│   │   │   ├── document_indexer.py
+│   │   │   └── chunking.py
+│   │   │
+│   │   ├── retrieval/
+│   │   │   ├── hybrid_search.py
+│   │   │   ├── vector_search.py
+│   │   │   ├── access_filter.py
+│   │   │   └── citations.py
+│   │   │
+│   │   ├── recommendations/
+│   │   │   ├── candidate_generator.py
+│   │   │   ├── ranking.py
+│   │   │   └── explanations.py
+│   │   │
+│   │   ├── assistant/
+│   │   │   ├── chat.py
+│   │   │   ├── context_builder.py
+│   │   │   ├── tool_registry.py
+│   │   │   └── response_validator.py
+│   │   │
+│   │   ├── extraction/
+│   │   │   ├── metadata.py
+│   │   │   ├── ocr.py
+│   │   │   └── classification.py
+│   │   │
+│   │   └── analytics/
+│   │       ├── report_analysis.py
+│   │       └── usage_tracking.py
+│   │
+│   ├── repositories/
+│   │   ├── sources.py
+│   │   ├── chunks.py
+│   │   ├── conversations.py
+│   │   ├── recommendations.py
+│   │   ├── jobs.py
+│   │   └── feedback.py
+│   │
+│   ├── queue/
+│   │   ├── connection.py
+│   │   ├── dispatcher.py
+│   │   └── retry.py
+│   │
+│   ├── workers/
+│   │   ├── runner.py
+│   │   ├── index_book.py
+│   │   ├── index_document.py
+│   │   ├── generate_recommendations.py
+│   │   ├── extract_metadata.py
+│   │   └── cleanup_indexes.py
+│   │
+│   └── prompts/
+│       ├── book_advisor.py
+│       ├── internal_assistant.py
+│       └── report_assistant.py
+```
+
+**Cây AI ở F05 là cấu trúc dự kiến, không phải yêu cầu triển khai Python trong F05. Toàn bộ code `ai-service/` chỉ thực hiện ở F17 sau khi BE hoàn tất.** Khi triển khai F17 mới tạo `ai-service/tests/{unit,integration,evaluations}/` và chỉ thêm file có test thực.
 
 **Hàm cần triển khai trong service:** `taoTaiKhoan`, `dangNhap`, `lamMoiPhien` hoặc luồng phiên tương đương, `dangXuat`, `kiemTraQuyen`, `layPhamViDuLieu`, `kiemTraChiNhanh`. Hash mật khẩu bằng thư viện phù hợp; phiên/cookie có cấu hình bảo mật. `don_vi_id` và `chi_nhanh_id` phải được suy ra từ phiên/quyền đã xác minh, **không tin ID tùy ý trong request của client**.
 
@@ -610,64 +722,190 @@ N. trang danh sách + chi tiết + sửa + integration/E2E
 
 ---
 
-## F16 — Code BullMQ worker, thông báo và báo cáo cơ bản
+## F16 — Code BullMQ worker, thông báo và hoàn thiện báo cáo BE
 
-**Phụ thuộc:** F04, F05 và sự kiện từ F13–F15. **Thứ tự file:** `integrations/redis-client.js → jobs/queues/ → jobs/processors/ → worker.js → tests`.
+**Phụ thuộc:** F04, F05 và sự kiện từ F13–F15. **Thứ tự file:** `integrations/redis-client.js → jobs/queues/ → jobs/processors/ → worker.js → tests`; hoàn thiện `backend/src/modules/bao-cao/` theo thứ tự `validation → repository → service → controller → routes → tests` trước khi chuyển sang F17.
 
-**Hàm:** `xepThongBao`, `guiThongBao`, `nhacHanMuon`, `ghiNhanKetQuaGui`, `taoBaoCaoCoBan`. Job chứa ID nghiệp vụ, không gửi cả dữ liệu nhạy cảm vào Redis; retry/backoff có giới hạn, job id chống trùng theo nghiệp vụ. `backend-worker` khởi chạy bằng image backend nhưng command `node src/worker.js`.
+**Hàm:** `xepThongBao`, `guiThongBao`, `nhacHanMuon`, `ghiNhanKetQuaGui`, `taoBaoCaoCoBan`; bổ sung API báo cáo BE trả dữ liệu bán hàng, doanh thu, tồn kho, mượn/trả và công nợ/cọc theo dữ liệu đã đối soát. Job chứa ID nghiệp vụ, không gửi cả dữ liệu nhạy cảm vào Redis; retry/backoff có giới hạn, job id chống trùng theo nghiệp vụ. `backend-worker` khởi chạy bằng image backend nhưng command `node src/worker.js`.
 
-**Test:** retry không nhân đôi thông báo/giao dịch, worker dừng không làm mất sự kiện gốc, báo cáo có phạm vi tenant/branch và đối soát đúng tiền cọc/hoàn.
+**Test:** retry không nhân đôi thông báo/giao dịch, worker dừng không làm mất sự kiện gốc, báo cáo có phạm vi tenant/branch và đối soát đúng tiền cọc/hoàn; API báo cáo và test BE phải hoàn thành trước F17. Giao diện báo cáo mở rộng ở F18, nhưng nguồn số liệu BE không được để đến sau AI.
 
 ---
 
-## F17 — Code AI API, AI Worker và kết nối backend
+## F17 — Triển khai BookFlow AI sau khi hoàn thiện backend
 
-**Phụ thuộc:** F01, F02, F03, F05 và sách F10. **Thứ tự:**
+**Thời điểm thực hiện:** chỉ bắt đầu F17 khi những phân hệ BE mà AI sử dụng đã có repository/service/API thật, phân quyền, contract và test. Trong giai đoạn đang viết BE, **chỉ giữ cấu trúc và quy trình này làm kế hoạch; chưa đánh dấu AI hoàn thành, chưa tạo hàng loạt file Python rỗng và chưa cho AI xử lý nghiệp vụ thay BE**. Cây `ai-service/` chuẩn nằm trong F05; F17 dưới đây là thứ tự **viết code, đăng ký, kết nối, chạy và kiểm thử** trên chính cây đó.
+
+**Phụ thuộc bắt buộc:** F01–F05, F09–F16; các phần `sach`, `phien-ban-sach`, `tep-tin`, `ton-kho`, `khach-hang`, `gio-hang`, `don-hang`, `ban-hang`, `thanh-toan`, `cong-no`, `tien-coc`, `dat-truoc`, `muon-tra`, `gia-han`, `phi-phat`, `thong-bao` và `bao-cao` mà AI sẽ đọc đã hoàn thiện ở BE. Chức năng AI nào chưa có API nghiệp vụ tương ứng phải để trạng thái **chưa triển khai**, không dùng dữ liệu giả rồi công bố hoàn thành. AI báo cáo chỉ viết sau khi `backend/src/modules/bao-cao/` đã trả số liệu được đối soát.
+
+**Ranh giới bắt buộc:** frontend chỉ gọi Express; Express xác thực người dùng, suy ra đơn vị/chi nhánh từ quyền đã xác minh và quyết định nghiệp vụ; FastAPI chỉ xử lý AI trên dữ liệu được phép. AI API và AI Worker dùng Python/RQ, không tiêu thụ trực tiếp job BullMQ của backend. PostgreSQL là nguồn dữ liệu bền vững; Redis là hàng đợi/cache, MinIO là nơi lưu file. AI không trực tiếp ghi bảng đơn hàng, tồn kho, tiền, cọc hoặc quyền và không chạy SQL tự do do mô hình sinh ra.
+
+### F17.0. Chốt điều kiện bàn giao từ BE sang AI
+
+**FILE phải kiểm tra:** `contracts/openapi/bookflow-api.yaml`, `contracts/openapi/ai-noi-bo-api.yaml`, `database/migrations/`, `backend/src/modules/`, `backend/src/common/`, `backend/src/integrations/`, `backend/src/routes/index.js` và bộ test BE. **THAO TÁC:** đối chiếu code đang chạy với contract, không thay toàn bộ BE để phục vụ AI.
+
+1. Xác nhận tất cả ID nghiệp vụ dùng đúng kiểu đã migrate (đặc biệt `don_vi_id`, `chi_nhanh_id`, `dau_sach_id`, `phien_ban_sach_id`); thống nhất JSON `camelCase` hay `snake_case` cho từng ranh giới và viết chuyển đổi tại client nếu cần. Python dùng `snake_case` nội bộ nhưng không được tự suy đoán tên trường JSON của BE.
+2. Liệt kê các API BE chỉ đọc cần cho AI: tìm sách/phiên bản, trạng thái kinh doanh, giá hiện hành, tồn và khả năng cho mượn theo chi nhánh, hồ sơ và đơn của chính người dùng, báo cáo theo quyền. Không để Python truy vấn bảng nghiệp vụ thay cho service BE khi nghiệp vụ cần kiểm tra quyền/trạng thái hiện hành.
+3. Chốt quyền AI công khai, AI người dùng và AI nội bộ; kiểm tra quyền truy cập nguồn tài liệu, quyền dùng lịch sử để cá nhân hóa, thời hạn lưu hội thoại và chính sách xóa dữ liệu. Không lấy `don_vi_id`/`chi_nhanh_id` tùy ý từ request của frontend.
+4. Chốt giới hạn nhà cung cấp AI: mô hình ngôn ngữ, mô hình embedding, kích thước vector, timeout, số lần retry, ngân sách/giới hạn sử dụng và trường dữ liệu được phép gửi ra ngoài. Các thông số này đi vào cấu hình, không hard-code trong service.
+5. Chốt sự kiện đồng bộ: sách/phiên bản/tài liệu được tạo, sửa, ẩn, chuyển quyền hoặc xóa; BE ghi sự kiện bền vững trong giao dịch nghiệp vụ, backend-worker đẩy yêu cầu lập chỉ mục/xóa chỉ mục qua AI client. Worker AI có thể chạy lại an toàn.
+
+**Kết quả mong đợi:** có danh sách API, quyền, bảng/migration và luồng sự kiện được đối chiếu với code BE; mọi chức năng AI đều có nguồn dữ liệu thật và chủ sở hữu nghiệp vụ rõ ràng. **Lỗi phải thử:** khác tenant/chi nhánh, quyền vừa bị thu hồi, sách vừa ngừng kinh doanh, BE trả lỗi hoặc timeout, dữ liệu thiếu nguồn.
+
+### F17.1. Hoàn thiện hợp đồng nội bộ và migration AI trước khi viết service
+
+**FILE — THAO TÁC:** `contracts/openapi/ai-noi-bo-api.yaml` — **THAY/HOÀN THIỆN** các schema/endpoint AI đã có; `contracts/openapi/bookflow-api.yaml` — **THÊM** API FE → BE khi thực hiện từng tính năng; `database/migrations/<so_tiep_theo>_hoan-thien-ai.sql` — **TẠO MỚI** migration tiếp theo chưa sử dụng, không tự sửa migration đã chạy trong môi trường có dữ liệu.
+
+- Contract nội bộ phải mô tả `health/ready`, tạo/lấy trạng thái job, đồng bộ/thu hồi nguồn, tìm kiếm, gợi ý, hội thoại và phản hồi; mỗi endpoint có request ID, schema dữ liệu, timeout, lỗi, phiên bản API và yêu cầu xác thực dịch vụ. URL chính xác được chốt **một lần** trong OpenAPI rồi BE/Python cùng triển khai, không để hai phía tự đặt route.
+- Bảng AI hiện có cần được đối chiếu thực tế với migration. Nếu chỉ lưu `ma_vector` thì bổ sung nơi lưu embedding pgvector hoặc bảng embedding riêng, `model`, `model_version`, `embedding_dimensions`, `source_version`, checksum, `don_vi_id`, phạm vi truy cập và trạng thái nguồn. Kích thước `vector(n)` và index phải khớp mô hình embedding đã chọn; không mặc định mọi nhà cung cấp dùng cùng kích thước.
+- Bổ sung lưu job bền vững: ID, loại, đơn vị, nguồn, idempotency key, trạng thái `queued/running/succeeded/failed/cancelled`, số lần chạy, lỗi có kiểm soát, thời gian tạo/cập nhật. Redis/RQ giữ dữ liệu thực thi, PostgreSQL giữ trạng thái kiểm tra và xử lý lại; không ghi toàn bộ nội dung nhạy cảm vào payload queue.
+- Ràng buộc ID/khóa ngoại và phạm vi đơn vị phải thống nhất với bảng BE. Thêm index cho tìm kiếm nguồn/đoạn theo tenant, phiên bản và trạng thái; có phương án xóa vector khi nguồn bị xóa hoặc thu hồi quyền.
+- Migration chạy bằng runner F03; kiểm tra trên DB sạch, DB đã có migration trước đó, chạy lại và rollback khi SQL lỗi. Nếu một chức năng cần bảng mới, thêm migration trước khi viết repository tương ứng.
+
+**Kết quả mong đợi:** hợp đồng AI parse được, migration có lịch sử và chạy lại an toàn, dữ liệu AI có thể truy xuất theo tenant/quyền; không có kiểu ID lệch BE và không có job mất lịch sử khi Redis khởi động lại.
+
+### F17.2. Viết nền FastAPI và tích hợp hạ tầng theo đúng cây đã chốt
+
+**Thứ tự FILE → chức năng → nơi gọi:**
+
+| Thứ tự | FILE | CODE/hàm chính và kết nối |
+|---|---|---|
+| 1 | `ai-service/pyproject.toml` | Khai báo Python và dependency thực dùng: FastAPI/Uvicorn, Pydantic Settings, driver PostgreSQL + pgvector, Redis/RQ, HTTP client và dependency test; chỉ cài OCR/đọc PDF khi làm F17.8. Khai báo nhóm `dev` cho test/lint. |
+| 2 | `ai-service/.env.example` | Chỉ lưu **tên biến và giá trị mẫu không phải secret**: database, Redis, backend internal URL, token dịch vụ, cấu hình mô hình, dimension, timeout, giới hạn request; `.env` thật không commit. |
+| 3 | `ai-service/app/core/config.py` | Đọc/validate môi trường, từ chối cấu hình thiếu hoặc dimension không hợp lệ; che secret trong log. |
+| 4 | `app/core/exceptions.py`, `logging.py` | Chuẩn hóa mã lỗi, HTTP status, request ID, structured log; không log mật khẩu, token, prompt nhạy cảm hoặc nội dung file private. |
+| 5 | `app/core/security.py`, `dependencies.py`, `rate_limit.py` | Kiểm tra danh tính dịch vụ BE, ngữ cảnh truy cập đã ký/xác minh, quyền của endpoint, hạn mức theo đơn vị/tác vụ; từ chối request sai chữ ký/hết hạn. Không dùng header tenant tùy ý làm bằng chứng quyền. |
+| 6 | `app/schemas/common.py`, `jobs.py`, `search.py`, `recommendations.py`, `chat.py`, `sources.py` | Pydantic request/response theo OpenAPI, kiểu ID, giới hạn độ dài, pagination, trạng thái job và cấu trúc trích dẫn. Schema phản hồi chưa có file riêng được khai báo có chủ đích tại `common.py` hoặc thêm file khi thực sự cần. |
+| 7 | `app/integrations/postgres.py`, `redis.py`, `storage.py`, `backend_client.py` | Pool/transaction truy cập **bảng AI**, kết nối RQ, lấy tệp được cấp quyền qua storage, gọi API BE chỉ đọc bằng thông tin dịch vụ đã cấu hình; đóng kết nối đúng vòng đời. |
+| 8 | `app/api/health.py`, `app/main.py` | Khởi tạo FastAPI, đăng ký exception handler và router, `GET /health` cho liveness; `/ready` chỉ báo sẵn sàng khi thành phần thiết yếu chạy. Không gọi LLM cho health. |
+| 9 | `ai-service/README.md` | Ghi yêu cầu môi trường, đường dẫn contract, quy trình migrate, lệnh chạy API/worker/test, biến cấu hình, giới hạn quyền và xử lý sự cố. |
+
+**Kết nối:** `main.py` đăng ký router công khai cho health và router `api/internal/` có dependency xác thực dịch vụ; `backend_client.py` chỉ gọi endpoint BE đã chốt; AI API không được frontend gọi trực tiếp. **Test:** API sống nhưng DB lỗi thì `/health` vẫn phản ánh liveness, `/ready` phản ánh dependency; sai token nhận `401/403` theo contract; log không chứa secret; connection được đóng khi dừng ứng dụng.
+
+### F17.3. Viết lớp mô hình AI có thể thay nhà cung cấp
+
+**FILE theo thứ tự:** `app/providers/base.py → embeddings.py → llm.py`. `base.py` định nghĩa giao diện tạo embedding và sinh phản hồi/structured output; `embeddings.py` bảo đảm dimension/model/version nhất quán giữa lúc lập chỉ mục và lúc tìm; `llm.py` chịu trách nhiệm timeout, giới hạn token, xử lý rate limit, retry có giới hạn và chuẩn hóa lỗi. Khi đổi nhà cung cấp hoặc dùng mô hình nội bộ, `services/` không phải thay thuật toán chính.
+
+**Phụ thuộc:** F17.1–F17.2. **Kết nối:** nhận cấu hình từ `core/config.py`, được gọi bởi indexing, retrieval, explanations, assistant và extraction. **Test:** giả lập provider bằng fake/mock; sai dimension bị chặn; timeout không treo request BE; retry không gửi lặp tác vụ có tác dụng phụ; không đưa tài liệu private sang mô hình bên ngoài khi chính sách không cho phép.
+
+### F17.4. Viết queue, repository và luồng đồng bộ nguồn trước khi bật tìm kiếm
+
+**Thứ tự FILE:** `app/repositories/jobs.py → sources.py → chunks.py → app/queue/connection.py → dispatcher.py → retry.py → app/api/internal/jobs.py → sources.py → app/workers/runner.py → index_book.py → index_document.py → cleanup_indexes.py → app/services/indexing/chunking.py → book_indexer.py → document_indexer.py`.
+
+**Luồng bắt buộc:**
 
 ```text
-ai-service/requirements.txt
-  → app/config.py
-  → app/main.py + app/api/kiem_tra.py
-  → app/core/security.py
-  → app/schemas/*.py
-  → app/llm/client.py
-  → app/embeddings/embedding_service.py
-  → app/retrieval/vector_search.py + permission_filter.py
-  → app/services/tu_van_sach.py
-  → app/workers/queue.py + worker.py + tasks/lap_chi_muc_sach.py
-  → backend/src/integrations/ai-client.js
-  → backend/src/modules/ai/ + FE trang AI
-  → tests FastAPI/RQ/contract/RAG permissions
+BE sach/tep-tin/phan-quyen thay đổi dữ liệu hoặc quyền
+  → BE transaction lưu dữ liệu + sự kiện đồng bộ bền vững
+  → backend-worker đọc sự kiện, gọi backend/src/integrations/ai-client.js
+  → FastAPI xác thực dịch vụ, kiểm tra scope và idempotency key
+  → repositories/jobs.py lưu job → queue/dispatcher.py đưa ID vào RQ
+  → workers/runner.py nhận job → workers/index_book.py hoặc index_document.py
+  → lấy snapshot/metadata nguồn đã cấp quyền từ BE/storage
+  → chunking.py chuẩn hóa/chia đoạn → providers/embeddings.py tạo vector
+  → repositories/sources.py + chunks.py cập nhật theo source_version
+  → repositories/jobs.py ghi succeeded/failed và thông tin kiểm tra
 ```
 
-**Mẫu code FastAPI tối thiểu** — `ai-service/app/main.py`:
+**Quy tắc code:** job chỉ mang ID nguồn, đơn vị và version đã xác minh; cập nhật index bằng upsert theo khóa duy nhất nguồn/phiên bản/đoạn, không tạo đoạn trùng khi retry; bỏ qua job cũ hơn version hiện tại; khi xóa, ẩn hoặc thu hồi quyền, phải xóa/khóa truy xuất index và cache liên quan. Các thao tác lưu vector theo tenant và trạng thái nguồn, không tạo vector từ văn bản không có quyền xử lý. `cleanup_indexes.py` dọn chỉ mục mồ côi và dữ liệu hết hạn theo chính sách, không tự xóa tệp gốc của BE.
 
-```python
-from fastapi import FastAPI
+**Test:** enqueue hai lần một sự kiện không tạo hai bộ vector; worker lỗi giữa chừng có thể retry; dữ liệu đang đổi không bị job cũ ghi đè; thu hồi quyền có hiệu lực cả trên vector và cache; Redis lỗi không làm mất sự kiện gốc; AI Worker không lấy BullMQ job.
 
-app = FastAPI(title="BookFlow AI Internal API")
+### F17.5. Chức năng 1 — Tìm kiếm sách thông minh
 
-@app.get("/health")
-def kiem_tra_suc_khoe():
-    return {"status": "ok", "service": "ai-api"}
+**FILE:** `app/services/retrieval/vector_search.py → access_filter.py → hybrid_search.py → citations.py → app/api/internal/search.py`; dùng lại `schemas/search.py`, `repositories/chunks.py`, `providers/embeddings.py` và `integrations/backend_client.py`.
+
+**Quy trình:** FE gửi câu hỏi/bộ lọc → BE xác định đơn vị và quyền xem sách → AI phân tích câu hỏi → tìm full-text/ISBN/tác giả/thể loại và vector theo cùng tenant → kết hợp/xếp hạng → lọc nguồn/quyền ở tầng truy vấn và kiểm tra lại trước khi trả → BE lấy giá, phiên bản đang bán, tồn và khả năng mượn hiện hành → FE hiển thị sách, lý do gợi ý và link chi tiết. Không dùng embedding làm nguồn giá/tồn. Khi AI timeout, BE dùng tìm kiếm thường bằng PostgreSQL nếu chức năng này đã có.
+
+**Test:** câu hỏi tự nhiên, ISBN chính xác, không có kết quả, từ khóa tiếng Việt, sai tenant, file private, chi nhánh khác, sách ngừng bán, giá/tồn đổi trong lúc tìm. **Xong khi:** kết quả chỉ chứa sách được phép xem, chỉ trích dẫn nguồn tồn tại và dữ liệu động được BE xác minh.
+
+### F17.6. Chức năng 2 — Gợi ý sách
+
+**FILE:** `app/services/recommendations/candidate_generator.py → ranking.py → explanations.py → app/repositories/recommendations.py → app/workers/generate_recommendations.py → app/api/internal/recommendations.py`; dùng `schemas/recommendations.py`.
+
+**Quy trình:** chọn ngữ cảnh (sách đang xem, thể loại, giỏ hàng hoặc lịch sử được phép sử dụng) → lấy ứng viên theo nội dung/quan hệ/embedding → loại sách không được xem, không phù hợp hình thức mua/mượn hoặc đã ngừng kinh doanh → xếp hạng có thể giải thích → BE xác nhận trạng thái thực tế → trả danh sách. Khách ẩn danh dùng dữ liệu công khai/ngữ cảnh phiên; cá nhân hóa chỉ sử dụng dữ liệu theo chính sách và quyền tương ứng. Không gọi LLM cho mọi lượt nếu ranking bằng dữ liệu đã đủ; `explanations.py` chỉ giải thích theo bằng chứng có thật.
+
+**Test:** người chưa đăng nhập, người có/không có lịch sử, sách hết hàng, nhiều phiên bản, tenant khác, xóa lịch sử, kết quả trống và retry job tạo gợi ý. AI chỉ gợi ý, không tự thêm giỏ/đặt trước/thanh toán.
+
+### F17.7. Chức năng 3 và 4 — Chatbot tư vấn khách hàng và trợ lý nội bộ
+
+**FILE theo thứ tự:** `app/prompts/book_advisor.py`, `internal_assistant.py` → `app/services/assistant/tool_registry.py → context_builder.py → response_validator.py → chat.py` → `app/repositories/conversations.py → app/api/internal/chat.py`; dùng `schemas/chat.py`, `services/retrieval/` và `integrations/backend_client.py`.
+
+**Quy trình chat khách:** BE xác định người dùng/phiên và phạm vi công khai → tải ngữ cảnh hội thoại còn hiệu lực → lấy thông tin sách được phép xem → khi hỏi giá/tồn/đơn cá nhân thì gọi công cụ BE phù hợp (đơn cá nhân bắt buộc xác thực/chủ sở hữu) → LLM trả câu trả lời → `response_validator.py` kiểm chứng format, nguồn và phạm vi → lưu hội thoại theo chính sách → BE trả FE. Trợ lý phải thông báo khi không có nguồn xác minh, không tự tạo ISBN, giá hay trạng thái đơn.
+
+**Quy trình trợ lý nội bộ:** BE xác thực nhân viên/admin, quyền chức năng và phạm vi chi nhánh → `tool_registry.py` chỉ cho gọi các công cụ chỉ đọc đã đăng ký như tìm sách, xem tồn, xem đơn có quyền và báo cáo → mỗi tool gọi service BE kiểm tra quyền một lần nữa → AI tổng hợp câu trả lời kèm nguồn/số liệu. Không thực thi SQL do LLM tạo; prompt/tài liệu từ nguồn truy xuất là dữ liệu không đáng tin, không được phép thay đổi system instruction hoặc gọi tool vượt quyền. Chức năng ghi nghiệp vụ trong tương lai phải có API BE và bước xác nhận riêng, **không nằm trong F17**.
+
+**Test:** hội thoại nhiều lượt, tài khoản khác không xem hội thoại, yêu cầu vượt chi nhánh, prompt injection trong tài liệu, tool bị từ chối, BE/LLM timeout, không có nguồn, phản hồi chứa giá hoặc số liệu không khớp nguồn. **Xong khi:** cả hai loại trợ lý dùng chung hạ tầng nhưng không dùng chung quyền; dữ liệu private không đi vào câu trả lời công khai.
+
+### F17.8. Chức năng 5 và 6 — Hỗ trợ thông tin sách, đọc tài liệu và OCR
+
+**FILE:** `app/services/extraction/metadata.py → classification.py → ocr.py` (chỉ khi có nhu cầu OCR thực), kết hợp `app/services/indexing/document_indexer.py`, `app/workers/extract_metadata.py`, `app/api/internal/sources.py` và `app/integrations/storage.py`.
+
+**Quy trình:** BE `tep-tin/` tiếp nhận/kiểm tra file và quyền → BE cấp nguồn hoặc URL đọc có thời hạn cho AI → AI trích xuất văn bản từ định dạng hỗ trợ, chỉ OCR nếu cần → chuẩn hóa/chia đoạn và tạo embedding theo quyền → đề xuất từ khóa, thể loại, metadata hoặc phát hiện khả năng trùng → BE hiển thị bản nháp cho nhân viên duyệt → service sở hữu dữ liệu kiểm tra rồi mới lưu. Không tự ghi đè ISBN, tác giả, nhà xuất bản; không lập chỉ mục toàn văn sách hay gửi file ra nhà cung cấp khi chưa có quyền xử lý nội dung.
+
+**Test:** sai MIME, file quá lớn, PDF/ảnh lỗi, file private khác tenant, nguồn bị thu hồi, nội dung có prompt injection, OCR trả sai, metadata thiếu và nhân viên từ chối đề xuất. **Xong khi:** dữ liệu AI là gợi ý có nguồn, chưa duyệt không trở thành dữ liệu nghiệp vụ chính thức.
+
+### F17.9. Chức năng 7 — AI phân tích báo cáo
+
+**FILE:** `app/services/analytics/report_analysis.py → usage_tracking.py`, `app/prompts/report_assistant.py`, dùng `app/services/assistant/chat.py` và API báo cáo BE. Chỉ thực hiện sau khi `backend/src/modules/bao-cao/` đã hoàn tất và trả đúng số liệu được đối soát.
+
+**Quy trình:** BE xác thực người hỏi → BE `bao-cao/` tính toán và trả bộ dữ liệu theo kỳ/đơn vị/chi nhánh đã kiểm quyền → AI nhận **số liệu đã chốt**, phân tích biến động và tạo diễn giải → `response_validator.py` kiểm tra nguồn, kỳ báo cáo và các con số được trích → BE trả kết quả. AI không tự tính lại tiền bằng văn bản, không tự truy vấn chứng từ thô vượt quyền và không dùng chỉ số thiếu dữ liệu để khẳng định nguyên nhân.
+
+**Test:** kỳ báo cáo rỗng, sai múi giờ, hoàn tiền và cọc, quyền chỉ một chi nhánh, số liệu BE thay đổi, báo cáo chưa sẵn sàng, LLM tự tạo con số. **Xong khi:** mỗi nhận xét định lượng có dữ liệu đầu vào đối chiếu được.
+
+### F17.10. Viết đầu nối backend và API AI theo format chung
+
+**FILE — THAO TÁC:** `backend/src/integrations/ai-client.js` — **TẠO MỚI**; `backend/src/modules/ai/ai.validation.js`, `ai.repository.js`, `ai.service.js`, `ai.controller.js`, `ai.routes.js` — **TẠO MỚI** khi tới lượt; `backend/src/routes/index.js` — **THÊM** đăng ký router AI đúng vị trí; `backend/src/services/ready.service.js` — **CHỈ SỬA NẾU** hợp đồng readiness yêu cầu kiểm tra AI.
+
+- `ai-client.js`: gọi FastAPI bằng địa chỉ nội bộ, token dịch vụ, request ID, timeout và schema đã chốt; không expose token cho browser, không retry vô hạn request chat hoặc thao tác không idempotent.
+- `ai.validation.js`: kiểm tra câu hỏi, bộ lọc, ID, phân trang, hội thoại và giới hạn input theo API BE. `ai.repository.js`: chỉ thao tác bảng AI BE sở hữu nếu cần cấu hình/hội thoại/nhật ký; không viết lại repository Python hoặc SQL nghiệp vụ.
+- `ai.service.js`: xác thực, lấy tenant/branch từ quyền, kiểm tra quyền cá nhân hóa/tài liệu, gọi `ai-client.js`, bổ sung giá/tồn/đơn/báo cáo qua service BE và có fallback khi AI gián đoạn. `ai.controller.js` trả response/lỗi theo contract chung; `ai.routes.js` gắn middleware phù hợp cho public/customer/staff/admin.
+- FE dùng API client chung để gọi `/api/...` của backend, không gọi thẳng FastAPI. Từng màn hình AI chỉ render khả năng đã có API thật: tìm kiếm, gợi ý, chat, lịch sử/feedback và trang quản trị job khi quyền cho phép.
+- Đồng bộ nguồn được nối từ sự kiện nghiệp vụ BE qua backend-worker/outbox; **không** gọi AI đồng bộ bên trong transaction bán hàng để tránh AI lỗi làm hỏng nghiệp vụ chính.
+
+**Test:** public xem dữ liệu công khai; người dùng chỉ xem dữ liệu của mình; nhân viên chỉ xem chi nhánh được cấp; API bị timeout trả lỗi/fallback phù hợp; một request BE sinh đúng một request AI và có request ID truy vết; AI ngừng hoạt động không chặn bán, mượn hay thanh toán.
+
+### F17.11. Feedback, vận hành, kiểm thử và điều kiện kết thúc
+
+**FILE:** `app/api/internal/feedback.py`, `app/repositories/feedback.py`, `app/services/analytics/usage_tracking.py`, `ai-service/tests/unit/`, `tests/integration/`, `tests/evaluations/`, `ai-service/Dockerfile` và các cấu hình Compose **chỉ bổ sung khi API/Worker thật đã chạy**. Feedback cần gắn câu trả lời/kết quả và phạm vi người dùng; chặn ghi feedback cho hội thoại người khác. Usage tracking lưu loại tác vụ, độ trễ, trạng thái và mức tiêu thụ theo chính sách, không log bí mật hoặc toàn bộ tài liệu private.
+
+**Lệnh kiểm tra dự kiến sau khi đã viết đầy đủ dependency và file tương ứng** (không coi là bằng chứng đã chạy ở thời điểm lập kế hoạch):
+
+```bash
+# Trong ai-service/: cài dependency đã khai báo trong pyproject.toml
+python -m pip install -e '.[dev]'
+# Chạy API và worker ở hai terminal riêng, với .env cục bộ hợp lệ
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8001
+python -m app.workers.runner
+# Chạy kiểm thử Python
+python -m pytest tests/unit tests/integration tests/evaluations
+# Kiểm tra endpoint health theo contract thực tế
+curl -i http://127.0.0.1:8001/health
+# Trong backend/: chỉ chạy lệnh test đã khai báo và tồn tại trong package.json
+npm test
+# Khi Dockerfile đa stage đã viết đúng target api/worker
+# docker build -f ai-service/Dockerfile --target api -t bookflow-ai-api .
+# docker build -f ai-service/Dockerfile --target worker -t bookflow-ai-worker .
 ```
 
-**Hàm cần viết:** `kiemTraYeuCauNoiBo`, `taoEmbedding`, `lapChiMucSach`, `timSachVector`, `locNguonTheoQuyen`, `tuVanSach`, `taoJobAi`, `layTrangThaiJob`. Python dùng RQ queue riêng, không đọc trực tiếp BullMQ job. Mọi truy vấn vector lọc tenant và quyền; metadata sách thay đổi phải có cách cập nhật/xóa index. AI chỉ đề xuất, backend quyết định bán/kho/tiền.
+**Test bắt buộc để đóng F17:** unit cho schema/provider/ranking/chunking; integration cho PostgreSQL/pgvector/Redis/RQ/BE client; contract test BE ↔ Python; đánh giá RAG cho độ đúng nguồn, trích dẫn, không bịa giá/tồn; thử tenant/branch isolation; thu hồi quyền/file private; prompt injection; lỗi provider/BE/Redis; timeout; retry/idempotency; thay đổi/xóa nguồn; giới hạn chi phí; không làm chậm nghiệp vụ BE khi AI lỗi. Ghi lại **lệnh đã thực chạy và kết quả thực**, không đánh dấu pass trước khi kiểm tra.
 
-**Test:** `GET /health`; backend xác thực gọi nội bộ; tenant B không có dữ liệu A; file private không xuất hiện trong RAG; job retry không tạo vector trùng; timeout nhà cung cấp AI không chặn bán/mượn. Sau khi có code Python mới viết `Dockerfile.api` và `Dockerfile.worker`, kiểm tra build riêng từng image.
+**Kết thúc F17:** `ai-api` và `ai-worker` chạy độc lập; BE là cổng duy nhất FE gọi; có tìm kiếm và gợi ý sách trên dữ liệu thật, chatbot khách/trợ lý nội bộ có kiểm quyền, OCR/metadata chỉ theo quyền và bước duyệt, phân tích báo cáo dựa trên số liệu BE; index cập nhật/xóa theo sự kiện; job retry an toàn; có test và tài liệu vận hành. Có thể phát hành từng chức năng bằng feature flag, không cần chờ tất cả bảy chức năng cùng bật.
+
+**Thứ tự mở tính năng sau BE:** nền tảng AI + đồng bộ/index → tìm kiếm sách → gợi ý sách → chatbot khách → trợ lý nội bộ → hỗ trợ metadata/OCR → AI báo cáo. Các nhánh sau chỉ mở khi đã có nguồn, quyền, API và test tương ứng; **phần AI là giai đoạn sau BE, không phải công việc đang làm song song trong giai đoạn BE hiện tại**.
 
 ---
 
-## F18 — Code báo cáo/SaaS, hoàn thiện build và CI triển khai
+## F18 — Hoàn thiện giao diện báo cáo/SaaS, build và CI triển khai
 
 **Phụ thuộc:** các module đã hoạt động. Chia F18 thành các nhánh riêng, không gom thành một lần triển khai lớn.
 
 | Nhánh | Viết file/code | Test hoàn thành |
 |---|---|---|
-| Báo cáo | `backend/src/modules/bao-cao/` repository/service/controller/route + FE báo cáo | Đúng tenant, mốc giờ, số liệu hoàn/cọc |
+| Báo cáo FE | FE báo cáo gọi API `backend/src/modules/bao-cao/` đã hoàn thiện ở F16; tối ưu truy vấn và giao diện khi cần | Đúng tenant, mốc giờ, số liệu hoàn/cọc; không tính lại số liệu ở FE/AI |
 | SaaS | `backend/src/modules/saas/` gói/quyền/hạn mức/thuê bao + FE `super-admin` | Đơn vị hết hạn không ảnh hưởng đơn vị khác |
 | Nginx | `infrastructure/nginx/nginx.conf`, templates, `compose.production.yaml` | Chỉ Nginx public; FE/API proxy đúng |
-| Docker | `frontend/Dockerfile`, `backend/Dockerfile`, `ai-service/Dockerfile.api`, `Dockerfile.worker` | Bốn image build riêng; `backend-worker` tái sử dụng image BE |
+| Docker | `frontend/Dockerfile`, `backend/Dockerfile`, `ai-service/Dockerfile` có target `api`/`worker` | Bốn image build riêng; `backend-worker` tái sử dụng image BE |
 | Build scripts | `scripts/build/*.sh`, `scripts/deploy/*.sh`, root `package.json` | Mỗi npm script gọi được file thực tồn tại |
 | CI | `.github/workflows/test-*.yml`, `build-images.yml`, `deploy-*.yml` | Test/lint/contract/migration/build ảnh hưởng đạt |
 | Backup | `infrastructure/backup/`, `scripts/backup/` | Khôi phục được PostgreSQL và file MinIO bằng bản thử |
@@ -727,5 +965,8 @@ FE test + E2E → cập nhật tài liệu → commit/PR vào dev
 - [ ] F06: frontend render HTML thật và gọi BE qua API client.
 - [ ] F07–F08: icon/form dùng chung có trang demo kiểm thử được.
 - [ ] F09–F10: upload ảnh và thêm/xem sách là lát cắt đầu tiên chạy end-to-end.
+- [ ] F11–F16: hoàn thiện nghiệp vụ BE, worker, thông báo và API báo cáo có test; chưa triển khai AI khi dữ liệu/quyền nguồn chưa sẵn sàng.
+- [ ] F17: sau BE, chốt contract + migration AI, viết FastAPI/RQ và backend AI client theo thứ tự, triển khai bảy chức năng, chạy test quyền/tenant/contract/RAG.
+- [ ] F18: hoàn thiện FE báo cáo, Docker/CI, build và deploy khi các dịch vụ thực đã chạy.
 
 **Trạng thái:** đây là quy trình và code mẫu để triển khai, không khẳng định bất kỳ file/code nào ở trên đã được tạo trong GitHub repository của m. Khi làm thật phải ghi lại lệnh kiểm tra đã chạy và kết quả tương ứng.

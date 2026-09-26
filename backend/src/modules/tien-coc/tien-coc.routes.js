@@ -1,0 +1,17 @@
+const { Router } = require('express');
+const { authenticate } = require('../../common/middlewares/authenticate.js');
+const { tenantScope } = require('../../common/middlewares/tenant-scope.js');
+const { authorize } = require('../../common/middlewares/authorize.js');
+const c = require('./tien-coc.controller.js');
+const router = Router();
+router.use(authenticate,tenantScope);
+router.get('/',authorize('deposits.read'),c.xuLy('danhSach'));
+router.post('/',authorize('deposits.manage'),c.xuLy('tao',201));
+router.get('/:id',authorize('deposits.read'),c.xuLy('chiTiet'));
+router.post('/:id/thu',authorize('deposits.settle'),c.xuLy('thu',201));
+router.post('/:id/giu',authorize('deposits.manage'),c.xuLy('giu'));
+router.post('/:id/giai-toa',authorize('deposits.manage'),c.xuLy('giaiToa'));
+router.post('/:id/khau-tru',authorize('deposits.settle'),c.xuLy('khauTru'));
+router.post('/:id/hoan',authorize('deposits.settle'),c.xuLy('yeuCauHoan',201));
+router.post('/:id/huy',authorize('deposits.manage'),c.xuLy('huy'));
+module.exports = router;

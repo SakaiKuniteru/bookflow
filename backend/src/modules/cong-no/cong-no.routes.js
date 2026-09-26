@@ -1,0 +1,14 @@
+const { Router } = require('express');
+const { authenticate } = require('../../common/middlewares/authenticate.js');
+const { tenantScope } = require('../../common/middlewares/tenant-scope.js');
+const { authorize } = require('../../common/middlewares/authorize.js');
+const c = require('./cong-no.controller.js');
+const router = Router();
+router.use(authenticate,tenantScope);
+router.get('/',authorize('debts.read'),c.xuLy('danhSach'));
+router.post('/',authorize('debts.manage'),c.xuLy('tao',201));
+router.post('/cap-nhat-qua-han',authorize('debts.manage'),c.xuLy('capNhatQuaHan'));
+router.get('/:id',authorize('debts.read'),c.xuLy('chiTiet'));
+router.post('/:id/dieu-chinh',authorize('debts.manage'),c.xuLy('dieuChinh'));
+router.post('/:id/thanh-toan',authorize('debts.settle'),c.xuLy('thanhToan',201));
+module.exports = router;
