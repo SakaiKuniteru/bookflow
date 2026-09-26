@@ -1,0 +1,11 @@
+const { Router } = require('express');
+const { authenticate } = require('../../common/middlewares/authenticate.js');
+const { tenantScope } = require('../../common/middlewares/tenant-scope.js');
+const { authorize } = require('../../common/middlewares/authorize.js');
+const controller = require('./ton-kho.controller.js');
+const router = Router();
+router.use(authenticate, tenantScope);
+router.get('/', authorize('books.read'), controller.danhSach);
+router.get('/tong-hop', authorize('books.read'), controller.tongHop);
+router.get('/lich-su', authorize('books.read'), controller.lichSu);
+module.exports = router;

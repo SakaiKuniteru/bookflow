@@ -1,0 +1,16 @@
+const { Router } = require('express');
+const { authenticate } = require('../../common/middlewares/authenticate.js');
+const { tenantScope } = require('../../common/middlewares/tenant-scope.js');
+const { authorize } = require('../../common/middlewares/authorize.js');
+const controller = require('./chuyen-kho.controller.js');
+const router = Router();
+router.use(authenticate, tenantScope);
+router.get('/', authorize('books.read'), controller.xuLy('danhSach'));
+router.post('/', authorize('books.create'), controller.xuLy('tao', 201));
+router.get('/:phieuId', authorize('books.read'), controller.xuLy('chiTiet'));
+router.post('/:phieuId/chi-tiet', authorize('books.create'), controller.xuLy('themDong', 201));
+router.delete('/:phieuId/chi-tiet/:dongId', authorize('books.create'), controller.xuLy('xoaDong'));
+router.post('/:phieuId/xuat', authorize('books.create'), controller.xuLy('xuat'));
+router.post('/:phieuId/nhan', authorize('books.create'), controller.xuLy('nhan'));
+router.post('/:phieuId/huy', authorize('books.create'), controller.xuLy('huy'));
+module.exports = router;

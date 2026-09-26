@@ -12,6 +12,10 @@ const phienBanSachRouter = require('../modules/phien-ban-sach/phien-ban-sach.rou
 const sachRouter = require('../modules/sach/sach.routes.js');
 const nhaCungCapRouter = require('../modules/nha-cung-cap/nha-cung-cap.routes.js');
 const khoRouter = require('../modules/kho/kho.routes.js');
+const nhapKhoRouter = require('../modules/nhap-kho/nhap-kho.routes.js');
+const tonKhoRouter = require('../modules/ton-kho/ton-kho.routes.js');
+const chuyenKhoRouter = require('../modules/chuyen-kho/chuyen-kho.routes.js');
+const kiemKhoRouter = require('../modules/kiem-kho/kiem-kho.routes.js');
 
 const apiRouter = Router();
 
@@ -28,5 +32,9 @@ apiRouter.use('/phien-ban-sach', phienBanSachRouter);
 apiRouter.use('/sach', sachRouter);
 apiRouter.use('/nha-cung-cap', nhaCungCapRouter);
 apiRouter.use('/kho', khoRouter);
+apiRouter.use('/nhap-kho', nhapKhoRouter);
+apiRouter.use('/ton-kho', tonKhoRouter);
+apiRouter.use('/chuyen-kho', chuyenKhoRouter);
+apiRouter.use('/kiem-kho', kiemKhoRouter);
 
 module.exports = apiRouter;
