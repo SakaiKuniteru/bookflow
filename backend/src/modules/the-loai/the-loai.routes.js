@@ -1,0 +1,14 @@
+const { Router } = require('express');
+const { authenticate } = require('../../common/middlewares/authenticate.js');
+const { authorize } = require('../../common/middlewares/authorize.js');
+const controller = require('./the-loai.controller.js');
+const router = Router();
+router.use(authenticate);
+router.get('/', authorize('books.read'), controller.danhSach);
+router.get('/cay', authorize('books.read'), controller.cayTheLoai);
+router.get('/:theLoaiId', authorize('books.read'), controller.chiTiet);
+router.post('/', authorize('books.create'), controller.taoTheLoai);
+router.patch('/:theLoaiId', authorize('books.create'), controller.suaTheLoai);
+router.patch('/:theLoaiId/trang-thai', authorize('books.create'), controller.doiTrangThai);
+router.delete('/:theLoaiId', authorize('books.create'), controller.xoaTheLoai);
+module.exports = router;

@@ -1,0 +1,17 @@
+const { Router } = require('express');
+const { authenticate } = require('../../common/middlewares/authenticate.js');
+const { authorize } = require('../../common/middlewares/authorize.js');
+const controller = require('./tac-gia.controller.js');
+const router = Router();
+router.use(authenticate);
+router.get('/', authorize('books.read'), controller.danhSach);
+router.post('/', authorize('books.create'), controller.taoTacGia);
+router.get('/:tacGiaId', authorize('books.read'), controller.chiTiet);
+router.patch('/:tacGiaId', authorize('books.create'), controller.suaTacGia);
+router.patch('/:tacGiaId/trang-thai', authorize('books.create'), controller.doiTrangThai);
+router.delete('/:tacGiaId', authorize('books.create'), controller.xoaTacGia);
+router.get('/:tacGiaId/ten-khac', authorize('books.read'), controller.danhSachTenKhac);
+router.post('/:tacGiaId/ten-khac', authorize('books.create'), controller.taoTenKhac);
+router.patch('/:tacGiaId/ten-khac/:tenKhacId', authorize('books.create'), controller.suaTenKhac);
+router.delete('/:tacGiaId/ten-khac/:tenKhacId', authorize('books.create'), controller.xoaTenKhac);
+module.exports = router;

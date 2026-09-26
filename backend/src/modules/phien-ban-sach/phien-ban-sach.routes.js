@@ -1,0 +1,13 @@
+const { Router } = require('express');
+const { authenticate } = require('../../common/middlewares/authenticate.js');
+const { authorize } = require('../../common/middlewares/authorize.js');
+const controller = require('./phien-ban-sach.controller.js');
+const router = Router();
+router.use(authenticate);
+router.get('/', authorize('books.read'), controller.danhSach);
+router.get('/:phienBanId', authorize('books.read'), controller.chiTiet);
+router.post('/', authorize('books.create'), controller.taoPhienBan);
+router.patch('/:phienBanId', authorize('books.create'), controller.suaPhienBan);
+router.patch('/:phienBanId/trang-thai', authorize('books.create'), controller.doiTrangThai);
+router.delete('/:phienBanId', authorize('books.create'), controller.xoaPhienBan);
+module.exports = router;
