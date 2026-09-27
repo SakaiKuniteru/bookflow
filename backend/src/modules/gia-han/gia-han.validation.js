@@ -42,9 +42,9 @@ function ngayHopLe(value, ten) {
     return ngay.toISOString();
 }
 function taoMoiHopLe(body) {
-    kiemTraTruong(body, ['phieu_muon_tra_id', 'chi_tiet_muon_tra_id', 'so_ngay_gia_han', 'ly_do']);
+    kiemTraTruong(body, ['muon_tra_id', 'chi_tiet_muon_tra_id', 'so_ngay_gia_han', 'ly_do']);
     return {
-        phieu_muon_tra_id: bigIntHopLe(body.phieu_muon_tra_id, 'Phiếu mượn trả'),
+        muon_tra_id: bigIntHopLe(body.muon_tra_id, 'Phiếu mượn trả'),
         chi_tiet_muon_tra_id: bigIntHopLe(body.chi_tiet_muon_tra_id, 'Chi tiết mượn trả'),
         so_ngay_gia_han: soNguyenHopLe(body.so_ngay_gia_han, 'Số ngày gia hạn', 1, 3650),
         ly_do: body.ly_do == null ? null : chuoiHopLe(body.ly_do, 'Lý do', 1, 2000)
@@ -79,7 +79,7 @@ function cauHinhHopLe(body) {
     };
 }
 function boLocHopLe(query = {}) {
-    kiemTraTruong(query, ['trang', 'kich_thuoc', 'phieu_muon_tra_id', 'chi_tiet_muon_tra_id', 'trang_thai', 'tu_ngay', 'den_ngay']);
+    kiemTraTruong(query, ['trang', 'kich_thuoc', 'muon_tra_id', 'chi_tiet_muon_tra_id', 'trang_thai', 'tu_ngay', 'den_ngay']);
     const trang = query.trang == null ? 1 : soNguyenHopLe(query.trang, 'Trang', 1, 1000000);
     const kich_thuoc = query.kich_thuoc == null ? 20 : soNguyenHopLe(query.kich_thuoc, 'Kích thước trang', 1, 100);
     if (query.trang > 0 && (trang - 1) * kich_thuoc > MAX_ID) throw loi('Phân trang không hợp lệ');
@@ -87,7 +87,7 @@ function boLocHopLe(query = {}) {
     return {
         trang,
         kich_thuoc,
-        phieu_muon_tra_id: query.phieu_muon_tra_id == null ? null : bigIntHopLe(query.phieu_muon_tra_id, 'Phiếu mượn trả'),
+        muon_tra_id: query.muon_tra_id == null ? null : bigIntHopLe(query.muon_tra_id, 'Phiếu mượn trả'),
         chi_tiet_muon_tra_id: query.chi_tiet_muon_tra_id == null ? null : bigIntHopLe(query.chi_tiet_muon_tra_id, 'Chi tiết mượn trả'),
         trang_thai: query.trang_thai ?? null,
         tu_ngay: query.tu_ngay == null ? null : ngayHopLe(query.tu_ngay, 'Từ ngày'),

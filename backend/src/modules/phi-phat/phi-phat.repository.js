@@ -5,8 +5,8 @@ class PhiPhatRepository {
         const { rows } = await query(
             `SELECT c.*, p.ma_phieu
              FROM chi_tiet_muon_tra c
-             JOIN phieu_muon_tra p ON p.id = c.phieu_muon_tra_id AND p.don_vi_id = c.don_vi_id
-             WHERE c.don_vi_id = $1 AND c.id = $2 AND c.phieu_muon_tra_id = $3
+             JOIN muon_tra p ON p.id = c.muon_tra_id AND p.don_vi_id = c.don_vi_id
+             WHERE c.don_vi_id = $1 AND c.id = $2 AND c.muon_tra_id = $3
              LIMIT 1${khoa ? ' FOR UPDATE OF c, p' : ''}`,
             [donViId, chiTietId, phieuId], client
         );
@@ -39,13 +39,13 @@ class PhiPhatRepository {
     async taoPhiPhat(donViId, data, client) {
         const { rows } = await query(
             `INSERT INTO phi_phat (
-                don_vi_id, phieu_muon_tra_id, chi_tiet_muon_tra_id, loai_phi_phat_id,
+                don_vi_id, muon_tra_id, chi_tiet_muon_tra_id, loai_phi_phat_id,
                 loai, ma_phieu, so_ngay_qua_han, so_luong, don_gia,
                 tien_goc, tien_giam, tien_mien_phi, tien_phai_thu, tien_da_thu,
                 tien_con_lai, tien_te, ly_do, ghi_chu, trang_thai, nguoi_tao_id
              ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,0,0,$10,0,$10,'VND',$11,$12,$13,$14)
              RETURNING *`,
-            [donViId, data.phieu_muon_tra_id, data.chi_tiet_muon_tra_id, data.loai_phi_phat_id, data.loai, data.ma_phieu, data.so_ngay_qua_han, data.so_luong, data.don_gia, data.tien_goc, data.ly_do, data.ghi_chu, data.trang_thai, data.nguoi_tao_id], client
+            [donViId, data.muon_tra_id, data.chi_tiet_muon_tra_id, data.loai_phi_phat_id, data.loai, data.ma_phieu, data.so_ngay_qua_han, data.so_luong, data.don_gia, data.tien_goc, data.ly_do, data.ghi_chu, data.trang_thai, data.nguoi_tao_id], client
         );
         return rows[0];
     }
@@ -72,7 +72,7 @@ class PhiPhatRepository {
                     COUNT(*) OVER()::integer AS tong_so
              FROM phi_phat p
              WHERE p.don_vi_id = $1
-               AND ($2::bigint IS NULL OR p.phieu_muon_tra_id = $2)
+               AND ($2::bigint IS NULL OR p.muon_tra_id = $2)
                AND ($3::bigint IS NULL OR p.chi_tiet_muon_tra_id = $3)
                AND ($4::text IS NULL OR p.loai = $4)
                AND ($5::text IS NULL OR p.trang_thai = $5)
@@ -80,7 +80,7 @@ class PhiPhatRepository {
                AND ($7::timestamptz IS NULL OR p.ngay_phat_sinh <= $7)
              ORDER BY p.ngay_phat_sinh DESC, p.id DESC
              LIMIT $8 OFFSET $9`,
-            [donViId, boLoc.phieu_muon_tra_id, boLoc.chi_tiet_muon_tra_id, boLoc.loai, boLoc.trang_thai, boLoc.tu_ngay, boLoc.den_ngay, boLoc.kich_thuoc, offset], client
+            [donViId, boLoc.muon_tra_id, boLoc.chi_tiet_muon_tra_id, boLoc.loai, boLoc.trang_thai, boLoc.tu_ngay, boLoc.den_ngay, boLoc.kich_thuoc, offset], client
         );
         return { items: rows, tong_so: rows[0]?.tong_so ?? 0, trang: boLoc.trang, kich_thuoc: boLoc.kich_thuoc };
     }

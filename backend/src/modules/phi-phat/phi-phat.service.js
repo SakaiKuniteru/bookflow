@@ -42,7 +42,7 @@ class PhiPhatService {
         await this.quyen(auth, 'circulation.create');
         const data = validation.taoPhiPhatHopLe(body);
         return trongGiaoDich(async client => {
-            const chiTiet = await repo.layChiTietMuonTra(auth.donViId, data.phieu_muon_tra_id, data.chi_tiet_muon_tra_id, client, true);
+            const chiTiet = await repo.layChiTietMuonTra(auth.donViId, data.muon_tra_id, data.chi_tiet_muon_tra_id, client, true);
             if (!chiTiet) throw this.loi('Không tìm thấy chi tiết mượn trả', 404, 'NOT_FOUND');
             if (data.loai === 'QUA_HAN' && data.so_ngay_qua_han <= 0) throw this.loi('Phí quá hạn phải có số ngày quá hạn lớn hơn 0');
             if (['MAT_SACH', 'HU_HONG'].includes(data.loai) && data.don_gia === '0') throw this.loi('Phí mất/hỏng phải có giá trị');

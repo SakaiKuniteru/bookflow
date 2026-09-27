@@ -54,11 +54,11 @@ function taoLoaiHopLe(body) {
     return { ma_loai, ten_loai: chuoiHopLe(body.ten_loai, 'Tên loại phí phạt', 1, 255), loai: body.loai, cach_tinh: body.cach_tinh, muc_tien, ty_le_phan_tram, cho_phep_mien_giam: body.cho_phep_mien_giam !== false, cho_phep_mien_phi: body.cho_phep_mien_phi !== false, hoat_dong: body.hoat_dong !== false };
 }
 function taoPhiPhatHopLe(body) {
-    kiemTraTruong(body, ['phieu_muon_tra_id', 'chi_tiet_muon_tra_id', 'loai_phi_phat_id', 'loai', 'so_ngay_qua_han', 'so_luong', 'don_gia', 'ly_do', 'ghi_chu']);
+    kiemTraTruong(body, ['muon_tra_id', 'chi_tiet_muon_tra_id', 'loai_phi_phat_id', 'loai', 'so_ngay_qua_han', 'so_luong', 'don_gia', 'ly_do', 'ghi_chu']);
     const loai = body.loai;
     if (!LOAI.includes(loai)) throw loi('Loại phí phạt không hợp lệ');
     return {
-        phieu_muon_tra_id: bigIntHopLe(body.phieu_muon_tra_id, 'Phiếu mượn trả'),
+        muon_tra_id: bigIntHopLe(body.muon_tra_id, 'Phiếu mượn trả'),
         chi_tiet_muon_tra_id: bigIntHopLe(body.chi_tiet_muon_tra_id, 'Chi tiết mượn trả'),
         loai_phi_phat_id: body.loai_phi_phat_id == null ? null : idHopLe(body.loai_phi_phat_id, 'Loại phí phạt'),
         loai,
@@ -95,7 +95,7 @@ function thuTienHopLe(body) {
     };
 }
 function boLocHopLe(query = {}) {
-    kiemTraTruong(query, ['trang', 'kich_thuoc', 'phieu_muon_tra_id', 'chi_tiet_muon_tra_id', 'loai', 'trang_thai', 'tu_ngay', 'den_ngay']);
+    kiemTraTruong(query, ['trang', 'kich_thuoc', 'muon_tra_id', 'chi_tiet_muon_tra_id', 'loai', 'trang_thai', 'tu_ngay', 'den_ngay']);
     const trang = query.trang == null ? 1 : soNguyen(query.trang, 'Trang', 1, 1000000);
     const kich_thuoc = query.kich_thuoc == null ? 20 : soNguyen(query.kich_thuoc, 'Kích thước trang', 1, 100);
     if (query.loai != null && !LOAI.includes(query.loai)) throw loi('Loại phí phạt không hợp lệ');
@@ -103,7 +103,7 @@ function boLocHopLe(query = {}) {
     return {
         trang,
         kich_thuoc,
-        phieu_muon_tra_id: query.phieu_muon_tra_id == null ? null : bigIntHopLe(query.phieu_muon_tra_id, 'Phiếu mượn trả'),
+        muon_tra_id: query.muon_tra_id == null ? null : bigIntHopLe(query.muon_tra_id, 'Phiếu mượn trả'),
         chi_tiet_muon_tra_id: query.chi_tiet_muon_tra_id == null ? null : bigIntHopLe(query.chi_tiet_muon_tra_id, 'Chi tiết mượn trả'),
         loai: query.loai ?? null,
         trang_thai: query.trang_thai ?? null,

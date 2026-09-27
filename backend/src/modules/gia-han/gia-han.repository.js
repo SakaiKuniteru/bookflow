@@ -4,7 +4,7 @@ class GiaHanRepository {
     async layPhieu(donViId, phieuId, client, khoa = false) {
         const { rows } = await query(
             `SELECT p.*
-             FROM phieu_muon_tra p
+             FROM muon_tra p
              WHERE p.don_vi_id = $1 AND p.id = $2
              LIMIT 1${khoa ? ' FOR UPDATE' : ''}`,
             [donViId, phieuId], client
@@ -15,7 +15,7 @@ class GiaHanRepository {
         const { rows } = await query(
             `SELECT c.*
              FROM chi_tiet_muon_tra c
-             WHERE c.don_vi_id = $1 AND c.id = $2 AND c.phieu_muon_tra_id = $3
+             WHERE c.don_vi_id = $1 AND c.id = $2 AND c.muon_tra_id = $3
              LIMIT 1${khoa ? ' FOR UPDATE' : ''}`,
             [donViId, chiTietId, phieuId], client
         );
@@ -75,12 +75,12 @@ class GiaHanRepository {
     async tao(donViId, data, client) {
         const { rows } = await query(
             `INSERT INTO gia_han_muon_tra (
-                don_vi_id, phieu_muon_tra_id, chi_tiet_muon_tra_id, lan_gia_han,
+                don_vi_id, muon_tra_id, chi_tiet_muon_tra_id, lan_gia_han,
                 ngay_han_cu, ngay_han_moi, so_ngay_gia_han, ly_do,
                 trang_thai, nguoi_yeu_cau_id, ngay_yeu_cau
              ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,now())
              RETURNING *`,
-            [donViId, data.phieu_muon_tra_id, data.chi_tiet_muon_tra_id, data.lan_gia_han, data.ngay_han_cu, data.ngay_han_moi, data.so_ngay_gia_han, data.ly_do, data.trang_thai, data.nguoi_yeu_cau_id], client
+            [donViId, data.muon_tra_id, data.chi_tiet_muon_tra_id, data.lan_gia_han, data.ngay_han_cu, data.ngay_han_moi, data.so_ngay_gia_han, data.ly_do, data.trang_thai, data.nguoi_yeu_cau_id], client
         );
         return rows[0];
     }
@@ -121,12 +121,12 @@ class GiaHanRepository {
     async layTheoId(donViId, id, client) {
         const { rows } = await query(
             `SELECT g.*,
-                    p.ma_phieu AS ma_phieu_muon_tra,
+                    p.ma_phieu AS ma_muon_tra,
                     c.phien_ban_sach_id,
                     c.so_luong,
                     c.ngay_han_tra
              FROM gia_han_muon_tra g
-             JOIN phieu_muon_tra p ON p.id = g.phieu_muon_tra_id AND p.don_vi_id = g.don_vi_id
+             JOIN muon_tra p ON p.id = g.muon_tra_id AND p.don_vi_id = g.don_vi_id
              JOIN chi_tiet_muon_tra c ON c.id = g.chi_tiet_muon_tra_id AND c.don_vi_id = g.don_vi_id
              WHERE g.don_vi_id = $1 AND g.id = $2`,
             [donViId, id], client
@@ -137,21 +137,21 @@ class GiaHanRepository {
         const offset = (boLoc.trang - 1) * boLoc.kich_thuoc;
         const { rows } = await query(
             `SELECT g.*,
-                    p.ma_phieu AS ma_phieu_muon_tra,
+                    p.ma_phieu AS ma_muon_tra,
                     c.phien_ban_sach_id,
                     COUNT(*) OVER()::integer AS tong_so
              FROM gia_han_muon_tra g
-             JOIN phieu_muon_tra p ON p.id = g.phieu_muon_tra_id AND p.don_vi_id = g.don_vi_id
+             JOIN muon_tra p ON p.id = g.muon_tra_id AND p.don_vi_id = g.don_vi_id
              JOIN chi_tiet_muon_tra c ON c.id = g.chi_tiet_muon_tra_id AND c.don_vi_id = g.don_vi_id
              WHERE g.don_vi_id = $1
-               AND ($2::bigint IS NULL OR g.phieu_muon_tra_id = $2)
+               AND ($2::bigint IS NULL OR g.muon_tra_id = $2)
                AND ($3::bigint IS NULL OR g.chi_tiet_muon_tra_id = $3)
                AND ($4::text IS NULL OR g.trang_thai = $4)
                AND ($5::timestamptz IS NULL OR g.ngay_tao >= $5)
                AND ($6::timestamptz IS NULL OR g.ngay_tao <= $6)
              ORDER BY g.ngay_tao DESC, g.id DESC
              LIMIT $7 OFFSET $8`,
-            [donViId, boLoc.phieu_muon_tra_id, boLoc.chi_tiet_muon_tra_id, boLoc.trang_thai, boLoc.tu_ngay, boLoc.den_ngay, boLoc.kich_thuoc, offset], client
+            [donViId, boLoc.muon_tra_id, boLoc.chi_tiet_muon_tra_id, boLoc.trang_thai, boLoc.tu_ngay, boLoc.den_ngay, boLoc.kich_thuoc, offset], client
         );
         return { items: rows, tong_so: rows[0]?.tong_so ?? 0, trang: boLoc.trang, kich_thuoc: boLoc.kich_thuoc };
     }

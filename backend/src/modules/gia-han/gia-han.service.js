@@ -21,9 +21,9 @@ class GiaHanService {
         await this.quyen(auth, 'circulation.create');
         const data = validation.taoMoiHopLe(body);
         return trongGiaoDich(async client => {
-            const phieu = await repo.layPhieu(auth.donViId, data.phieu_muon_tra_id, client, true);
+            const phieu = await repo.layPhieu(auth.donViId, data.muon_tra_id, client, true);
             if (!phieu) throw this.loi('Không tìm thấy phiếu mượn trả', 404, 'NOT_FOUND');
-            const chiTiet = await repo.layChiTiet(auth.donViId, data.phieu_muon_tra_id, data.chi_tiet_muon_tra_id, client, true);
+            const chiTiet = await repo.layChiTiet(auth.donViId, data.muon_tra_id, data.chi_tiet_muon_tra_id, client, true);
             if (!chiTiet) throw this.loi('Chi tiết mượn trả không thuộc phiếu', 404, 'NOT_FOUND');
             if (!['DANG_MUON', 'DANG_THUE', 'QUA_HAN'].includes(chiTiet.trang_thai)) throw this.loi('Chi tiết sách không còn ở trạng thái được phép gia hạn');
             if (Number(chiTiet.so_luong_da_tra ?? 0) >= Number(chiTiet.so_luong ?? 0)) throw this.loi('Sách đã trả đủ, không thể gia hạn');
@@ -64,7 +64,7 @@ class GiaHanService {
             if (!row) throw this.loi('Không tìm thấy bản ghi gia hạn', 404, 'NOT_FOUND');
             if (row.trang_thai !== 'CHO_DUYET') throw this.loi('Gia hạn không còn ở trạng thái chờ duyệt');
             if (data.trang_thai === 'DA_DUYET') {
-                const chiTiet = await repo.layChiTiet(auth.donViId, row.phieu_muon_tra_id, row.chi_tiet_muon_tra_id, client, true);
+                const chiTiet = await repo.layChiTiet(auth.donViId, row.muon_tra_id, row.chi_tiet_muon_tra_id, client, true);
                 if (!chiTiet) throw this.loi('Không tìm thấy chi tiết mượn trả', 404, 'NOT_FOUND');
                 if (Number(chiTiet.so_luong_da_tra ?? 0) >= Number(chiTiet.so_luong ?? 0)) throw this.loi('Sách đã được trả trong thời gian chờ duyệt');
                 await repo.capNhatHanTra(auth.donViId, row.chi_tiet_muon_tra_id, row.ngay_han_moi, client);

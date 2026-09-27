@@ -1,0 +1,74 @@
+const AI_LOAI_YEU_CAU = Object.freeze({
+    CHAT: 'CHAT',
+    SEARCH: 'SEARCH',
+    GOI_Y_SACH: 'GOI_Y_SACH',
+    PHAN_TICH: 'PHAN_TICH'
+});
+
+const AI_LOAI_PHAN_TICH = Object.freeze({
+    KHO: 'KHO',
+    MUON_TRA: 'MUON_TRA',
+    DAT_TRUOC: 'DAT_TRUOC',
+    SACH: 'SACH',
+    PHI_PHAT: 'PHI_PHAT',
+    TONG_HOP: 'TONG_HOP'
+});
+
+const AI_INTENT = Object.freeze({
+    TIM_SACH: 'TIM_SACH',
+    KIEM_TRA_TON_KHO: 'KIEM_TRA_TON_KHO',
+    KIEM_TRA_MUON_TRA: 'KIEM_TRA_MUON_TRA',
+    KIEM_TRA_QUA_HAN: 'KIEM_TRA_QUA_HAN',
+    KIEM_TRA_DAT_TRUOC: 'KIEM_TRA_DAT_TRUOC',
+    GIAI_THICH_CHINH_SACH: 'GIAI_THICH_CHINH_SACH',
+    GOI_Y_SACH: 'GOI_Y_SACH',
+    PHAN_TICH_KHO: 'PHAN_TICH_KHO',
+    PHAN_TICH_MUON_TRA: 'PHAN_TICH_MUON_TRA',
+    PHAN_TICH_DAT_TRUOC: 'PHAN_TICH_DAT_TRUOC',
+    PHAN_TICH_SACH: 'PHAN_TICH_SACH',
+    PHAN_TICH_PHI_PHAT: 'PHAN_TICH_PHI_PHAT',
+    PHAN_TICH_TONG_HOP: 'PHAN_TICH_TONG_HOP',
+    KHAC: 'KHAC'
+});
+
+const AI_NGUON_CONTEXT = Object.freeze({
+    SACH: 'SACH',
+    TON_KHO: 'TON_KHO',
+    MUON_TRA: 'MUON_TRA',
+    DAT_TRUOC: 'DAT_TRUOC',
+    PHI_PHAT: 'PHI_PHAT',
+    KHACH_HANG: 'KHACH_HANG',
+    DON_HANG: 'DON_HANG',
+    THONG_KE: 'THONG_KE'
+});
+
+const AI_TRANG_THAI_YEU_CAU = Object.freeze({
+    DANG_XU_LY: 'DANG_XU_LY',
+    THANH_CONG: 'THANH_CONG',
+    THAT_BAI: 'THAT_BAI'
+});
+
+const AI_MAX = Object.freeze({
+    DO_DAI_CAU_HOI: 5000,
+    SO_KET_QUA_SEARCH: 50,
+    SO_KET_QUA_GOI_Y: 10,
+    SO_DONG_CONTEXT: 100,
+    SO_NGAY_PHAN_TICH: 90
+});
+
+const AI_ENDPOINT = Object.freeze({
+    CHAT: '/chat',
+    PHAN_TICH_Y_DINH: '/intent',
+    GOI_Y_SACH: '/recommend',
+    PHAN_TICH: '/analysis'
+});
+
+module.exports = {
+    AI_LOAI_YEU_CAU,
+    AI_LOAI_PHAN_TICH,
+    AI_INTENT,
+    AI_NGUON_CONTEXT,
+    AI_TRANG_THAI_YEU_CAU,
+    AI_MAX,
+    AI_ENDPOINT
+};

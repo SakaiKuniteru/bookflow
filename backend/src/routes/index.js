@@ -28,6 +28,8 @@ const datTruocRouter = require('../modules/dat-truoc/dat-truoc.routes.js');
 const muonTraRouter = require('../modules/muon-tra/muon-tra.routes.js');
 const giaHanRoutes = require('../modules/gia-han/gia-han.routes.js');
 const phiPhatRoutes = require('../modules/phi-phat/phi-phat.routes.js');
+const thongBaoRouter = require('../modules/thong-bao/thong-bao.routes.js');
+const aiRoute = require('../modules/ai/ai.route.js');
 
 const apiRouter = Router();
 
@@ -60,5 +62,7 @@ apiRouter.use('/dat-truoc',datTruocRouter);
 apiRouter.use('/muon-tra',muonTraRouter);
 apiRouter.use('/gia-han', giaHanRoutes);
 apiRouter.use('/phi-phat', phiPhatRoutes);
+apiRouter.use('/thong-bao', thongBaoRouter);
+apiRouter.use('/ai', aiRoute);
 
 module.exports = apiRouter;
