@@ -435,20 +435,20 @@ ai-service/
 │   ├── api/
 │   │   ├── health.py
 │   │   └── internal/
-│   │       ├── jobs.py
-│   │       ├── search.py
-│   │       ├── recommendations.py
-│   │       ├── chat.py
-│   │       ├── sources.py
-│   │       └── feedback.py
+│   │       ├── cong_viec.py
+│   │       ├── tim_kiem.py
+│   │       ├── goi_y.py
+│   │       ├── tro_ly.py
+│   │       ├── nguon_du_lieu.py
+│   │       └── phan_hoi.py
 │   │
 │   ├── schemas/
-│   │   ├── common.py
-│   │   ├── jobs.py
-│   │   ├── search.py
-│   │   ├── recommendations.py
-│   │   ├── chat.py
-│   │   └── sources.py
+│   │   ├── dung_chung.py
+│   │   ├── cong_viec.py
+│   │   ├── tim_kiem.py
+│   │   ├── goi_y.py
+│   │   ├── tro_ly.py
+│   │   └── nguon_du_lieu.py
 │   │
 │   ├── integrations/
 │   │   ├── postgres.py
@@ -463,43 +463,43 @@ ai-service/
 │   │
 │   ├── services/
 │   │   ├── indexing/
-│   │   │   ├── book_indexer.py
-│   │   │   ├── document_indexer.py
-│   │   │   └── chunking.py
+│   │   │   ├── sach.py
+│   │   │   ├── tai_lieu.py
+│   │   │   └── chia_doan.py
 │   │   │
 │   │   ├── retrieval/
-│   │   │   ├── hybrid_search.py
-│   │   │   ├── vector_search.py
-│   │   │   ├── access_filter.py
-│   │   │   └── citations.py
+│   │   │   ├── tim_kiem_ket_hop.py
+│   │   │   ├── tim_kiem_vector.py
+│   │   │   ├── loc_quyen_truy_cap.py
+│   │   │   └── trich_dan.py
 │   │   │
 │   │   ├── recommendations/
-│   │   │   ├── candidate_generator.py
-│   │   │   ├── ranking.py
-│   │   │   └── explanations.py
+│   │   │   ├── tao_ung_vien.py
+│   │   │   ├── xep_hang.py
+│   │   │   └── giai_thich.py
 │   │   │
 │   │   ├── assistant/
-│   │   │   ├── chat.py
-│   │   │   ├── context_builder.py
-│   │   │   ├── tool_registry.py
-│   │   │   └── response_validator.py
+│   │   │   ├── tro_chuyen.py
+│   │   │   ├── xay_dung_ngu_canh.py
+│   │   │   ├── dang_ky_cong_cu.py
+│   │   │   └── kiem_tra_phan_hoi.py
 │   │   │
 │   │   ├── extraction/
-│   │   │   ├── metadata.py
+│   │   │   ├── trich_xuat_thong_tin.py
 │   │   │   ├── ocr.py
-│   │   │   └── classification.py
+│   │   │   └── phan_loai.py
 │   │   │
 │   │   └── analytics/
-│   │       ├── report_analysis.py
-│   │       └── usage_tracking.py
+│   │       ├── phan_tich_bao_cao.py
+│   │       └── theo_doi_su_dung.py
 │   │
 │   ├── repositories/
-│   │   ├── sources.py
-│   │   ├── chunks.py
-│   │   ├── conversations.py
-│   │   ├── recommendations.py
-│   │   ├── jobs.py
-│   │   └── feedback.py
+│   │   ├── nguon_du_lieu.py
+│   │   ├── doan_du_lieu.py
+│   │   ├── hoi_thoai.py
+│   │   ├── goi_y.py
+│   │   ├── cong_viec.py
+│   │   └── phan_hoi.py
 │   │
 │   ├── queue/
 │   │   ├── connection.py
@@ -508,16 +508,451 @@ ai-service/
 │   │
 │   ├── workers/
 │   │   ├── runner.py
-│   │   ├── index_book.py
-│   │   ├── index_document.py
-│   │   ├── generate_recommendations.py
-│   │   ├── extract_metadata.py
-│   │   └── cleanup_indexes.py
+│   │   ├── lap_chi_muc_sach.py
+│   │   ├── lap_chi_muc_tai_lieu.py
+│   │   ├── tao_goi_y.py
+│   │   ├── trich_xuat_thong_tin.py
+│   │   └── don_dep_chi_muc.py
 │   │
 │   └── prompts/
-│       ├── book_advisor.py
-│       ├── internal_assistant.py
-│       └── report_assistant.py
+│       ├── tu_van_sach.py
+│       ├── tro_ly_noi_bo.py
+│       └── tro_ly_bao_cao.py
+```
+
+# THỨ TỰ XỬ LÝ AI SERVICE
+
+## 1. Nền tảng dự án
+```text
+├── pyproject.toml
+├── .env.example
+├── Dockerfile
+└── README.md
+```
+
+## 2. Khởi tạo ứng dụng
+```text
+└── app/
+```
+
+## 3. Cấu hình và nền tảng dùng chung
+```text
+└── app/core/
+```
+
+Thứ tự xử lý:
+```text
+1. config.py
+2. security.py
+3. dependencies.py
+4. exceptions.py
+5. logging.py
+6. rate_limit.py
+```
+
+## 4. Kết nối hệ thống
+```text
+├── app/integrations/
+├── app/providers/
+└── app/queue/
+```
+
+Thứ tự xử lý:
+```text
+app/integrations/
+    ↓
+app/providers/
+    ↓
+app/queue/
+```
+
+## 5. Định nghĩa dữ liệu đầu vào / đầu ra
+```text
+└── app/schemas/
+```
+
+Thứ tự xử lý:
+```text
+1. dung_chung.py
+2. cong_viec.py
+3. tim_kiem.py
+4. goi_y.py
+5. tro_ly.py
+6. nguon_du_lieu.py
+```
+
+## 6. Repository và lưu trữ dữ liệu AI
+```text
+└── app/repositories/
+```
+
+Thứ tự xử lý:
+```text
+1. nguon_du_lieu.py
+2. doan_du_lieu.py
+3. hoi_thoai.py
+4. goi_y.py
+5. cong_viec.py
+6. phan_hoi.py
+```
+
+## 7. Lập chỉ mục dữ liệu
+```text
+└── app/services/indexing/
+```
+
+Thứ tự xử lý:
+```text
+1. chia_doan.py
+2. sach.py
+3. tai_lieu.py
+```
+
+Luồng:
+```text
+Dữ liệu sách / tài liệu
+    ↓
+Chia thành các đoạn dữ liệu
+    ↓
+Chuẩn hóa
+    ↓
+Tạo embedding
+    ↓
+Lưu chỉ mục
+```
+
+## 8. Tìm kiếm và truy xuất dữ liệu
+```text
+└── app/services/retrieval/
+```
+
+Thứ tự xử lý:
+```text
+1. loc_quyen_truy_cap.py
+2. tim_kiem_vector.py
+3. tim_kiem_ket_hop.py
+4. trich_dan.py
+```
+
+Luồng:
+```text
+Yêu cầu tìm kiếm
+    ↓
+Kiểm tra phạm vi truy cập
+    ↓
+Tìm kiếm vector
+    ↓
+Kết hợp tìm kiếm nghiệp vụ + vector
+    ↓
+Lấy nguồn và trích dẫn
+    ↓
+Trả kết quả
+```
+
+## 9. Gợi ý sách
+```text
+└── app/services/recommendations/
+```
+
+Thứ tự xử lý:
+```text
+1. tao_ung_vien.py
+2. xep_hang.py
+3. giai_thich.py
+```
+
+Luồng:
+```text
+Dữ liệu người dùng / sách / lịch sử
+    ↓
+Tạo danh sách ứng viên
+    ↓
+Xếp hạng
+    ↓
+Sinh lý do / giải thích
+    ↓
+Trả danh sách gợi ý
+```
+
+## 10. Trợ lý AI
+```text
+└── app/services/assistant/
+```
+
+Thứ tự xử lý:
+```text
+1. dang_ky_cong_cu.py
+2. xay_dung_ngu_canh.py
+3. tro_chuyen.py
+4. kiem_tra_phan_hoi.py
+```
+
+Luồng:
+```text
+Yêu cầu người dùng
+    ↓
+Xác định công cụ được phép sử dụng
+    ↓
+Xây dựng ngữ cảnh
+    ↓
+Xử lý hội thoại
+    ↓
+Kiểm tra phản hồi
+    ↓
+Trả kết quả
+```
+
+## 11. Trích xuất dữ liệu
+```text
+└── app/services/extraction/
+```
+
+Thứ tự xử lý:
+```text
+1. ocr.py
+2. trich_xuat_thong_tin.py
+3. phan_loai.py
+```
+
+Luồng:
+```text
+File / tài liệu
+    ↓
+OCR
+    ↓
+Trích xuất thông tin
+    ↓
+Phân loại
+    ↓
+Chuẩn hóa dữ liệu
+```
+
+## 12. Phân tích dữ liệu
+```text
+└── app/services/analytics/
+```
+
+Thứ tự xử lý:
+```text
+1. theo_doi_su_dung.py
+2. phan_tich_bao_cao.py
+```
+
+Luồng:
+```text
+Dữ liệu sử dụng / báo cáo đã xác thực
+    ↓
+Theo dõi dữ liệu
+    ↓
+Phân tích
+    ↓
+Sinh kết quả giải thích
+```
+
+## 13. Prompt AI
+```text
+└── app/prompts/
+```
+
+Xử lý sau khi các service nghiệp vụ chính đã ổn định:
+```text
+1. tu_van_sach.py
+2. tro_ly_noi_bo.py
+3. tro_ly_bao_cao.py
+```
+
+## 14. API nội bộ
+```text
+├── app/api/health.py
+└── app/api/internal/
+```
+
+Thứ tự xử lý:
+```text
+1. health.py
+2. cong_viec.py
+3. nguon_du_lieu.py
+4. tim_kiem.py
+5. goi_y.py
+6. tro_ly.py
+7. phan_hoi.py
+```
+
+Luồng:
+```text
+Backend BookFlow
+    ↓
+Internal API
+    ↓
+Schema validation
+    ↓
+Service
+    ↓
+Repository / Integration
+    ↓
+Response
+```
+
+## 15. Worker xử lý nền
+```text
+└── app/workers/
+```
+
+Thứ tự xử lý:
+```text
+1. runner.py
+2. lap_chi_muc_sach.py
+3. lap_chi_muc_tai_lieu.py
+4. trich_xuat_thong_tin.py
+5. tao_goi_y.py
+6. don_dep_chi_muc.py
+```
+
+Luồng:
+```text
+Queue
+    ↓
+Worker runner
+    ↓
+Nhận job
+    ↓
+Thực hiện service tương ứng
+    ↓
+Retry khi lỗi
+    ↓
+Ghi trạng thái job
+    ↓
+Hoàn thành
+```
+
+## 16. Khởi động ứng dụng
+```text
+└── app/main.py
+```
+
+`main.py` xử lý:
+```text
+1. Khởi tạo application
+2. Load config
+3. Khởi tạo logging
+4. Khởi tạo database / Redis / storage
+5. Đăng ký middleware
+6. Đăng ký health API
+7. Đăng ký internal API
+8. Khởi động application
+```
+
+## 17. Kiểm thử
+```text
+└── tests/
+```
+
+Thứ tự kiểm thử:
+```text
+1. Core
+2. Integrations
+3. Providers
+4. Schemas
+5. Repositories
+6. Indexing
+7. Retrieval
+8. Recommendations
+9. Assistant
+10. Extraction
+11. Analytics
+12. API
+13. Queue
+14. Workers
+15. End-to-end
+```
+
+## 18. Docker và triển khai
+```text
+├── Dockerfile
+├── .env.example
+└── README.md
+```
+
+Thứ tự hoàn thiện:
+```text
+1. Dockerfile
+2. Environment configuration
+3. Health check
+4. Application startup
+5. Worker startup
+6. Logging
+7. Retry / recovery
+8. README triển khai
+```
+
+# THỨ TỰ TỔNG THỂ
+
+```text
+pyproject.toml
+    ↓
+.env.example
+    ↓
+app/core/
+    ↓
+app/integrations/
+    ↓
+app/providers/
+    ↓
+app/queue/
+    ↓
+app/schemas/
+    ↓
+app/repositories/
+    ↓
+app/services/indexing/
+    ↓
+app/services/retrieval/
+    ↓
+app/services/recommendations/
+    ↓
+app/services/assistant/
+    ↓
+app/services/extraction/
+    ↓
+app/services/analytics/
+    ↓
+app/prompts/
+    ↓
+app/api/
+    ↓
+app/workers/
+    ↓
+app/main.py
+    ↓
+tests/
+    ↓
+Dockerfile
+    ↓
+README.md
+```
+
+# THỨ TỰ ƯU TIÊN NGHIỆP VỤ
+
+```text
+F1  → Nền tảng AI Service
+F2  → Core
+F3  → Integrations
+F4  → Providers
+F5  → Queue
+F6  → Schemas
+F7  → Repositories
+F8  → Indexing
+F9  → Retrieval
+F10 → Recommendations
+F11 → Assistant
+F12 → Extraction
+F13 → Analytics
+F14 → Prompts
+F15 → Internal API
+F16 → Workers
+F17 → Main Application
+F18 → Testing
+F19 → Docker / Deployment
 ```
 
 **Cây AI ở F05 là cấu trúc dự kiến, không phải yêu cầu triển khai Python trong F05. Toàn bộ code `ai-service/` chỉ thực hiện ở F17 sau khi BE hoàn tất.** Khi triển khai F17 mới tạo `ai-service/tests/{unit,integration,evaluations}/` và chỉ thêm file có test thực.
