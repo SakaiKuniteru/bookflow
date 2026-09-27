@@ -24,9 +24,11 @@ app/integrations/storage.py
 app/prompts/tro_ly_bao_cao.py
 app/prompts/tro_ly_noi_bo.py
 app/prompts/tu_van_sach.py
+app/providers/__init__.py
 app/providers/base.py
 app/providers/embeddings.py
 app/providers/llm.py
+app/queue/__init__.py
 app/queue/connection.py
 app/queue/dispatcher.py
 app/queue/retry.py

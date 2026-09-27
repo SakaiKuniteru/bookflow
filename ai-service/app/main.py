@@ -8,6 +8,10 @@ from app.integrations.backend_client import tao_backend_client
 from app.integrations.postgres import tao_postgres_client
 from app.integrations.redis import tao_redis_client
 from app.integrations.storage import tao_storage_client
+from app.providers.embeddings import tao_embedding_provider
+from app.providers.llm import tao_llm_provider
+from app.queue.connection import tao_queue_connection
+from app.queue.dispatcher import QueueDispatcher
 
 settings = get_settings()
 cau_hinh_logging(settings.app_log_level)
@@ -16,6 +20,10 @@ postgres = tao_postgres_client(settings)
 redis = tao_redis_client(settings)
 storage = tao_storage_client(settings)
 backend = tao_backend_client(settings)
+llm = tao_llm_provider(settings)
+embedding = tao_embedding_provider(settings)
+queue = tao_queue_connection(settings)
+dispatcher = QueueDispatcher(queue)
 
 @asynccontextmanager
 async def lifespan(application: FastAPI):
@@ -23,7 +31,13 @@ async def lifespan(application: FastAPI):
     await redis.khoi_tao()
     await storage.khoi_tao()
     await backend.khoi_tao()
+    await llm.khoi_tao()
+    await embedding.khoi_tao()
+    await queue.khoi_tao()
     yield
+    await queue.dong()
+    await embedding.dong()
+    await llm.dong()
     await backend.dong()
     await storage.dong()
     await redis.dong()
@@ -69,5 +83,12 @@ async def health():
             "redis": redis.san_sang(),
             "storage": storage.san_sang(),
             "backend": backend.san_sang()
+        },
+        "providers": {
+            "llm": llm.san_sang(),
+            "embedding": embedding.san_sang()
+        },
+        "queue": {
+            "redis": queue.san_sang()
         }
     }
