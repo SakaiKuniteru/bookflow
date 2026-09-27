@@ -9,12 +9,14 @@ app/api/internal/nguon_du_lieu.py
 app/api/internal/phan_hoi.py
 app/api/internal/tim_kiem.py
 app/api/internal/tro_ly.py
+app/core/__init__.py
 app/core/config.py
 app/core/dependencies.py
 app/core/exceptions.py
 app/core/logging.py
 app/core/rate_limit.py
 app/core/security.py
+app/integrations/__init__.py
 app/integrations/backend_client.py
 app/integrations/postgres.py
 app/integrations/redis.py
