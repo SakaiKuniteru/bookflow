@@ -12,7 +12,7 @@ class BoLocGoiYSach(SchemaCoSo):
 
 class GoiYSachRequest(SchemaCoSo):
     user_id: int | None = Field(default=None, ge=1)
-    user_context: RequestContext | None = None
+    user_context: dict[str, Any] = Field(default_factory=dict)
     context: str | None = Field(default=None, max_length=5000)
     book_id: int | None = Field(default=None, ge=1)
     limit: int = Field(default=10, ge=1, le=10)
@@ -30,3 +30,5 @@ class GoiYSachResponse(SchemaCoSo):
     recommendations: list[GoiYSachItem] = Field(default_factory=list)
     total: int = Field(default=0, ge=0)
     context: str | None = None
+
+GoiYRequest = GoiYSachRequest

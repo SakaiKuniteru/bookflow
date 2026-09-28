@@ -92,6 +92,73 @@ services:
       timeout: 5s
       retries: 15
       start_period: 30s
+  ai-api:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile
+    image: ${AI_API_IMAGE:-bookflow/ai-api}:${BOOKFLOW_IMAGE_TAG:-dev}
+    restart: unless-stopped
+    env_file:
+      - ./ai-service/.env
+    environment:
+      APP_HOST: 0.0.0.0
+      APP_PORT: 8001
+      BACKEND_BASE_URL: ${AI_BACKEND_BASE_URL:-http://host.docker.internal:3001}
+      BACKEND_INTERNAL_TOKEN: ${AI_SERVICE_KEY:?AI_SERVICE_KEY is required}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      STORAGE_ENDPOINT: http://minio:9000
+      STORAGE_ACCESS_KEY: ${MINIO_ROOT_USER:?MINIO_ROOT_USER is required}
+      STORAGE_SECRET_KEY: ${MINIO_ROOT_PASSWORD:?MINIO_ROOT_PASSWORD is required}
+      WORKER_ENABLED: "false"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "127.0.0.1:${AI_API_PORT:-18001}:8001"
+    networks:
+      - internal
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+  ai-worker:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile
+    image: ${AI_WORKER_IMAGE:-bookflow/ai-worker}:${BOOKFLOW_IMAGE_TAG:-dev}
+    restart: unless-stopped
+    env_file:
+      - ./ai-service/.env
+    environment:
+      APP_HOST: 0.0.0.0
+      APP_PORT: 8001
+      BACKEND_BASE_URL: ${AI_BACKEND_BASE_URL:-http://host.docker.internal:3001}
+      BACKEND_INTERNAL_TOKEN: ${AI_SERVICE_KEY:?AI_SERVICE_KEY is required}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      STORAGE_ENDPOINT: http://minio:9000
+      STORAGE_ACCESS_KEY: ${MINIO_ROOT_USER:?MINIO_ROOT_USER is required}
+      STORAGE_SECRET_KEY: ${MINIO_ROOT_PASSWORD:?MINIO_ROOT_PASSWORD is required}
+      WORKER_ENABLED: "true"
+      WORKER_CONCURRENCY: ${WORKER_CONCURRENCY:-2}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - internal
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    command:
+      - python
+      - -m
+      - app.workers.runner
 networks:
   internal:
     driver: bridge

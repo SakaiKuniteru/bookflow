@@ -40,6 +40,8 @@ function duLieuChatHopLe(body = {}) {
         cau_hoi: chuoiHopLe(body.cau_hoi ?? body.cauHoi, 'câu hỏi', true),
         lich_su: Array.isArray(body.lich_su ?? body.lichSu) ? (body.lich_su ?? body.lichSu).slice(-20) : [],
         doi_tuong: doiTuongHopLe(body.doi_tuong ?? body.doiTuong),
+        assistant_type: chuoiHopLe(body.assistant_type ?? body.assistantType, 'assistant_type') || 'BOOK_ADVISOR',
+        conversation_id: idHopLe(body.conversation_id ?? body.conversationId, 'conversation_id'),
         yeu_cau_id: chuoiHopLe(body.yeu_cau_id ?? body.yeuCauId, 'mã yêu cầu')
     };
 }
@@ -68,6 +70,7 @@ function duLieuPhanTichHopLe(body = {}) {
         tu_ngay: body.tu_ngay ?? body.tuNgay ?? null,
         den_ngay: body.den_ngay ?? body.denNgay ?? null,
         chi_nhanh_id: idHopLe(body.chi_nhanh_id ?? body.chiNhanhId, 'Chi nhánh'),
+        context: doiTuongHopLe(body.context),
         sach_id: idHopLe(body.sach_id ?? body.sachId, 'Sách')
     };
 }

@@ -15,7 +15,14 @@ class QueueConnection:
             self.settings.redis_url,
             decode_responses=True
         )
-
+    async def ping(self) -> bool:
+        if self.client is None:
+            return False
+        try:
+            result = await self.client.ping()
+            return bool(result)
+        except Exception:
+            return False
     async def dong(self) -> None:
         if self.client:
             await self.client.aclose()

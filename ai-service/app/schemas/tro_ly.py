@@ -29,7 +29,7 @@ class CongCuDaSuDung(SchemaCoSo):
 class TroLyRequest(SchemaCoSo):
     conversation_id: str | None = Field(default=None, max_length=200)
     message: str = Field(min_length=1, max_length=5000)
-    user_context: RequestContext | None = None
+    user_context: dict[str, Any] = Field(default_factory=dict)
     session_context: dict[str, Any] = Field(default_factory=dict)
 
 class TroLyResponse(SchemaCoSo):
@@ -40,3 +40,13 @@ class TroLyResponse(SchemaCoSo):
     tools_used: list[CongCuDaSuDung] = Field(default_factory=list)
     requires_confirmation: bool = False
     response_type: str = Field(default="TEXT", max_length=50)
+
+class PhanHoiRequest(SchemaCoSo):
+    user_id: int | None = Field(default=None, ge=1)
+    conversation_id: str | None = Field(default=None, max_length=200)
+    message_id: str = Field(min_length=1, max_length=200)
+    feedback_type: str = Field(default="GENERAL", min_length=1, max_length=50)
+    rating: int | None = Field(default=None, ge=1, le=5)
+    content: str | None = Field(default=None, max_length=5000)
+    reason: str | None = Field(default=None, max_length=2000)
+    metadata: dict[str, Any] = Field(default_factory=dict)

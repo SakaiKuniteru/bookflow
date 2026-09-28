@@ -1,0 +1,17 @@
+.git
+.venv
+venv
+__pycache__
+.pytest_cache
+.mypy_cache
+.ruff_cache
+dist
+build
+coverage
+*.log
+uploads
+dump
+backup
+.env
+.env.*
+!.env.example

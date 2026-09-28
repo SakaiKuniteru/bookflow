@@ -3,7 +3,7 @@ const service = require('./ai.service.js');
 class AiController {
     async chat(req, res, next) {
         try {
-            const data = await service.chat(req.auth, req.body);
+            const data = await service.chat(req.auth, req.body, req.requestId);
             return res.status(200).json({ code: 0, message: 'Thành công', data });
         } catch (error) {
             return next(error);
@@ -12,7 +12,7 @@ class AiController {
 
     async search(req, res, next) {
         try {
-            const data = await service.search(req.auth, req.body);
+            const data = await service.search(req.auth, req.body, req.requestId);
             return res.status(200).json({ code: 0, message: 'Thành công', data });
         } catch (error) {
             return next(error);
@@ -21,7 +21,7 @@ class AiController {
 
     async goiYSach(req, res, next) {
         try {
-            const data = await service.goiYSach(req.auth, req.body);
+            const data = await service.goiYSach(req.auth, req.body, req.requestId);
             return res.status(200).json({ code: 0, message: 'Thành công', data });
         } catch (error) {
             return next(error);
@@ -30,7 +30,7 @@ class AiController {
 
     async phanTich(req, res, next) {
         try {
-            const data = await service.phanTich(req.auth, req.body);
+            const data = await service.phanTich(req.auth, req.body, req.requestId);
             return res.status(200).json({ code: 0, message: 'Thành công', data });
         } catch (error) {
             return next(error);

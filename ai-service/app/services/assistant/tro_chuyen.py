@@ -902,60 +902,46 @@ class TroChuyenService:
         )
 
     @staticmethod
-    def _parse_final_response(
-        content: str
-    ) -> dict[str, Any]:
-        text = str(
-            content
-            or ""
-        ).strip()
-        if (
-            text.startswith("```")
-            and text.endswith("```")
-        ):
+    def _parse_final_response(content: str) -> dict[str, Any]:
+        text = str(content or "").strip()
+        if text.startswith("```") and text.endswith("```"):
             text = text.strip("`").strip()
             if text.lower().startswith("json"):
                 text = text[4:].strip()
         try:
-            parsed = json.loads(
-                text
-            )
-            if (
-                isinstance(
-                    parsed,
-                    dict
-                )
-                and "content" in parsed
-            ):
-                parsed.setdefault(
-                    "citations",
-                    []
-                )
-                parsed.setdefault(
-                    "recommendations",
-                    []
-                )
-                parsed.setdefault(
-                    "claims",
-                    []
-                )
-                parsed.setdefault(
-                    "metadata",
-                    {}
-                )
-                return parsed
-        except (
-            TypeError,
-            ValueError
-        ):
-            pass
-        return {
-            "content": text,
-            "citations": [],
-            "recommendations": [],
-            "claims": [],
-            "metadata": {}
-        }
+            parsed = json.loads(text)
+        except (TypeError, ValueError):
+            return {
+                "answer": text,
+                "content": text,
+                "books": [],
+                "recommendations": [],
+                "citations": [],
+                "warnings": [],
+                "claims": [],
+                "metadata": {},
+            }
+        if not isinstance(parsed, dict):
+            return {
+                "answer": text,
+                "content": text,
+                "books": [],
+                "recommendations": [],
+                "citations": [],
+                "warnings": [],
+                "claims": [],
+                "metadata": {},
+            }
+        answer = str(parsed.get("answer") or parsed.get("content") or "")
+        parsed["answer"] = answer
+        parsed["content"] = answer
+        parsed.setdefault("books", [])
+        parsed.setdefault("recommendations", parsed.get("books", []))
+        parsed.setdefault("citations", [])
+        parsed.setdefault("warnings", [])
+        parsed.setdefault("claims", [])
+        parsed.setdefault("metadata", {})
+        return parsed
 
     @staticmethod
     def _parse_tool_call(

@@ -20,6 +20,7 @@ class AssistantContextRequest:
     conversation_id: str | int | None
     user_id: str | int | None
     message: str
+    assistant_type: str = "BOOK_ADVISOR"
     user_context: dict[str, Any] = field(default_factory=dict)
     retrieved_context: list[dict[str, Any]] = field(default_factory=list)
     recommendation_context: list[dict[str, Any]] = field(default_factory=list)
@@ -224,6 +225,7 @@ class XayDungNguCanhService:
                     for tool in allowed_tools
                 ]
             },
+            "assistant_type": data.assistant_type,
             "tools": [
                 tool.to_dict()
                 for tool in allowed_tools
@@ -278,34 +280,16 @@ class XayDungNguCanhService:
         ):
             return request
         return AssistantContextRequest(
-            conversation_id=request.get(
-                "conversation_id"
-            ),
-            user_id=request.get(
-                "user_id"
-            ),
-            message=str(
-                request.get("message")
-                or ""
-            ).strip(),
-            user_context=request.get(
-                "user_context"
-            ) or {},
-            retrieved_context=request.get(
-                "retrieved_context"
-            ) or [],
-            recommendation_context=request.get(
-                "recommendation_context"
-            ) or [],
-            business_context=request.get(
-                "business_context"
-            ) or {},
-            tool_context=request.get(
-                "tool_context"
-            ) or [],
-            metadata=request.get(
-                "metadata"
-            ) or {}
+            conversation_id=request.get("conversation_id"),
+            user_id=request.get("user_id"),
+            message=str(request.get("message") or "").strip(),
+            assistant_type=str(request.get("assistant_type") or "BOOK_ADVISOR").strip().upper(),
+            user_context=request.get("user_context") or {},
+            retrieved_context=request.get("retrieved_context") or [],
+            recommendation_context=request.get("recommendation_context") or [],
+            business_context=request.get("business_context") or {},
+            tool_context=request.get("tool_context") or [],
+            metadata=request.get("metadata") or {}
         )
 
     @staticmethod
@@ -417,96 +401,45 @@ class XayDungNguCanhService:
         return data
 
     @staticmethod
-    def _tao_system_instruction(
-        context: dict[str, Any],
-        tools: list[ToolDefinition]
-    ) -> str:
-        tool_names = [
-            tool.name
-            for tool in tools
-        ]
-        return (
-            "Bạn là trợ lý AI của BookFlow. "
-            "Backend là nguồn sự thật về nghiệp vụ. "
-            "Chỉ sử dụng dữ liệu có trong context, tool result hoặc retrieval. "
-            "Không tự cấp quyền, không tự query SQL, không bịa giá, tồn kho, "
-            "trạng thái đơn hàng, khách hàng, citation hoặc trạng thái giao dịch. "
-            "Chỉ gọi tool có trong danh sách được phép. "
-            "Nếu tool trả lỗi hoặc không có dữ liệu, nói rõ không thể xác nhận "
-            "thay vì đoán. "
-            "Nếu cần thao tác thay đổi dữ liệu mà chưa có xác nhận hợp lệ, "
-            "chỉ hướng dẫn người dùng xác nhận. "
-            "Khi trả kết quả cuối, ưu tiên JSON với các trường "
-            "content, citations, recommendations, claims. "
-            "Tool được phép hiện tại: "
-            + json.dumps(
-                tool_names,
-                ensure_ascii=False
-            )
-        )
-
+    def _tao_system_instruction(context: dict[str, Any], tools: list[ToolDefinition]) -> str:
+        assistant_type = str(context.get("assistant_type") or "BOOK_ADVISOR").upper()
+        if assistant_type == "INTERNAL_ASSISTANT":
+            from app.prompts.tro_ly_noi_bo import get_system_prompt
+        elif assistant_type == "REPORT_ASSISTANT":
+            from app.prompts.tro_ly_bao_cao import get_system_prompt
+        else:
+            from app.prompts.tu_van_sach import get_system_prompt
+        tool_names = [tool.name for tool in tools]
+        return get_system_prompt() + "\n\nCác tool được hệ thống cho phép trong phiên này:\n" + json.dumps(tool_names, ensure_ascii=False)
     @staticmethod
-    def _tao_llm_messages(
-        context: dict[str, Any],
-        history: list[dict[str, Any]],
-        include_current: bool = False
-    ) -> list[dict[str, Any]]:
-        messages = [
-            {
-                "role": "system",
-                "content": context.get(
-                    "system_instruction",
-                    ""
-                )
-            }
-        ]
-        for item in history[
-            -DEFAULT_RECENT_MESSAGES:
-        ]:
-            role = str(
-                item.get("role")
-                or ""
-            ).lower()
-            if role in {
-                "user",
-                "assistant",
-                "tool",
-                "system"
-            }:
-                content = item.get(
-                    "content"
-                ) or ""
-                message = {
-                    "role": role,
-                    "content": str(content)
-                }
-                if item.get(
-                    "tool_call_id"
-                ):
-                    message["tool_call_id"] = item[
-                        "tool_call_id"
-                    ]
-                if item.get("name"):
-                    message["name"] = item[
-                        "name"
-                    ]
-                if item.get("tool_calls"):
-                    message["tool_calls"] = item[
-                        "tool_calls"
-                    ]
-                messages.append(message)
-        if include_current:
-            current = context.get(
-                "request",
-                {}
-            ).get(
-                "message"
-            )
-            if current:
-                messages.append({
-                    "role": "user",
-                    "content": current
-                })
+    def _tao_llm_messages(context: dict[str, Any], history: list[dict[str, Any]], include_current: bool = False) -> list[dict[str, Any]]:
+        assistant_type = str(context.get("assistant_type") or "BOOK_ADVISOR").upper()
+        if assistant_type == "INTERNAL_ASSISTANT":
+            from app.prompts.tro_ly_noi_bo import build_prompt_context, get_system_prompt
+        elif assistant_type == "REPORT_ASSISTANT":
+            from app.prompts.tro_ly_bao_cao import build_prompt_context, get_system_prompt
+        else:
+            from app.prompts.tu_van_sach import build_prompt_context, get_system_prompt
+        prompt_context = dict(context)
+        prompt_context.pop("system_instruction", None)
+        prompt_context.pop("llm_messages", None)
+        context_block = build_prompt_context(prompt_context)
+        messages: list[dict[str, Any]] = [{"role": "system", "content": get_system_prompt()}]
+        for item in history[-DEFAULT_RECENT_MESSAGES:]:
+            role = str(item.get("role") or "").lower()
+            if role not in {"user", "assistant", "tool"}:
+                continue
+            message: dict[str, Any] = {"role": role, "content": str(item.get("content") or "")}
+            if item.get("tool_call_id"):
+                message["tool_call_id"] = item["tool_call_id"]
+            if item.get("name"):
+                message["name"] = item["name"]
+            if item.get("tool_calls"):
+                message["tool_calls"] = item["tool_calls"]
+            messages.append(message)
+        current = str(context.get("request", {}).get("message") or "").strip()
+        if current:
+            messages.append({"role": "user", "content": f"{context_block}\n\n<bookflow_user_request>\n{current}\n</bookflow_user_request>"})
         return messages
 
     def _truncate_context(

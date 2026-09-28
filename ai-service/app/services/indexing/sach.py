@@ -3,7 +3,8 @@ from datetime import datetime, timezone
 from typing import Any
 from app.core.exceptions import AIBackendException, AIProviderException, AIServiceException
 from app.integrations.backend_client import BackendClient, backend_client
-from app.providers.embeddings import EmbeddingProvider, embedding_provider
+from app.providers.base import EmbeddingProvider
+from app.providers.embeddings import embedding_provider
 from app.repositories.doan_du_lieu import DoanDuLieuRepository, doan_du_lieu_repository
 from app.repositories.nguon_du_lieu import NguonDuLieuRepository, nguon_du_lieu_repository
 from app.services.indexing.chia_doan import ChiaDoanService, chia_doan_service

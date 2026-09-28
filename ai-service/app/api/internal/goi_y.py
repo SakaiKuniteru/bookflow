@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, status
 from app.core.dependencies import get_internal_request_context
 from app.schemas.goi_y import GoiYRequest
 from app.services.recommendations import tao_ung_vien
+from app.services.recommendations.tao_ung_vien import RecommendationContext
 
 router = APIRouter(
     prefix="/internal/goi-y",
@@ -32,11 +33,20 @@ async def goi_y(
         get_internal_request_context
     )
 ) -> dict[str, Any]:
-    data = await tao_ung_vien.goi_y(
-        body.model_dump(mode="json"),
-        context
+    recommendation_context = RecommendationContext.tu_dict({
+        "context_type": body.context_type,
+        "user_id": body.user_id,
+        "source_book_id": body.book_id,
+        "query": body.query,
+        "filters": body.filters,
+        "limit": body.limit,
+    })
+    result = await tao_ung_vien.tao_ung_vien_service.tao_ung_vien(
+        recommendation_context,
+        user_context=body.user_context,
+        limit=body.limit,
     )
     return _success(
         context["request_id"],
-        data
+        result
     )

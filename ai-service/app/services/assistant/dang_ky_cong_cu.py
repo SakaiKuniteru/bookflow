@@ -1,6 +1,3 @@
-# app/services/assistant/dang_ky_cong_cu.py
-# TẠO MỚI / THAY TOÀN BỘ
-
 from __future__ import annotations
 
 import inspect
@@ -623,6 +620,8 @@ def tao_tool_registry_mac_dinh(
     backend_client: Any | None = None
 ) -> ToolRegistry:
     registry = ToolRegistry()
+    if os.getenv("AI_TOOLS_ENABLED", "false").strip().lower() not in {"1", "true", "yes"}:
+        return registry
     if backend_client is None:
         try:
             import app.integrations.backend_client as backend_module

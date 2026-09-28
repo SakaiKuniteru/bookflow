@@ -18,9 +18,16 @@ class OpenAICompatibleEmbeddingProvider(EmbeddingProvider):
         self.client = httpx.AsyncClient(
             base_url=self.settings.embedding_base_url.rstrip("/"),
             headers=headers,
-            timeout=self.settings.llm_timeout
+            timeout=self.settings.embedding_timeout
         )
-
+    async def kiem_tra_ket_noi(self) -> bool:
+        if not self.san_sang():
+            return False
+        try:
+            await self.embed(["bookflow health check"])
+            return True
+        except Exception:
+            return False
     async def dong(self) -> None:
         if self.client:
             await self.client.aclose()
@@ -90,4 +97,6 @@ def tao_embedding_provider(settings: Settings) -> OpenAICompatibleEmbeddingProvi
     global embedding_provider
     if embedding_provider is None:
         embedding_provider = OpenAICompatibleEmbeddingProvider(settings)
+    return embedding_provider
+def get_embedding_provider() -> EmbeddingProvider:
     return embedding_provider

@@ -14,7 +14,14 @@ class BackendClient:
             timeout=self.settings.backend_request_timeout,
             headers=self._tao_headers()
         )
-
+    async def kiem_tra_ket_noi(self) -> bool:
+        if self.client is None:
+            return False
+        try:
+            response = await self.client.get(f"{self.settings.backend_base_url.rstrip('/')}/health", timeout=min(self.settings.backend_request_timeout, 5.0))
+            return response.status_code < 500
+        except Exception:
+            return False
     async def dong(self) -> None:
         if self.client:
             await self.client.aclose()
@@ -36,9 +43,9 @@ class BackendClient:
         response = await self._request("GET", path, params=params)
         return response
 
-    async def post(self, path: str, data: dict[str, Any] | None = None) -> dict[str, Any]:
-        response = await self._request("POST", path, json=data)
-        return response
+    async def post(self, path: str, data: dict[str, Any] | None = None, json_data: dict[str, Any] | None = None) -> dict[str, Any]:
+        payload = data if data is not None else json_data
+        return await self._request("POST", path, json=payload)
 
     async def put(self, path: str, data: dict[str, Any] | None = None) -> dict[str, Any]:
         response = await self._request("PUT", path, json=data)

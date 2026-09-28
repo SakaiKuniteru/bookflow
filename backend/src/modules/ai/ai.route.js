@@ -1,11 +1,11 @@
 const express = require('express');
+const { authenticate } = require('../../common/middlewares/authenticate.js');
+const { tenantScope } = require('../../common/middlewares/tenant-scope.js');
 const controller = require('./ai.controller.js');
-
 const router = express.Router();
-
+router.use(authenticate, tenantScope);
 router.post('/chat', controller.chat.bind(controller));
 router.post('/search', controller.search.bind(controller));
 router.post('/goi-y-sach', controller.goiYSach.bind(controller));
 router.post('/phan-tich', controller.phanTich.bind(controller));
-
 module.exports = router;

@@ -66,3 +66,5 @@ class CongViecLoc(YeuCauPhanTrang):
     priority: MucDoUuTien | None = None
     don_vi_id: int | None = Field(default=None, ge=1)
     chi_nhanh_id: int | None = Field(default=None, ge=1)
+
+CongViecTaoRequest = CongViecTao

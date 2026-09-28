@@ -34,7 +34,13 @@ class HoiThoaiRepository:
         async with self._ket_noi(connection) as ket_noi:
             cursor = await ket_noi.execute(sql, (conversation_id, user_id, session_id, title, status, Jsonb(metadata or {})))
             return await cursor.fetchone()
-    async def lay_theo_id(self, conversation_id: str, connection: Any | None = None) -> dict[str, Any] | None:
+    async def lay_theo_id(
+        self,
+        conversation_id: str,
+        user_id: int | str | None = None,
+        connection: Any | None = None,
+    ) -> dict[str, Any] | None:
+        ...
         sql = f"SELECT * FROM {TABLE_HOI_THOAI} WHERE conversation_id = %s"
         async with self._ket_noi(connection) as ket_noi:
             cursor = await ket_noi.execute(sql, (conversation_id,))

@@ -315,9 +315,15 @@ class WorkerRunner:
             await self._goi(
                 self.queue_dispatcher.dispatch,
                 self.queue_name,
-                job["job_type"],
-                {"job_id": job_id},
-                1,
+                {
+                    "job_id": job_id,
+                    "job_type": job["job_type"],
+                    "payload": job.get("payload") or {},
+                    "attempt": attempt + 1,
+                    "max_attempts": max_attempts,
+                    "request_id": job.get("request_id"),
+                    "trace_id": job.get("trace_id"),
+                },
             )
         except Exception as error:
             logger.warning(
@@ -448,6 +454,11 @@ class WorkerRunner:
             self.queue_name,
             self.concurrency,
         )
+        logger.info(
+            "Worker ready worker_id=%s queue=%s; bắt đầu poll queue",
+            self.worker_id,
+            self.queue_name,
+        )
         while not self.dung_event.is_set():
             self.tasks = {task for task in self.tasks if not task.done()}
             if len(self.tasks) >= self.concurrency:
@@ -512,3 +523,123 @@ async def chay_worker(
         job_timeouts=job_timeouts,
     )
     await runner.chay()
+
+async def khoi_dong_worker() -> None:
+    from app.core.config import get_settings
+    from app.core.logging import cau_hinh_logging
+    from app.integrations.postgres import tao_postgres_client
+    from app.integrations.redis import tao_redis_client
+    from app.integrations.storage import tao_storage_client
+    from app.integrations.backend_client import tao_backend_client
+    from app.providers.llm import tao_llm_provider
+    from app.providers.embeddings import tao_embedding_provider
+    from app.queue.connection import tao_queue_connection
+    from app.queue.dispatcher import QueueDispatcher
+    from app.repositories.cong_viec import tao_cong_viec_repository
+    from app.repositories.doan_du_lieu import doan_du_lieu_repository
+    from app.repositories.nguon_du_lieu import nguon_du_lieu_repository
+    from app.services.indexing.sach import sach_indexing_service
+    from app.services.indexing.tai_lieu import tai_lieu_indexing_service
+    from app.services.extraction.trich_xuat_thong_tin import trich_xuat_thong_tin_service
+    from app.services.recommendations.tao_ung_vien import tao_ung_vien_service
+    settings = get_settings()
+    cau_hinh_logging(settings.app_log_level)
+    postgres = tao_postgres_client(settings)
+    redis = tao_redis_client(settings)
+    storage = tao_storage_client(settings)
+    backend = tao_backend_client(settings)
+    llm = tao_llm_provider(settings)
+    embedding = tao_embedding_provider(settings)
+    queue = tao_queue_connection(settings)
+    initialized = []
+    try:
+        logger.info("Worker startup: PostgreSQL")
+        await postgres.khoi_tao()
+        initialized.append(postgres)
+        logger.info("Worker startup: Redis")
+        await redis.khoi_tao()
+        initialized.append(redis)
+        logger.info("Worker startup: Storage")
+        await storage.khoi_tao()
+        initialized.append(storage)
+        logger.info("Worker startup: Backend")
+        await backend.khoi_tao()
+        initialized.append(backend)
+        logger.info("Worker startup: LLM")
+        await llm.khoi_tao()
+        initialized.append(llm)
+        logger.info("Worker startup: Embedding")
+        await embedding.khoi_tao()
+        initialized.append(embedding)
+        logger.info("Worker startup: Queue")
+        await queue.khoi_tao()
+        initialized.append(queue)
+        repository = tao_cong_viec_repository(postgres)
+        dispatcher = QueueDispatcher(queue)
+        async def index_book(payload, progress, context):
+            result = await sach_indexing_service.index_sach(
+                payload["book_id"],
+                du_lieu=payload.get("book_data"),
+                backend_path=payload.get("backend_path"),
+                force=bool(payload.get("force", False)),
+            )
+            await progress({"processed": 1, "total": 1, "percentage": 100, "message": "Index sách hoàn tất."})
+            return result
+        async def index_document(payload, progress, context):
+            result = await tai_lieu_indexing_service.index_tai_lieu(
+                payload["file_id"],
+                du_lieu=payload.get("document_data"),
+                backend_path=payload.get("backend_path"),
+                force=bool(payload.get("force", False)),
+            )
+            await progress({"processed": 1, "total": 1, "percentage": 100, "message": "Index tài liệu hoàn tất."})
+            return result
+        async def extract_information(payload, progress, context):
+            result = await trich_xuat_thong_tin_service.trich_xuat(
+                ocr_result=payload["ocr_result"],
+                document_type_hint=payload.get("document_type"),
+                existing_data=payload.get("existing_data"),
+                verified_fields=payload.get("verified_fields"),
+                extraction_context=payload.get("extraction_context"),
+            )
+            await progress({"processed": 1, "total": 1, "percentage": 100, "message": "Extraction hoàn tất."})
+            return result
+        async def generate_recommendation(payload, progress, context):
+            result = await tao_ung_vien_service.tao_ung_vien(
+                payload.get("context") or payload,
+                user_context=payload.get("user_context") or {},
+                limit=payload.get("limit"),
+            )
+            await progress({"processed": 1, "total": 1, "percentage": 100, "message": "Recommendation hoàn tất."})
+            return result
+        async def cleanup_index(payload, progress, context):
+            source_id = payload.get("source_id")
+            if source_id:
+                chunk_count = await doan_du_lieu_repository.vo_hieu_hoa_theo_source(str(source_id))
+                await nguon_du_lieu_repository.vo_hieu_hoa(str(source_id), status="INACTIVE")
+            else:
+                chunk_count = 0
+            await progress({"processed": 1, "total": 1, "percentage": 100, "message": "Cleanup index hoàn tất."})
+            return {"source_id": source_id, "affected_chunks": chunk_count}
+        services = WorkerServices(
+            lap_chi_muc_sach=index_book,
+            lap_chi_muc_tai_lieu=index_document,
+            trich_xuat_thong_tin=extract_information,
+            tao_goi_y=generate_recommendation,
+            don_dep_chi_muc=cleanup_index,
+        )
+        await chay_worker(
+            queue_dispatcher=dispatcher,
+            cong_viec_repository=repository,
+            services=services,
+            queue_name=settings.queue_name,
+            concurrency=settings.worker_concurrency,
+            poll_timeout=settings.worker_poll_timeout,
+            heartbeat_interval=settings.worker_heartbeat_interval,
+        )
+    finally:
+        for dependency in reversed(initialized):
+            await dependency.dong()
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(khoi_dong_worker())

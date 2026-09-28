@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Any
 from pydantic import Field, model_validator
 from app.schemas.dung_chung import Citation, RequestContext, SchemaCoSo
 
@@ -26,7 +27,7 @@ class BoLocTimKiemSach(SchemaCoSo):
 
 class TimKiemSachRequest(SchemaCoSo):
     query: str = Field(min_length=1, max_length=5000)
-    user_context: RequestContext | None = None
+    user_context: dict[str, Any] = Field(default_factory=dict)
     filters: BoLocTimKiemSach = Field(default_factory=BoLocTimKiemSach)
     page: int = Field(default=1, ge=1)
     limit: int = Field(default=20, ge=1, le=50)
@@ -55,3 +56,5 @@ class TimKiemSachResponse(SchemaCoSo):
     page: int = Field(ge=1)
     limit: int = Field(ge=1, le=50)
     search_mode: CheDoTimKiem
+
+TimKiemRequest = TimKiemSachRequest
