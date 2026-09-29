@@ -2,25 +2,22 @@
     {{#if label}}
         <label class="bf-form-label" for="{{id}}">{{label}}{{#if required}}<span class="bf-form-required">*</span>{{/if}}</label>
     {{/if}}
-    <div class="bf-money-control">
+    <div class="bf-phone-control" data-bf-phone data-phone-format="{{#if format}}{{format}}{{else}}local{{/if}}">
         <input
             id="{{id}}"
-            name="{{name}}"
-            type="text"
-            inputmode="decimal"
-            class="bf-form-control bf-money-input"
+            type="tel"
+            inputmode="tel"
+            class="bf-form-control bf-phone-input"
             value="{{value}}"
-            placeholder="{{placeholder}}"
-            data-money-type="{{#if type}}{{type}}{{else}}decimal{{/if}}"
-            data-money-decimals="{{decimals}}"
-            data-min="{{min}}"
-            data-max="{{max}}"
+            placeholder="{{#if placeholder}}{{placeholder}}{{else}}0912 345 678{{/if}}"
+            autocomplete="tel"
             {{#if required}}required{{/if}}
             {{#if disabled}}disabled{{/if}}
             {{#if readonly}}readonly{{/if}}
         >
-        {{#if currency}}<span class="bf-money-currency">{{currency}}</span>{{/if}}
+        <input type="hidden" class="bf-phone-value" name="{{name}}" value="">
     </div>
+    <div class="bf-form-error bf-phone-error" hidden>Số điện thoại Việt Nam phải gồm mã 0 và 9 chữ số.</div>
     {{#if helpText}}<div class="bf-form-help">{{helpText}}</div>{{/if}}
     {{#if error}}<div class="bf-form-error">{{error}}</div>{{/if}}
 </div>

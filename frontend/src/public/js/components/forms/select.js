@@ -1,179 +1,253 @@
 function getOptions(wrapper) {
-    return [...wrapper.querySelectorAll(".bf-select-option:not(.bf-select-all-option)")];
+    return [...wrapper.querySelectorAll(".bf-select-option")];
+}
+
+function getVisibleOptions(wrapper) {
+    return getOptions(wrapper).filter(option => !option.disabled && !option.hidden);
 }
 
 function getSelected(wrapper) {
     return getOptions(wrapper).filter(option => option.classList.contains("is-selected"));
 }
 
+function isMultiple(wrapper) {
+    return wrapper.dataset.multiple === "true";
+}
+
+function hasSearch(wrapper) {
+    return wrapper.dataset.search === "true";
+}
+
+function hasCheckbox(wrapper) {
+    return wrapper.dataset.checkbox === "true";
+}
+
 function updateHiddenValues(wrapper) {
     const container = wrapper.querySelector(".bf-select-hidden-values");
     const name = wrapper.dataset.name;
-    const multiple = wrapper.dataset.multiple === "true";
-    container.innerHTML = "";
+    if (!container || !name) return;
+    container.replaceChildren();
     getSelected(wrapper).forEach(option => {
         const input = document.createElement("input");
         input.type = "hidden";
-        input.name = multiple ? `${name}[]` : name;
-        input.value = option.dataset.value;
+        input.name = isMultiple(wrapper) ? `${name}[]` : name;
+        input.value = option.dataset.value ?? "";
         container.appendChild(input);
     });
 }
 
-function updateDisplay(wrapper) {
+function updateControlState(wrapper) {
     const value = wrapper.querySelector(".bf-select-value");
     const clear = wrapper.querySelector(".bf-select-clear");
+    const chevron = wrapper.querySelector(".bf-select-chevron");
+    const search = wrapper.querySelector(".bf-select-search-input");
     const selected = getSelected(wrapper);
-    const multiple = wrapper.dataset.multiple === "true";
-    value.innerHTML = "";
-    if (!selected.length) {
-        value.textContent = wrapper.dataset.placeholder || "Chọn...";
-        wrapper.classList.remove("has-value");
-        if (clear) clear.hidden = true;
-    } else if (multiple) {
+    if (!value) return;
+    value.replaceChildren();
+    if (isMultiple(wrapper)) {
         selected.forEach(option => {
             const chip = document.createElement("span");
             chip.className = "bf-select-chip";
-            chip.innerHTML = `<span>${escapeHtml(option.dataset.label)}</span><button type="button" data-remove-value="${escapeAttribute(option.dataset.value)}" aria-label="Bỏ lựa chọn">×</button>`;
+            const label = document.createElement("span");
+            label.className = "bf-select-chip-label";
+            label.textContent = option.dataset.label ?? "";
+            const remove = document.createElement("button");
+            remove.type = "button";
+            remove.className = "bf-select-chip-remove";
+            remove.dataset.removeValue = option.dataset.value ?? "";
+            remove.setAttribute("aria-label", `Bỏ lựa chọn ${option.dataset.label ?? ""}`);
+            remove.textContent = "×";
+            chip.append(label, remove);
             value.appendChild(chip);
         });
-        wrapper.classList.add("has-value");
-        if (clear) clear.hidden = false;
-    } else {
-        value.textContent = selected[0].dataset.label;
-        wrapper.classList.add("has-value");
-        if (clear) clear.hidden = false;
+    } else if (selected.length && !hasSearch(wrapper)) {
+        value.textContent = selected[0].dataset.label ?? "";
+    } else if (!selected.length && !hasSearch(wrapper)) {
+        value.textContent = wrapper.dataset.placeholder || "Chọn...";
     }
+    wrapper.classList.toggle("has-value", selected.length > 0);
+    if (clear) clear.hidden = selected.length === 0;
+    if (chevron) chevron.hidden = selected.length > 0;
+    if (search && !wrapper.classList.contains("is-open")) {
+        search.value = !isMultiple(wrapper) && selected.length ? selected[0].dataset.label ?? "" : "";
+    }
+}
+
+function updateOptions(wrapper) {
+    getOptions(wrapper).forEach(option => {
+        const selected = option.classList.contains("is-selected");
+        option.setAttribute("aria-selected", String(selected));
+        const checkbox = option.querySelector(".bf-select-option-checkbox");
+        if (checkbox) {
+            checkbox.setAttribute("aria-checked", String(selected));
+            checkbox.classList.toggle("is-checked", selected);
+        }
+    });
+}
+
+function updateDisplay(wrapper) {
+    updateControlState(wrapper);
+    updateOptions(wrapper);
     updateHiddenValues(wrapper);
 }
 
-function escapeHtml(value) {
-    return String(value ?? "").replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[char]));
-}
-
-function escapeAttribute(value) {
-    return String(value ?? "").replace(/"/g, "&quot;");
-}
-
 function setActive(wrapper, index) {
-    const options = getOptions(wrapper).filter(option => !option.disabled && !option.hidden);
+    const options = getVisibleOptions(wrapper);
     if (!options.length) return;
-    index = Math.max(0, Math.min(index, options.length - 1));
-    wrapper.querySelectorAll(".bf-select-option").forEach(option => option.classList.remove("is-active"));
-    options[index].classList.add("is-active");
-    options[index].scrollIntoView({ block: "nearest" });
+    const nextIndex = Math.max(0, Math.min(index, options.length - 1));
+    getOptions(wrapper).forEach(option => option.classList.remove("is-active"));
+    options[nextIndex].classList.add("is-active");
+    options[nextIndex].scrollIntoView({ block: "nearest" });
+}
+
+function getActiveIndex(wrapper) {
+    return getVisibleOptions(wrapper).findIndex(option => option.classList.contains("is-active"));
+}
+
+function open(wrapper, focusSearch = false) {
+    wrapper.classList.add("is-open");
+    wrapper.querySelector(".bf-select-control")?.setAttribute("aria-expanded", "true");
+    setActive(wrapper, 0);
+    if (focusSearch && hasSearch(wrapper)) {
+        const search = wrapper.querySelector(".bf-select-search-input");
+        if (search) {
+            search.value = "";
+            filterOptions(wrapper, "");
+            search.focus();
+        }
+    }
+}
+
+function close(wrapper, restoreSearch = true) {
+    wrapper.classList.remove("is-open");
+    wrapper.querySelector(".bf-select-control")?.setAttribute("aria-expanded", "false");
+    if (hasSearch(wrapper)) {
+        const search = wrapper.querySelector(".bf-select-search-input");
+        if (search && restoreSearch) {
+            search.value = !isMultiple(wrapper) && getSelected(wrapper).length ? getSelected(wrapper)[0].dataset.label ?? "" : "";
+        }
+        filterOptions(wrapper, "");
+    }
+}
+
+function filterOptions(wrapper, query) {
+    const normalizedQuery = String(query ?? "").trim().toLocaleLowerCase();
+    let visible = 0;
+    getOptions(wrapper).forEach(option => {
+        const label = String(option.dataset.label ?? "").toLocaleLowerCase();
+        option.hidden = !label.includes(normalizedQuery);
+        if (!option.hidden) visible++;
+    });
+    const empty = wrapper.querySelector(".bf-select-empty");
+    if (empty) empty.hidden = visible > 0;
+    getOptions(wrapper).forEach(option => option.classList.remove("is-active"));
+    if (visible) setActive(wrapper, 0);
+}
+
+function clearSelection(wrapper) {
+    getOptions(wrapper).forEach(option => option.classList.remove("is-selected"));
+    updateDisplay(wrapper);
 }
 
 function toggleOption(wrapper, option) {
     if (!option || option.disabled) return;
-    const multiple = wrapper.dataset.multiple === "true";
-    const all = wrapper.dataset.selectAll === "true";
-    if (option.classList.contains("bf-select-all-option")) {
-        if (!all) return;
-        const options = getOptions(wrapper).filter(item => !item.disabled);
-        const selected = options.every(item => item.classList.contains("is-selected"));
-        options.forEach(item => item.classList.toggle("is-selected", !selected));
-    } else if (multiple) {
+    if (isMultiple(wrapper)) {
         option.classList.toggle("is-selected");
     } else {
         getOptions(wrapper).forEach(item => item.classList.remove("is-selected"));
         option.classList.add("is-selected");
-        close(wrapper);
     }
     updateDisplay(wrapper);
+    if (isMultiple(wrapper)) {
+        wrapper.querySelector(".bf-select-search-input")?.focus();
+    } else {
+        close(wrapper);
+    }
+    wrapper.dispatchEvent(new Event("change", { bubbles: true }));
 }
 
-function open(wrapper) {
-    wrapper.classList.add("is-open");
-    wrapper.querySelector(".bf-select-control")?.setAttribute("aria-expanded", "true");
-    setActive(wrapper, 0);
-    const search = wrapper.querySelector(".bf-select-search-input");
-    if (search) setTimeout(() => search.focus(), 0);
-}
-
-function close(wrapper) {
-    wrapper.classList.remove("is-open");
-    wrapper.querySelector(".bf-select-control")?.setAttribute("aria-expanded", "false");
+function moveActive(wrapper, direction) {
+    const options = getVisibleOptions(wrapper);
+    if (!options.length) return;
+    const active = getActiveIndex(wrapper);
+    setActive(wrapper, active < 0 ? 0 : active + direction);
 }
 
 function initialize(wrapper) {
     if (wrapper.dataset.formInitialized === "true") return;
-    wrapper.dataset.formInitialized = "true";
     const control = wrapper.querySelector(".bf-select-control");
     const optionsBox = wrapper.querySelector(".bf-select-options");
     const search = wrapper.querySelector(".bf-select-search-input");
+    const clear = wrapper.querySelector(".bf-select-clear");
+    if (!control || !optionsBox) return;
+    wrapper.dataset.formInitialized = "true";
     control.addEventListener("click", event => {
+        const chipRemove = event.target.closest("[data-remove-value]");
+        if (chipRemove) {
+            event.preventDefault();
+            event.stopPropagation();
+            const option = getOptions(wrapper).find(item => item.dataset.value === chipRemove.dataset.removeValue);
+            option?.classList.remove("is-selected");
+            updateDisplay(wrapper);
+            wrapper.dispatchEvent(new Event("change", { bubbles: true }));
+            return;
+        }
         if (event.target.closest(".bf-select-clear")) return;
-        wrapper.classList.contains("is-open") ? close(wrapper) : open(wrapper);
+        if (event.target.closest(".bf-select-search-input")) {
+            if (!wrapper.classList.contains("is-open")) open(wrapper);
+            return;
+        }
+        if (wrapper.classList.contains("is-open")) close(wrapper);
+        else open(wrapper, hasSearch(wrapper));
     });
     control.addEventListener("keydown", event => {
-        const options = getOptions(wrapper).filter(option => !option.disabled && !option.hidden);
-        const active = options.findIndex(option => option.classList.contains("is-active"));
-        if (event.key === "ArrowDown") {
+        if (hasSearch(wrapper)) return;
+        if (event.key === "ArrowDown" || event.key === "ArrowUp") {
             event.preventDefault();
             if (!wrapper.classList.contains("is-open")) open(wrapper);
-            else setActive(wrapper, active + 1);
-        }
-        if (event.key === "ArrowUp") {
-            event.preventDefault();
-            if (wrapper.classList.contains("is-open")) setActive(wrapper, active - 1);
-        }
-        if (event.key === "Enter" || event.key === " ") {
+            else moveActive(wrapper, event.key === "ArrowDown" ? 1 : -1);
+        } else if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();
             if (!wrapper.classList.contains("is-open")) open(wrapper);
-            else toggleOption(wrapper, options[Math.max(active, 0)]);
-        }
-        if (event.key === "Escape") close(wrapper);
-        if (event.key === "Home") {
+            else toggleOption(wrapper, wrapper.querySelector(".bf-select-option.is-active"));
+        } else if (event.key === "Escape") {
+            close(wrapper);
+        } else if (event.key === "Home" && wrapper.classList.contains("is-open")) {
             event.preventDefault();
             setActive(wrapper, 0);
-        }
-        if (event.key === "End") {
+        } else if (event.key === "End" && wrapper.classList.contains("is-open")) {
             event.preventDefault();
-            setActive(wrapper, options.length - 1);
+            setActive(wrapper, getVisibleOptions(wrapper).length - 1);
         }
     });
     optionsBox.addEventListener("click", event => {
         const option = event.target.closest(".bf-select-option");
-        const remove = event.target.closest("[data-remove-value]");
         if (option) toggleOption(wrapper, option);
-        if (remove) {
-            const target = getOptions(wrapper).find(item => item.dataset.value === remove.dataset.removeValue);
-            if (target) target.classList.remove("is-selected");
-            updateDisplay(wrapper);
-            event.stopPropagation();
-        }
     });
-    wrapper.querySelector(".bf-select-clear")?.addEventListener("click", event => {
-        event.stopPropagation();
-        getOptions(wrapper).forEach(option => option.classList.remove("is-selected"));
-        updateDisplay(wrapper);
+    search?.addEventListener("focus", () => {
+        if (!wrapper.classList.contains("is-open")) open(wrapper);
     });
-    search?.addEventListener("input", () => {
-        const query = search.value.trim().toLowerCase();
-        let visible = 0;
-        getOptions(wrapper).forEach(option => {
-            const match = option.dataset.label.toLowerCase().includes(query);
-            option.hidden = !match;
-            if (match) visible++;
-        });
-        const empty = wrapper.querySelector(".bf-select-empty");
-        if (empty) empty.hidden = visible !== 0;
-        setActive(wrapper, 0);
-    });
+    search?.addEventListener("input", () => filterOptions(wrapper, search.value));
     search?.addEventListener("keydown", event => {
-        if (event.key === "Escape") close(wrapper);
-        if (event.key === "Enter") {
-            event.preventDefault();
-            const active = wrapper.querySelector(".bf-select-option.is-active");
-            if (active) toggleOption(wrapper, active);
-        }
         if (event.key === "ArrowDown" || event.key === "ArrowUp") {
             event.preventDefault();
-            const options = getOptions(wrapper).filter(option => !option.disabled && !option.hidden);
-            const active = options.findIndex(option => option.classList.contains("is-active"));
-            setActive(wrapper, event.key === "ArrowDown" ? active + 1 : active - 1);
+            if (!wrapper.classList.contains("is-open")) open(wrapper);
+            else moveActive(wrapper, event.key === "ArrowDown" ? 1 : -1);
+        } else if (event.key === "Enter") {
+            event.preventDefault();
+            toggleOption(wrapper, wrapper.querySelector(".bf-select-option.is-active"));
+        } else if (event.key === "Escape") {
+            event.preventDefault();
+            close(wrapper);
+            control.focus();
         }
+    });
+    clear?.addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        clearSelection(wrapper);
+        if (hasSearch(wrapper) && wrapper.classList.contains("is-open")) search?.focus();
+        wrapper.dispatchEvent(new Event("change", { bubbles: true }));
     });
     document.addEventListener("click", event => {
         if (!wrapper.contains(event.target)) close(wrapper);

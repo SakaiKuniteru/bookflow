@@ -1,19 +1,19 @@
 <div class="bf-form-field {{className}}" data-form-field>
     {{#if label}}
-        <label class="bf-form-label">{{label}}{{#if required}}<span class="bf-form-required">*</span>{{/if}}</label>
+        <label class="bf-form-label" for="{{id}}">{{label}}{{#if required}}<span class="bf-form-required">*</span>{{/if}}</label>
     {{/if}}
-    <div class="bf-file-upload" data-bf-file data-multiple="{{multiple}}" data-download="{{download}}">
+    <div class="bf-file-upload" data-bf-file data-name="{{name}}" data-multiple="{{multiple}}" data-download="{{download}}" data-disabled="{{disabled}}">
         <input
             id="{{id}}"
             name="{{name}}"
             type="file"
             class="bf-file-input"
-            accept="{{accept}}"
+            accept="{{#if accept}}{{accept}}{{else}}*/*{{/if}}"
             {{#if multiple}}multiple{{/if}}
             {{#if required}}required{{/if}}
             {{#if disabled}}disabled{{/if}}
         >
-        <label class="bf-file-dropzone" for="{{id}}">
+        <label class="bf-file-dropzone {{#if disabled}}is-disabled{{/if}}" for="{{id}}">
             <span class="bf-file-upload-icon">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4"></path><path d="m7 9 5-5 5 5"></path><path d="M5 20h14"></path></svg>
             </span>
@@ -22,12 +22,22 @@
         </label>
         <div class="bf-file-list">
             {{#each files}}
-                <div class="bf-file-item" data-existing-file data-url="{{url}}">
-                    <button type="button" class="bf-file-name" data-download-url="{{url}}" {{#unless ../download}}disabled{{/unless}}>{{name}}</button>
+                <div class="bf-file-item" data-existing-file data-url="{{url}}" data-name="{{name}}">
+                    <span class="bf-file-item-icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21.4 11.1-8.5 8.5a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"></path></svg>
+                    </span>
+                    {{#if ../download}}
+                        <a class="bf-file-name" href="{{url}}" download="{{name}}">{{name}}</a>
+                    {{else}}
+                        <span class="bf-file-name">{{name}}</span>
+                    {{/if}}
                     <span class="bf-file-size">{{size}}</span>
-                    <button type="button" class="bf-file-delete" aria-label="Xóa tệp">×</button>
+                    <button type="button" class="bf-file-delete" aria-label="Xóa tệp" title="Xóa tệp">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m4 4v6m6-6v6"></path></svg>
+                    </button>
                 </div>
             {{/each}}
         </div>
+        <div class="bf-file-removed"></div>
     </div>
 </div>

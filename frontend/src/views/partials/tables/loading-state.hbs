@@ -1,0 +1,7 @@
+{{#each (array 1 2 3 4 5)}}
+    <tr class="bf-table-skeleton-row" aria-hidden="true">
+        {{#each ../columns}}
+            <td><span class="bf-table-skeleton"></span></td>
+        {{/each}}
+    </tr>
+{{/each}}

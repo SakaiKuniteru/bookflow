@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#ffffff">
+    <title>{{#if title}}{{title}} | {{/if}}{{app.name}}</title>
+    <link rel="icon" href="/brand/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/css/components/forms.css">
+    <link rel="stylesheet" href="/css/components/navigation.css">
+    {{#each stylesheets}}<link rel="stylesheet" href="{{this}}">{{/each}}
+</head>
+<body class="bf-layout bf-layout-admin {{bodyClass}}">
+    {{> navigation/header brandName=app.name brandHref="/" links=navigation.headerLinks user=user accountLinks=navigation.accountLinks notifications=navigation.notifications unreadCount=navigation.unreadCount showNotifications=navigation.showNotifications sidebarId="admin-sidebar"}}
+    <div class="bf-app-shell">
+        {{> navigation/sidebar id="admin-sidebar" title=navigation.sidebarTitle ariaLabel="Menu quản trị" items=navigation.sidebarItems}}
+        <div class="bf-app-main">
+            {{#if breadcrumbs}}<div class="bf-layout-container">{{> navigation/breadcrumb items=breadcrumbs}}</div>{{/if}}
+            <main id="main-content" class="bf-layout-content {{contentClass}}">{{{body}}}</main>
+            {{#if navigation.footerGroups}}{{> navigation/footer brandName=app.name groups=navigation.footerGroups bottomLinks=navigation.footerLinks copyright=navigation.copyright year=navigation.year}}{{/if}}
+        </div>
+    </div>
+    <script type="module" src="/js/components/forms.js"></script>
+    <script type="module">import { initNavigation } from "/js/components/navigation.js"; initNavigation();</script>
+    {{#each scripts}}<script type="module" src="{{this}}"></script>{{/each}}
+</body>
+</html>

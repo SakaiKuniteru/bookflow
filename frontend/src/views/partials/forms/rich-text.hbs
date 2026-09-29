@@ -3,36 +3,83 @@
         <label class="bf-form-label" for="{{id}}-editor">{{label}}{{#if required}}<span class="bf-form-required">*</span>{{/if}}</label>
     {{/if}}
     <div class="bf-rich-text" data-bf-rich-text>
-        <div class="bf-rich-toolbar" role="toolbar">
-            <button type="button" data-command="undo" title="Hoàn tác">↶</button>
-            <button type="button" data-command="redo" title="Làm lại">↷</button>
+        <div class="bf-rich-toolbar" role="toolbar" aria-label="Thanh công cụ soạn thảo">
+            <button type="button" data-command="undo" title="Hoàn tác (Ctrl/Cmd+Z)">↶</button>
+            <button type="button" data-command="redo" title="Làm lại (Ctrl/Cmd+Y)">↷</button>
             <span class="bf-rich-divider"></span>
-            <select data-command="fontSize" title="Cỡ chữ">
-                <option value="3">Bình thường</option>
-                <option value="1">Nhỏ</option>
-                <option value="4">Lớn</option>
-                <option value="5">Rất lớn</option>
-                <option value="6">Tiêu đề</option>
+            <select data-command="formatBlock" title="Kiểu đoạn">
+                <option value="p">Đoạn văn</option>
+                <option value="h1">Tiêu đề 1</option>
+                <option value="h2">Tiêu đề 2</option>
+                <option value="h3">Tiêu đề 3</option>
+                <option value="blockquote">Trích dẫn</option>
+            </select>
+            <select data-command="fontName" title="Phông chữ">
+                <option value="Arial">Arial</option>
+                <option value="Georgia">Georgia</option>
+                <option value="Tahoma">Tahoma</option>
+                <option value="Verdana">Verdana</option>
+                <option value="monospace">Monospace</option>
+            </select>
+            <input class="bf-rich-font-size" type="text" inputmode="decimal" placeholder="14" aria-label="Cỡ chữ (px)" title="Nhập cỡ chữ, ví dụ 5 hoặc 5,5">
+            <button type="button" data-command="fontSizeCustom" title="Áp dụng cỡ chữ">px</button>
+            <span class="bf-rich-divider"></span>
+            <button type="button" data-command="bold" title="Đậm (Ctrl/Cmd+B)"><strong>B</strong></button>
+            <button type="button" data-command="italic" title="Nghiêng (Ctrl/Cmd+I)"><em>I</em></button>
+            <button type="button" data-command="underline" title="Gạch chân (Ctrl/Cmd+U)"><u>U</u></button>
+            <button type="button" data-command="strikeThrough" title="Gạch giữa (Ctrl/Cmd+Shift+X)"><s>S</s></button>
+            <button type="button" data-command="removeFormat" title="Xóa định dạng">Tx</button>
+            <span class="bf-rich-divider"></span>
+            <label class="bf-rich-color" title="Màu chữ">A<input type="color" data-command="foreColor" value="#222222" aria-label="Màu chữ"></label>
+            <label class="bf-rich-color bf-rich-highlight" title="Màu nền chữ">▰<input type="color" data-command="hiliteColor" value="#fff59d" aria-label="Màu nền chữ"></label>
+            <span class="bf-rich-divider"></span>
+            <button type="button" data-command="justifyLeft" title="Căn trái">☰</button>
+            <button type="button" data-command="justifyCenter" title="Căn giữa">≡</button>
+            <button type="button" data-command="justifyRight" title="Căn phải">☷</button>
+            <button type="button" data-command="justifyFull" title="Căn đều">▤</button>
+            <span class="bf-rich-divider"></span>
+            <select data-command="listStyle" title="Kiểu danh sách">
+                <option value="decimal">1, 2, 3</option>
+                <option value="upper-roman">I, II, III</option>
+                <option value="lower-roman">i, ii, iii</option>
+                <option value="lower-alpha">a, b, c</option>
+                <option value="disc">• Chấm tròn</option>
+                <option value="circle">○ Chấm rỗng</option>
+                <option value="square">▪ Hình vuông</option>
             </select>
             <span class="bf-rich-divider"></span>
-            <button type="button" data-command="bold" title="Đậm"><strong>B</strong></button>
-            <button type="button" data-command="italic" title="Nghiêng"><em>I</em></button>
-            <button type="button" data-command="underline" title="Gạch chân"><u>U</u></button>
+            <button type="button" data-command="insertTable" title="Chèn bảng">▦</button>
+            <select data-command="tableAlign" title="Căn bảng">
+                <option value="left">Bảng trái</option>
+                <option value="center">Bảng giữa</option>
+                <option value="right">Bảng phải</option>
+            </select>
+            <select data-command="tableVertical" title="Căn nội dung ô">
+                <option value="top">Ô trên</option>
+                <option value="middle">Ô giữa</option>
+                <option value="bottom">Ô dưới</option>
+            </select>
             <span class="bf-rich-divider"></span>
-            <button type="button" data-command="justifyLeft" title="Căn trái">≡</button>
-            <button type="button" data-command="justifyCenter" title="Căn giữa">≡</button>
-            <button type="button" data-command="justifyRight" title="Căn phải">≡</button>
-            <button type="button" data-command="justifyFull" title="Căn đều">≡</button>
-            <span class="bf-rich-divider"></span>
-            <button type="button" data-command="insertUnorderedList" title="Danh sách">•</button>
-            <button type="button" data-command="insertOrderedList" title="Đánh số">1.</button>
-            <button type="button" data-command="createLink" title="Liên kết">↗</button>
-            <button type="button" data-command="unlink" title="Bỏ liên kết">×</button>
+            <button type="button" data-command="createLink" title="Chèn liên kết (Ctrl/Cmd+K)">↗</button>
+            <button type="button" data-command="insertImage" title="Chèn ảnh bằng URL">▧</button>
+            <select class="bf-rich-language" aria-label="Ngôn ngữ code">
+                <option value="plaintext">Plain text</option>
+                <option value="javascript">JavaScript</option>
+                <option value="typescript">TypeScript</option>
+                <option value="python">Python</option>
+                <option value="html">HTML</option>
+                <option value="css">CSS</option>
+                <option value="json">JSON</option>
+                <option value="sql">SQL</option>
+            </select>
+            <button type="button" data-command="insertCode" title="Chèn khối code">Code</button>
         </div>
         <div
             id="{{id}}-editor"
             class="bf-rich-editor"
             contenteditable="true"
+            role="textbox"
+            aria-multiline="true"
             data-placeholder="{{placeholder}}"
             data-initial-value="{{value}}"
             style="min-height: {{#if height}}{{height}}{{else}}220px{{/if}};"

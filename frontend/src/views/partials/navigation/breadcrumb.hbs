@@ -1,0 +1,13 @@
+<nav class="bf-nav-breadcrumb {{className}}" aria-label="Breadcrumb">
+    <ol>
+        {{#each items}}
+            <li>
+                {{#if current}}
+                    <span aria-current="page">{{label}}</span>
+                {{else}}
+                    <a href="{{href}}">{{label}}</a>
+                {{/if}}
+            </li>
+        {{/each}}
+    </ol>
+</nav>

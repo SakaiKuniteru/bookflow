@@ -1,124 +1,139 @@
 .bf-file-upload {
     width: 100%;
 }
-
 .bf-file-input {
     position: absolute;
     width: 1px;
     height: 1px;
-    opacity: 0;
-    pointer-events: none;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    clip-path: inset(50%);
 }
-
 .bf-file-dropzone {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 130px;
-    padding: 20px;
+    min-height: 100px;
+    padding: 16px;
     border: 1.5px dashed var(--bf-form-border);
-    border-radius: 10px;
+    border-radius: 8px;
     background: #fafbfc;
     cursor: pointer;
     transition: border-color .18s ease, background .18s ease;
 }
-
 .bf-file-dropzone:hover,
 .bf-file-dropzone.is-dragover {
     border-color: var(--bf-form-primary);
     background: rgba(37, 99, 235, .025);
 }
-
+.bf-file-dropzone.is-disabled {
+    opacity: .55;
+    cursor: not-allowed;
+    pointer-events: none;
+}
 .bf-file-upload-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    margin-bottom: 8px;
-    border-radius: 10px;
+    width: 34px;
+    height: 34px;
+    margin-bottom: 6px;
+    border-radius: 8px;
     background: #eef3ff;
     color: var(--bf-form-primary);
 }
-
-.bf-file-upload-icon svg {
-    width: 21px;
-    height: 21px;
+.bf-file-upload-icon svg,
+.bf-file-item-icon svg,
+.bf-file-delete svg {
+    width: 19px;
+    height: 19px;
     fill: none;
     stroke: currentColor;
     stroke-width: 1.8;
     stroke-linecap: round;
     stroke-linejoin: round;
 }
-
 .bf-file-upload-title {
     color: var(--bf-form-text);
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
 }
-
 .bf-file-upload-description {
     margin-top: 3px;
     color: var(--bf-form-muted);
     font-size: 12px;
 }
-
 .bf-file-list {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 5px;
     margin-top: 8px;
 }
-
 .bf-file-item {
     display: flex;
     align-items: center;
     gap: 10px;
-    min-height: 42px;
-    padding: 7px 10px;
-    border: 1px solid var(--bf-form-border);
-    border-radius: 7px;
-    background: var(--bf-form-bg);
-}
-
-.bf-file-name {
-    flex: 1;
     min-width: 0;
-    padding: 0;
-    overflow: hidden;
+    min-height: 40px;
+    padding: 5px 9px;
     border: 0;
-    background: transparent;
-    color: var(--bf-form-primary);
-    font-size: 13px;
+    border-radius: 4px;
+    background: #f5f5f5;
+    box-sizing: border-box;
+}
+.bf-file-item-icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 24px;
+    color: #888;
+}
+.bf-file-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    color: var(--bf-form-text);
+    font-size: 14px;
     text-align: left;
     text-overflow: ellipsis;
     white-space: nowrap;
-    cursor: pointer;
 }
-
+a.bf-file-name {
+    color: #2584e8;
+    font-weight: 600;
+    text-decoration: none;
+}
+a.bf-file-name:hover {
+    text-decoration: underline;
+}
 .bf-file-size {
     flex: 0 0 auto;
     color: var(--bf-form-muted);
     font-size: 11px;
 }
-
 .bf-file-delete {
     display: inline-flex;
+    flex: 0 0 auto;
     align-items: center;
     justify-content: center;
-    width: 27px;
-    height: 27px;
+    width: 28px;
+    height: 28px;
     padding: 0;
     border: 0;
-    border-radius: 6px;
+    border-radius: 5px;
     background: transparent;
-    color: var(--bf-form-muted);
-    font-size: 20px;
+    color: #888;
     cursor: pointer;
 }
-
 .bf-file-delete:hover {
     background: #fef2f2;
     color: var(--bf-form-danger);
+}
+.bf-file-delete svg {
+    width: 18px;
+    height: 18px;
 }

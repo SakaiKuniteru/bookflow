@@ -4,7 +4,6 @@
     align-items: center;
     width: 100%;
 }
-
 .bf-search-icon {
     position: absolute;
     left: 12px;
@@ -17,7 +16,6 @@
     stroke-linejoin: round;
     pointer-events: none;
 }
-
 .bf-search-input {
     width: 100%;
     min-height: 42px;
@@ -31,12 +29,10 @@
     font-size: 14px;
     box-sizing: border-box;
 }
-
 .bf-search-input:focus {
     border-color: var(--bf-form-primary);
     box-shadow: var(--bf-form-focus-shadow);
 }
-
 .bf-search-clear {
     position: absolute;
     right: 52px;
@@ -53,11 +49,9 @@
     font-size: 18px;
     cursor: pointer;
 }
-
 .bf-search-clear.is-visible {
     display: inline-flex;
 }
-
 .bf-search-shortcut {
     position: absolute;
     right: 9px;

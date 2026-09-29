@@ -1,0 +1,27 @@
+{{#if href}}
+    <a
+        href="{{href}}"
+        class="bf-btn bf-btn-{{#if variant}}{{variant}}{{else}}primary{{/if}} bf-btn-{{#if size}}{{size}}{{else}}md{{/if}} {{className}}"
+        {{#if disabled}}aria-disabled="true" tabindex="-1"{{/if}}
+        {{#if title}}title="{{title}}"{{/if}}
+    >
+        {{#if icon}}{{> ui/icon name=icon size="18"}}{{/if}}
+        {{#if label}}<span class="bf-btn-text">{{label}}</span>{{/if}}
+        {{#if iconRight}}{{> ui/icon name=iconRight size="18"}}{{/if}}
+    </a>
+{{else}}
+    <button
+        id="{{id}}"
+        name="{{name}}"
+        type="{{#if type}}{{type}}{{else}}button{{/if}}"
+        value="{{value}}"
+        class="bf-btn bf-btn-{{#if variant}}{{variant}}{{else}}primary{{/if}} bf-btn-{{#if size}}{{size}}{{else}}md{{/if}} {{className}}"
+        {{#if disabled}}disabled{{/if}}
+        {{#if loading}}disabled aria-busy="true"{{/if}}
+        {{#if title}}title="{{title}}"{{/if}}
+    >
+        {{#if loading}}<span class="bf-ui-spinner bf-ui-spinner-sm" aria-hidden="true"></span>{{else}}{{#if icon}}{{> ui/icon name=icon size="18"}}{{/if}}{{/if}}
+        {{#if label}}<span class="bf-btn-text">{{label}}</span>{{/if}}
+        {{#if iconRight}}{{> ui/icon name=iconRight size="18"}}{{/if}}
+    </button>
+{{/if}}

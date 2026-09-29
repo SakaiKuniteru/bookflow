@@ -1,109 +1,126 @@
 function normalizeNumberType(type) {
+    const aliases = { positive: "positive-decimal", negative: "negative-decimal" };
+    const normalized = aliases[type] || type;
     const allowed = ["decimal", "integer", "positive-decimal", "negative-decimal", "positive-integer", "negative-integer"];
-    return allowed.includes(type) ? type : "decimal";
+    return allowed.includes(normalized) ? normalized : "decimal";
+}
+
+function getConfig(input) {
+    const money = input.classList.contains("bf-money-input");
+    const type = normalizeNumberType(money ? input.dataset.moneyType : input.dataset.numberType);
+    const decimalsValue = money ? input.dataset.moneyDecimals : input.dataset.numberDecimals;
+    const minValue = input.dataset.min;
+    const maxValue = input.dataset.max;
+    return {
+        type,
+        integer: type.includes("integer"),
+        positive: type.includes("positive"),
+        negative: type.includes("negative"),
+        decimals: decimalsValue === "" || decimalsValue == null ? null : Math.max(0, Number(decimalsValue)),
+        min: minValue === "" || minValue == null || !Number.isFinite(Number(minValue)) ? null : Number(minValue),
+        max: maxValue === "" || maxValue == null || !Number.isFinite(Number(maxValue)) ? null : Number(maxValue)
+    };
 }
 
 function formatNumber(value, type = "decimal", decimals = null) {
     type = normalizeNumberType(type);
     let source = String(value ?? "").trim();
-    let negative = source.startsWith("-");
-    source = source.replace(/\./g, "").replace(/[^\d,-]/g, "");
-    source = source.replace(/(?!^)-/g, "");
+    const negative = source.startsWith("-") || type.includes("negative");
     const commaIndex = source.indexOf(",");
-    let integer = commaIndex >= 0 ? source.slice(0, commaIndex) : source;
-    let decimal = commaIndex >= 0 ? source.slice(commaIndex + 1).replace(/\D/g, "") : "";
+    if (commaIndex >= 0) {
+        source = source.slice(0, commaIndex).replace(/\./g, "") + "," + source.slice(commaIndex + 1).replace(/[^\d]/g, "");
+    } else {
+        source = source.replace(/[^\d]/g, "");
+    }
+    const parts = source.split(",");
+    let integer = (parts[0] || "").replace(/\D/g, "").replace(/^0+(?=\d)/, "");
+    let fraction = parts.length > 1 ? parts.slice(1).join("").replace(/\D/g, "") : "";
     const isInteger = type.includes("integer");
-    const isPositive = type.includes("positive");
-    const isNegative = type.includes("negative");
-    if (isInteger) decimal = "";
-    if (isPositive) negative = false;
-    if (isNegative) negative = true;
-    integer = integer.replace(/\D/g, "").replace(/^0+(?=\d)/, "");
-    if (!integer) integer = commaIndex >= 0 ? "0" : "";
-    if (decimals !== null && decimals !== "") decimal = decimal.slice(0, Number(decimals));
+    if (isInteger) fraction = "";
+    if (decimals !== null && decimals !== "" && Number.isFinite(Number(decimals))) fraction = fraction.slice(0, Math.max(0, Number(decimals)));
+    if (!integer && (source.startsWith(",") || source.startsWith("-,"))) integer = "0";
+    if (!integer && !fraction) return source.startsWith("-") && !type.includes("positive") ? "-" : "";
     integer = integer.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    let result = `${negative && (integer || decimal) ? "-" : ""}${integer}`;
-    if (!isInteger && commaIndex >= 0) result += `,${decimal}`;
-    return result;
+    const sign = negative && !type.includes("positive") && (integer || fraction) ? "-" : "";
+    return `${sign}${integer}${!isInteger && parts.length > 1 ? `,${fraction}` : ""}`;
 }
 
-function getFormattedCaret(value, rawCaret, type, decimals) {
-    const rawPrefix = value.slice(0, rawCaret).replace(/\./g, "");
-    return formatNumber(rawPrefix, type, decimals).length;
+function getNumber(value) {
+    const normalized = String(value ?? "").replace(/\./g, "").replace(",", ".");
+    if (!normalized || normalized === "-" || normalized === "-0,") return null;
+    const number = Number(normalized);
+    return Number.isFinite(number) ? number : null;
 }
 
-function getInputConfig(input) {
-    const isMoney = input.classList.contains("bf-money-input");
-    return {
-        type: normalizeNumberType(isMoney ? (input.dataset.moneyType || "decimal") : input.dataset.numberType),
-        decimals: isMoney ? input.dataset.moneyDecimals : input.dataset.numberDecimals,
-        min: input.dataset.min !== undefined ? Number(input.dataset.min) : null,
-        max: input.dataset.max !== undefined ? Number(input.dataset.max) : null
-    };
+function formatInitialValue(value, config) {
+    let initial = String(value ?? "").trim();
+    if (/^-?\d+\.\d+$/.test(initial)) initial = initial.replace(".", ",");
+    return formatNumber(initial, config.type, config.decimals);
 }
 
-function clampNumberValue(input) {
-    const config = getInputConfig(input);
-    const numeric = Number(String(input.value).replace(/\./g, "").replace(",", "."));
-    if (!Number.isFinite(numeric)) return;
-    if (config.min !== null && numeric < config.min) input.value = formatNumber(String(config.min).replace(".", ","), config.type, config.decimals);
-    if (config.max !== null && numeric > config.max) input.value = formatNumber(String(config.max).replace(".", ","), config.type, config.decimals);
+function getCaretTokenCount(value, position) {
+    return (value.slice(0, position).match(/[0-9,-]/g) || []).length;
+}
+
+function getCaretFromTokenCount(value, tokenCount) {
+    if (!tokenCount) return 0;
+    let count = 0;
+    for (let index = 0; index < value.length; index++) {
+        if (/[0-9,-]/.test(value[index])) count++;
+        if (count >= tokenCount) return index + 1;
+    }
+    return value.length;
 }
 
 function formatInput(input) {
-    const config = getInputConfig(input);
-    const caret = input.selectionStart ?? input.value.length;
-    const valueBeforeCaret = input.value;
-    const rawCaret = valueBeforeCaret.slice(0, caret).replace(/\./g, "").length;
-    input.value = formatNumber(valueBeforeCaret, config.type, config.decimals);
-    const newCaret = getFormattedCaret(input.value, rawCaret, config.type, config.decimals);
+    const config = getConfig(input);
+    const oldValue = input.value;
+    const start = input.selectionStart ?? oldValue.length;
+    const end = input.selectionEnd ?? start;
+    const startTokens = getCaretTokenCount(oldValue, start);
+    const endTokens = getCaretTokenCount(oldValue, end);
+    input.value = formatNumber(oldValue, config.type, config.decimals);
     try {
-        input.setSelectionRange(newCaret, newCaret);
+        input.setSelectionRange(getCaretFromTokenCount(input.value, startTokens), getCaretFromTokenCount(input.value, endTokens));
     } catch {}
 }
 
-function handleBackspace(event, input) {
-    if (event.key !== "Backspace") return false;
-    const start = input.selectionStart ?? 0;
-    const end = input.selectionEnd ?? start;
-    if (start !== end || start <= 0) return false;
-    if (input.value[start - 1] !== ".") return false;
-    event.preventDefault();
-    input.setSelectionRange(start - 2, start);
-    document.execCommand("delete");
-    formatInput(input);
-    return true;
+function clampInput(input) {
+    const config = getConfig(input);
+    const value = getNumber(input.value);
+    if (value === null) return;
+    let next = value;
+    if (config.min !== null && next < config.min) next = config.min;
+    if (config.max !== null && next > config.max) next = config.max;
+    input.value = formatNumber(String(next).replace(".", ","), config.type, config.decimals);
 }
 
-function handleDelete(event, input) {
-    if (event.key !== "Delete") return false;
-    const start = input.selectionStart ?? 0;
-    const end = input.selectionEnd ?? start;
-    if (start !== end || start >= input.value.length) return false;
-    if (input.value[start] !== ".") return false;
-    event.preventDefault();
-    input.setSelectionRange(start, start + 2);
-    document.execCommand("delete");
-    formatInput(input);
-    return true;
+function updateCurrencyPadding(input) {
+    const currency = input.closest(".bf-money-control")?.querySelector(".bf-money-currency");
+    if (!currency) return;
+    const width = Math.ceil(currency.getBoundingClientRect().width) + 24;
+    input.style.paddingRight = `${Math.max(52, width)}px`;
 }
 
 function initializeInput(input) {
     if (input.dataset.formInitialized === "true") return;
     input.dataset.formInitialized = "true";
-    input.addEventListener("keydown", event => {
-        if (handleBackspace(event, input)) return;
-        handleDelete(event, input);
-    });
+    const config = getConfig(input);
+    if (input.value !== "") input.value = formatInitialValue(input.value, config);
+    updateCurrencyPadding(input);
     input.addEventListener("input", () => formatInput(input));
     input.addEventListener("paste", () => setTimeout(() => formatInput(input), 0));
     input.addEventListener("blur", () => {
-        if (input.value === "-") input.value = "";
-        if (input.value === ",") input.value = "0,";
+        if (input.value === "-" || input.value === ",") input.value = "";
+        if (input.value.endsWith(",")) input.value = input.value.slice(0, -1);
         formatInput(input);
-        clampNumberValue(input);
+        clampInput(input);
     });
-    formatInput(input);
+    input.addEventListener("change", () => {
+        formatInput(input);
+        clampInput(input);
+    });
+    window.addEventListener("resize", () => updateCurrencyPadding(input));
 }
 
 export function initNumberInputs(root = document) {

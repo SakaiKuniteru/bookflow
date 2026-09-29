@@ -1,0 +1,23 @@
+<div class="bf-nav-menu-wrap {{className}}" data-bf-menu>
+    <button type="button" class="bf-nav-account-trigger" data-bf-menu-trigger aria-expanded="false" aria-haspopup="true">
+        {{#if user.avatar}}
+            <img class="bf-nav-avatar" src="{{user.avatar}}" alt="">
+        {{else}}
+            <span class="bf-nav-avatar bf-nav-avatar-fallback">{{#if user.name}}{{user.name.[0]}}{{else}}?{{/if}}</span>
+        {{/if}}
+        <span class="bf-nav-account-name">{{#if user.name}}{{user.name}}{{else}}Tài khoản{{/if}}</span>
+        {{> ui/icon name="chevron-down" size="16"}}
+    </button>
+    <div class="bf-nav-menu bf-nav-account-menu" data-bf-menu-panel hidden>
+        <div class="bf-nav-account-summary">
+            <strong>{{user.name}}</strong>
+            {{#if user.email}}<span>{{user.email}}</span>{{/if}}
+        </div>
+        {{#each links}}
+            <a class="bf-nav-menu-item {{#if danger}}is-danger{{/if}}" href="{{href}}">
+                {{#if icon}}{{> ui/icon name=icon size="17"}}{{/if}}
+                <span>{{label}}</span>
+            </a>
+        {{/each}}
+    </div>
+</div>

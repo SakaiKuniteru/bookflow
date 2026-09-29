@@ -1,0 +1,26 @@
+<header class="bf-nav-header {{className}}">
+    <a class="bf-nav-brand" href="{{#if brandHref}}{{brandHref}}{{else}}/{{/if}}">
+        {{#if brandLogo}}
+            <img class="bf-nav-brand-logo" src="{{brandLogo}}" alt="{{#if brandName}}{{brandName}}{{else}}{{app.name}}{{/if}}">
+        {{else}}
+            <span class="bf-nav-brand-name">{{#if brandName}}{{brandName}}{{else}}{{app.name}}{{/if}}</span>
+        {{/if}}
+    </a>
+    <button type="button" class="bf-nav-mobile-toggle" data-bf-sidebar-toggle="{{sidebarId}}" aria-label="Mở menu" aria-expanded="false">
+        {{> ui/icon name="menu" size="22"}}
+    </button>
+    {{#if links}}
+        <nav class="bf-nav-header-links" aria-label="Điều hướng chính">
+            {{#each links}}
+                <a class="bf-nav-link {{#if active}}is-active{{/if}}" href="{{href}}" {{#if active}}aria-current="page"{{/if}}>
+                    {{#if icon}}{{> ui/icon name=icon size="18"}}{{/if}}
+                    <span>{{label}}</span>
+                </a>
+            {{/each}}
+        </nav>
+    {{/if}}
+    <div class="bf-nav-header-actions">
+        {{#if showNotifications}}{{> navigation/notification-menu notifications=notifications unreadCount=unreadCount}}{{/if}}
+        {{#if authenticated}}{{> navigation/account-menu user=user links=accountLinks}}{{/if}}
+    </div>
+</header>

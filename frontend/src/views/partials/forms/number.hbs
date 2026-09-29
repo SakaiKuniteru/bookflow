@@ -10,7 +10,7 @@
         class="bf-form-control bf-number-input"
         value="{{value}}"
         placeholder="{{placeholder}}"
-        data-number-type="{{type}}"
+        data-number-type="{{#if type}}{{type}}{{else}}decimal{{/if}}"
         data-number-decimals="{{decimals}}"
         data-min="{{min}}"
         data-max="{{max}}"

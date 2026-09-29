@@ -1,0 +1,14 @@
+<aside id="{{id}}" class="bf-nav-sidebar {{className}}" data-bf-sidebar>
+    {{#if title}}<div class="bf-nav-sidebar-title">{{title}}</div>{{/if}}
+    <nav aria-label="{{#if ariaLabel}}{{ariaLabel}}{{else}}Điều hướng{{/if}}">
+        {{#each items}}
+            {{#if divider}}<div class="bf-nav-sidebar-divider"></div>{{/if}}
+            {{#if group}}<h2 class="bf-nav-sidebar-group">{{group}}</h2>{{/if}}
+            <a class="bf-nav-sidebar-link {{#if active}}is-active{{/if}}" href="{{href}}" {{#if active}}aria-current="page"{{/if}}>
+                {{#if icon}}{{> ui/icon name=icon size="18"}}{{/if}}
+                <span class="bf-nav-sidebar-link-label">{{label}}</span>
+                {{#if badge}}<span class="bf-nav-sidebar-badge">{{badge}}</span>{{/if}}
+            </a>
+        {{/each}}
+    </nav>
+</aside>

@@ -1,6 +1,6 @@
 <div class="bf-form-field {{className}}" data-form-field>
     {{#if label}}
-        <label class="bf-form-label">{{label}}{{#if required}}<span class="bf-form-required">*</span>{{/if}}</label>
+        <label class="bf-form-label" for="{{id}}">{{label}}{{#if required}}<span class="bf-form-required">*</span>{{/if}}</label>
     {{/if}}
     <div
         class="bf-image-upload"
@@ -15,21 +15,23 @@
             type="file"
             class="bf-image-input"
             accept="image/*"
+            data-required="{{required}}"
             {{#if multiple}}multiple{{/if}}
             {{#if required}}required{{/if}}
             {{#if disabled}}disabled{{/if}}
         >
+        <input type="hidden" class="bf-image-delete-state" name="{{name}}_remove" value="false">
         <label class="bf-image-add" for="{{id}}">
             <span>+</span>
             <small>Thêm ảnh</small>
         </label>
         <div class="bf-image-list">
             {{#if src}}
-                <div class="bf-image-item">
+                <div class="bf-image-item" data-existing-src>
                     <img src="{{src}}" alt="{{alt}}">
                     <div class="bf-image-actions">
-                        <button type="button" class="bf-image-preview" data-existing-src="{{src}}" aria-label="Xem ảnh">
-                            <svg viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        <button type="button" class="bf-image-preview" data-existing-src="{{src}}" data-alt="{{alt}}" aria-label="Xem ảnh">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                         </button>
                         <button type="button" class="bf-image-delete" aria-label="Xóa ảnh">×</button>
                     </div>

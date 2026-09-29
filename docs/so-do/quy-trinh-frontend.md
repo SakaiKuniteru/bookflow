@@ -297,32 +297,32 @@ enter đẻ tìm
 
 ```text
 partials/tables/
-├── bang-du-lieu.hbs
-├── thanh-cong-cu.hbs
-├── bo-loc.hbs
-├── phan-trang.hbs
-├── bang-trong.hbs
-└── bang-dang-tai.hbs
+├── data-table.hbs
+├── toolbar.hbs
+├── filters.hbs
+├── pagination.hbs
+├── empty-state.hbs
+└── loading-state.hbs
 ```
 
 ### 7.5. Modals
 
 ```text
 partials/modals/
-├── hop-thoai-goc.hbs
-├── hop-thoai-bieu-mau.hbs
-├── hop-thoai-xac-nhan.hbs
-└── hop-thoai-chi-tiet.hbs
+├── base-modal.hbs
+├── form-modal.hbs
+├── confirm-modal.hbs
+└── detail-modal.hbs
 ```
 
 ### 7.6. Feedback
 
 ```text
 partials/feedback/
-├── thong-bao-noi.hbs
-├── canh-bao.hbs
-├── trang-loi.hbs
-└── khong-du-quyen.hbs
+├── toast.hbs
+├── alert.hbs
+├── error-page.hbs
+└── no-permission.hbs
 ```
 
 ## 8. Giai đoạn 05 — Components

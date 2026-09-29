@@ -1,0 +1,24 @@
+<footer class="bf-nav-footer {{className}}">
+    <div class="bf-nav-footer-main">
+        <div class="bf-nav-footer-brand">
+            {{#if brandLogo}}<img class="bf-nav-brand-logo" src="{{brandLogo}}" alt="{{brandName}}">{{else}}<strong>{{#if brandName}}{{brandName}}{{else}}{{app.name}}{{/if}}</strong>{{/if}}
+            {{#if description}}<p>{{description}}</p>{{/if}}
+        </div>
+        {{#each groups}}
+            <nav class="bf-nav-footer-group" aria-label="{{title}}">
+                <h2>{{title}}</h2>
+                {{#each links}}
+                    <a href="{{href}}">{{label}}</a>
+                {{/each}}
+            </nav>
+        {{/each}}
+    </div>
+    <div class="bf-nav-footer-bottom">
+        <span>{{#if copyright}}{{copyright}}{{else}}© {{year}} {{#if brandName}}{{brandName}}{{else}}{{app.name}}{{/if}}{{/if}}</span>
+        {{#if bottomLinks}}
+            <nav aria-label="Liên kết cuối trang">
+                {{#each bottomLinks}}<a href="{{href}}">{{label}}</a>{{/each}}
+            </nav>
+        {{/if}}
+    </div>
+</footer>

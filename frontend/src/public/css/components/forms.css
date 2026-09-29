@@ -87,15 +87,31 @@
     min-height: auto;
     resize: vertical;
 }
-
 .bf-money-control {
     position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
 }
-
-.bf-money-control .bf-form-control {
-    padding-right: 72px;
+.bf-money-control .bf-money-input {
+    width: 100%;
+    padding-right: 52px;
 }
-
+.bf-money-currency {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    max-width: 45%;
+    overflow: hidden;
+    color: var(--bf-form-muted);
+    font-size: 13px;
+    line-height: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transform: translateY(-50%);
+    pointer-events: none;
+    user-select: none;
+}
 .bf-money-currency {
     position: absolute;
     top: 50%;
@@ -253,9 +269,164 @@
     background: rgba(37, 99, 235, .07);
 }
 
+.bf-icon {
+    display: inline-block;
+    flex: 0 0 auto;
+    vertical-align: middle;
+}
+.bf-btn-icon,
+.bf-btn-text {
+    display: inline-flex;
+    align-items: center;
+}
+.bf-btn-icon {
+    flex: 0 0 auto;
+}
+.bf-btn[aria-busy="true"],
+.bf-btn:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+.bf-ui-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--bf-form-text);
+    font-size: 13px;
+    font-weight: 600;
+}
+.bf-ui-label-primary {
+    color: var(--bf-form-primary);
+}
+.bf-ui-label-muted {
+    color: var(--bf-form-muted);
+}
+.bf-ui-label-danger {
+    color: var(--bf-form-danger);
+}
+.bf-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: #eef2f7;
+    color: #475569;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 18px;
+}
+.bf-status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+}
+.bf-status-active,
+.bf-status-success,
+.bf-status-completed,
+.bf-status-available,
+.bf-status-paid {
+    background: #dcfce7;
+    color: #15803d;
+}
+.bf-status-pending,
+.bf-status-warning,
+.bf-status-waiting {
+    background: #fef3c7;
+    color: #a16207;
+}
+.bf-status-danger,
+.bf-status-error,
+.bf-status-failed,
+.bf-status-cancelled {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+.bf-status-info {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+.bf-status-inactive,
+.bf-status-disabled,
+.bf-status-muted {
+    background: #e5e7eb;
+    color: #4b5563;
+}
+.bf-ui-loading {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    color: var(--bf-form-muted);
+    font-size: 14px;
+}
+.bf-ui-spinner {
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    flex: 0 0 auto;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    color: var(--bf-form-primary);
+    animation: bf-ui-spin .7s linear infinite;
+}
+.bf-ui-spinner-sm {
+    width: 16px;
+    height: 16px;
+    border-width: 2px;
+}
+.bf-ui-loading[hidden] {
+    display: none;
+}
+.bf-ui-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 180px;
+    padding: 24px;
+    color: var(--bf-form-muted);
+    text-align: center;
+}
+.bf-ui-empty-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--bf-form-hover);
+    color: #94a3b8;
+}
+.bf-ui-empty-title {
+    margin: 4px 0 0;
+    color: var(--bf-form-text);
+    font-size: 16px;
+    font-weight: 600;
+}
+.bf-ui-empty-description {
+    max-width: 440px;
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+}
+@keyframes bf-ui-spin {
+    to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .bf-ui-spinner {
+        animation-duration: 1.5s;
+    }
+}
+
 @import url("./forms/select.css");
 @import url("./forms/password.css");
 @import url("./forms/file.css");
 @import url("./forms/image.css");
 @import url("./forms/rich-text.css");
 @import url("./forms/search.css");
+@import url("./forms/date.css");
+@import url("./forms/phone.css");

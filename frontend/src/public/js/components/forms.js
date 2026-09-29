@@ -7,6 +7,7 @@ import { initFileInputs } from "./forms/file.js";
 import { initImageInputs } from "./forms/image.js";
 import { initRichTextInputs } from "./forms/rich-text.js";
 import { initSearchInputs } from "./forms/search.js";
+import { initPhoneInputs } from "./forms/phone.js";
 
 const initializers = [
     initNumberInputs,
@@ -17,7 +18,8 @@ const initializers = [
     initFileInputs,
     initImageInputs,
     initRichTextInputs,
-    initSearchInputs
+    initSearchInputs,
+    initPhoneInputs
 ];
 
 function initForms(root = document) {
