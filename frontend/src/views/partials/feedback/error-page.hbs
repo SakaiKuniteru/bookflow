@@ -1,0 +1,15 @@
+<section class="bf-error-page {{className}}" role="alert">
+    <div class="bf-error-page-code">{{#if statusCode}}{{statusCode}}{{else}}500{{/if}}</div>
+    <h1 class="bf-error-page-title">{{#if title}}{{title}}{{else}}Đã xảy ra lỗi{{/if}}</h1>
+    <p class="bf-error-page-message">{{#if message}}{{message}}{{else}}Hệ thống chưa thể xử lý yêu cầu. Vui lòng thử lại sau.{{/if}}</p>
+    {{#if requestId}}<p class="bf-error-page-request">Mã yêu cầu: <code>{{requestId}}</code></p>{{/if}}
+    <div class="bf-error-page-actions">
+        {{#if showBack}}<button type="button" class="bf-btn bf-btn-secondary bf-btn-md" data-feedback-back>Quay lại</button>{{/if}}
+        <a class="bf-btn bf-btn-primary bf-btn-md" href="{{#if homeUrl}}{{homeUrl}}{{else}}/{{/if}}">Về trang chủ</a>
+        {{#if retryUrl}}
+            <a class="bf-btn bf-btn-secondary bf-btn-md" href="{{retryUrl}}">Thử lại</a>
+        {{else if showRetry}}
+            <button type="button" class="bf-btn bf-btn-secondary bf-btn-md" data-feedback-retry>Thử lại</button>
+        {{/if}}
+    </div>
+</section>

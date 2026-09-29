@@ -1,0 +1,7 @@
+{{#> modals/base-modal id=id title=title description=description size=size open=open loading=loading loadingText=loadingText closeOnBackdrop=closeOnBackdrop hideClose=hideClose footer=footer}}
+    <div class="bf-modal-confirm {{#if variant}}bf-modal-confirm-{{variant}}{{/if}}">
+        {{#if icon}}<span class="bf-modal-confirm-icon">{{> ui/icon name=icon size="24"}}</span>{{/if}}
+        {{#if message}}<p class="bf-modal-confirm-message">{{message}}</p>{{/if}}
+        {{#if detail}}<p class="bf-modal-confirm-detail">{{detail}}</p>{{/if}}
+    </div>
+{{/modals/base-modal}}

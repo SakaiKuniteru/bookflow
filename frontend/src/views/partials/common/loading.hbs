@@ -1,0 +1,17 @@
+<div
+    class="bf-loading {{#if fullscreen}}bf-loading-fullscreen{{else}}bf-loading-region{{/if}} {{className}}"
+    data-bf-loading
+    data-fullscreen="{{#if fullscreen}}true{{else}}false{{/if}}"
+    role="status"
+    aria-live="polite"
+    aria-busy="true"
+    {{#unless visible}}hidden{{/unless}}
+>
+    {{#if fullscreen}}<div class="bf-loading-backdrop"></div>{{/if}}
+    <div class="bf-loading-content">
+        <span class="bf-loading-spinner" aria-hidden="true">
+            <i style="--bf-spinner-index:0"></i><i style="--bf-spinner-index:1"></i><i style="--bf-spinner-index:2"></i><i style="--bf-spinner-index:3"></i><i style="--bf-spinner-index:4"></i><i style="--bf-spinner-index:5"></i><i style="--bf-spinner-index:6"></i><i style="--bf-spinner-index:7"></i><i style="--bf-spinner-index:8"></i><i style="--bf-spinner-index:9"></i><i style="--bf-spinner-index:10"></i><i style="--bf-spinner-index:11"></i>
+        </span>
+        {{#if text}}<span class="bf-loading-text">{{text}}</span>{{/if}}
+    </div>
+</div>

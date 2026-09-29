@@ -1,0 +1,61 @@
+<div
+    id="{{id}}"
+    class="bf-modal {{#if open}}is-open{{/if}} {{className}}"
+    data-bf-modal
+    data-modal-size="{{#if size}}{{size}}{{else}}md{{/if}}"
+    data-close-on-backdrop="{{#if closeOnBackdrop}}true{{else}}false{{/if}}"
+    data-loading="{{#if loading}}true{{else}}false{{/if}}"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="{{id}}-title"
+    aria-hidden="{{#if open}}false{{else}}true{{/if}}"
+    {{#unless open}}hidden{{/unless}}
+>
+    <button type="button" class="bf-modal-backdrop" data-bf-modal-backdrop aria-label="Đóng cửa sổ"></button>
+    <section class="bf-modal-dialog">
+        <header class="bf-modal-header">
+            <div class="bf-modal-heading">
+                {{#if eyebrow}}<span class="bf-modal-eyebrow">{{eyebrow}}</span>{{/if}}
+                <h2 id="{{id}}-title" class="bf-modal-title">{{title}}</h2>
+                {{#if description}}<p class="bf-modal-description">{{description}}</p>{{/if}}
+            </div>
+            {{#unless hideClose}}
+                <button type="button" class="bf-modal-close" data-bf-modal-close aria-label="Đóng" title="Đóng">
+                    {{> ui/icon name="close" size="20"}}
+                </button>
+            {{/unless}}
+        </header>
+        <div class="bf-modal-body">
+            {{> @partial-block}}
+        </div>
+        {{#if footer}}
+            <footer class="bf-modal-footer">
+                {{#if footer.cancelText}}
+                    <button type="button" class="bf-btn bf-btn-secondary bf-btn-md" data-bf-modal-close>{{footer.cancelText}}</button>
+                {{/if}}
+                <div class="bf-modal-footer-actions">
+                    {{#each footer.actions}}
+                        {{#if href}}
+                            {{> ui/nut-bam href=href label=label icon=icon variant=variant size=size}}
+                        {{else}}
+                            <button type="{{#if type}}{{type}}{{else}}button{{/if}}" class="bf-btn bf-btn-{{#if variant}}{{variant}}{{else}}secondary{{/if}} bf-btn-{{#if size}}{{size}}{{else}}md{{/if}}" data-bf-modal-action="{{action}}" {{#if formId}}form="{{formId}}"{{/if}}>
+                                {{#if icon}}{{> ui/icon name=icon size="18"}}{{/if}}
+                                <span>{{label}}</span>
+                            </button>
+                        {{/if}}
+                    {{/each}}
+                    {{#if footer.submitText}}
+                        <button type="submit" class="bf-btn bf-btn-{{#if footer.submitVariant}}{{footer.submitVariant}}{{else}}primary{{/if}} bf-btn-md" data-bf-modal-submit {{#if formId}}form="{{formId}}"{{/if}}>
+                            {{#if loading}}<span class="bf-ui-spinner bf-ui-spinner-sm" aria-hidden="true"></span>{{/if}}
+                            <span>{{#if loading}}{{#if footer.loadingText}}{{footer.loadingText}}{{else}}Đang xử lý...{{/if}}{{else}}{{footer.submitText}}{{/if}}</span>
+                        </button>
+                    {{/if}}
+                </div>
+            </footer>
+        {{/if}}
+        <div class="bf-modal-loading-overlay" data-bf-modal-loading-overlay {{#unless loading}}hidden{{/unless}}>
+            <span class="bf-ui-spinner" aria-hidden="true"></span>
+            <span>{{#if loadingText}}{{loadingText}}{{else}}Đang xử lý...{{/if}}</span>
+        </div>
+    </section>
+</div>

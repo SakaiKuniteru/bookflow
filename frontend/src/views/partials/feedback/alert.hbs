@@ -1,0 +1,13 @@
+<div class="bf-alert bf-alert-{{#if type}}{{type}}{{else}}info{{/if}} {{className}}" role="{{#if (eq type "error")}}alert{{else}}status{{/if}}" {{#if hidden}}hidden{{/if}}>
+    <span class="bf-alert-icon">
+        {{#if (eq type "success")}}{{> ui/icon name="check" size="20"}}
+        {{else if (eq type "error")}}{{> ui/icon name="warning" size="20"}}
+        {{else if (eq type "warning")}}{{> ui/icon name="warning" size="20"}}
+        {{else}}{{> ui/icon name="info" size="20"}}{{/if}}
+    </span>
+    <div class="bf-alert-content">
+        {{#if title}}<strong class="bf-alert-title">{{title}}</strong>{{/if}}
+        <div class="bf-alert-message">{{message}}</div>
+    </div>
+    {{#if dismissible}}<button type="button" class="bf-alert-close" data-feedback-dismiss aria-label="Đóng thông báo">{{> ui/icon name="close" size="16"}}</button>{{/if}}
+</div>

@@ -1,0 +1,281 @@
+.bf-modal {
+    position: fixed;
+    z-index: 2000;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+.bf-modal[hidden] {
+    display: none;
+}
+.bf-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: rgba(15, 23, 42, .56);
+    cursor: default;
+}
+.bf-modal-dialog {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    width: min(100%, 560px);
+    max-height: min(90vh, 900px);
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--bf-form-border, #d9dee7);
+    border-radius: 12px;
+    background: var(--bf-form-bg, #fff);
+    box-shadow: 0 24px 70px rgba(15, 23, 42, .24);
+}
+.bf-modal[data-modal-size="sm"] .bf-modal-dialog {
+    width: min(100%, 400px);
+}
+.bf-modal[data-modal-size="md"] .bf-modal-dialog {
+    width: min(100%, 560px);
+}
+.bf-modal[data-modal-size="lg"] .bf-modal-dialog {
+    width: min(100%, 900px);
+}
+.bf-modal[data-modal-size="xl"] .bf-modal-dialog {
+    width: min(100%, 1200px);
+}
+.bf-modal[data-modal-size="full"] {
+    padding: 12px;
+}
+.bf-modal[data-modal-size="full"] .bf-modal-dialog {
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    border-radius: 8px;
+}
+.bf-modal-header,
+.bf-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 20px;
+}
+.bf-modal-header {
+    border-bottom: 1px solid var(--bf-form-border, #d9dee7);
+}
+.bf-modal-heading {
+    min-width: 0;
+}
+.bf-modal-eyebrow {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--bf-form-muted, #6b7280);
+    font-size: 12px;
+}
+.bf-modal-title {
+    margin: 0;
+    color: var(--bf-form-text, #1f2937);
+    font-size: 18px;
+    font-weight: 700;
+}
+.bf-modal-description {
+    margin: 5px 0 0;
+    color: var(--bf-form-muted, #6b7280);
+    font-size: 13px;
+    line-height: 1.5;
+}
+.bf-modal-close {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--bf-form-muted, #6b7280);
+    cursor: pointer;
+}
+.bf-modal-close:hover {
+    background: var(--bf-form-hover, #f5f7fa);
+    color: var(--bf-form-text, #1f2937);
+}
+.bf-modal-body {
+    min-height: 0;
+    padding: 20px;
+    overflow: auto;
+}
+.bf-modal-footer {
+    flex: 0 0 auto;
+    border-top: 1px solid var(--bf-form-border, #d9dee7);
+    background: #fff;
+}
+.bf-modal-footer-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-left: auto;
+}
+.bf-modal-form .bf-form-field:last-child {
+    margin-bottom: 0;
+}
+.bf-modal-form-error {
+    margin-bottom: 14px;
+}
+.bf-modal-confirm {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+.bf-modal-confirm-icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #fef3c7;
+    color: #b45309;
+}
+.bf-modal-confirm-danger .bf-modal-confirm-icon {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+.bf-modal-confirm-message {
+    margin: 0;
+    color: var(--bf-form-text, #1f2937);
+    font-size: 14px;
+    line-height: 1.6;
+}
+.bf-modal-confirm-detail {
+    margin: 6px 0 0;
+    color: var(--bf-form-muted, #6b7280);
+    font-size: 13px;
+    line-height: 1.5;
+}
+.bf-modal-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.bf-modal-detail-section + .bf-modal-detail-section {
+    padding-top: 16px;
+    border-top: 1px solid var(--bf-form-border, #d9dee7);
+}
+.bf-modal-detail-section h3 {
+    margin: 0 0 12px;
+    color: var(--bf-form-text, #1f2937);
+    font-size: 14px;
+}
+.bf-modal-detail-description {
+    margin: -4px 0 12px;
+    color: var(--bf-form-muted, #6b7280);
+    font-size: 13px;
+}
+.bf-modal-detail-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 20px;
+    margin: 0;
+}
+.bf-modal-detail-item {
+    min-width: 0;
+}
+.bf-modal-detail-item dt {
+    margin-bottom: 4px;
+    color: var(--bf-form-muted, #6b7280);
+    font-size: 12px;
+}
+.bf-modal-detail-item dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+    color: var(--bf-form-text, #1f2937);
+    font-size: 14px;
+}
+.bf-modal-detail-table-wrap {
+    overflow: auto;
+}
+.bf-modal-detail-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.bf-modal-detail-table th,
+.bf-modal-detail-table td {
+    padding: 9px 10px;
+    border-bottom: 1px solid var(--bf-form-border, #d9dee7);
+    text-align: left;
+    font-size: 13px;
+}
+.bf-modal-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin: 0;
+    padding-left: 20px;
+}
+.bf-modal-timeline li {
+    padding-left: 4px;
+}
+.bf-modal-timeline-title,
+.bf-modal-timeline-description,
+.bf-modal-timeline time {
+    display: block;
+}
+.bf-modal-timeline-title {
+    color: var(--bf-form-text, #1f2937);
+    font-size: 13px;
+    font-weight: 600;
+}
+.bf-modal-timeline-description,
+.bf-modal-timeline time {
+    margin-top: 3px;
+    color: var(--bf-form-muted, #6b7280);
+    font-size: 12px;
+}
+.bf-modal-loading-overlay {
+    position: absolute;
+    z-index: 4;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, .82);
+    color: var(--bf-form-text, #1f2937);
+    font-size: 14px;
+}
+.bf-modal-loading-overlay[hidden] {
+    display: none;
+}
+.bf-modal.is-loading .bf-modal-close {
+    pointer-events: none;
+    opacity: .45;
+}
+@media (max-width: 600px) {
+    .bf-modal {
+        align-items: flex-end;
+        padding: 0;
+    }
+    .bf-modal-dialog,
+    .bf-modal[data-modal-size] .bf-modal-dialog {
+        width: 100%;
+        max-height: 92vh;
+        border-radius: 14px 14px 0 0;
+    }
+    .bf-modal-header,
+    .bf-modal-footer {
+        padding: 14px 16px;
+    }
+    .bf-modal-body {
+        padding: 16px;
+    }
+    .bf-modal-detail-list {
+        grid-template-columns: 1fr;
+    }
+}

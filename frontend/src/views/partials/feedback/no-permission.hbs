@@ -1,0 +1,11 @@
+<section class="bf-no-permission {{className}}" role="alert">
+    <span class="bf-no-permission-icon">{{> ui/icon name="warning" size="30"}}</span>
+    <h1 class="bf-no-permission-title">{{#if title}}{{title}}{{else}}Không có quyền truy cập{{/if}}</h1>
+    <p class="bf-no-permission-message">{{#if message}}{{message}}{{else}}Bạn không có quyền truy cập chức năng này.{{/if}}</p>
+    {{#if permission}}<p class="bf-no-permission-code">Quyền cần có: <code>{{permission}}</code></p>{{/if}}
+    {{#if requestId}}<p class="bf-no-permission-code">Mã yêu cầu: <code>{{requestId}}</code></p>{{/if}}
+    <div class="bf-no-permission-actions">
+        <button type="button" class="bf-btn bf-btn-secondary bf-btn-md" data-feedback-back>Quay lại</button>
+        <a class="bf-btn bf-btn-primary bf-btn-md" href="{{#if homeUrl}}{{homeUrl}}{{else}}/{{/if}}">Về trang chủ</a>
+    </div>
+</section>

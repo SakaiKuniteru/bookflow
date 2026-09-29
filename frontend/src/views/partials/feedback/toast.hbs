@@ -1,0 +1,14 @@
+<div class="bf-toast-region" data-bf-toast-region aria-live="polite" aria-relevant="additions">
+    {{#if message}}
+        <div class="bf-toast bf-toast-{{#if type}}{{type}}{{else}}info{{/if}}" data-bf-toast data-duration="{{#if duration}}{{duration}}{{else}}4500{{/if}}" role="status" {{#unless visible}}hidden{{/unless}}>
+            <span class="bf-toast-icon">
+                {{#if (eq type "success")}}{{> ui/icon name="check" size="20"}}
+                {{else if (eq type "error")}}{{> ui/icon name="warning" size="20"}}
+                {{else if (eq type "warning")}}{{> ui/icon name="warning" size="20"}}
+                {{else}}{{> ui/icon name="info" size="20"}}{{/if}}
+            </span>
+            <span class="bf-toast-message">{{message}}</span>
+            <button type="button" class="bf-toast-close" data-feedback-dismiss aria-label="Đóng thông báo">{{> ui/icon name="close" size="16"}}</button>
+        </div>
+    {{/if}}
+</div>

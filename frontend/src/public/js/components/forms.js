@@ -8,6 +8,9 @@ import { initImageInputs } from "./forms/image.js";
 import { initRichTextInputs } from "./forms/rich-text.js";
 import { initSearchInputs } from "./forms/search.js";
 import { initPhoneInputs } from "./forms/phone.js";
+import { initFeedback } from "./feedback.js";
+import { initDataTables } from "./tables.js";
+import { initModals } from "./modals.js";
 
 const initializers = [
     initNumberInputs,
@@ -19,7 +22,10 @@ const initializers = [
     initImageInputs,
     initRichTextInputs,
     initSearchInputs,
-    initPhoneInputs
+    initPhoneInputs,
+    initFeedback,
+    initDataTables,
+    initModals
 ];
 
 function initForms(root = document) {

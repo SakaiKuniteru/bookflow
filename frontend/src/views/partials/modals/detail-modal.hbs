@@ -1,0 +1,57 @@
+{{#> modals/base-modal id=id title=title description=description eyebrow=eyebrow size=size open=open closeOnBackdrop=closeOnBackdrop footer=footer}}
+    <div class="bf-modal-detail">
+        {{#each sections}}
+            <section class="bf-modal-detail-section">
+                {{#if title}}<h3>{{title}}</h3>{{/if}}
+                {{#if description}}<p class="bf-modal-detail-description">{{description}}</p>{{/if}}
+                {{#if items}}
+                    <dl class="bf-modal-detail-list">
+                        {{#each items}}
+                            <div class="bf-modal-detail-item">
+                                <dt>{{label}}</dt>
+                                <dd>
+                                    {{#if status}}
+                                        {{> ui/trang-thai label=value status=status dot=true}}
+                                    {{else if href}}
+                                        <a href="{{href}}">{{value}}</a>
+                                    {{else}}
+                                        {{#if value}}{{value}}{{else}}—{{/if}}
+                                    {{/if}}
+                                </dd>
+                            </div>
+                        {{/each}}
+                    </dl>
+                {{/if}}
+                {{#if rows}}
+                    <div class="bf-modal-detail-table-wrap">
+                        <table class="bf-modal-detail-table">
+                            {{#if columns}}
+                                <thead><tr>{{#each columns}}<th scope="col">{{label}}</th>{{/each}}</tr></thead>
+                            {{/if}}
+                            <tbody>
+                                {{#each rows}}
+                                    <tr>{{#each cells}}<td>{{value}}</td>{{/each}}</tr>
+                                {{/each}}
+                            </tbody>
+                        </table>
+                    </div>
+                {{/if}}
+            </section>
+        {{/each}}
+        {{#if timeline}}
+            <section class="bf-modal-detail-section">
+                <h3>{{#if timelineTitle}}{{timelineTitle}}{{else}}Lịch sử{{/if}}</h3>
+                <ol class="bf-modal-timeline">
+                    {{#each timeline}}
+                        <li>
+                            <span class="bf-modal-timeline-title">{{title}}</span>
+                            {{#if description}}<span class="bf-modal-timeline-description">{{description}}</span>{{/if}}
+                            {{#if time}}<time>{{time}}</time>{{/if}}
+                        </li>
+                    {{/each}}
+                </ol>
+            </section>
+        {{/if}}
+        {{#if contentHtml}}<div class="bf-modal-detail-content">{{{contentHtml}}}</div>{{/if}}
+    </div>
+{{/modals/base-modal}}
