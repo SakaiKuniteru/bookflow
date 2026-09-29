@@ -1,0 +1,12 @@
+<button
+    id="{{id}}"
+    name="{{name}}"
+    type="{{#if type}}{{type}}{{else}}button{{/if}}"
+    value="{{value}}"
+    class="bf-btn bf-btn-{{#if variant}}{{variant}}{{else}}primary{{/if}} bf-btn-{{#if size}}{{size}}{{else}}md{{/if}} {{className}}"
+    {{#if disabled}}disabled{{/if}}
+    {{#if loading}}data-loading="true"{{/if}}
+>
+    {{#if icon}}<span class="bf-btn-icon">{{{icon}}}</span>{{/if}}
+    <span class="bf-btn-text">{{label}}</span>
+</button>

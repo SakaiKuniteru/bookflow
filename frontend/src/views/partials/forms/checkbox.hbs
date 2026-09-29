@@ -1,0 +1,13 @@
+<label class="bf-check {{className}}" for="{{id}}">
+    <input
+        id="{{id}}"
+        name="{{name}}"
+        type="checkbox"
+        value="{{#if value}}{{value}}{{else}}1{{/if}}"
+        {{#if checked}}checked{{/if}}
+        {{#if required}}required{{/if}}
+        {{#if disabled}}disabled{{/if}}
+    >
+    <span class="bf-check-box"></span>
+    <span class="bf-check-label">{{label}}</span>
+</label>

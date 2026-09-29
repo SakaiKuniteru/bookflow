@@ -1,0 +1,33 @@
+<div class="bf-form-field {{className}}" data-form-field>
+    {{#if label}}
+        <label class="bf-form-label">{{label}}{{#if required}}<span class="bf-form-required">*</span>{{/if}}</label>
+    {{/if}}
+    <div class="bf-file-upload" data-bf-file data-multiple="{{multiple}}" data-download="{{download}}">
+        <input
+            id="{{id}}"
+            name="{{name}}"
+            type="file"
+            class="bf-file-input"
+            accept="{{accept}}"
+            {{#if multiple}}multiple{{/if}}
+            {{#if required}}required{{/if}}
+            {{#if disabled}}disabled{{/if}}
+        >
+        <label class="bf-file-dropzone" for="{{id}}">
+            <span class="bf-file-upload-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4"></path><path d="m7 9 5-5 5 5"></path><path d="M5 20h14"></path></svg>
+            </span>
+            <span class="bf-file-upload-title">Chọn tệp</span>
+            <span class="bf-file-upload-description">Nhấn để chọn hoặc kéo thả tệp vào đây</span>
+        </label>
+        <div class="bf-file-list">
+            {{#each files}}
+                <div class="bf-file-item" data-existing-file data-url="{{url}}">
+                    <button type="button" class="bf-file-name" data-download-url="{{url}}" {{#unless ../download}}disabled{{/unless}}>{{name}}</button>
+                    <span class="bf-file-size">{{size}}</span>
+                    <button type="button" class="bf-file-delete" aria-label="Xóa tệp">×</button>
+                </div>
+            {{/each}}
+        </div>
+    </div>
+</div>

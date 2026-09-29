@@ -1,0 +1,23 @@
+<div class="bf-form-field {{className}}" data-form-field>
+    {{#if label}}
+        <label class="bf-form-label" for="{{id}}">
+            {{label}}
+            {{#if required}}<span class="bf-form-required">*</span>{{/if}}
+        </label>
+    {{/if}}
+    <input
+        id="{{id}}"
+        name="{{name}}"
+        type="text"
+        class="bf-form-control bf-date-input"
+        value="{{value}}"
+        placeholder="{{#if placeholder}}{{placeholder}}{{else}}{{#if (eq type "time")}}HH:mm:ss{{else}}{{#if (eq type "datetime")}}dd/MM/yyyy HH:mm:ss{{else}}dd/MM/yyyy{{/if}}{{/if}}{{/if}}"
+        data-date-type="{{type}}"
+        maxlength="{{#if (eq type "datetime")}}19{{else}}{{#if (eq type "time")}}8{{else}}10{{/if}}{{/if}}"
+        autocomplete="off"
+        {{#if required}}required{{/if}}
+        {{#if disabled}}disabled{{/if}}
+        {{#if readonly}}readonly{{/if}}
+    >
+    <div class="bf-form-error bf-date-error" hidden>Ngày hoặc thời gian không hợp lệ.</div>
+</div>

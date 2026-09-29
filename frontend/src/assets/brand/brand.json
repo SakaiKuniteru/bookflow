@@ -1,0 +1,64 @@
+{
+  "name": "BookFlow",
+  "shortName": "BookFlow",
+  "description": "BookFlow - Nền tảng quản lý nhà sách và dịch vụ sách",
+  "design": {
+    "concept": "Open book + flowing pages",
+    "primaryInk": "#172A3A",
+    "accent": "#2F8F83",
+    "paper": "#F7F3EA"
+  },
+  "logo": {
+    "default": "logo/logo.svg",
+    "mark": "logo/logo-mark.svg",
+    "wordmark": "logo/logo-wordmark.svg",
+    "horizontal": "logo/logo-horizontal.svg",
+    "horizontalDark": "logo/logo-horizontal-dark.svg",
+    "horizontalLight": "logo/logo-horizontal-light.svg",
+    "vertical": "logo/logo-vertical.svg",
+    "verticalDark": "logo/logo-vertical-dark.svg",
+    "verticalLight": "logo/logo-vertical-light.svg",
+    "symbol": "logo/logo-symbol.svg",
+    "symbolDark": "logo/logo-symbol-dark.svg",
+    "symbolLight": "logo/logo-symbol-light.svg",
+    "monochrome": "logo/logo-monochrome.svg",
+    "white": "logo/logo-white.svg",
+    "black": "logo/logo-black.svg"
+  },
+  "favicon": {
+    "default": "favicon/favicon.svg",
+    "light": "favicon/favicon-light.svg",
+    "dark": "favicon/favicon-dark.svg",
+    "16": "favicon/favicon-16.svg",
+    "32": "favicon/favicon-32.svg",
+    "48": "favicon/favicon-48.svg"
+  },
+  "app": {
+    "default": "app/app-icon.svg",
+    "light": "app/app-icon-light.svg",
+    "dark": "app/app-icon-dark.svg",
+    "rounded": "app/app-icon-rounded.svg",
+    "monochrome": "app/app-icon-monochrome.svg"
+  },
+  "social": {
+    "og": "social/og-image.svg",
+    "ogLight": "social/og-image-light.svg",
+    "ogDark": "social/og-image-dark.svg",
+    "avatar": "social/social-avatar.svg",
+    "cover": "social/social-cover.svg"
+  },
+  "watermark": {
+    "default": "watermark/watermark.svg",
+    "light": "watermark/watermark-light.svg",
+    "dark": "watermark/watermark-dark.svg"
+  },
+  "loading": {
+    "default": "loading/logo-loading.svg",
+    "light": "loading/logo-loading-light.svg",
+    "dark": "loading/logo-loading-dark.svg"
+  },
+  "empty": {
+    "default": "empty/brand-empty.svg",
+    "dark": "empty/brand-empty-dark.svg"
+  }
+}

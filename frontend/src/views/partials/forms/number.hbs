@@ -1,0 +1,23 @@
+<div class="bf-form-field {{className}}" data-form-field>
+    {{#if label}}
+        <label class="bf-form-label" for="{{id}}">{{label}}{{#if required}}<span class="bf-form-required">*</span>{{/if}}</label>
+    {{/if}}
+    <input
+        id="{{id}}"
+        name="{{name}}"
+        type="text"
+        inputmode="decimal"
+        class="bf-form-control bf-number-input"
+        value="{{value}}"
+        placeholder="{{placeholder}}"
+        data-number-type="{{type}}"
+        data-number-decimals="{{decimals}}"
+        data-min="{{min}}"
+        data-max="{{max}}"
+        {{#if required}}required{{/if}}
+        {{#if disabled}}disabled{{/if}}
+        {{#if readonly}}readonly{{/if}}
+    >
+    {{#if helpText}}<div class="bf-form-help">{{helpText}}</div>{{/if}}
+    {{#if error}}<div class="bf-form-error">{{error}}</div>{{/if}}
+</div>

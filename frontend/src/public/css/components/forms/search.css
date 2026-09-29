@@ -1,0 +1,71 @@
+.bf-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.bf-search-icon {
+    position: absolute;
+    left: 12px;
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: var(--bf-form-muted);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    pointer-events: none;
+}
+
+.bf-search-input {
+    width: 100%;
+    min-height: 42px;
+    padding: 9px 75px 9px 38px;
+    border: 1px solid var(--bf-form-border);
+    border-radius: var(--bf-form-radius);
+    outline: none;
+    background: var(--bf-form-bg);
+    color: var(--bf-form-text);
+    font: inherit;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.bf-search-input:focus {
+    border-color: var(--bf-form-primary);
+    box-shadow: var(--bf-form-focus-shadow);
+}
+
+.bf-search-clear {
+    position: absolute;
+    right: 52px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 25px;
+    height: 25px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--bf-form-muted);
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.bf-search-clear.is-visible {
+    display: inline-flex;
+}
+
+.bf-search-shortcut {
+    position: absolute;
+    right: 9px;
+    padding: 2px 5px;
+    border: 1px solid var(--bf-form-border);
+    border-radius: 4px;
+    background: #f7f8fa;
+    color: var(--bf-form-muted);
+    font: inherit;
+    font-size: 10px;
+}

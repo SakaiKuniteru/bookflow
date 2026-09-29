@@ -1,0 +1,17 @@
+<div class="bf-search {{className}}" data-bf-search>
+    <svg class="bf-search-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle>
+        <path d="m16 16 5 5"></path>
+    </svg>
+    <input
+        id="{{id}}"
+        name="{{name}}"
+        type="search"
+        class="bf-search-input"
+        value="{{value}}"
+        placeholder="{{#if placeholder}}{{placeholder}}{{else}}Tìm kiếm...{{/if}}"
+        autocomplete="off"
+    >
+    <button type="button" class="bf-search-clear" aria-label="Xóa tìm kiếm">×</button>
+    <kbd class="bf-search-shortcut">⌘K</kbd>
+</div>

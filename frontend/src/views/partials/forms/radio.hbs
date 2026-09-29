@@ -1,0 +1,13 @@
+<label class="bf-radio {{className}}" for="{{id}}">
+    <input
+        id="{{id}}"
+        name="{{name}}"
+        type="radio"
+        value="{{value}}"
+        {{#if checked}}checked{{/if}}
+        {{#if required}}required{{/if}}
+        {{#if disabled}}disabled{{/if}}
+    >
+    <span class="bf-radio-circle"></span>
+    <span class="bf-radio-label">{{label}}</span>
+</label>

@@ -169,191 +169,220 @@ BookFlow/
 ### 1.1. `frontend/src/views/` — layout, form, component và trang
 
 ```text
-frontend/src/views/
-│
-├── layouts/
-│   ├── main.hbs
-│   ├── auth.hbs
-│   ├── customer.hbs
-│   ├── staff.hbs
-│   ├── admin.hbs
-│   └── super-admin.hbs
-│
-├── partials/
+├── frontend/                               # Handlebars + Bootstrap + JavaScript
+│   ├── src/
+│   │   ├── server.js                       # Điểm khởi động HTTP
+│   │   ├── app.js                          # Khởi tạo Express phục vụ giao diện
+│   │   │
+│   │   ├── config/                         # Handlebars, môi trường, định tuyến
+│   │   ├── routes/                         # Route giao diện theo khu vực
+│   │   ├── controllers/                    # Chuẩn bị dữ liệu và render trang
+│   │   ├── services/                       # Client gọi API nghiệp vụ
+│   │   ├── middlewares/                    # Người dùng, quyền xem trang, lỗi
+│   │   ├── helpers/                        # Handlebars helpers
+│   │   │
+│   │   ├── views/
+│   │   │   ├── layouts/
+│   │   │   │   ├── main.hbs
+│   │   │   │   ├── auth.hbs
+│   │   │   │   ├── customer.hbs
+│   │   │   │   ├── staff.hbs
+│   │   │   │   ├── admin.hbs
+│   │   │   │   └── super-admin.hbs
+│   │   │   │
+│   │   │   ├── partials/
+│   │   │   │   │
+│   │   │   │   ├── navigation/
+│   │   │   │   │   ├── dau-trang.hbs
+│   │   │   │   │   ├── chan-trang.hbs
+│   │   │   │   │   ├── thanh-ben.hbs
+│   │   │   │   │   ├── duong-dan.hbs
+│   │   │   │   │   ├── menu-tai-khoan.hbs
+│   │   │   │   │   └── menu-thong-bao.hbs
+│   │   │   │   │
+│   │   │   │   ├── ui/
+│   │   │   │   │   ├── icon.hbs
+│   │   │   │   │   ├── nut-bam.hbs
+│   │   │   │   │   ├── nhan.hbs
+│   │   │   │   │   ├── dang-tai.hbs
+│   │   │   │   │   ├── khong-co-du-lieu.hbs
+│   │   │   │   │   └── nhan-trang-thai.hbs
+│   │   │   │   │
+│   │   │   │   ├── forms/
+│   │   │   │   │   ├── input.hbs
+│   │   │   │   │   ├── email.hbs
+│   │   │   │   │   ├── password.hbs
+│   │   │   │   │   ├── money.hbs
+│   │   │   │   │   ├── date.hbs
+│   │   │   │   │   ├── select.hbs
+│   │   │   │   │   ├── textarea.hbs
+│   │   │   │   │   ├── checkbox.hbs
+│   │   │   │   │   ├── radio.hbs
+│   │   │   │   │   ├── file.hbs
+│   │   │   │   │   ├── image.hbs
+│   │   │   │   │   ├── rich-text.hbs
+│   │   │   │   │   ├── button.hbs
+│   │   │   │   │   └── search.hbs
+│   │   │   │   │
+│   │   │   │   ├── tables/
+│   │   │   │   │   ├── bang-du-lieu.hbs
+│   │   │   │   │   ├── thanh-cong-cu.hbs
+│   │   │   │   │   ├── bo-loc.hbs
+│   │   │   │   │   ├── phan-trang.hbs
+│   │   │   │   │   ├── bang-trong.hbs
+│   │   │   │   │   └── bang-dang-tai.hbs
+│   │   │   │   │
+│   │   │   │   ├── modals/
+│   │   │   │   │   ├── hop-thoai-goc.hbs
+│   │   │   │   │   ├── hop-thoai-bieu-mau.hbs
+│   │   │   │   │   ├── hop-thoai-xac-nhan.hbs
+│   │   │   │   │   └── hop-thoai-chi-tiet.hbs
+│   │   │   │   │
+│   │   │   │   └── feedback/
+│   │   │   │       ├── thong-bao-noi.hbs
+│   │   │   │       ├── canh-bao.hbs
+│   │   │   │       ├── trang-loi.hbs
+│   │   │   │       └── khong-du-quyen.hbs
+│   │   │   │
+│   │   │   ├── components/
+│   │   │   │   ├── sach/
+│   │   │   │   │   ├── the-sach.hbs
+│   │   │   │   │   ├── bo-suu-tap-anh.hbs
+│   │   │   │   │   ├── trang-thai-sach.hbs
+│   │   │   │   │   └── hinh-thuc-cung-cap.hbs
+│   │   │   │   │
+│   │   │   │   ├── khach-hang/
+│   │   │   │   │   └── the-khach-hang.hbs
+│   │   │   │   │
+│   │   │   │   ├── hoi-vien/
+│   │   │   │   │   └── the-goi-hoi-vien.hbs
+│   │   │   │   │
+│   │   │   │   ├── kho/
+│   │   │   │   │   └── trang-thai-ton-kho.hbs
+│   │   │   │   │
+│   │   │   │   ├── muon-tra/
+│   │   │   │   │   ├── trang-thai-phieu-muon.hbs
+│   │   │   │   │   └── han-tra.hbs
+│   │   │   │   │
+│   │   │   │   └── thanh-toan/
+│   │   │   │       ├── trang-thai-thanh-toan.hbs
+│   │   │   │       └── phuong-thuc-thanh-toan.hbs
+│   │   │   │
+│   │   │   └── pages/
+│   │   │       │
+│   │   │       ├── public/
+│   │   │       │   ├── trang-chu.hbs
+│   │   │       │   ├── danh-sach-sach.hbs
+│   │   │       │   ├── chi-tiet-sach.hbs
+│   │   │       │   ├── tim-kiem.hbs
+│   │   │       │   ├── goi-hoi-vien.hbs
+│   │   │       │   └── gioi-thieu.hbs
+│   │   │       │
+│   │   │       ├── auth/
+│   │   │       │   ├── dang-nhap.hbs
+│   │   │       │   ├── dang-ky.hbs
+│   │   │       │   ├── quen-mat-khau.hbs
+│   │   │       │   └── dat-lai-mat-khau.hbs
+│   │   │       │
+│   │   │       ├── customer/
+│   │   │       │   ├── tong-quan.hbs
+│   │   │       │   ├── gio-hang.hbs
+│   │   │       │   ├── thanh-toan.hbs
+│   │   │       │   ├── don-hang.hbs
+│   │   │       │   ├── chi-tiet-don-hang.hbs
+│   │   │       │   ├── yeu-cau-muon.hbs
+│   │   │       │   ├── sach-dang-muon.hbs
+│   │   │       │   ├── chi-tiet-phieu-muon.hbs
+│   │   │       │   ├── dat-truoc-sach.hbs
+│   │   │       │   ├── hoi-vien.hbs
+│   │   │       │   ├── thong-bao.hbs
+│   │   │       │   └── ho-so.hbs
+│   │   │       │
+│   │   │       ├── staff/
+│   │   │       │   ├── tong-quan.hbs
+│   │   │       │   │
+│   │   │       │   ├── sach/
+│   │   │       │   │   ├── danh-sach-sach.hbs
+│   │   │       │   │   ├── them-sach.hbs
+│   │   │       │   │   ├── sua-sach.hbs
+│   │   │       │   │   ├── chi-tiet-sach.hbs
+│   │   │       │   │   └── partials/
+│   │   │       │   │       ├── bieu-mau-sach.hbs
+│   │   │       │   │       ├── thong-tin-co-ban.hbs
+│   │   │       │   │       ├── thong-tin-phien-ban.hbs
+│   │   │       │   │       ├── hinh-anh-sach.hbs
+│   │   │       │   │       └── hinh-thuc-cung-cap.hbs
+│   │   │       │   │
+│   │   │       │   ├── kho/
+│   │   │       │   │   ├── ton-kho.hbs
+│   │   │       │   │   ├── ban-sao-sach.hbs
+│   │   │       │   │   ├── nhap-kho.hbs
+│   │   │       │   │   └── chuyen-kho.hbs
+│   │   │       │   │
+│   │   │       │   ├── ban-hang/
+│   │   │       │   │   ├── ban-hang-tai-quay.hbs
+│   │   │       │   │   ├── danh-sach-don.hbs
+│   │   │       │   │   ├── chi-tiet-don.hbs
+│   │   │       │   │   └── tra-hang.hbs
+│   │   │       │   │
+│   │   │       │   ├── muon-tra/
+│   │   │       │   │   ├── danh-sach-phieu-muon.hbs
+│   │   │       │   │   ├── tao-phieu-muon.hbs
+│   │   │       │   │   ├── chi-tiet-phieu-muon.hbs
+│   │   │       │   │   ├── nhan-tra-sach.hbs
+│   │   │       │   │   ├── danh-sach-dat-truoc.hbs
+│   │   │       │   │   └── sach-qua-han.hbs
+│   │   │       │   │
+│   │   │       │   └── khach-hang/
+│   │   │       │       ├── danh-sach-khach-hang.hbs
+│   │   │       │       ├── chi-tiet-khach-hang.hbs
+│   │   │       │       └── partials/
+│   │   │       │           └── bieu-mau-khach-hang.hbs
+│   │   │       │
+│   │   │       ├── admin/
+│   │   │       │   ├── tong-quan.hbs
+│   │   │       │   ├── chi-nhanh/
+│   │   │       │   ├── nhan-vien/
+│   │   │       │   ├── phan-quyen/
+│   │   │       │   ├── sach/
+│   │   │       │   ├── nha-cung-cap/
+│   │   │       │   ├── kho/
+│   │   │       │   ├── khach-hang/
+│   │   │       │   ├── hoi-vien/
+│   │   │       │   ├── chinh-sach-muon/
+│   │   │       │   ├── thanh-toan/
+│   │   │       │   ├── bao-cao/
+│   │   │       │   └── cai-dat/
+│   │   │       │
+│   │   │       └── super-admin/
+│   │   │           ├── tong-quan.hbs
+│   │   │           ├── don-vi/
+│   │   │           ├── goi-dich-vu/
+│   │   │           ├── dang-ky-dich-vu/
+│   │   │           ├── hoa-don/
+│   │   │           ├── su-dung-ai/
+│   │   │           ├── nhat-ky/
+│   │   │           └── cai-dat/
+│   │   │
+│   │   ├── assets/
+│   │   │   ├── icons/                      # SVG gốc tự thiết kế
+│   │   │   └── brand/                      # Logo và favicon gốc tự thiết kế
+│   │   │
+│   │   └── public/
+│   │       ├── css/                        # CSS chung và CSS theo màn hình
+│   │       ├── js/                         # JS dùng chung, gọi API và từng trang
+│   │       ├── icons/                      # SVG sprite tạo khi build
+│   │       ├── brand/                      # Logo sau khi build
+│   │       ├── images/                     # Chỉ hình tĩnh của giao diện
+│   │       └── fonts/
 │   │
-│   ├── navigation/
-│   │   ├── dau-trang.hbs
-│   │   ├── chan-trang.hbs
-│   │   ├── thanh-ben.hbs
-│   │   ├── duong-dan.hbs
-│   │   ├── menu-tai-khoan.hbs
-│   │   └── menu-thong-bao.hbs
-│   │
-│   ├── ui/
-│   │   ├── icon.hbs
-│   │   ├── nut-bam.hbs
-│   │   ├── nhan.hbs
-│   │   ├── dang-tai.hbs
-│   │   ├── khong-co-du-lieu.hbs
-│   │   └── nhan-trang-thai.hbs
-│   │
-│   ├── forms/
-│   │   ├── truong-van-ban.hbs
-│   │   ├── truong-so.hbs
-│   │   ├── truong-email.hbs
-│   │   ├── truong-mat-khau.hbs
-│   │   ├── truong-tien.hbs
-│   │   ├── truong-ngay.hbs
-│   │   ├── truong-ngay-gio.hbs
-│   │   ├── truong-chon.hbs
-│   │   ├── truong-chon-nhieu.hbs
-│   │   ├── truong-nhieu-dong.hbs
-│   │   ├── truong-tich-chon.hbs
-│   │   ├── truong-chon-mot.hbs
-│   │   ├── truong-tep.hbs
-│   │   ├── truong-hinh-anh.hbs
-│   │   ├── loi-truong.hbs
-│   │   └── nut-bieu-mau.hbs
-│   │
-│   ├── tables/
-│   │   ├── bang-du-lieu.hbs
-│   │   ├── thanh-cong-cu.hbs
-│   │   ├── bo-loc.hbs
-│   │   ├── phan-trang.hbs
-│   │   ├── bang-trong.hbs
-│   │   └── bang-dang-tai.hbs
-│   │
-│   ├── modals/
-│   │   ├── hop-thoai-goc.hbs
-│   │   ├── hop-thoai-bieu-mau.hbs
-│   │   ├── hop-thoai-xac-nhan.hbs
-│   │   └── hop-thoai-chi-tiet.hbs
-│   │
-│   └── feedback/
-│       ├── thong-bao-noi.hbs
-│       ├── canh-bao.hbs
-│       ├── trang-loi.hbs
-│       └── khong-du-quyen.hbs
-│
-├── components/
-│   ├── sach/
-│   │   ├── the-sach.hbs
-│   │   ├── bo-suu-tap-anh.hbs
-│   │   ├── trang-thai-sach.hbs
-│   │   └── hinh-thuc-cung-cap.hbs
-│   │
-│   ├── khach-hang/
-│   │   └── the-khach-hang.hbs
-│   │
-│   ├── hoi-vien/
-│   │   └── the-goi-hoi-vien.hbs
-│   │
-│   ├── kho/
-│   │   └── trang-thai-ton-kho.hbs
-│   │
-│   ├── muon-tra/
-│   │   ├── trang-thai-phieu-muon.hbs
-│   │   └── han-tra.hbs
-│   │
-│   └── thanh-toan/
-│       ├── trang-thai-thanh-toan.hbs
-│       └── phuong-thuc-thanh-toan.hbs
-│
-└── pages/
-    │
-    ├── public/
-    │   ├── trang-chu.hbs
-    │   ├── danh-sach-sach.hbs
-    │   ├── chi-tiet-sach.hbs
-    │   ├── tim-kiem.hbs
-    │   ├── goi-hoi-vien.hbs
-    │   └── gioi-thieu.hbs
-    │
-    ├── auth/
-    │   ├── dang-nhap.hbs
-    │   ├── dang-ky.hbs
-    │   ├── quen-mat-khau.hbs
-    │   └── dat-lai-mat-khau.hbs
-    │
-    ├── customer/
-    │   ├── tong-quan.hbs
-    │   ├── gio-hang.hbs
-    │   ├── thanh-toan.hbs
-    │   ├── don-hang.hbs
-    │   ├── chi-tiet-don-hang.hbs
-    │   ├── yeu-cau-muon.hbs
-    │   ├── sach-dang-muon.hbs
-    │   ├── chi-tiet-phieu-muon.hbs
-    │   ├── dat-truoc-sach.hbs
-    │   ├── hoi-vien.hbs
-    │   ├── thong-bao.hbs
-    │   └── ho-so.hbs
-    │
-    ├── staff/
-    │   ├── tong-quan.hbs
-    │   │
-    │   ├── sach/
-    │   │   ├── danh-sach-sach.hbs
-    │   │   ├── them-sach.hbs
-    │   │   ├── sua-sach.hbs
-    │   │   ├── chi-tiet-sach.hbs
-    │   │   └── partials/
-    │   │       ├── bieu-mau-sach.hbs
-    │   │       ├── thong-tin-co-ban.hbs
-    │   │       ├── thong-tin-phien-ban.hbs
-    │   │       ├── hinh-anh-sach.hbs
-    │   │       └── hinh-thuc-cung-cap.hbs
-    │   │
-    │   ├── kho/
-    │   │   ├── ton-kho.hbs
-    │   │   ├── ban-sao-sach.hbs
-    │   │   ├── nhap-kho.hbs
-    │   │   └── chuyen-kho.hbs
-    │   │
-    │   ├── ban-hang/
-    │   │   ├── ban-hang-tai-quay.hbs
-    │   │   ├── danh-sach-don.hbs
-    │   │   ├── chi-tiet-don.hbs
-    │   │   └── tra-hang.hbs
-    │   │
-    │   ├── muon-tra/
-    │   │   ├── danh-sach-phieu-muon.hbs
-    │   │   ├── tao-phieu-muon.hbs
-    │   │   ├── chi-tiet-phieu-muon.hbs
-    │   │   ├── nhan-tra-sach.hbs
-    │   │   ├── danh-sach-dat-truoc.hbs
-    │   │   └── sach-qua-han.hbs
-    │   │
-    │   └── khach-hang/
-    │       ├── danh-sach-khach-hang.hbs
-    │       ├── chi-tiet-khach-hang.hbs
-    │       └── partials/
-    │           └── bieu-mau-khach-hang.hbs
-    │
-    ├── admin/
-    │   ├── tong-quan.hbs
-    │   ├── chi-nhanh/
-    │   ├── nhan-vien/
-    │   ├── phan-quyen/
-    │   ├── sach/
-    │   ├── nha-cung-cap/
-    │   ├── kho/
-    │   ├── khach-hang/
-    │   ├── hoi-vien/
-    │   ├── chinh-sach-muon/
-    │   ├── thanh-toan/
-    │   ├── bao-cao/
-    │   └── cai-dat/
-    │
-    └── super-admin/
-        ├── tong-quan.hbs
-        ├── don-vi/
-        ├── goi-dich-vu/
-        ├── dang-ky-dich-vu/
-        ├── hoa-don/
-        ├── su-dung-ai/
-        ├── nhat-ky/
-        └── cai-dat/
+│   ├── scripts/                            # Build SVG, tài nguyên và template
+│   ├── tests/
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── .env.example
+│   ├── .dockerignore
+│   └── Dockerfile
 ```
 
 **Quy tắc:** `truong-tien.hbs`, `hop-thoai-xac-nhan.hbs`, `phan-trang.hbs` chỉ có một bản dùng chung. Form thêm/sửa sách cùng dùng `bieu-mau-sach.hbs` và truyền chế độ `tao-moi`/`chinh-sua`; không gộp form sách với form hội viên chỉ vì chúng đều có ô nhập liệu.

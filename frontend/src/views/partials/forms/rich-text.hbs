@@ -1,0 +1,42 @@
+<div class="bf-form-field {{className}}" data-form-field>
+    {{#if label}}
+        <label class="bf-form-label" for="{{id}}-editor">{{label}}{{#if required}}<span class="bf-form-required">*</span>{{/if}}</label>
+    {{/if}}
+    <div class="bf-rich-text" data-bf-rich-text>
+        <div class="bf-rich-toolbar" role="toolbar">
+            <button type="button" data-command="undo" title="Hoàn tác">↶</button>
+            <button type="button" data-command="redo" title="Làm lại">↷</button>
+            <span class="bf-rich-divider"></span>
+            <select data-command="fontSize" title="Cỡ chữ">
+                <option value="3">Bình thường</option>
+                <option value="1">Nhỏ</option>
+                <option value="4">Lớn</option>
+                <option value="5">Rất lớn</option>
+                <option value="6">Tiêu đề</option>
+            </select>
+            <span class="bf-rich-divider"></span>
+            <button type="button" data-command="bold" title="Đậm"><strong>B</strong></button>
+            <button type="button" data-command="italic" title="Nghiêng"><em>I</em></button>
+            <button type="button" data-command="underline" title="Gạch chân"><u>U</u></button>
+            <span class="bf-rich-divider"></span>
+            <button type="button" data-command="justifyLeft" title="Căn trái">≡</button>
+            <button type="button" data-command="justifyCenter" title="Căn giữa">≡</button>
+            <button type="button" data-command="justifyRight" title="Căn phải">≡</button>
+            <button type="button" data-command="justifyFull" title="Căn đều">≡</button>
+            <span class="bf-rich-divider"></span>
+            <button type="button" data-command="insertUnorderedList" title="Danh sách">•</button>
+            <button type="button" data-command="insertOrderedList" title="Đánh số">1.</button>
+            <button type="button" data-command="createLink" title="Liên kết">↗</button>
+            <button type="button" data-command="unlink" title="Bỏ liên kết">×</button>
+        </div>
+        <div
+            id="{{id}}-editor"
+            class="bf-rich-editor"
+            contenteditable="true"
+            data-placeholder="{{placeholder}}"
+            data-initial-value="{{value}}"
+            style="min-height: {{#if height}}{{height}}{{else}}220px{{/if}};"
+        ></div>
+        <textarea id="{{id}}" name="{{name}}" class="bf-rich-hidden" hidden>{{value}}</textarea>
+    </div>
+</div>

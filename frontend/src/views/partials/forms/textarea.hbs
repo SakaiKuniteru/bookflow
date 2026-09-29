@@ -1,0 +1,17 @@
+<div class="bf-form-field {{className}}" data-form-field>
+    {{#if label}}
+        <label class="bf-form-label" for="{{id}}">{{label}}{{#if required}}<span class="bf-form-required">*</span>{{/if}}</label>
+    {{/if}}
+    <textarea
+        id="{{id}}"
+        name="{{name}}"
+        class="bf-form-control bf-textarea"
+        rows="{{#if rows}}{{rows}}{{else}}4{{/if}}"
+        placeholder="{{placeholder}}"
+        {{#if required}}required{{/if}}
+        {{#if disabled}}disabled{{/if}}
+        {{#if readonly}}readonly{{/if}}
+        {{#if maxlength}}maxlength="{{maxlength}}"{{/if}}
+    >{{value}}</textarea>
+    {{#if helpText}}<div class="bf-form-help">{{helpText}}</div>{{/if}}
+</div>

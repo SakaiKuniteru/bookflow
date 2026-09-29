@@ -1,0 +1,141 @@
+.bf-image-upload {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.bf-image-add,
+.bf-image-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 1px dashed var(--bf-form-border);
+    border-radius: 9px;
+    background: #fafbfc;
+}
+
+.bf-image-add {
+    width: 160px;
+    height: 160px;
+    cursor: pointer;
+}
+
+.bf-image-add > span {
+    color: var(--bf-form-primary);
+    font-size: 32px;
+    line-height: 32px;
+}
+
+.bf-image-add small {
+    margin-top: 5px;
+    color: var(--bf-form-muted);
+}
+
+.bf-image-item img {
+    display: block;
+}
+
+.bf-image-actions {
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+    left: 6px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 5px;
+}
+
+.bf-image-preview {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 29px;
+    height: 29px;
+    border: 0;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, .58);
+    color: #fff;
+    cursor: pointer;
+}
+
+.bf-image-preview svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.bf-image-delete {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 29px;
+    height: 29px;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, .58);
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.bf-image-delete:hover {
+    background: rgba(220, 38, 38, .85);
+}
+
+.bf-image-modal {
+    position: fixed;
+    z-index: 10000;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.bf-image-modal.is-open {
+    display: flex;
+}
+
+.bf-image-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, .72);
+}
+
+.bf-image-modal-content {
+    position: relative;
+    z-index: 1;
+    max-width: 90vw;
+    max-height: 90vh;
+}
+
+.bf-image-modal-content img {
+    display: block;
+    max-width: 90vw;
+    max-height: 85vh;
+    border-radius: 8px;
+    object-fit: contain;
+}
+
+.bf-image-modal-close {
+    position: absolute;
+    z-index: 2;
+    top: -40px;
+    right: 0;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .15);
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+}

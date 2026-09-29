@@ -1,0 +1,54 @@
+<div class="bf-form-field {{className}}" data-form-field>
+    {{#if label}}
+        <label class="bf-form-label" for="{{id}}">{{label}}{{#if required}}<span class="bf-form-required">*</span>{{/if}}</label>
+    {{/if}}
+    <div
+        id="{{id}}"
+        class="bf-select"
+        data-bf-select
+        data-name="{{name}}"
+        data-multiple="{{multiple}}"
+        data-select-all="{{selectAll}}"
+        data-search="{{search}}"
+        data-placeholder="{{placeholder}}"
+    >
+        <button type="button" class="bf-select-control" aria-haspopup="listbox" aria-expanded="false">
+            <span class="bf-select-value">Chọn...</span>
+            <span class="bf-select-icons">
+                <svg class="bf-select-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+                <svg class="bf-select-clear" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="m7 7 10 10M17 7 7 17"></path></svg>
+            </span>
+        </button>
+        <div class="bf-select-menu">
+            {{#if search}}
+                <div class="bf-select-search">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m16 16 5 5"></path></svg>
+                    <input type="text" class="bf-select-search-input" placeholder="Tìm kiếm..." autocomplete="off">
+                </div>
+            {{/if}}
+            <div class="bf-select-options" role="listbox">
+                {{#if selectAll}}
+                    <button type="button" class="bf-select-option bf-select-all-option" data-value="__all__" role="option">
+                        <span class="bf-select-option-label">Tất cả</span>
+                        <span class="bf-select-check">✓</span>
+                    </button>
+                {{/if}}
+                {{#each options}}
+                    <button
+                        type="button"
+                        class="bf-select-option {{#if selected}}is-selected{{/if}}"
+                        data-value="{{value}}"
+                        data-label="{{label}}"
+                        role="option"
+                        {{#if disabled}}disabled{{/if}}
+                    >
+                        <span class="bf-select-option-label">{{label}}</span>
+                        <span class="bf-select-check">✓</span>
+                    </button>
+                {{/each}}
+            </div>
+            <div class="bf-select-empty" hidden>Không tìm thấy dữ liệu.</div>
+        </div>
+        <div class="bf-select-hidden-values"></div>
+    </div>
+</div>

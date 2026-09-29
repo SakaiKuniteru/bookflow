@@ -1,0 +1,59 @@
+.bf-rich-text {
+    overflow: hidden;
+    border: 1px solid var(--bf-form-border);
+    border-radius: var(--bf-form-radius);
+    background: var(--bf-form-bg);
+}
+
+.bf-rich-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px;
+    padding: 6px;
+    border-bottom: 1px solid var(--bf-form-border);
+    background: #fafbfc;
+}
+
+.bf-rich-toolbar button,
+.bf-rich-toolbar select {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    height: 30px;
+    padding: 3px 7px;
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
+    color: var(--bf-form-text);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.bf-rich-toolbar button:hover,
+.bf-rich-toolbar select:hover {
+    background: var(--bf-form-hover);
+    color: var(--bf-form-primary);
+}
+
+.bf-rich-divider {
+    width: 1px;
+    height: 20px;
+    margin: 0 3px;
+    background: var(--bf-form-border);
+}
+
+.bf-rich-editor {
+    padding: 12px;
+    outline: none;
+    color: var(--bf-form-text);
+    font-size: 14px;
+    line-height: 1.65;
+}
+
+.bf-rich-editor:empty::before {
+    content: attr(data-placeholder);
+    color: #9ca3af;
+}
