@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import Any
+from botocore.exceptions import ClientError
 from app.core.config import Settings
 class StorageClient:
     def __init__(self, settings: Settings):
@@ -22,6 +23,22 @@ class StorageClient:
             region_name="us-east-1",
         )
         self.client = await self._client_context.__aenter__()
+        bucket = self.settings.storage_bucket
+        try:
+            await self.client.head_bucket(Bucket=bucket)
+            return
+        except ClientError as exc:
+            error = exc.response.get("Error", {})
+            status = exc.response.get("ResponseMetadata", {}).get("HTTPStatusCode")
+            if error.get("Code") not in {"404", "NoSuchBucket", "NotFound"} and status != 404:
+                raise
+        try:
+            await self.client.create_bucket(Bucket=bucket)
+        except ClientError as exc:
+            error = exc.response.get("Error", {})
+            if error.get("Code") not in {"BucketAlreadyOwnedByYou", "BucketAlreadyExists"}:
+                raise
+            await self.client.head_bucket(Bucket=bucket)
     async def kiem_tra_ket_noi(self) -> bool:
         if self.client is None:
             return False
@@ -41,10 +58,10 @@ class StorageClient:
         if content_type:
             params["ContentType"] = content_type
         await self.client.put_object(**params)
-    async def download_bytes(self, key: str) -> bytes:
+    async def download_bytes(self, key: str, bucket: str | None = None) -> bytes:
         if self.client is None:
             raise RuntimeError("Storage chưa được khởi tạo.")
-        response = await self.client.get_object(Bucket=self.settings.storage_bucket, Key=key)
+        response = await self.client.get_object(Bucket=bucket or self.settings.storage_bucket, Key=key)
         body = response["Body"]
         try:
             return await body.read()

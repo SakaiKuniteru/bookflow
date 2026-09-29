@@ -543,6 +543,8 @@ async def khoi_dong_worker() -> None:
     from app.services.extraction.trich_xuat_thong_tin import trich_xuat_thong_tin_service
     from app.services.recommendations.tao_ung_vien import tao_ung_vien_service
     settings = get_settings()
+    from app.core.config import kiem_tra_cau_hinh
+    kiem_tra_cau_hinh(settings)
     cau_hinh_logging(settings.app_log_level)
     postgres = tao_postgres_client(settings)
     redis = tao_redis_client(settings)
@@ -579,6 +581,7 @@ async def khoi_dong_worker() -> None:
         async def index_book(payload, progress, context):
             result = await sach_indexing_service.index_sach(
                 payload["book_id"],
+                don_vi_id=payload["don_vi_id"],
                 du_lieu=payload.get("book_data"),
                 backend_path=payload.get("backend_path"),
                 force=bool(payload.get("force", False)),
@@ -588,6 +591,7 @@ async def khoi_dong_worker() -> None:
         async def index_document(payload, progress, context):
             result = await tai_lieu_indexing_service.index_tai_lieu(
                 payload["file_id"],
+                don_vi_id=payload["don_vi_id"],
                 du_lieu=payload.get("document_data"),
                 backend_path=payload.get("backend_path"),
                 force=bool(payload.get("force", False)),

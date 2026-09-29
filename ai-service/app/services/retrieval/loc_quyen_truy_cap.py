@@ -142,7 +142,12 @@ class LocQuyenTruyCapService:
 
     def kiem_tra_metadata(self, metadata: dict[str, Any] | None, bo_loc: BoLocTruyCap) -> bool:
         metadata = metadata or {}
-        scope = str(metadata.get("access_scope", metadata.get("accessScope", ACCESS_SCOPE_PUBLIC))).strip().upper()
+        access_scope = metadata.get("access_scope", metadata.get("accessScope", ACCESS_SCOPE_PUBLIC))
+        if isinstance(access_scope, dict):
+            metadata = {**access_scope, **metadata}
+            scope = str(access_scope.get("access_scope", ACCESS_SCOPE_PUBLIC)).strip().upper()
+        else:
+            scope = str(access_scope).strip().upper()
         if scope not in bo_loc.allowed_scopes:
             return False
         if scope == ACCESS_SCOPE_PUBLIC:

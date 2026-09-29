@@ -1,8 +1,11 @@
 from typing import Any
+
 import httpx
+
 from app.core.config import Settings
 from app.core.exceptions import AIProviderException
 from app.providers.base import EmbeddingProvider, EmbeddingResponse
+
 
 class OpenAICompatibleEmbeddingProvider(EmbeddingProvider):
     def __init__(self, settings: Settings):
@@ -13,7 +16,10 @@ class OpenAICompatibleEmbeddingProvider(EmbeddingProvider):
         if not self.settings.embedding_base_url:
             return
         headers = {"Accept": "application/json", "Content-Type": "application/json"}
-        if self.settings.embedding_api_key:
+        if self.settings.embedding_provider == "gemini":
+            if self.settings.embedding_api_key:
+                headers["x-goog-api-key"] = self.settings.embedding_api_key
+        elif self.settings.embedding_api_key:
             headers["Authorization"] = f"Bearer {self.settings.embedding_api_key}"
         self.client = httpx.AsyncClient(
             base_url=self.settings.embedding_base_url.rstrip("/"),
@@ -26,7 +32,7 @@ class OpenAICompatibleEmbeddingProvider(EmbeddingProvider):
         try:
             await self.embed(["bookflow health check"])
             return True
-        except Exception:
+        except AIProviderException:
             return False
     async def dong(self) -> None:
         if self.client:
@@ -43,12 +49,29 @@ class OpenAICompatibleEmbeddingProvider(EmbeddingProvider):
             raise AIProviderException("Chưa cấu hình EMBEDDING_MODEL")
         if not texts:
             raise AIProviderException("Danh sách văn bản embedding không được rỗng")
-        payload: dict[str, Any] = {
-            "model": self.settings.embedding_model,
-            "input": texts
-        }
+        is_gemini = self.settings.embedding_provider == "gemini"
+        if is_gemini:
+            model = self.settings.embedding_model.removeprefix("models/")
+            model_path = f"models/{model}"
+            url = f"{self.settings.embedding_base_url.rstrip('/')}/{model_path}:batchEmbedContents"
+            payload: dict[str, Any] = {
+                "requests": [
+                    {
+                        "model": model_path,
+                        "content": {"parts": [{"text": text}]},
+                        "embedContentConfig": {"outputDimensionality": self.settings.embedding_dimension}
+                    }
+                    for text in texts
+                ]
+            }
+        else:
+            url = f"{self.settings.embedding_base_url.rstrip('/')}/embeddings"
+            payload = {
+                "model": self.settings.embedding_model,
+                "input": texts
+            }
         try:
-            response = await self.client.post("/embeddings", json=payload)
+            response = await self.client.post(url, json=payload)
             response.raise_for_status()
         except httpx.TimeoutException as exc:
             raise AIProviderException("Embedding Provider phản hồi quá thời gian") from exc
@@ -61,17 +84,27 @@ class OpenAICompatibleEmbeddingProvider(EmbeddingProvider):
             data = response.json()
         except ValueError as exc:
             raise AIProviderException("Embedding Provider trả về dữ liệu không hợp lệ") from exc
-        items = data.get("data") or []
+        if is_gemini:
+            items = data.get("embeddings") or []
+            vectors = [item.get("values") for item in items]
+        else:
+            items = data.get("data") or []
+            items = sorted(items, key=lambda item: item.get("index", 0))
+            vectors = [item.get("embedding") for item in items]
         if not items:
             raise AIProviderException("Embedding Provider không trả về vector")
-        items = sorted(items, key=lambda item: item.get("index", 0))
-        vectors = [item.get("embedding") for item in items]
+
         if any(vector is None for vector in vectors):
             raise AIProviderException("Embedding Provider trả về vector không hợp lệ")
+        if any(not isinstance(vector, list) for vector in vectors):
+            raise AIProviderException("Embedding Provider trả về vector không hợp lệ")
+        dimensions = {len(vector) for vector in vectors}
+        if dimensions != {self.settings.embedding_dimension}:
+            raise AIProviderException("Dimension embedding không khớp cấu hình và PostgreSQL", details={"expected": self.settings.embedding_dimension, "received": sorted(dimensions)})
         return EmbeddingResponse(
             vectors=vectors,
-            model=data.get("model"),
-            usage=data.get("usage"),
+            model=data.get("model") or self.settings.embedding_model,
+            usage=data.get("usage") or data.get("usageMetadata"),
             raw=data
         )
 
@@ -79,7 +112,7 @@ class OpenAICompatibleEmbeddingProvider(EmbeddingProvider):
         if not self.client or not self.settings.embedding_model:
             return False
         try:
-            response = await self.client.get("/models")
+            response = await self.client.get(f"{self.settings.embedding_base_url.rstrip('/')}/models")
             return response.status_code < 400
         except httpx.HTTPError:
             return False

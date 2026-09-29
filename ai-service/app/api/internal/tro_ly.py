@@ -11,4 +11,5 @@ async def tro_ly(
 ):
     payload = body.model_dump(mode="json")
     payload["request_context"] = request_context
-    return await tro_chuyen.tro_chuyen_service.chat(payload)
+    data = await tro_chuyen.tro_chuyen_service.chat(payload)
+    return {"request_id": request_context["request_id"], "success": True, "data": data, "metadata": {}}

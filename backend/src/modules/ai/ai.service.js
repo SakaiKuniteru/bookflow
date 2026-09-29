@@ -47,7 +47,9 @@ async function layUserContext(auth) {
         chi_nhanh_id: auth.chiNhanhId ?? null,
         permissions: (permissions?.quyen || []).map(item => item.ma_quyen),
         permission_scopes: permissions?.quyen || [],
-        allowed_scope: auth.chiNhanhId ? 'BRANCH' : 'ORGANIZATION',
+        allowed_scopes: auth.chiNhanhId ? ['PUBLIC', 'ORGANIZATION', 'BRANCH'] : ['PUBLIC', 'ORGANIZATION'],
+        allowed_organization_ids: [auth.donViId],
+        allowed_branch_ids: auth.chiNhanhId ? [auth.chiNhanhId] : [],
     };
 }
 class AiService {
@@ -57,6 +59,8 @@ class AiService {
             assistant_type: data.assistant_type || 'BOOK_ADVISOR',
             conversation_id: body.conversation_id ?? null,
             message: data.cau_hoi,
+            history: data.lich_su,
+            request_idempotency_key: data.yeu_cau_id,
             user_context: await layUserContext(auth),
             retrieved_context: [],
             recommendation_context: [],

@@ -25,12 +25,12 @@ class SachIndexingService:
         self.source_repository = source_repository or nguon_du_lieu_repository
         self.chunk_repository = chunk_repository or doan_du_lieu_repository
         self.chunker = chunker or chia_doan_service
-    async def _lay_du_lieu_sach(self, book_id: int | str, backend_path: str | None = None) -> dict[str, Any]:
+    async def _lay_du_lieu_sach(self, book_id: int | str, don_vi_id: int | str, backend_path: str | None = None) -> dict[str, Any]:
         path = (backend_path or BACKEND_SACH_PATH).format(book_id=book_id)
         try:
-            response = await self.backend.get(path)
+            response = await self.backend.get(path, params={"don_vi_id": don_vi_id})
         except Exception as exc:
-            raise AIBackendException(f"Không thể lấy dữ liệu sách {book_id} từ Backend", details={"book_id": book_id}) from exc
+            raise AIBackendException(f"Không thể lấy dữ liệu sách {book_id} từ Backend", details={"book_id": book_id, "don_vi_id": don_vi_id}) from exc
         if not isinstance(response, dict):
             raise AIBackendException("Backend trả dữ liệu sách không hợp lệ", details={"book_id": book_id})
         data = response.get("data", response)
@@ -116,9 +116,11 @@ class SachIndexingService:
             if source_id and source.get("status") == SOURCE_STATUS_ACTIVE:
                 await self.chunk_repository.vo_hieu_hoa_theo_source(source_id)
                 await self.source_repository.vo_hieu_hoa(source_id, status=SOURCE_STATUS_INACTIVE)
-    async def index_sach(self, book_id: int | str, *, du_lieu: dict[str, Any] | None = None, backend_path: str | None = None, force: bool = False) -> dict[str, Any]:
+    async def index_sach(self, book_id: int | str, *, don_vi_id: int | str, du_lieu: dict[str, Any] | None = None, backend_path: str | None = None, force: bool = False) -> dict[str, Any]:
+        if don_vi_id in (None, ""):
+            raise AIServiceException("Thiếu don_vi_id để index sách", code="INDEX_TENANT_REQUIRED", status_code=422, details={"book_id": book_id})
         if du_lieu is None:
-            du_lieu = await self._lay_du_lieu_sach(book_id, backend_path)
+            du_lieu = await self._lay_du_lieu_sach(book_id, don_vi_id, backend_path)
         content = self._lay_noi_dung(du_lieu)
         if not content:
             raise AIServiceException("Sách không có nội dung phù hợp để lập chỉ mục", code="INDEX_CONTENT_EMPTY", status_code=422, details={"book_id": book_id})

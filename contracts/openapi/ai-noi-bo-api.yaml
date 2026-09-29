@@ -54,104 +54,83 @@ paths:
                   status: ok
                   service: ai-api
 
-  /internal/ai/jobs:
+  /internal/tro-ly:
     post:
-      tags:
-        - TacVuAI
-
-      operationId: taoTacVuAi
-
-      summary: Tạo tác vụ AI nền
-
-      description: |
-        Backend xác thực người dùng và kiểm tra
-        quyền trước khi gửi yêu cầu.
-
-        FastAPI xác thực token nội bộ và kiểm tra
-        phạm vi dữ liệu được phép xử lý.
-
-        Một idempotency_key không được tạo
-        nhiều job tương đương khi request được gửi lại.
-
+      operationId: troLy
+      security:
+        - TokenNoiBo: []
       parameters:
         - $ref: '#/components/parameters/RequestIdBatBuoc'
-        - $ref: '#/components/parameters/Timeout'
-
       requestBody:
         required: true
-
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TaoTacVu'
-
-      responses:
-        '202':
-          description: Đã tiếp nhận tác vụ
-
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PhanHoiTacVu'
-
-        '400':
-          $ref: '#/components/responses/LoiApi'
-
-        '401':
-          $ref: '#/components/responses/LoiApi'
-
-        '403':
-          $ref: '#/components/responses/LoiApi'
-
-        '409':
-          $ref: '#/components/responses/LoiApi'
-
-        '429':
-          $ref: '#/components/responses/LoiApi'
-
-        '503':
-          $ref: '#/components/responses/LoiApi'
-
-  /internal/ai/jobs/{job_id}:
-    get:
-      tags:
-        - TacVuAI
-
-      operationId: layTrangThaiTacVuAi
-
-      summary: Lấy trạng thái tác vụ AI
-
-      parameters:
-        - name: job_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-
-        - $ref: '#/components/parameters/RequestIdBatBuoc'
-
-        - $ref: '#/components/parameters/Timeout'
-
+              $ref: '#/components/schemas/TroLyRequest'
       responses:
         '200':
-          description: Trạng thái tác vụ
-
+          description: Kết quả trợ lý
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PhanHoiTacVu'
-
+                $ref: '#/components/schemas/SuccessResponse'
         '401':
           $ref: '#/components/responses/LoiApi'
-
-        '403':
+        '422':
           $ref: '#/components/responses/LoiApi'
-
-        '404':
+        '502':
           $ref: '#/components/responses/LoiApi'
-
-        '503':
+  /internal/tim-kiem:
+    post:
+      operationId: timKiem
+      security:
+        - TokenNoiBo: []
+      parameters:
+        - $ref: '#/components/parameters/RequestIdBatBuoc'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimKiemRequest'
+      responses:
+        '200':
+          description: Kết quả tìm kiếm
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/LoiApi'
+        '422':
+          $ref: '#/components/responses/LoiApi'
+        '502':
+          $ref: '#/components/responses/LoiApi'
+  /internal/goi-y:
+    post:
+      operationId: goiYSach
+      security:
+        - TokenNoiBo: []
+      parameters:
+        - $ref: '#/components/parameters/RequestIdBatBuoc'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GoiYRequest'
+      responses:
+        '200':
+          description: Danh sách gợi ý
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/LoiApi'
+        '422':
+          $ref: '#/components/responses/LoiApi'
+        '502':
           $ref: '#/components/responses/LoiApi'
 
 components:

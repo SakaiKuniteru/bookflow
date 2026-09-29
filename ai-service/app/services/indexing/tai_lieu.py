@@ -32,10 +32,10 @@ class TaiLieuIndexingService:
         self.chunk_repository = chunk_repository or doan_du_lieu_repository
         self.chunker = chunker or chia_doan_service
         self.extractor = extractor
-    async def _lay_du_lieu_tai_lieu(self, file_id: int | str, backend_path: str | None = None) -> dict[str, Any]:
+    async def _lay_du_lieu_tai_lieu(self, file_id: int | str, don_vi_id: int | str, backend_path: str | None = None) -> dict[str, Any]:
         path = (backend_path or BACKEND_TAI_LIEU_PATH).format(file_id=file_id)
         try:
-            response = await self.backend.get(path)
+            response = await self.backend.get(path, params={"don_vi_id": don_vi_id})
         except Exception as exc:
             raise AIBackendException(f"Không thể lấy metadata tài liệu {file_id} từ Backend", details={"file_id": file_id}) from exc
         if not isinstance(response, dict):
@@ -52,7 +52,8 @@ class TaiLieuIndexingService:
         if not storage_key:
             return None
         try:
-            return await self.storage.download_bytes(str(storage_key))
+            storage_bucket = du_lieu.get("storage_bucket") or du_lieu.get("bucket")
+            return await self.storage.download_bytes(str(storage_key), bucket=storage_bucket)
         except Exception as exc:
             raise AIServiceException("Không thể đọc file từ storage", code="STORAGE_READ_FAILED", status_code=502, details={"storage_key": storage_key}) from exc
     async def _lay_text(self, du_lieu: dict[str, Any], file_id: int | str, document_type: str) -> tuple[str, list[dict[str, Any]] | None]:
@@ -114,9 +115,11 @@ class TaiLieuIndexingService:
             if source_id and source.get("status") == SOURCE_STATUS_ACTIVE:
                 await self.chunk_repository.vo_hieu_hoa_theo_source(source_id)
                 await self.source_repository.vo_hieu_hoa(source_id, status=SOURCE_STATUS_INACTIVE)
-    async def index_tai_lieu(self, file_id: int | str, *, du_lieu: dict[str, Any] | None = None, backend_path: str | None = None, force: bool = False) -> dict[str, Any]:
+    async def index_tai_lieu(self, file_id: int | str, *, don_vi_id: int | str, du_lieu: dict[str, Any] | None = None, backend_path: str | None = None, force: bool = False) -> dict[str, Any]:
+        if don_vi_id in (None, ""):
+            raise AIServiceException("Thiếu don_vi_id để index tài liệu", code="INDEX_TENANT_REQUIRED", status_code=422, details={"file_id": file_id})
         if du_lieu is None:
-            du_lieu = await self._lay_du_lieu_tai_lieu(file_id, backend_path)
+            du_lieu = await self._lay_du_lieu_tai_lieu(file_id, don_vi_id, backend_path)
         document_type = str(du_lieu.get("document_type") or du_lieu.get("loai_tai_lieu") or du_lieu.get("mime_type") or "UNKNOWN").upper()
         text, blocks = await self._lay_text(du_lieu, file_id, document_type)
         if not text.strip():

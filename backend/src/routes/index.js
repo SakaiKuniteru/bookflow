@@ -30,6 +30,7 @@ const giaHanRoutes = require('../modules/gia-han/gia-han.routes.js');
 const phiPhatRoutes = require('../modules/phi-phat/phi-phat.routes.js');
 const thongBaoRouter = require('../modules/thong-bao/thong-bao.routes.js');
 const aiRoute = require('../modules/ai/ai.route.js');
+const aiInternalRoutes = require('../modules/ai/ai.internal.routes.js');
 
 const apiRouter = Router();
 
@@ -64,5 +65,6 @@ apiRouter.use('/gia-han', giaHanRoutes);
 apiRouter.use('/phi-phat', phiPhatRoutes);
 apiRouter.use('/thong-bao', thongBaoRouter);
 apiRouter.use('/ai', aiRoute);
+apiRouter.use('/internal/ai', aiInternalRoutes);
 
 module.exports = apiRouter;

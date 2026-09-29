@@ -321,5 +321,47 @@ CREATE INDEX IF NOT EXISTS idx_thong_bao_kenh_log
         thoi_gian DESC
     );
 
+CREATE TABLE IF NOT EXISTS ai_nguon_du_lieu (
+    source_id UUID PRIMARY KEY,
+    source_type VARCHAR(40) NOT NULL,
+    entity_type VARCHAR(40),
+    entity_id VARCHAR(120),
+    file_id BIGINT,
+    title VARCHAR(500) NOT NULL,
+    content_reference TEXT,
+    version INTEGER NOT NULL DEFAULT 1 CHECK (version >= 1),
+    checksum VARCHAR(128),
+    access_scope JSONB NOT NULL DEFAULT '{}'::jsonb,
+    status VARCHAR(30) NOT NULL DEFAULT 'PENDING_INDEX',
+    metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+    index_status VARCHAR(30) NOT NULL DEFAULT 'CHUA_INDEX',
+    index_version INTEGER,
+    chunk_count INTEGER NOT NULL DEFAULT 0 CHECK (chunk_count >= 0),
+    indexed_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_ai_nguon_du_lieu_entity ON ai_nguon_du_lieu(entity_type, entity_id, updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_ai_nguon_du_lieu_file ON ai_nguon_du_lieu(file_id, updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_ai_nguon_du_lieu_status ON ai_nguon_du_lieu(status, index_status, updated_at);
+CREATE TABLE IF NOT EXISTS ai_doan_du_lieu (
+    chunk_id UUID PRIMARY KEY,
+    source_id UUID NOT NULL REFERENCES ai_nguon_du_lieu(source_id) ON DELETE CASCADE,
+    parent_chunk_id UUID,
+    sequence INTEGER NOT NULL CHECK (sequence >= 0),
+    content TEXT NOT NULL,
+    content_hash VARCHAR(128),
+    token_count INTEGER CHECK (token_count >= 0),
+    embedding VECTOR(1536),
+    embedding_model VARCHAR(200),
+    metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+    access_scope JSONB NOT NULL DEFAULT '{}'::jsonb,
+    status VARCHAR(30) NOT NULL DEFAULT 'ACTIVE',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    UNIQUE (source_id, sequence)
+);
+CREATE INDEX IF NOT EXISTS idx_ai_doan_du_lieu_source ON ai_doan_du_lieu(source_id, status, sequence);
+CREATE INDEX IF NOT EXISTS idx_ai_doan_du_lieu_embedding ON ai_doan_du_lieu USING hnsw (embedding vector_cosine_ops) WHERE embedding IS NOT NULL;
 
 COMMIT;

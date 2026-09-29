@@ -7,7 +7,7 @@ WorkerService = Callable[[dict[str, Any], Callable[[dict[str, Any]], Awaitable[N
 def _kiem_tra_payload(payload: Any) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise ValueError("INDEX_BOOK payload phải là object.")
-    for field in ("source_id", "book_id", "version"):
+    for field in ("source_id", "book_id", "don_vi_id", "version"):
         if payload.get(field) in (None, ""):
             raise ValueError(f"INDEX_BOOK thiếu {field}.")
     if not isinstance(payload["version"], int) or payload["version"] < 1:

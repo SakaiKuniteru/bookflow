@@ -1,7 +1,11 @@
 from __future__ import annotations
+
 from functools import lru_cache
+
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -62,8 +66,20 @@ def kiem_tra_cau_hinh(settings: Settings) -> None:
         errors.append("REDIS_URL")
     if settings.database_pool_min_size > settings.database_pool_max_size:
         errors.append("DATABASE_POOL_MIN_SIZE phải nhỏ hơn hoặc bằng DATABASE_POOL_MAX_SIZE")
-    if settings.worker_enabled and not settings.embedding_provider.strip():
-        errors.append("EMBEDDING_PROVIDER khi WORKER_ENABLED=true")
+    if settings.llm_provider != "openai_compatible":
+        errors.append("LLM_PROVIDER phải là openai_compatible")
+    if not settings.llm_model.strip():
+        errors.append("LLM_MODEL")
+    if not settings.llm_base_url.strip():
+        errors.append("LLM_BASE_URL")
+    if settings.embedding_provider not in {"openai_compatible", "gemini"}:
+        errors.append("EMBEDDING_PROVIDER phải là openai_compatible hoặc gemini")
+    if not settings.embedding_model.strip():
+        errors.append("EMBEDDING_MODEL")
+    if not settings.embedding_base_url.strip():
+        errors.append("EMBEDDING_BASE_URL")
+    if settings.embedding_provider == "gemini" and not settings.embedding_api_key.strip():
+        errors.append("EMBEDDING_API_KEY khi EMBEDDING_PROVIDER=gemini")
     if settings.worker_enabled and not settings.storage_endpoint.strip():
         errors.append("STORAGE_ENDPOINT khi WORKER_ENABLED=true")
     if errors:

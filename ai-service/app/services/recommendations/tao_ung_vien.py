@@ -158,7 +158,7 @@ class BackendRecommendationDataProvider:
         client = await self._lay_client()
         path = BACKEND_SACH_PATH.format(book_id=book_id)
         try:
-            response = await client.get(path)
+            response = await client.get(path, params={"don_vi_id": (user_context or {}).get("don_vi_id")})
         except Exception as error:
             raise AIBackendException("Không thể lấy thông tin sách từ Backend", details=str(error)) from error
         if isinstance(response, dict) and isinstance(response.get("data"), dict):
