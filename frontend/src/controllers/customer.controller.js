@@ -5,15 +5,7 @@ import notificationService from '../services/notification.service.js';
 
 const customerController = {
   async dashboard(req, res, next) {
-    try {
-      const result = await customerService.dashboard();
-      return res.render('customer/tong-quan', {
-        title: 'Tổng quan',
-        data: result.data
-      });
-    } catch (error) {
-      return next(error);
-    }
+    return res.render('customer/tong-quan', { title: 'Tổng quan', layout: 'customer' });
   },
   async cart(req, res, next) {
     try {

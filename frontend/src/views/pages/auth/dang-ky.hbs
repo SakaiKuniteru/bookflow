@@ -1,10 +1,8 @@
 <div class="bf-auth-description">Tạo tài khoản để sử dụng các dịch vụ của BookFlow.</div>
 {{#if error}}{{> feedback/alert type="error" title="Không thể đăng ký" message=error}}{{/if}}
 <form class="bf-auth-form" method="post" action="/auth/dang-ky" data-bf-auth-form>
-    {{> forms/input id="register-full-name" name="fullName" type="text" label="Họ và tên" value=values.fullName placeholder="Nhập họ và tên" autocomplete="name" required=true}}
+    <div class="bf-form-field" data-form-field><label class="bf-form-label" for="register-full-name">Họ và tên <span class="bf-form-required">*</span></label><input id="register-full-name" name="fullName" type="text" class="bf-form-control" value="{{values.fullName}}" placeholder="Nhập họ và tên" autocomplete="name" required></div>
     {{> forms/email id="register-email" name="email" label="Email" value=values.email placeholder="name@example.com" required=true}}
-    {{> forms/phone id="register-phone" name="phone" label="Số điện thoại" value=values.phone placeholder="0912 345 678" required=true}}
-    {{#if useUsername}}{{> forms/input id="register-username" name="username" type="text" label="Tên đăng nhập" value=values.username placeholder="Nhập tên đăng nhập" autocomplete="username" required=true}}{{/if}}
     {{> forms/password id="register-password" name="password" label="Mật khẩu" placeholder="Tạo mật khẩu" autocomplete="new-password" required=true minlength="8"}}
     {{> forms/password id="register-password-confirm" name="passwordConfirm" label="Xác nhận mật khẩu" placeholder="Nhập lại mật khẩu" autocomplete="new-password" required=true}}
     <div class="bf-form-error bf-auth-password-error" data-password-error hidden>Mật khẩu xác nhận chưa khớp.</div>

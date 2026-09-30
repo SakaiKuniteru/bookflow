@@ -7,7 +7,7 @@ const router = Router();
 
 router.use(authMiddleware);
 
-router.get('/tong-quan', permissionMiddleware('ADMIN_DASHBOARD_VIEW'), adminController.dashboard);
+router.get('/tong-quan', permissionMiddleware('members.manage'), adminController.dashboard);
 
 router.get('/chi-nhanh', permissionMiddleware('BRANCH_VIEW'), adminController.branches);
 router.get('/nhan-vien', permissionMiddleware('EMPLOYEE_VIEW'), adminController.employees);

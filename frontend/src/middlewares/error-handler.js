@@ -11,6 +11,16 @@ const errorHandler = (error, req, res, next) => {
       requestId
     });
   }
+  const publicPaths = ['/', '/sach', '/tim-kiem', '/goi-hoi-vien', '/gioi-thieu'];
+  const isPublicPage = publicPaths.includes(req.path) || req.path.startsWith('/sach/');
+  if (status === 401 && isPublicPage) {
+    return res.status(503).render('feedback/trang-loi', {
+      title: 'Danh mục tạm thời chưa tải được',
+      statusCode: 503,
+      message: 'Trang vẫn mở công khai, nhưng hiện chưa lấy được dữ liệu sách. Vui lòng thử lại sau.',
+      requestId
+    });
+  }
   if (status === 401) {
     return res.redirect(`/auth/dang-nhap?redirect=${encodeURIComponent(req.originalUrl || '/')}`);
   }

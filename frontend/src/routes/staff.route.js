@@ -7,7 +7,7 @@ const router = Router();
 
 router.use(authMiddleware);
 
-router.get('/tong-quan', permissionMiddleware('STAFF_VIEW'), staffController.dashboard);
+router.get('/tong-quan', permissionMiddleware('books.read'), staffController.dashboard);
 
 router.get('/sach', permissionMiddleware('BOOK_VIEW'), staffController.books);
 router.get('/sach/them', permissionMiddleware('BOOK_CREATE'), staffController.createBook);

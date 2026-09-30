@@ -5,7 +5,7 @@
 {{#if reset}}{{> feedback/alert type="success" message="Mật khẩu đã được cập nhật. Hãy đăng nhập bằng mật khẩu mới."}}{{/if}}
 <form class="bf-auth-form" method="post" action="/auth/dang-nhap" data-bf-auth-form>
     <input type="hidden" name="redirect" value="{{#if redirect}}{{redirect}}{{else}}/{{/if}}">
-    {{> forms/input id="login-email" name="email" type="text" label="Email hoặc tên đăng nhập" value=values.email placeholder="Nhập email hoặc tên đăng nhập" autocomplete="username" required=true}}
+    <div class="bf-form-field" data-form-field><label class="bf-form-label" for="login-email">Email hoặc tên đăng nhập <span class="bf-form-required">*</span></label><input id="login-email" name="email" type="text" class="bf-form-control" value="{{values.email}}" placeholder="Nhập email hoặc tên đăng nhập" autocomplete="username" required></div>
     {{> forms/password id="login-password" name="password" label="Mật khẩu" placeholder="Nhập mật khẩu" autocomplete="current-password" required=true}}
     <div class="bf-auth-form-row">
         {{> forms/checkbox id="remember-me" name="remember" label="Ghi nhớ đăng nhập" value="true"}}

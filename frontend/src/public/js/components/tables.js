@@ -1,4 +1,4 @@
-import { matchesSearch } from "./search.js";
+import { matchesSearch } from "./forms/search.js";
 
 function normalize(value) {
     return String(value ?? "").trim().toLocaleLowerCase();

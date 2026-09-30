@@ -1,9 +1,7 @@
 const normalizePermissions = user => {
   if (!user) return [];
-  if (Array.isArray(user.permissions)) return user.permissions;
-  if (Array.isArray(user.quyen)) return user.quyen;
-  if (Array.isArray(user.permissionCodes)) return user.permissionCodes;
-  return [];
+  const values = Array.isArray(user.permissions) ? user.permissions : Array.isArray(user.quyen) ? user.quyen : Array.isArray(user.permissionCodes) ? user.permissionCodes : [];
+  return values.map(item => typeof item === 'string' ? item : item?.ma_quyen).filter(Boolean);
 };
 
 const permissionMiddleware = (...requiredPermissions) => {

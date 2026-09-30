@@ -1,6 +1,7 @@
 <section class="bf-public-container bf-public-page">
     {{#if breadcrumbs}}{{> navigation/breadcrumb items=breadcrumbs}}{{/if}}
     {{#if book}}
+        {{#if intentMessage}}{{> feedback/alert type="info" title="Bạn có thể tiếp tục" message=intentMessage}}{{/if}}
         <article class="bf-public-book-detail">
             <div class="bf-public-book-detail-media">
                 {{> components/sach/bo-suu-tap-anh mainImage=book.mainImage images=book.images}}

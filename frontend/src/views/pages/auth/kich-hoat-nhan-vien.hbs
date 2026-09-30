@@ -1,0 +1,15 @@
+<div class="bf-auth-description">Nhập thông tin trong email mời, mã OTP và mật khẩu mới để kích hoạt tài khoản.</div>
+{{#if error}}{{> feedback/alert type="error" title="Không thể kích hoạt tài khoản" message=error}}{{/if}}
+<form class="bf-auth-form" method="post" action="/auth/kich-hoat-nhan-vien" data-bf-auth-form>
+    {{> forms/input id="activation-identifier" name="identifier" type="text" label="Email hoặc tên đăng nhập" value=identifier placeholder="Email hoặc tên đăng nhập" autocomplete="username" required=true}}
+    {{> forms/password id="temporary-password" name="temporaryPassword" label="Mật khẩu tạm thời" placeholder="Nhập mật khẩu trong email mời" autocomplete="current-password" required=true}}
+    {{> forms/input id="activation-otp" name="otp" type="text" label="Mã OTP" placeholder="Nhập mã gồm 6 chữ số" autocomplete="one-time-code" maxlength="6" minlength="6" required=true className="bf-auth-otp-field"}}
+    {{> forms/password id="activation-new-password" name="newPassword" label="Mật khẩu mới" placeholder="Tạo mật khẩu mới" autocomplete="new-password" required=true minlength="8"}}
+    {{> forms/password id="activation-confirm-password" name="confirmNewPassword" label="Xác nhận mật khẩu mới" placeholder="Nhập lại mật khẩu mới" autocomplete="new-password" required=true}}
+    <div class="bf-form-error bf-auth-password-error" data-password-error hidden>Mật khẩu xác nhận chưa khớp.</div>
+    <div class="bf-auth-submit">
+        <button class="bf-btn bf-btn-primary bf-btn-md" type="submit" data-auth-submit>Kích hoạt tài khoản</button>
+        {{> common/loading visible=false fullscreen=false text="Đang kích hoạt..." className="bf-auth-loading"}}
+    </div>
+</form>
+<p class="bf-auth-switch"><a href="/auth/dang-nhap">Quay lại đăng nhập</a></p>

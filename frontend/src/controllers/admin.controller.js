@@ -5,7 +5,9 @@ const render = (view, title) => async (req, res) => {
 };
 
 const adminController = {
-  dashboard: render('admin/tong-quan', 'Tổng quan quản trị'),
+  async dashboard(req, res) {
+    return res.render('admin/tong-quan', { title: 'Tổng quan quản trị', layout: 'admin' });
+  },
   branches: render('admin/chi-nhanh', 'Chi nhánh'),
   employees: render('admin/nhan-vien', 'Nhân viên'),
   permissions: render('admin/phan-quyen', 'Phân quyền'),

@@ -1,3 +1,15 @@
+@import url("./forms/select.css");
+@import url("./forms/password.css?v=20261001-1");
+@import url("./forms/file.css");
+@import url("./forms/image.css");
+@import url("./forms/rich-text.css");
+@import url("./forms/search.css");
+@import url("./forms/date.css");
+@import url("./forms/phone.css");
+@import url("./feedback.css");
+@import url("./tables.css");
+@import url("./modals.css");
+
 :root {
     --bf-form-primary: var(--bf-primary, #2563eb);
     --bf-form-primary-hover: var(--bf-primary-hover, #1d4ed8);
@@ -421,15 +433,3 @@
         animation-duration: 1.5s;
     }
 }
-
-@import url("./forms/select.css");
-@import url("./forms/password.css");
-@import url("./forms/file.css");
-@import url("./forms/image.css");
-@import url("./forms/rich-text.css");
-@import url("./forms/search.css");
-@import url("./forms/date.css");
-@import url("./forms/phone.css");
-@import url("./feedback.css");
-@import url("./tables.css");
-@import url("./modals.css");

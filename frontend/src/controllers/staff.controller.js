@@ -6,9 +6,7 @@ import customerService from '../services/customer.service.js';
 
 const staffController = {
   async dashboard(req, res) {
-    return res.render('staff/tong-quan', {
-      title: 'Tổng quan'
-    });
+    return res.render('staff/tong-quan', { title: 'Tổng quan', layout: 'staff' });
   },
   async books(req, res, next) {
     try {

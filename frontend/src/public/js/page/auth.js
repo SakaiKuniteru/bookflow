@@ -6,7 +6,7 @@ function initializeAuthForm(form) {
     const error = form.querySelector("[data-password-error]");
     const submit = form.querySelector("[data-auth-submit]");
     const loading = form.querySelector(".bf-auth-loading");
-    const otp = form.querySelector('[name="code"]');
+    const otp = form.querySelector('[name="otp"]');
     const validatePasswords = () => {
         if (!password || !confirmation) return true;
         const valid = password.value === confirmation.value;

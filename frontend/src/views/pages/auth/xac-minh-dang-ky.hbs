@@ -1,0 +1,16 @@
+<div class="bf-auth-description">Nhập mã OTP đã gửi đến email đăng ký để kích hoạt tài khoản.</div>
+{{#if error}}{{> feedback/alert type="error" title="Không xác minh được email" message=error}}{{/if}}
+{{#if success}}{{> feedback/alert type="success" message=success}}{{/if}}
+<form class="bf-auth-form" method="post" action="/auth/xac-minh-dang-ky" data-bf-auth-form>
+    {{> forms/email id="verify-email" name="email" label="Email" value=email placeholder="name@example.com" required=true}}
+    {{> forms/input id="verify-otp" name="otp" type="text" label="Mã OTP" value=otp placeholder="Nhập mã gồm 6 chữ số" autocomplete="one-time-code" maxlength="6" minlength="6" required=true className="bf-auth-otp-field"}}
+    <div class="bf-auth-submit">
+        <button class="bf-btn bf-btn-primary bf-btn-md" type="submit" data-auth-submit>Xác minh email</button>
+        {{> common/loading visible=false fullscreen=false text="Đang xác minh..." className="bf-auth-loading"}}
+    </div>
+</form>
+<form class="bf-auth-form bf-auth-resend-form" method="post" action="/auth/gui-lai-otp-dang-ky">
+    <input type="hidden" name="email" value="{{email}}">
+    <button class="bf-btn bf-btn-secondary bf-btn-md" type="submit">Gửi lại mã OTP</button>
+</form>
+<p class="bf-auth-switch"><a href="/auth/dang-nhap">Quay lại đăng nhập</a></p>

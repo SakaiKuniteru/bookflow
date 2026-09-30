@@ -1,66 +1,12 @@
-<section class="bf-public-home">
-    <section class="bf-public-hero">
-        <div class="bf-public-container bf-public-hero-content">
-            <p class="bf-public-eyebrow">{{#if hero.eyebrow}}{{hero.eyebrow}}{{else}}Chào mừng đến với BookFlow{{/if}}</p>
-            <h1>{{#if hero.title}}{{hero.title}}{{else}}Khám phá thế giới sách cùng BookFlow{{/if}}</h1>
-            {{#if hero.description}}<p class="bf-public-hero-description">{{hero.description}}</p>{{else}}<p class="bf-public-hero-description">Tìm kiếm, đọc thông tin và lựa chọn hình thức sử dụng sách phù hợp với bạn.</p>{{/if}}
-            <form class="bf-public-search-form" method="get" action="/tim-kiem">
-                {{> forms/search id="home-book-search" name="q" value=query placeholder="Tìm theo tên sách, tác giả, ISBN..." mode="relative" threshold=85}}
-                <button class="bf-btn bf-btn-primary bf-btn-md" type="submit">Tìm sách</button>
-            </form>
-            <div class="bf-public-hero-links">
-                <a href="/sach">Duyệt tất cả sách</a>
-                <a href="/goi-hoi-vien">Xem gói hội viên</a>
-            </div>
-        </div>
-    </section>
-    {{#if featuredBooks}}
-        <section class="bf-public-section bf-public-container">
-            <div class="bf-public-section-heading">
-                <div><p class="bf-public-eyebrow">Được quan tâm</p><h2>Sách nổi bật</h2>{{#if featuredDescription}}<p>{{featuredDescription}}</p>{{/if}}</div>
-                <a class="bf-public-text-link" href="/sach?featured=true">Xem tất cả</a>
-            </div>
-            <div class="bf-public-book-grid">
-                {{#each featuredBooks}}{{> components/sach/the-sach book=this}}{{/each}}
-            </div>
-        </section>
-    {{/if}}
-    {{#if newBooks}}
-        <section class="bf-public-section bf-public-section-muted">
-            <div class="bf-public-container">
-                <div class="bf-public-section-heading">
-                    <div><p class="bf-public-eyebrow">Vừa cập nhật</p><h2>Sách mới</h2>{{#if newBooksDescription}}<p>{{newBooksDescription}}</p>{{/if}}</div>
-                    <a class="bf-public-text-link" href="/sach?sort=newest">Xem tất cả</a>
-                </div>
-                <div class="bf-public-book-grid">
-                    {{#each newBooks}}{{> components/sach/the-sach book=this}}{{/each}}
-                </div>
-            </div>
-        </section>
-    {{/if}}
-    {{#if provisions}}
-        <section class="bf-public-section bf-public-container">
-            <div class="bf-public-section-heading"><div><p class="bf-public-eyebrow">Linh hoạt theo nhu cầu</p><h2>Các hình thức sử dụng sách</h2></div></div>
-            {{> components/sach/hinh-thuc-cung-cap types=provisions ariaLabel="Các hình thức sử dụng sách"}}
-        </section>
-    {{/if}}
-    {{#if featuredPlans}}
-        <section class="bf-public-section bf-public-section-muted">
-            <div class="bf-public-container">
-                <div class="bf-public-section-heading">
-                    <div><p class="bf-public-eyebrow">Dành cho bạn đọc thường xuyên</p><h2>Gói hội viên nổi bật</h2></div>
-                    <a class="bf-public-text-link" href="/goi-hoi-vien">Xem tất cả gói</a>
-                </div>
-                <div class="bf-public-plan-grid">
-                    {{#each featuredPlans}}{{> components/hoi-vien/the-goi-hoi-vien plan=this}}{{/each}}
-                </div>
-            </div>
-        </section>
-    {{/if}}
-    {{#if introduction}}
-        <section class="bf-public-section bf-public-container bf-public-intro">
-            <div><p class="bf-public-eyebrow">{{#if introduction.eyebrow}}{{introduction.eyebrow}}{{else}}Về BookFlow{{/if}}</p><h2>{{introduction.title}}</h2><p>{{introduction.description}}</p>{{#if introduction.href}}<a class="bf-btn bf-btn-secondary bf-btn-md" href="{{introduction.href}}">{{#if introduction.linkLabel}}{{introduction.linkLabel}}{{else}}Tìm hiểu thêm{{/if}}</a>{{/if}}</div>
-            {{#if introduction.imageUrl}}<img src="{{introduction.imageUrl}}" alt="{{introduction.imageAlt}}" loading="lazy">{{/if}}
-        </section>
-    {{/if}}
+<section class="bf-demo-public-home">
+    <section class="bf-demo-hero"><div class="bf-demo-hero-copy"><p class="bf-public-eyebrow">Đọc một trang · mở một thế giới</p><h1>Mỗi cuốn sách,<br>một hành trình mới.</h1><p>Khám phá sách yêu thích, mua để sở hữu, mượn miễn phí hoặc thuê linh hoạt ngay tại BookFlow.</p><div class="bf-demo-hero-buttons"><a class="bf-demo-button bf-demo-primary" href="/sach">Khám phá sách <span>→</span></a><a class="bf-demo-button" href="/sach?loai=muon">Mượn &amp; thuê sách <span>▤</span></a></div><div class="bf-demo-proof"><span>✓</span> Xem sách không cần tài khoản <i>·</i> <span>✓</span> Chọn chi nhánh nhận sách</div></div><div class="bf-demo-hero-art"><span class="bf-demo-hero-tag">✦ Sách hay mỗi ngày</span><div class="bf-demo-shelf"><span class="bf-demo-hero-book" style="--book-height:190px;--book-color:#385d53">✦</span><span class="bf-demo-hero-book" style="--book-height:225px;--book-color:#c48265">◌</span><span class="bf-demo-hero-book" style="--book-height:207px;--book-color:#d3b471">☼</span><span class="bf-demo-hero-book" style="--book-height:181px;--book-color:#77968c">❀</span></div></div></section>
+    <div class="bf-demo-benefits"><div><span>▤</span><p><strong>Mua, mượn hoặc thuê</strong><small>Linh hoạt theo nhu cầu đọc</small></p></div><div><span>▦</span><p><strong>Nhận sách tại chi nhánh</strong><small>Chọn nơi thuận tiện cho bạn</small></p></div><div><span>♙</span><p><strong>Quyền lợi hội viên</strong><small>Ưu đãi và lịch sử đọc tập trung</small></p></div></div>
+    {{#if catalogUnavailable}}{{> feedback/alert type="warning" title="Danh mục đang tạm thời gián đoạn" message="Bạn vẫn có thể xem trang chủ. Danh sách sách sẽ hiện lại khi dịch vụ dữ liệu sẵn sàng."}}{{/if}}
+    <section class="bf-demo-books-section"><header class="bf-demo-section-head"><div><p class="bf-public-eyebrow">Tủ sách BookFlow</p><h2>Gợi ý dành cho bạn</h2><p>Sách nổi bật tại Chi nhánh Trung tâm</p></div><a class="bf-demo-button bf-demo-soft" href="/sach">Xem tất cả <span>→</span></a></header><div class="bf-demo-book-grid">
+        {{#if featuredBooks}}{{#each featuredBooks}}<article class="bf-demo-book-card"><a class="bf-demo-book-cover tone-{{@index}}" href="{{#if href}}{{href}}{{else}}/sach{{/if}}"><span class="bf-demo-cover-art"><i>✦</i><b>{{title}}</b></span></a><div class="bf-demo-book-info"><small>{{#if categoryName}}{{categoryName}}{{else}}Văn học{{/if}} · Còn sách</small><a href="{{#if href}}{{href}}{{else}}/sach{{/if}}"><strong>{{title}}</strong></a><span class="bf-demo-author">{{#if authorsDisplay}}{{authorsDisplay}}{{else}}BookFlow{{/if}}</span><div class="bf-demo-price"><b>{{#if priceDisplay}}{{priceDisplay}}{{else}}Đang cập nhật{{/if}}</b><small>{{#if rentalPriceDisplay}}Thuê {{rentalPriceDisplay}}{{else}}Thuê tại chi nhánh{{/if}}</small></div><div class="bf-demo-book-actions"><a class="bf-demo-button bf-demo-primary" href="{{#if actions}}{{#each actions}}{{#if @first}}{{href}}{{/if}}{{/each}}{{else}}/sach{{/if}}">♧ Thêm giỏ</a><a class="bf-demo-button bf-demo-arrow" href="{{#if href}}{{href}}{{else}}/sach{{/if}}" aria-label="Xem chi tiết">→</a></div></div></article>{{/each}}{{else}}
+        <article class="bf-demo-book-card"><a class="bf-demo-book-cover tone-0" href="/sach"><span class="bf-demo-cover-art"><i>✦</i><b>Những ngày<br>chậm lại</b></span></a><div class="bf-demo-book-info"><small>Văn học · Còn sách</small><a href="/sach"><strong>Những ngày chậm lại</strong></a><span class="bf-demo-author">An Nhiên</span><div class="bf-demo-price"><b>125.000 ₫</b><small>Thuê 8.000 ₫/tuần</small></div><div class="bf-demo-book-actions"><a class="bf-demo-button bf-demo-primary" href="/sach">♧ Thêm giỏ</a><a class="bf-demo-button bf-demo-arrow" href="/sach" aria-label="Xem sách">→</a></div></div></article>
+        <article class="bf-demo-book-card"><a class="bf-demo-book-cover tone-1" href="/sach"><span class="bf-demo-cover-art"><i>◌</i><b>Bản đồ của<br>gió</b></span></a><div class="bf-demo-book-info"><small>Tiểu thuyết · Còn sách</small><a href="/sach"><strong>Bản đồ của gió</strong></a><span class="bf-demo-author">Lâm Phương</span><div class="bf-demo-price"><b>168.000 ₫</b><small>Thuê 10.000 ₫/tuần</small></div><div class="bf-demo-book-actions"><a class="bf-demo-button bf-demo-primary" href="/sach">♧ Thêm giỏ</a><a class="bf-demo-button bf-demo-arrow" href="/sach" aria-label="Xem sách">→</a></div></div></article>
+        <article class="bf-demo-book-card"><a class="bf-demo-book-cover tone-2" href="/sach"><span class="bf-demo-cover-art"><i>☼</i><b>Ngày nắng<br>lên</b></span></a><div class="bf-demo-book-info"><small>Thiếu nhi · Còn sách</small><a href="/sach"><strong>Ngày nắng lên</strong></a><span class="bf-demo-author">Hạ Lam</span><div class="bf-demo-price"><b>89.000 ₫</b><small>Thuê 6.000 ₫/tuần</small></div><div class="bf-demo-book-actions"><a class="bf-demo-button bf-demo-primary" href="/sach">♧ Thêm giỏ</a><a class="bf-demo-button bf-demo-arrow" href="/sach" aria-label="Xem sách">→</a></div></div></article>
+        <article class="bf-demo-book-card"><a class="bf-demo-book-cover tone-3" href="/sach"><span class="bf-demo-cover-art"><i>❀</i><b>Một tách<br>bình yên</b></span></a><div class="bf-demo-book-info"><small>Kỹ năng · Còn sách</small><a href="/sach"><strong>Một tách bình yên</strong></a><span class="bf-demo-author">Mộc Miên</span><div class="bf-demo-price"><b>139.000 ₫</b><small>Thuê 9.000 ₫/tuần</small></div><div class="bf-demo-book-actions"><a class="bf-demo-button bf-demo-primary" href="/sach">♧ Thêm giỏ</a><a class="bf-demo-button bf-demo-arrow" href="/sach" aria-label="Xem sách">→</a></div></div></article>{{/if}}
+    </div><p class="bf-demo-disclaimer">Bìa sách và dữ liệu mẫu minh họa giao diện, không phải danh mục thương mại thực tế.</p></section>
 </section>

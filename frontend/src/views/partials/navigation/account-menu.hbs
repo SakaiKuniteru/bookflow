@@ -3,15 +3,15 @@
         {{#if user.avatar}}
             <img class="bf-nav-avatar" src="{{user.avatar}}" alt="">
         {{else}}
-            <span class="bf-nav-avatar bf-nav-avatar-fallback">{{#if user.name}}{{user.name.[0]}}{{else}}?{{/if}}</span>
+            <span class="bf-nav-avatar bf-nav-avatar-fallback">{{#if user.name}}{{user.name.[0]}}{{else}}{{#if user.taiKhoan.hoTen}}{{user.taiKhoan.hoTen.[0]}}{{else}}{{#if user.tai_khoan.ho_ten}}{{user.tai_khoan.ho_ten.[0]}}{{else}}?{{/if}}{{/if}}{{/if}}</span>
         {{/if}}
-        <span class="bf-nav-account-name">{{#if user.name}}{{user.name}}{{else}}Tài khoản{{/if}}</span>
+        <span class="bf-nav-account-name">{{#if user.name}}{{user.name}}{{else}}{{#if user.taiKhoan.hoTen}}{{user.taiKhoan.hoTen}}{{else}}{{#if user.tai_khoan.ho_ten}}{{user.tai_khoan.ho_ten}}{{else}}Tài khoản{{/if}}{{/if}}{{/if}}</span>
         {{> ui/icon name="chevron-down" size="16"}}
     </button>
     <div class="bf-nav-menu bf-nav-account-menu" data-bf-menu-panel hidden>
         <div class="bf-nav-account-summary">
-            <strong>{{user.name}}</strong>
-            {{#if user.email}}<span>{{user.email}}</span>{{/if}}
+            <strong>{{#if user.name}}{{user.name}}{{else}}{{#if user.taiKhoan.hoTen}}{{user.taiKhoan.hoTen}}{{else}}{{user.tai_khoan.ho_ten}}{{/if}}{{/if}}</strong>
+            {{#if user.email}}<span>{{user.email}}</span>{{else}}{{#if user.taiKhoan.email}}<span>{{user.taiKhoan.email}}</span>{{else}}{{#if user.tai_khoan.email}}<span>{{user.tai_khoan.email}}</span>{{/if}}{{/if}}{{/if}}
         </div>
         {{#each links}}
             <a class="bf-nav-menu-item {{#if danger}}is-danger{{/if}}" href="{{href}}">
@@ -19,5 +19,6 @@
                 <span>{{label}}</span>
             </a>
         {{/each}}
+        <form class="bf-nav-logout-form" method="post" action="/auth/dang-xuat"><button class="bf-nav-menu-item" type="submit">Đăng xuất</button></form>
     </div>
 </div>

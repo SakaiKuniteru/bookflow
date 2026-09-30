@@ -2,9 +2,9 @@
 {{#if error}}{{> feedback/alert type="error" title="Không thể đặt lại mật khẩu" message=error}}{{/if}}
 {{#if success}}{{> feedback/alert type="success" message=success}}{{/if}}
 <form class="bf-auth-form" method="post" action="/auth/dat-lai-mat-khau" data-bf-auth-form>
-    <input type="hidden" name="token" value="{{token}}">
+    {{> forms/email id="reset-email" name="email" label="Email" value=email placeholder="name@example.com" required=true}}
     {{#if requiresOtp}}
-        {{> forms/input id="reset-code" name="code" type="text" label="Mã xác thực" value=values.code placeholder="Nhập mã gồm 6 chữ số" autocomplete="one-time-code" maxlength="6" minlength="6" className="bf-auth-otp-field"}}
+        {{> forms/input id="reset-code" name="otp" type="text" label="Mã xác thực" value=values.otp placeholder="Nhập mã gồm 6 chữ số" autocomplete="one-time-code" maxlength="6" minlength="6" required=true className="bf-auth-otp-field"}}
     {{/if}}
     {{> forms/password id="new-password" name="newPassword" label="Mật khẩu mới" placeholder="Nhập mật khẩu mới" autocomplete="new-password" required=true minlength="8"}}
     {{> forms/password id="confirm-new-password" name="confirmNewPassword" label="Xác nhận mật khẩu mới" placeholder="Nhập lại mật khẩu mới" autocomplete="new-password" required=true}}

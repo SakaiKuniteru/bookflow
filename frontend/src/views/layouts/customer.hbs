@@ -3,25 +3,24 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#ffffff">
+    <meta name="theme-color" content="#173e37">
     <title>{{#if title}}{{title}} | {{/if}}{{app.name}}</title>
     <link rel="icon" href="/brand/logo-symbol.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="/css/components/forms.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/components/tables.css">
+    <link rel="stylesheet" href="/css/components/forms.css?v=20261001-1">
     <link rel="stylesheet" href="/css/components/navigation.css">
+    <link rel="stylesheet" href="/css/theme.css">
+    <link rel="stylesheet" href="/css/pages/public.css">
     {{#each stylesheets}}<link rel="stylesheet" href="{{this}}">{{/each}}
 </head>
-<body class="bf-layout bf-layout-customer {{bodyClass}}">
-    {{> navigation/header brandName=app.name brandHref="/" links=navigation.headerLinks user=user accountLinks=navigation.accountLinks notifications=navigation.notifications unreadCount=navigation.unreadCount showNotifications=navigation.showNotifications sidebarId="customer-sidebar"}}
-    <div class="bf-app-shell">
-        {{> navigation/sidebar id="customer-sidebar" title=navigation.sidebarTitle ariaLabel="Menu khách hàng" items=navigation.sidebarItems}}
-        <div class="bf-app-main">
-            {{#if breadcrumbs}}<div class="bf-layout-container">{{> navigation/breadcrumb items=breadcrumbs}}</div>{{/if}}
-            <main id="main-content" class="bf-layout-content {{contentClass}}">{{{body}}}</main>
-            {{#if navigation.footerGroups}}{{> navigation/footer brandName=app.name groups=navigation.footerGroups bottomLinks=navigation.footerLinks copyright=navigation.copyright year=navigation.year}}{{/if}}
-        </div>
-    </div>
-    <script type="module" src="/js/components/forms.js"></script>
-    <script type="module">import { initNavigation } from "/js/components/navigation.js"; initNavigation();</script>
+<body class="bf-layout bf-layout-customer" data-bf-theme="default">
+    {{> navigation/header publicNav=true brandName=app.name brandHref="/" links=navigation.headerLinks user=user accountLinks=navigation.accountLinks notifications=navigation.notifications unreadCount=navigation.unreadCount showNotifications=navigation.showNotifications sidebarId="customer-sidebar"}}
+    <main id="main-content" class="bf-layout-content bf-demo-main">{{{body}}}</main>
+    <footer class="bf-demo-footer"><a class="bf-nav-brand bf-demo-brand" href="/"><span class="bf-demo-mark" aria-hidden="true"><i></i></span><span>{{app.name}}</span><small>AI</small></a><span>BookFlow AI · Bán sách · Mượn miễn phí · Thuê có phí · Hội viên</span></footer>
+    <script type="module" src="/js/components/forms.js?v=20261001-7"></script>
+    <script type="module" src="/js/page/auth.js?v=20261001-5"></script>
+    <script type="module" src="/js/components/navigation.js?v=20260930-1"></script>
     {{#each scripts}}<script type="module" src="{{this}}"></script>{{/each}}
 </body>
 </html>

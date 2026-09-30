@@ -9,7 +9,7 @@ import { initRichTextInputs } from "./forms/rich-text.js";
 import { initSearchInputs } from "./forms/search.js";
 import { initPhoneInputs } from "./forms/phone.js";
 import { initFeedback } from "./feedback.js";
-import { initDataTables } from "./tables.js";
+import { initDataTables } from "./tables.js?v=20260930-3";
 import { initModals } from "./modals.js";
 import { initBookGalleries } from "./book-gallery.js";
 
@@ -31,7 +31,13 @@ const initializers = [
 ];
 
 function initForms(root = document) {
-    initializers.forEach(initializer => initializer(root));
+    initializers.forEach(initializer => {
+        try {
+            initializer(root);
+        } catch (error) {
+            console.error("BookFlow form component initialization failed:", error);
+        }
+    });
 }
 
 function observeForms() {
@@ -46,6 +52,8 @@ function observeForms() {
     observer.observe(document.body, { childList: true, subtree: true });
 }
 
+window.BookFlowForms = { init: initForms };
+
 function boot() {
     initForms(document);
     observeForms();
@@ -56,7 +64,3 @@ if (document.readyState === "loading") {
 } else {
     boot();
 }
-
-window.BookFlowForms = {
-    init: initForms
-};
