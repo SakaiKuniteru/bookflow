@@ -5,23 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#ffffff">
     <title>{{#if title}}{{title}} | {{/if}}{{app.name}}</title>
-    <link rel="icon" href="/brand/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="/brand/logo-symbol.svg" type="image/svg+xml">
     <link rel="stylesheet" href="/css/components/forms.css">
     <link rel="stylesheet" href="/css/components/navigation.css">
+    <link rel="stylesheet" href="/css/pages/auth.css">
     {{#each stylesheets}}<link rel="stylesheet" href="{{this}}">{{/each}}
 </head>
 <body class="bf-layout bf-layout-auth {{bodyClass}}">
     <header class="bf-auth-header">
-        <a class="bf-nav-brand" href="/">{{> ui/icon name="book" size="24"}}<span>{{app.name}}</span></a>
+        <a class="bf-nav-brand" href="/" aria-label="{{app.name}} - Trang chủ">
+            {{> ui/icon name="book" size="24"}}
+            <span>{{app.name}}</span>
+        </a>
+        {{#if headerLink}}<a class="bf-auth-header-link" href="{{headerLink.href}}">{{headerLink.label}}</a>{{/if}}
     </header>
     <main id="main-content" class="bf-auth-main">
         <section class="bf-auth-card" aria-labelledby="auth-title">
             {{#if title}}<h1 id="auth-title" class="bf-auth-title">{{title}}</h1>{{/if}}
             {{{body}}}
         </section>
+        {{#if footerText}}<p class="bf-auth-footer">{{footerText}}</p>{{/if}}
     </main>
     <script type="module" src="/js/components/forms.js"></script>
-    <script type="module">import { initNavigation } from "/js/components/navigation.js"; initNavigation();</script>
-    {{#each scripts}}<script type="module" src="{{this}}"></script>{{/each}}
+    <script type="module" src="/js/components/auth.js"></script>
 </body>
 </html>

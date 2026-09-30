@@ -1,0 +1,48 @@
+<section class="bf-public-container bf-public-page">
+    {{#if breadcrumbs}}{{> navigation/breadcrumb items=breadcrumbs}}{{/if}}
+    {{#if book}}
+        <article class="bf-public-book-detail">
+            <div class="bf-public-book-detail-media">
+                {{> components/sach/bo-suu-tap-anh mainImage=book.mainImage images=book.images}}
+            </div>
+            <div class="bf-public-book-detail-content">
+                <div class="bf-public-book-detail-heading">
+                    <div><p class="bf-public-eyebrow">{{#if book.categoryName}}{{book.categoryName}}{{else}}Thông tin sách{{/if}}</p><h1>{{book.title}}</h1>{{#if book.subtitle}}<p class="bf-public-book-subtitle">{{book.subtitle}}</p>{{/if}}</div>
+                    {{#if book.statusLabel}}{{> components/sach/trang-thai-sach statusCode=book.statusCode label=book.statusLabel variant=book.statusVariant icon=book.statusIcon tooltip=book.statusTooltip}}{{/if}}
+                </div>
+                {{#if book.authorsDisplay}}<p class="bf-public-book-author">Tác giả: <strong>{{book.authorsDisplay}}</strong></p>{{/if}}
+                <dl class="bf-public-book-facts">
+                    {{#if book.isbn}}<div><dt>ISBN</dt><dd>{{book.isbn}}</dd></div>{{/if}}
+                    {{#if book.publisherName}}<div><dt>Nhà xuất bản</dt><dd>{{book.publisherName}}</dd></div>{{/if}}
+                    {{#if book.publishedYear}}<div><dt>Năm xuất bản</dt><dd>{{book.publishedYear}}</dd></div>{{/if}}
+                    {{#if book.categoryName}}<div><dt>Thể loại</dt><dd>{{book.categoryName}}</dd></div>{{/if}}
+                </dl>
+                {{#if book.provisions}}{{> components/sach/hinh-thuc-cung-cap types=book.provisions ariaLabel="Hình thức cung cấp sách"}}{{/if}}
+                {{#if book.description}}<section class="bf-public-book-description"><h2>Mô tả</h2><div>{{{book.description}}}</div></section>{{/if}}
+                {{#if book.stock}}
+                    <section class="bf-public-book-stock">
+                        {{> components/kho/trang-thai-ton-kho statusCode=book.stock.statusCode label=book.stock.statusLabel variant=book.stock.statusVariant icon=book.stock.statusIcon tooltip=book.stock.statusTooltip totalDisplay=book.stock.totalDisplay availableDisplay=book.stock.availableDisplay reservedDisplay=book.stock.reservedDisplay borrowedDisplay=book.stock.borrowedDisplay}}
+                    </section>
+                {{/if}}
+                {{#if book.priceDisplay}}<p class="bf-public-book-price"><span>Giá bán</span><strong>{{book.priceDisplay}}</strong></p>{{/if}}
+                {{#if book.rentalPriceDisplay}}<p class="bf-public-book-price"><span>Giá thuê</span><strong>{{book.rentalPriceDisplay}}</strong></p>{{/if}}
+                {{#if book.membershipOffer}}<aside class="bf-public-membership-offer"><strong>{{book.membershipOffer.title}}</strong><p>{{book.membershipOffer.description}}</p>{{#if book.membershipOffer.href}}<a href="{{book.membershipOffer.href}}">Xem quyền lợi hội viên</a>{{/if}}</aside>{{/if}}
+                {{#if book.actions}}
+                    <div class="bf-public-book-actions">
+                        {{#each book.actions}}
+                            {{#if href}}<a class="bf-btn bf-btn-{{#if variant}}{{variant}}{{else}}primary{{/if}} bf-btn-md" href="{{href}}">{{label}}</a>{{/if}}
+                        {{/each}}
+                    </div>
+                {{/if}}
+            </div>
+        </article>
+        {{#if relatedBooks}}
+            <section class="bf-public-section">
+                <div class="bf-public-section-heading"><div><p class="bf-public-eyebrow">Có thể bạn cũng thích</p><h2>Sách liên quan</h2></div></div>
+                <div class="bf-public-book-grid">{{#each relatedBooks}}{{> components/sach/the-sach book=this}}{{/each}}</div>
+            </section>
+        {{/if}}
+    {{else}}
+        {{> feedback/error-page code="404" title="Không tìm thấy sách" description="Sách có thể đã bị gỡ hoặc đường dẫn không còn hợp lệ." homeHref="/" homeLabel="Về trang chủ"}}
+    {{/if}}
+</section>

@@ -1,0 +1,12 @@
+<div class="bf-auth-description">Nhập email hoặc số điện thoại đã đăng ký. Nếu thông tin hợp lệ, BookFlow sẽ gửi hướng dẫn đặt lại mật khẩu.</div>
+{{#if error}}{{> feedback/alert type="error" title="Không gửi được yêu cầu" message=error}}{{/if}}
+{{#if success}}{{> feedback/alert type="success" title="Đã tiếp nhận yêu cầu" message=success}}{{/if}}
+<form class="bf-auth-form" method="post" action="/auth/quen-mat-khau" data-bf-auth-form>
+    {{> forms/email id="forgot-email" name="email" label="Email" value=values.email placeholder="name@example.com" helpText="Có thể để trống nếu bạn nhập số điện thoại."}}
+    {{> forms/phone id="forgot-phone" name="phone" label="Số điện thoại" value=values.phone placeholder="0912 345 678" helpText="Nhập email hoặc số điện thoại đã liên kết với tài khoản."}}
+    <div class="bf-auth-submit">
+        <button class="bf-btn bf-btn-primary bf-btn-md" type="submit" data-auth-submit>Gửi yêu cầu</button>
+        {{> common/loading visible=false fullscreen=false text="Đang gửi yêu cầu..." className="bf-auth-loading"}}
+    </div>
+</form>
+<p class="bf-auth-switch"><a href="/auth/dang-nhap">Quay lại đăng nhập</a></p>

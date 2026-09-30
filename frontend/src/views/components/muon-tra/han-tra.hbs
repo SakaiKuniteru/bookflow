@@ -1,0 +1,9 @@
+<section class="bf-loan-due-date bf-loan-due-date--{{#if variant}}{{variant}}{{else}}neutral{{/if}}" data-due-status="{{statusCode}}">
+    {{#if label}}<span class="bf-loan-due-date-label">{{label}}</span>{{/if}}
+    {{#if dueDateDisplay}}<strong class="bf-loan-due-date-value">{{dueDateDisplay}}</strong>{{/if}}
+    {{#if borrowedDateDisplay}}<span class="bf-loan-due-date-meta">Ngày mượn: {{borrowedDateDisplay}}</span>{{/if}}
+    {{#if returnedDateDisplay}}<span class="bf-loan-due-date-meta">Ngày trả: {{returnedDateDisplay}}</span>{{/if}}
+    {{#if remainingDaysDisplay}}<span class="bf-loan-due-date-meta">{{remainingDaysDisplay}}</span>{{/if}}
+    {{#if overdueDaysDisplay}}<span class="bf-loan-due-date-meta">{{overdueDaysDisplay}}</span>{{/if}}
+    {{#if note}}<span class="bf-loan-due-date-note">{{note}}</span>{{/if}}
+</section>

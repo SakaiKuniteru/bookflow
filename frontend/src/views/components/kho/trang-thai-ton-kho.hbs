@@ -1,0 +1,14 @@
+<section class="bf-stock-status" aria-label="{{#if ariaLabel}}{{ariaLabel}}{{else}}Trạng thái tồn kho{{/if}}">
+    <div class="bf-stock-status-heading">
+        {{> components/common/trang-thai statusCode=statusCode label=label variant=variant icon=icon tooltip=tooltip}}
+        {{#if locationLabel}}<span class="bf-stock-status-location">{{locationLabel}}</span>{{/if}}
+    </div>
+    <dl class="bf-stock-status-quantities">
+        {{#if totalDisplay}}<div><dt>Tổng số</dt><dd>{{totalDisplay}}</dd></div>{{/if}}
+        {{#if availableDisplay}}<div><dt>Có thể sử dụng</dt><dd>{{availableDisplay}}</dd></div>{{/if}}
+        {{#if reservedDisplay}}<div><dt>Đang giữ</dt><dd>{{reservedDisplay}}</dd></div>{{/if}}
+        {{#if borrowedDisplay}}<div><dt>Đang mượn</dt><dd>{{borrowedDisplay}}</dd></div>{{/if}}
+        {{#if damagedDisplay}}<div><dt>Hư hỏng</dt><dd>{{damagedDisplay}}</dd></div>{{/if}}
+    </dl>
+    {{#if note}}<p class="bf-stock-status-note">{{note}}</p>{{/if}}
+</section>

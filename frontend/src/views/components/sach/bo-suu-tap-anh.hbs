@@ -1,0 +1,18 @@
+<div class="bf-book-gallery" data-bf-gallery>
+    <div class="bf-book-gallery-main-wrap">
+        <button class="bf-book-gallery-main" type="button" data-gallery-open aria-label="Mở ảnh lớn">
+            {{#if mainImage.src}}<img class="bf-book-gallery-main-image" src="{{mainImage.src}}" alt="{{mainImage.alt}}" data-gallery-main>{{else}}<span class="bf-book-gallery-empty">Chưa có hình ảnh</span>{{/if}}
+        </button>
+        <button class="bf-book-gallery-arrow bf-book-gallery-arrow--prev" type="button" data-gallery-prev aria-label="Ảnh trước">‹</button>
+        <button class="bf-book-gallery-arrow bf-book-gallery-arrow--next" type="button" data-gallery-next aria-label="Ảnh tiếp theo">›</button>
+    </div>
+    {{#if images}}
+        <div class="bf-book-gallery-thumbnails" role="list" aria-label="Danh sách ảnh">
+            {{#each images}}
+                <button class="bf-book-gallery-thumb {{#if @first}}is-active{{/if}}" type="button" role="listitem" data-gallery-item data-src="{{src}}" data-alt="{{alt}}" aria-label="{{#if label}}{{label}}{{else}}Ảnh {{@index}}{{/if}}" aria-pressed="{{#if @first}}true{{else}}false{{/if}}">
+                    <img src="{{src}}" alt="" loading="lazy">
+                </button>
+            {{/each}}
+        </div>
+    {{/if}}
+</div>

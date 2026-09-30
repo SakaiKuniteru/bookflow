@@ -1,0 +1,29 @@
+<section class="bf-public-container bf-public-page">
+    <header class="bf-public-page-heading">
+        <div><p class="bf-public-eyebrow">Danh mục</p><h1>{{#if pageTitle}}{{pageTitle}}{{else}}Danh sách sách{{/if}}</h1>{{#if description}}<p>{{description}}</p>{{/if}}</div>
+        {{#if totalDisplay}}<span class="bf-public-result-count">{{totalDisplay}} cuốn sách</span>{{/if}}
+    </header>
+    <section class="bf-public-catalog" data-bf-table data-mode="server" data-page="{{pagination.page}}" data-page-size="{{pagination.pageSize}}" data-total="{{pagination.total}}">
+        <form class="bf-public-catalog-form" data-bf-table-form method="get" action="/sach">
+            <input type="hidden" name="page" value="{{#if pagination.page}}{{pagination.page}}{{else}}1{{/if}}" data-table-page>
+            <input type="hidden" name="sort" value="{{sort.key}}" data-table-sort>
+            <input type="hidden" name="order" value="{{#if sort.order}}{{sort.order}}{{else}}asc{{/if}}" data-table-order>
+            {{> tables/toolbar toolbarTitle="Duyệt sách" search=search actions=toolbarActions}}
+            {{> tables/filters filters=filters}}
+            {{#if loading}}
+                {{> common/loading visible=true fullscreen=false text="Đang tải danh sách sách..."}}
+            {{else}}
+                {{#if books}}
+                    <div class="bf-public-book-grid">
+                        {{#each books}}
+                            <div data-table-row>{{> components/sach/the-sach book=this}}</div>
+                        {{/each}}
+                    </div>
+                {{else}}
+                    {{> tables/empty-state title="Không tìm thấy sách" description="Thử thay đổi từ khóa hoặc bộ lọc để xem thêm sách." actionLabel="Xóa bộ lọc" actionHref="/sach"}}
+                {{/if}}
+            {{/if}}
+            {{#if pagination.enabled}}{{> tables/pagination pagination=pagination}}{{/if}}
+        </form>
+    </section>
+</section>

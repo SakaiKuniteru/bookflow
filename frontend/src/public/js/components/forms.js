@@ -11,6 +11,7 @@ import { initPhoneInputs } from "./forms/phone.js";
 import { initFeedback } from "./feedback.js";
 import { initDataTables } from "./tables.js";
 import { initModals } from "./modals.js";
+import { initBookGalleries } from "./book-gallery.js";
 
 const initializers = [
     initNumberInputs,
@@ -25,7 +26,8 @@ const initializers = [
     initPhoneInputs,
     initFeedback,
     initDataTables,
-    initModals
+    initModals,
+    initBookGalleries
 ];
 
 function initForms(root = document) {

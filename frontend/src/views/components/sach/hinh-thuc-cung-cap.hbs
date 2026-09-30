@@ -1,0 +1,5 @@
+<div class="bf-book-provisions" aria-label="{{#if ariaLabel}}{{ariaLabel}}{{else}}Hình thức cung cấp{{/if}}">
+    {{#each types}}
+        <span class="bf-book-provision bf-book-provision--{{#if variant}}{{variant}}{{else}}neutral{{/if}}" data-type="{{code}}">{{label}}</span>
+    {{/each}}
+</div>

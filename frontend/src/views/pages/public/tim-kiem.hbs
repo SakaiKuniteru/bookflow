@@ -1,0 +1,51 @@
+<section class="bf-public-container bf-public-page">
+    <header class="bf-public-page-heading">
+        <div><p class="bf-public-eyebrow">Tìm trong danh mục công khai</p><h1>Tìm kiếm sách</h1><p>Tìm theo tên sách, tác giả, ISBN, thể loại hoặc nhà xuất bản.</p></div>
+    </header>
+    <form class="bf-public-search-page-form" method="get" action="/tim-kiem">
+        {{> forms/search id="public-book-search" name="q" value=query.q placeholder="Nhập tên sách, tác giả, ISBN..." mode=searchMode threshold=threshold}}
+        <div class="bf-public-search-options">
+            <label for="public-search-mode">Kiểu tìm kiếm</label>
+            <select class="bf-form-control" id="public-search-mode" name="mode">
+                <option value="relative" {{#if (eq searchMode "relative")}}selected{{/if}}>Tương đối – có chứa từ khóa</option>
+                <option value="exact" {{#if (eq searchMode "exact")}}selected{{/if}}>Tuyệt đối – khớp chính xác</option>
+                <option value="similar" {{#if (eq searchMode "similar")}}selected{{/if}}>Tương đồng – bỏ dấu, nhận diện viết tắt</option>
+                <option value="ratio" {{#if (eq searchMode "ratio")}}selected{{/if}}>Theo tỷ lệ tương đồng</option>
+            </select>
+            <label for="public-search-threshold">Ngưỡng tương đồng (%)</label>
+            <input class="bf-form-control" id="public-search-threshold" type="number" name="threshold" min="0" max="100" step="1" value="{{#if threshold}}{{threshold}}{{else}}85{{/if}}">
+            <button class="bf-btn bf-btn-primary bf-btn-md" type="submit">Tìm kiếm</button>
+        </div>
+    </form>
+    {{#if query.q}}
+        <section class="bf-public-search-results" aria-live="polite">
+            <div class="bf-public-section-heading">
+                <div><h2>Kết quả cho “{{query.q}}”</h2>{{#if resultCountDisplay}}<p>{{resultCountDisplay}}</p>{{/if}}</div>
+            </div>
+            <div class="bf-public-catalog" data-bf-table data-mode="server" data-page="{{pagination.page}}" data-page-size="{{pagination.pageSize}}" data-total="{{pagination.total}}">
+                <form data-bf-table-form method="get" action="/tim-kiem">
+                    <input type="hidden" name="q" value="{{query.q}}">
+                    <input type="hidden" name="mode" value="{{searchMode}}">
+                    <input type="hidden" name="threshold" value="{{threshold}}">
+                    <input type="hidden" name="page" value="{{#if pagination.page}}{{pagination.page}}{{else}}1{{/if}}" data-table-page>
+                    <input type="hidden" name="sort" value="{{sort.key}}" data-table-sort>
+                    <input type="hidden" name="order" value="{{#if sort.order}}{{sort.order}}{{else}}asc{{/if}}" data-table-order>
+                    {{> tables/toolbar search=null actions=toolbarActions}}
+                    {{> tables/filters filters=filters}}
+                    {{#if loading}}
+                        {{> common/loading visible=true fullscreen=false text="Đang tìm sách..."}}
+                    {{else}}
+                        {{#if results}}
+                            <div class="bf-public-book-grid">
+                                {{#each results}}<div data-table-row>{{> components/sach/the-sach book=this}}</div>{{/each}}
+                            </div>
+                        {{else}}
+                            {{> tables/empty-state title="Không có kết quả phù hợp" description="Thử từ khóa khác hoặc đổi kiểu tìm kiếm." actionLabel="Duyệt danh sách sách" actionHref="/sach"}}
+                        {{/if}}
+                    {{/if}}
+                    {{#if pagination.enabled}}{{> tables/pagination pagination=pagination}}{{/if}}
+                </form>
+            </div>
+        </section>
+    {{/if}}
+</section>

@@ -1,0 +1,66 @@
+<section class="bf-public-home">
+    <section class="bf-public-hero">
+        <div class="bf-public-container bf-public-hero-content">
+            <p class="bf-public-eyebrow">{{#if hero.eyebrow}}{{hero.eyebrow}}{{else}}Chào mừng đến với BookFlow{{/if}}</p>
+            <h1>{{#if hero.title}}{{hero.title}}{{else}}Khám phá thế giới sách cùng BookFlow{{/if}}</h1>
+            {{#if hero.description}}<p class="bf-public-hero-description">{{hero.description}}</p>{{else}}<p class="bf-public-hero-description">Tìm kiếm, đọc thông tin và lựa chọn hình thức sử dụng sách phù hợp với bạn.</p>{{/if}}
+            <form class="bf-public-search-form" method="get" action="/tim-kiem">
+                {{> forms/search id="home-book-search" name="q" value=query placeholder="Tìm theo tên sách, tác giả, ISBN..." mode="relative" threshold=85}}
+                <button class="bf-btn bf-btn-primary bf-btn-md" type="submit">Tìm sách</button>
+            </form>
+            <div class="bf-public-hero-links">
+                <a href="/sach">Duyệt tất cả sách</a>
+                <a href="/goi-hoi-vien">Xem gói hội viên</a>
+            </div>
+        </div>
+    </section>
+    {{#if featuredBooks}}
+        <section class="bf-public-section bf-public-container">
+            <div class="bf-public-section-heading">
+                <div><p class="bf-public-eyebrow">Được quan tâm</p><h2>Sách nổi bật</h2>{{#if featuredDescription}}<p>{{featuredDescription}}</p>{{/if}}</div>
+                <a class="bf-public-text-link" href="/sach?featured=true">Xem tất cả</a>
+            </div>
+            <div class="bf-public-book-grid">
+                {{#each featuredBooks}}{{> components/sach/the-sach book=this}}{{/each}}
+            </div>
+        </section>
+    {{/if}}
+    {{#if newBooks}}
+        <section class="bf-public-section bf-public-section-muted">
+            <div class="bf-public-container">
+                <div class="bf-public-section-heading">
+                    <div><p class="bf-public-eyebrow">Vừa cập nhật</p><h2>Sách mới</h2>{{#if newBooksDescription}}<p>{{newBooksDescription}}</p>{{/if}}</div>
+                    <a class="bf-public-text-link" href="/sach?sort=newest">Xem tất cả</a>
+                </div>
+                <div class="bf-public-book-grid">
+                    {{#each newBooks}}{{> components/sach/the-sach book=this}}{{/each}}
+                </div>
+            </div>
+        </section>
+    {{/if}}
+    {{#if provisions}}
+        <section class="bf-public-section bf-public-container">
+            <div class="bf-public-section-heading"><div><p class="bf-public-eyebrow">Linh hoạt theo nhu cầu</p><h2>Các hình thức sử dụng sách</h2></div></div>
+            {{> components/sach/hinh-thuc-cung-cap types=provisions ariaLabel="Các hình thức sử dụng sách"}}
+        </section>
+    {{/if}}
+    {{#if featuredPlans}}
+        <section class="bf-public-section bf-public-section-muted">
+            <div class="bf-public-container">
+                <div class="bf-public-section-heading">
+                    <div><p class="bf-public-eyebrow">Dành cho bạn đọc thường xuyên</p><h2>Gói hội viên nổi bật</h2></div>
+                    <a class="bf-public-text-link" href="/goi-hoi-vien">Xem tất cả gói</a>
+                </div>
+                <div class="bf-public-plan-grid">
+                    {{#each featuredPlans}}{{> components/hoi-vien/the-goi-hoi-vien plan=this}}{{/each}}
+                </div>
+            </div>
+        </section>
+    {{/if}}
+    {{#if introduction}}
+        <section class="bf-public-section bf-public-container bf-public-intro">
+            <div><p class="bf-public-eyebrow">{{#if introduction.eyebrow}}{{introduction.eyebrow}}{{else}}Về BookFlow{{/if}}</p><h2>{{introduction.title}}</h2><p>{{introduction.description}}</p>{{#if introduction.href}}<a class="bf-btn bf-btn-secondary bf-btn-md" href="{{introduction.href}}">{{#if introduction.linkLabel}}{{introduction.linkLabel}}{{else}}Tìm hiểu thêm{{/if}}</a>{{/if}}</div>
+            {{#if introduction.imageUrl}}<img src="{{introduction.imageUrl}}" alt="{{introduction.imageAlt}}" loading="lazy">{{/if}}
+        </section>
+    {{/if}}
+</section>

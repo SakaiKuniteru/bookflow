@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="BookFlow">
-
-<g opacity=".96">
-<path d="M82 156c58-28 111-26 174 12v232c-63-38-116-40-174-12V156Z" fill="#172A3A" opacity=".96"/><path d="M430 156c-58-28-111-26-174 12v232c63-38 116-40 174-12V156Z" fill="#172A3A" opacity=".82"/><path d="M256 168v232" stroke="#2F8F83" stroke-width="18" stroke-linecap="round"/><path d="M130 220c36-12 70-8 105 10M382 220c-36-12-70-8-105 10" fill="none" stroke="#2F8F83" stroke-width="12" stroke-linecap="round" opacity=".9"/>
-<circle cx="256" cy="256" r="206" fill="none" stroke="#2F8F83" stroke-width="12" stroke-linecap="round" stroke-dasharray="170 1120"/>
-</g>
-
-</svg>

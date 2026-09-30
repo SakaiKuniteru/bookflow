@@ -1,4 +1,5 @@
 import express from 'express';
+import path from 'node:path';
 import cookieParser from 'cookie-parser';
 import { engine } from 'express-handlebars';
 import config from './config/index.js';
@@ -57,6 +58,10 @@ app.use(requestContext);
 app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 app.use(express.json({ limit: '2mb' }));
 app.use(cookieParser());
+app.use('/brand', express.static(path.join(config.view.assetsDir, 'brand', 'logo'), {
+  maxAge: config.app.isProduction ? '1d' : 0,
+  index: false
+}));
 app.use(express.static(config.view.publicDir, {
   maxAge: config.app.isProduction ? '1d' : 0,
   index: false

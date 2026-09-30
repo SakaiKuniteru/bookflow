@@ -1,0 +1,331 @@
+.bf-public-container {
+    width: min(1180px, calc(100% - 40px));
+    margin: 0 auto;
+}
+
+.bf-public-page {
+    padding-top: 32px;
+    padding-bottom: 56px;
+}
+
+.bf-public-hero,
+.bf-public-about-hero {
+    padding: 72px 0;
+    background: linear-gradient(135deg, #eff6ff, #f8fafc);
+}
+
+.bf-public-hero-content {
+    max-width: 760px;
+}
+
+.bf-public-hero h1,
+.bf-public-about-hero h1 {
+    max-width: 760px;
+    margin: 8px 0 14px;
+    color: var(--bf-form-text);
+    font-size: clamp(32px, 5vw, 52px);
+    line-height: 1.12;
+}
+
+.bf-public-hero-description,
+.bf-public-about-hero p {
+    max-width: 640px;
+    color: var(--bf-form-muted);
+    font-size: 17px;
+    line-height: 1.65;
+}
+
+.bf-public-eyebrow {
+    margin: 0;
+    color: var(--bf-form-primary);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.bf-public-search-form,
+.bf-public-search-page-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 24px;
+}
+
+.bf-public-search-form .bf-search,
+.bf-public-search-page-form .bf-search {
+    flex: 1;
+    min-width: 0;
+}
+
+.bf-public-hero-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-top: 18px;
+}
+
+.bf-public-hero-links a,
+.bf-public-text-link {
+    color: var(--bf-form-primary);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.bf-public-section {
+    padding-top: 48px;
+    padding-bottom: 48px;
+}
+
+.bf-public-section-muted {
+    background: #f8fafc;
+}
+
+.bf-public-section-heading,
+.bf-public-page-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 20px;
+}
+
+.bf-public-section-heading h2,
+.bf-public-page-heading h1 {
+    margin: 5px 0;
+    color: var(--bf-form-text);
+    font-size: clamp(24px, 3vw, 32px);
+}
+
+.bf-public-section-heading p,
+.bf-public-page-heading p {
+    margin: 5px 0 0;
+    color: var(--bf-form-muted);
+}
+
+.bf-public-book-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.bf-public-book-grid > [data-table-row] {
+    min-width: 0;
+}
+
+.bf-public-plan-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
+}
+
+.bf-public-result-count {
+    color: var(--bf-form-muted);
+    font-size: 14px;
+}
+
+.bf-public-catalog-form {
+    display: grid;
+    gap: 16px;
+}
+
+.bf-public-search-options {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.bf-public-search-options label {
+    color: var(--bf-form-muted);
+    font-size: 13px;
+}
+
+.bf-public-search-options .bf-form-control {
+    width: auto;
+    min-width: 150px;
+}
+
+.bf-public-book-detail {
+    display: grid;
+    grid-template-columns: minmax(280px, .8fr) minmax(0, 1.2fr);
+    gap: 36px;
+    align-items: start;
+}
+
+.bf-public-book-detail-media {
+    position: sticky;
+    top: 20px;
+}
+
+.bf-public-book-detail-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.bf-public-book-detail-heading h1 {
+    margin: 5px 0 8px;
+    font-size: clamp(26px, 4vw, 38px);
+}
+
+.bf-public-book-subtitle,
+.bf-public-book-author {
+    color: var(--bf-form-muted);
+}
+
+.bf-public-book-facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin: 20px 0;
+}
+
+.bf-public-book-facts > div {
+    padding: 10px;
+    border-radius: 7px;
+    background: #f8fafc;
+}
+
+.bf-public-book-facts dt {
+    color: var(--bf-form-muted);
+    font-size: 12px;
+}
+
+.bf-public-book-facts dd {
+    margin: 4px 0 0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.bf-public-book-description {
+    margin-top: 22px;
+    line-height: 1.7;
+}
+
+.bf-public-book-description h2 {
+    font-size: 18px;
+}
+
+.bf-public-book-price {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--bf-form-border);
+}
+
+.bf-public-book-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.bf-public-membership-offer,
+.bf-public-membership-note {
+    margin-top: 18px;
+    padding: 14px;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: var(--bf-form-text);
+}
+
+.bf-public-intro {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, .8fr);
+    gap: 28px;
+    align-items: center;
+}
+
+.bf-public-intro img,
+.bf-public-about-section img {
+    display: block;
+    max-width: 100%;
+    border-radius: 10px;
+    object-fit: cover;
+}
+
+.bf-public-about-content {
+    padding-top: 36px;
+    padding-bottom: 56px;
+}
+
+.bf-public-about-section {
+    margin-bottom: 36px;
+    line-height: 1.7;
+}
+
+.bf-public-feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    margin-top: 18px;
+}
+
+.bf-public-feature-grid article,
+.bf-public-steps li {
+    padding: 16px;
+    border: 1px solid var(--bf-form-border);
+    border-radius: 8px;
+    background: var(--bf-form-bg);
+}
+
+.bf-public-steps {
+    display: grid;
+    gap: 12px;
+    padding-left: 24px;
+}
+
+.bf-public-contact {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px;
+    border-radius: 10px;
+    background: #f8fafc;
+}
+
+.bf-public-contact a {
+    color: var(--bf-form-primary);
+}
+
+@media (max-width: 760px) {
+    .bf-public-container {
+        width: min(100% - 28px, 1180px);
+    }
+
+    .bf-public-hero,
+    .bf-public-about-hero {
+        padding: 48px 0;
+    }
+
+    .bf-public-section-heading,
+    .bf-public-page-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .bf-public-book-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .bf-public-book-detail,
+    .bf-public-intro {
+        grid-template-columns: 1fr;
+    }
+
+    .bf-public-book-detail-media {
+        position: static;
+    }
+
+    .bf-public-search-form,
+    .bf-public-search-page-form {
+        align-items: stretch;
+        flex-direction: column;
+    }
+}

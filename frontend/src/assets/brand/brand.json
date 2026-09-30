@@ -10,51 +10,51 @@
   },
   "logo": {
     "default": "logo/logo.svg",
-    "mark": "logo/logo-mark.svg",
+    "mark": "logo/logo-symbol.svg",
     "wordmark": "logo/logo-wordmark.svg",
-    "horizontal": "logo/logo-horizontal.svg",
+    "horizontal": "logo/logo.svg",
     "horizontalDark": "logo/logo-horizontal-dark.svg",
-    "horizontalLight": "logo/logo-horizontal-light.svg",
+    "horizontalLight": "logo/logo.svg",
     "vertical": "logo/logo-vertical.svg",
     "verticalDark": "logo/logo-vertical-dark.svg",
-    "verticalLight": "logo/logo-vertical-light.svg",
+    "verticalLight": "logo/logo-vertical.svg",
     "symbol": "logo/logo-symbol.svg",
     "symbolDark": "logo/logo-symbol-dark.svg",
-    "symbolLight": "logo/logo-symbol-light.svg",
+    "symbolLight": "logo/logo-symbol.svg",
     "monochrome": "logo/logo-monochrome.svg",
     "white": "logo/logo-white.svg",
     "black": "logo/logo-black.svg"
   },
   "favicon": {
-    "default": "favicon/favicon.svg",
-    "light": "favicon/favicon-light.svg",
-    "dark": "favicon/favicon-dark.svg",
-    "16": "favicon/favicon-16.svg",
-    "32": "favicon/favicon-32.svg",
-    "48": "favicon/favicon-48.svg"
+    "default": "logo/logo-symbol.svg",
+    "light": "logo/logo-symbol.svg",
+    "dark": "logo/logo-symbol-dark.svg",
+    "16": "logo/logo-symbol.svg",
+    "32": "logo/logo-symbol.svg",
+    "48": "logo/logo-symbol.svg"
   },
   "app": {
     "default": "app/app-icon.svg",
     "light": "app/app-icon-light.svg",
-    "dark": "app/app-icon-dark.svg",
-    "rounded": "app/app-icon-rounded.svg",
+    "dark": "app/app-icon.svg",
+    "rounded": "app/app-icon.svg",
     "monochrome": "app/app-icon-monochrome.svg"
   },
   "social": {
     "og": "social/og-image.svg",
-    "ogLight": "social/og-image-light.svg",
+    "ogLight": "social/og-image.svg",
     "ogDark": "social/og-image-dark.svg",
     "avatar": "social/social-avatar.svg",
-    "cover": "social/social-cover.svg"
+    "cover": "social/og-image.svg"
   },
   "watermark": {
     "default": "watermark/watermark.svg",
-    "light": "watermark/watermark-light.svg",
+    "light": "watermark/watermark.svg",
     "dark": "watermark/watermark-dark.svg"
   },
   "loading": {
     "default": "loading/logo-loading.svg",
-    "light": "loading/logo-loading-light.svg",
+    "light": "loading/logo-loading.svg",
     "dark": "loading/logo-loading-dark.svg"
   },
   "empty": {

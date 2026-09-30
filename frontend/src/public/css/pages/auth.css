@@ -1,0 +1,118 @@
+.bf-layout-auth {
+    min-height: 100vh;
+    background: #f8fafc;
+}
+
+.bf-auth-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 64px;
+    padding: 0 max(20px, calc((100vw - 1180px) / 2));
+    border-bottom: 1px solid var(--bf-form-border);
+    background: var(--bf-form-bg);
+}
+
+.bf-auth-header-link,
+.bf-auth-switch a,
+.bf-auth-form-row a {
+    color: var(--bf-form-primary);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.bf-auth-main {
+    display: grid;
+    justify-items: center;
+    gap: 18px;
+    padding: 48px 16px;
+}
+
+.bf-auth-card {
+    width: min(100%, 460px);
+    padding: 28px;
+    border: 1px solid var(--bf-form-border);
+    border-radius: 12px;
+    background: var(--bf-form-bg);
+    box-shadow: 0 12px 32px rgba(16, 24, 40, .06);
+}
+
+.bf-auth-title {
+    margin: 0;
+    color: var(--bf-form-text);
+    font-size: 26px;
+}
+
+.bf-auth-description,
+.bf-auth-footer {
+    margin: 8px 0 20px;
+    color: var(--bf-form-muted);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.bf-auth-form {
+    display: grid;
+    gap: 16px;
+}
+
+.bf-auth-form-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 13px;
+}
+
+.bf-auth-submit {
+    position: relative;
+}
+
+.bf-auth-submit > .bf-btn {
+    width: 100%;
+}
+
+.bf-auth-loading {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--bf-form-radius);
+    background: rgba(255, 255, 255, .88);
+}
+
+.bf-auth-loading .bf-loading-content {
+    flex-direction: row;
+    gap: 8px;
+}
+
+.bf-auth-switch {
+    margin: 18px 0 0;
+    color: var(--bf-form-muted);
+    font-size: 14px;
+    text-align: center;
+}
+
+.bf-auth-otp-field input {
+    max-width: 220px;
+    font-size: 22px;
+    letter-spacing: .45em;
+    text-align: center;
+}
+
+.bf-auth-footer {
+    margin: 0;
+    text-align: center;
+}
+
+@media (max-width: 520px) {
+    .bf-auth-main {
+        padding: 24px 12px;
+    }
+
+    .bf-auth-card {
+        padding: 22px 18px;
+    }
+
+    .bf-auth-header {
+        padding: 0 16px;
+    }
+}
