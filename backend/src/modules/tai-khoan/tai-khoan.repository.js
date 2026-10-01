@@ -1,8 +1,8 @@
 const { query } = require('../../database/query.js');
 
 class TaiKhoanRepository {
-    async chenTaiKhoan({ email, ho_ten, mat_khau_bam }, client) {
-        const { rows } = await query('INSERT INTO tai_khoan (email, ho_ten, mat_khau_bam) VALUES ($1, $2, $3) RETURNING id, email, ho_ten, trang_thai, email_da_xac_minh, ngay_tao', [email, ho_ten, mat_khau_bam], client);
+    async chenTaiKhoan({ email, ho_ten, ten_dang_nhap, so_dien_thoai, mat_khau_bam }, client) {
+        const { rows } = await query('INSERT INTO tai_khoan (email, ho_ten, ten_dang_nhap, so_dien_thoai, mat_khau_bam) VALUES ($1, $2, $3, $4, $5) RETURNING id, email, ho_ten, ten_dang_nhap, so_dien_thoai, trang_thai, email_da_xac_minh, ngay_tao', [email, ho_ten, ten_dang_nhap, so_dien_thoai, mat_khau_bam], client);
         return rows[0];
     }
 

@@ -8,7 +8,7 @@
             id="{{id}}"
             type="tel"
             inputmode="tel"
-            class="bf-form-control bf-phone-input"
+            class="bf-form-control bf-phone-input {{#if error}}is-invalid{{/if}}"
             value="{{value}}"
             placeholder="{{#if placeholder}}{{placeholder}}{{else}}0912 345 678{{/if}}"
             autocomplete="tel"

@@ -1,11 +1,7 @@
 <div class="bf-auth-description">Tạo tài khoản để sử dụng các dịch vụ của BookFlow.</div>
-{{#if error}}
-    {{> feedback/alert
-        type="error"
-        title="Không thể đăng ký"
-        message=error
-    }}
-{{/if}}
+    {{#if formError}}
+        <div class="bf-form-error" role="alert">{{formError}}</div>
+    {{/if}}
 <form class="bf-auth-form" method="post" action="/auth/dang-ky" data-bf-auth-form data-auth-loading-text="Đang tạo tài khoản...">
     {{> forms/input
         id="register-full-name"
@@ -17,6 +13,7 @@
         autocomplete="name"
         icon="user"
         required=true
+        error=fieldErrors.fullName
     }}
     {{> forms/input
         id="register-username"
@@ -28,6 +25,7 @@
         autocomplete="username"
         icon="user"
         required=true
+        error=fieldErrors.username
     }}
     {{> forms/email
         id="register-email"
@@ -37,6 +35,7 @@
         placeholder="name@example.com"
         icon="email"
         required=true
+        error=fieldErrors.email
     }}
     {{> forms/phone
         id="register-phone"
@@ -46,21 +45,25 @@
         placeholder="Nhập số điện thoại"
         icon="phone"
         required=true
+        error=fieldErrors.phone
     }}
     {{> forms/password
         id="register-password"
         name="password"
         label="Mật khẩu"
+        value=values.password
         placeholder="Tạo mật khẩu"
         autocomplete="new-password"
         icon="lock"
         required=true
         minlength="8"
+        pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s])[^\r\n]{8,128}"
     }}
     {{> forms/password
         id="register-password-confirm"
         name="passwordConfirm"
         label="Xác nhận mật khẩu"
+        value=values.passwordConfirm
         placeholder="Nhập lại mật khẩu"
         autocomplete="new-password"
         icon="lock"
@@ -72,7 +75,9 @@
         name="acceptTerms"
         label="Tôi đồng ý với điều khoản sử dụng và chính sách quyền riêng tư."
         value="true"
+        checked=values.acceptTerms
         required=true
+        error=fieldErrors.acceptTerms
     }}
     <div class="bf-auth-submit">
         <button class="bf-btn bf-btn-primary bf-btn-md" type="submit" data-auth-submit>Đăng ký <span aria-hidden="true">→</span></button>

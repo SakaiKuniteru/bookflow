@@ -66,6 +66,7 @@ function initializeOtpInputs(form) {
 function fieldMessage(input) {
     const label = input.closest("[data-form-field]")?.querySelector(".bf-form-label")?.textContent.replace("*", "").trim() || "trường này";
     if (input.validity.valueMissing) return input.type === "checkbox" ? "Vui lòng đồng ý để tiếp tục." : `Vui lòng nhập ${label.toLowerCase()}.`;
+        if (["password", "newPassword"].includes(input.name) && (input.validity.tooShort || input.validity.patternMismatch)) return "Mật khẩu cần ít nhất 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt.";
     if (input.validity.typeMismatch) return input.type === "email" ? "Vui lòng nhập địa chỉ email hợp lệ." : "Giá trị nhập chưa đúng định dạng.";
     if (input.validity.tooShort) return `Thông tin cần có ít nhất ${input.minLength} ký tự.`;
     if (input.validity.patternMismatch) return "Thông tin nhập chưa đúng định dạng.";
@@ -171,10 +172,11 @@ function initializeAuthForm(form) {
     form.dataset.formInitialized = "true";
     form.noValidate = true;
     const isLogin = form.action.includes("/auth/dang-nhap");
+    const formAlert = isLogin ? form.closest(".bf-auth-card")?.querySelector(".bf-auth-login-alert") : null;
+    const formAlertMessage = formAlert?.querySelector(".bf-alert-message");
     const password = form.querySelector('[name="password"], [name="newPassword"]');
     const confirmation = form.querySelector('[name="passwordConfirm"], [name="confirmNewPassword"]');
     const passwordError = form.querySelector("[data-password-error]");
-    const formError = document.querySelector("[data-auth-form-error]");
     const submit = form.querySelector("[data-auth-submit]");
     initializeOtpInputs(form);
     initializeResetPasswordStep(form);
@@ -183,6 +185,13 @@ function initializeAuthForm(form) {
         const mismatch = Boolean(confirmation.value && password.value !== confirmation.value);
         confirmation.setCustomValidity(mismatch ? "Mật khẩu xác nhận chưa khớp." : "");
         if (passwordError) { passwordError.textContent = "Mật khẩu xác nhận chưa khớp."; passwordError.hidden = !mismatch; }
+        if (confirmation.value) {
+            const field = confirmation.closest("[data-form-field]");
+            const requiredError = field?.querySelector("[data-auth-field-error]");
+            if (requiredError) { requiredError.textContent = ""; requiredError.hidden = true; }
+            confirmation.classList.toggle("is-invalid", mismatch);
+            field?.classList.toggle("has-auth-error", mismatch);
+        }
         return !mismatch;
     };
     if (password && confirmation) {
@@ -198,7 +207,7 @@ function initializeAuthForm(form) {
         } else if (input.checkValidity()) {
             setFieldError(input, "", false);
         }
-        if (isLogin && formError && [...form.querySelectorAll("input:not([type=hidden])")].every(field => field.disabled || field.checkValidity())) formError.hidden = true;
+        if (isLogin && formAlert && [...form.querySelectorAll("input:not([type=hidden])")].every(field => field.disabled || field.checkValidity())) formAlert.hidden = true;
     });
     form.addEventListener("submit", event => {
         validatePasswords();
@@ -209,9 +218,9 @@ function initializeAuthForm(form) {
         if (isLogin && (invalid.length || otpInvalid)) {
             event.preventDefault();
             const first = invalid[0];
-            if (formError) {
-                formError.textContent = first ? fieldMessage(first) : "Vui lòng nhập mã xác nhận đầy đủ.";
-                formError.hidden = false;
+            if (formAlert && formAlertMessage) {
+                formAlertMessage.textContent = first ? fieldMessage(first) : "Vui lòng nhập mã xác nhận đầy đủ.";
+                formAlert.hidden = false;
             }
             first?.focus();
             return;
@@ -230,7 +239,7 @@ function initializeAuthForm(form) {
             (invalid[0] || otpParts(form).inputs.find(input => !/^\d$/.test(input.value)))?.focus();
             return;
         }
-        if (formError) formError.hidden = true;
+        if (formAlert) formAlert.hidden = true;
         if (submit) submit.disabled = true;
         showLoading(document.body, { fullscreen: true, text: form.dataset.authLoadingText || "Đang xử lý..." });
     });

@@ -1,4 +1,4 @@
-<label class="bf-check {{className}}" for="{{id}}">
+<label class="bf-check {{className}} {{#if error}}is-invalid{{/if}}" for="{{id}}">
     <input
         id="{{id}}"
         name="{{name}}"
@@ -11,3 +11,4 @@
     <span class="bf-check-box"></span>
     <span class="bf-check-label">{{label}}</span>
 </label>
+{{#if error}}<div class="bf-form-error" role="alert">{{error}}</div>{{/if}}

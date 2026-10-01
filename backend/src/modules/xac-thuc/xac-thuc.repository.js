@@ -1,6 +1,40 @@
 const { query } = require('../../database/query.js');
 
 class XacThucRepository {
+    async layDangKyChoXacMinhHetHan(client, limit = 100) {
+        const { rows } = await query(
+            `SELECT tk.id FROM tai_khoan tk
+             WHERE tk.trang_thai = 'CHO_XAC_MINH'
+               AND tk.email_da_xac_minh = FALSE
+               AND tk.bat_buoc_doi_mat_khau = FALSE
+               AND tk.ngay_tao <= now() - interval '1 day'
+               AND EXISTS (
+                   SELECT 1 FROM ma_xac_minh mx
+                   WHERE mx.tai_khoan_id = tk.id AND mx.muc_dich = 'DANG_KY'
+               )
+             ORDER BY tk.ngay_tao
+             LIMIT $1
+             FOR UPDATE OF tk SKIP LOCKED`,
+            [limit], client
+        );
+        return rows.map(row => row.id);
+    }
+    async xoaOtpCuaTaiKhoan(ids, client) {
+        if (!ids.length) return;
+        await query('DELETE FROM ma_xac_minh WHERE tai_khoan_id = ANY($1::int[])', [ids], client);
+    }
+    async xoaTaiKhoanDangKyHetHan(ids, client) {
+        if (!ids.length) return 0;
+        const { rowCount } = await query(
+            `DELETE FROM tai_khoan
+             WHERE id = ANY($1::int[])
+               AND trang_thai = 'CHO_XAC_MINH'
+               AND email_da_xac_minh = FALSE
+               AND bat_buoc_doi_mat_khau = FALSE`,
+            [ids], client
+        );
+        return rowCount;
+    }
     async timTaiKhoan(dinhDanh, client) {
         const { rows } = await query('SELECT * FROM tai_khoan WHERE lower(email) = $1 OR lower(ten_dang_nhap) = $1 LIMIT 1', [dinhDanh], client);
         return rows[0] ?? null;
@@ -15,7 +49,44 @@ class XacThucRepository {
         const { rows } = await query('SELECT * FROM tai_khoan WHERE id = $1 FOR UPDATE', [id], client);
         return rows[0] ?? null;
     }
-
+    async luuTokenTiepTucDangKy(taiKhoanId, tokenHash, client) {
+        await client.query(
+            `UPDATE tai_khoan
+            SET ma_tiep_tuc_dang_ky_bam = $2,
+                ma_tiep_tuc_dang_ky_het_han = NOW() + INTERVAL '24 hours'
+            WHERE id = $1`,
+            [taiKhoanId, tokenHash]
+        );
+    }
+    async timTaiKhoanTheoTokenTiepTucDangKy(tokenHash, client) {
+        const { rows } = await client.query(
+            `SELECT *
+            FROM tai_khoan
+            WHERE ma_tiep_tuc_dang_ky_bam = $1
+            AND ma_tiep_tuc_dang_ky_het_han > NOW()
+            AND trang_thai = 'CHO_XAC_MINH'
+            AND email_da_xac_minh = FALSE
+            AND bat_buoc_doi_mat_khau = FALSE
+            FOR UPDATE`,
+            [tokenHash]
+        );
+        return rows[0] || null;
+    }
+    async capNhatEmailDangKyChoXacMinh(taiKhoanId, email, tokenHash, client) {
+        const { rows } = await client.query(
+            `UPDATE tai_khoan
+            SET email = $2,
+                ma_tiep_tuc_dang_ky_bam = $3,
+                ma_tiep_tuc_dang_ky_het_han = NOW() + INTERVAL '24 hours'
+            WHERE id = $1
+            AND trang_thai = 'CHO_XAC_MINH'
+            AND email_da_xac_minh = FALSE
+            AND bat_buoc_doi_mat_khau = FALSE
+            RETURNING *`,
+            [taiKhoanId, email, tokenHash]
+        );
+        return rows[0] || null;
+    }
     async taoOtp(taiKhoanId, email, mucDich, maBam, soLanGui, client) {
         const { rows } = await query(
             `INSERT INTO ma_xac_minh (tai_khoan_id, dia_chi_dich, muc_dich, ma_bam, ngay_het_han, ngay_gui_cuoi, so_lan_gui)

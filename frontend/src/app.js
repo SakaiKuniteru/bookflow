@@ -9,8 +9,15 @@ import userMiddleware from './middlewares/user.js';
 import localsMiddleware from './middlewares/locals.js';
 import notFoundMiddleware from './middlewares/not-found.js';
 import errorHandler from './middlewares/error-handler.js';
+import session from 'express-session';
+import { createClient } from 'redis';
+import { RedisStore } from 'connect-redis';
 
 const app = express();
+const sessionRedis = createClient({ url: config.env.redisUrl });
+sessionRedis.on('error', error => console.error('Redis session lỗi:', error.message));
+await sessionRedis.connect();
+const sessionStore = new RedisStore({ client: sessionRedis, prefix: 'bookflow:session:', ttl: 900 });
 
 app.disable('x-powered-by');
 
@@ -58,6 +65,14 @@ app.use(requestContext);
 app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 app.use(express.json({ limit: '2mb' }));
 app.use(cookieParser());
+app.use(session({
+  name: 'bookflow.sid',
+  store: sessionStore,
+  secret: config.env.sessionSecret,
+  resave: false,
+  saveUninitialized: false,
+  cookie: { httpOnly: true, sameSite: 'lax', secure: config.app.isProduction, maxAge: 15 * 60 * 1000 }
+}));
 app.use('/brand', express.static(path.join(config.view.assetsDir, 'brand', 'logo'), {
   maxAge: config.app.isProduction ? '1d' : 0,
   index: false

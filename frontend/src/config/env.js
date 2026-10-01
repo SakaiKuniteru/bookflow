@@ -29,6 +29,9 @@ const env = {
   authCookieSameSite: getString('AUTH_COOKIE_SAME_SITE', 'lax'),
   authCookieMaxAge: getNumber('AUTH_COOKIE_MAX_AGE', 86400000),
   sessionCookieHttpOnly: getBoolean('SESSION_COOKIE_HTTP_ONLY', true),
+  sessionSecret: getString('SESSION_SECRET'),
+  redisUrl: getString('REDIS_URL'),
+  registrationDraftKey: getString('REGISTRATION_DRAFT_KEY'),
   viewCache: getBoolean('VIEW_CACHE', false)
 };
 

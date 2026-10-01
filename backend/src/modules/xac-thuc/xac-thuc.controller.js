@@ -12,7 +12,14 @@ class XacThucController {
             return tra(req, res, data, 201);
         } catch (error) { next(error); }
     }
-
+    async doiEmailDangKy(req, res, next) {
+    try {
+        const data = await service.doiEmailDangKy(req.body ?? {});
+        return tra(req, res, data, 200);
+    } catch (error) {
+        return next(error);
+    }
+    }
     async xacNhanDangKy(req, res, next) {
         try {
             const data = await service.xacNhanDangKy(req.body ?? {});

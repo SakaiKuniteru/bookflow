@@ -1,6 +1,7 @@
 import { get, post } from './api-client.js';
 const login = credentials => post('/xac-thuc/dang-nhap', credentials);
 const register = payload => post('/xac-thuc/dang-ky', payload);
+const changeRegistrationEmail = payload => post('/xac-thuc/doi-email-dang-ky', payload);
 const verifyRegistration = payload => post('/xac-thuc/xac-nhan-dang-ky', payload);
 const resendRegistrationOtp = payload => post('/xac-thuc/gui-lai-otp-dang-ky', payload);
 const completeEmployeeActivation = payload => post('/xac-thuc/hoan-tat-nhan-vien', payload);

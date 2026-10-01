@@ -6,11 +6,19 @@ const taiKhoanRepository = require('./tai-khoan.repository.js');
 class TaiKhoanService {
     async taoTaiKhoan(duLieu, client) {
         if (!client || typeof client.query !== 'function') throw new Error('taoTaiKhoan phải chạy trong transaction tạo OTP');
-        const { ho_ten, email, mat_khau } = kiemTraDuLieuTaoTaiKhoan(duLieu);
+        const { ho_ten, email, ten_dang_nhap, so_dien_thoai, mat_khau } = kiemTraDuLieuTaoTaiKhoan(duLieu);
         try {
-            return await taiKhoanRepository.chenTaiKhoan({ ho_ten, email, mat_khau_bam: bamMatKhau(mat_khau) }, client);
+            return await taiKhoanRepository.chenTaiKhoan({ ho_ten, email, ten_dang_nhap, so_dien_thoai, mat_khau_bam: bamMatKhau(mat_khau) }, client);
         } catch (error) {
-            if (error?.code === '23505') throw new AppError({ code: 'EMAIL_KHONG_THE_SU_DUNG', message: 'Không thể sử dụng email này', status: 409 });
+            if (error?.code === '23505' && error.constraint === 'uq_tai_khoan_email') {
+                throw new AppError({ code: 'EMAIL_EXISTS', message: 'Email này đã được đăng ký', status: 409, details: [{ field: 'email', message: 'Email này đã được đăng ký' }] });
+            }
+            if (error?.code === '23505' && error.constraint === 'uq_tai_khoan_ten_dang_nhap') {
+                throw new AppError({ code: 'USERNAME_EXISTS', message: 'Tên đăng nhập này đã được sử dụng', status: 409, details: [{ field: 'username', message: 'Tên đăng nhập này đã được sử dụng' }] });
+            }
+            if (error?.code === '23505') {
+                throw new AppError({ code: 'ACCOUNT_EXISTS', message: 'Email hoặc tên đăng nhập đã tồn tại', status: 409 });
+            }
             throw error;
         }
     }

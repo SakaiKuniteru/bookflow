@@ -62,23 +62,18 @@ function getDigitCaretPosition(value, digitCount) {
 }
 
 function updatePhone(input, hidden, format, validate = true) {
-    const oldValue = input.value;
-    const caret = input.selectionStart ?? oldValue.length;
-    const digitsBeforeCaret = (oldValue.slice(0, caret).match(/\d/g) || []).length;
-    input.value = formatPhone(oldValue, format);
-    hidden.value = getCanonicalPhone(input.value);
-    const canonical = hidden.value;
-    const isValid = !input.value || Boolean(canonical);
+    const raw = input.value.trim();
+    const digits = raw.replace(/\D/g, "");
+    const international = raw.startsWith("+") || (digits.startsWith("84") && digits.length === 11);
+    let canonical = "";
+    if (international && digits.startsWith("84") && digits.length === 11) canonical = `0${digits.slice(2)}`;
+    else if (digits.startsWith("0") && digits.length === 10) canonical = digits;
+    hidden.value = canonical;
+    const isValid = !raw || Boolean(canonical);
     input.setCustomValidity(isValid ? "" : "Số điện thoại Việt Nam phải gồm mã 0 và 9 chữ số.");
     input.classList.toggle("is-invalid", !isValid);
     const error = input.closest("[data-form-field]")?.querySelector(".bf-phone-error");
     if (error) error.hidden = isValid;
-    if (validate) {
-        try {
-            const nextCaret = getDigitCaretPosition(input.value, digitsBeforeCaret);
-            input.setSelectionRange(nextCaret, nextCaret);
-        } catch {}
-    }
 }
 
 function initialize(input) {

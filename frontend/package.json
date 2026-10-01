@@ -11,9 +11,12 @@
     "check": "node --check src/server.js && node --check src/app.js"
   },
   "dependencies": {
+    "connect-redis": "^10.0.0",
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.2.2",
     "express": "^5.2.1",
-    "express-handlebars": "^8.0.3"
+    "express-handlebars": "^8.0.3",
+    "express-session": "^1.19.0",
+    "redis": "^6.3.0"
   }
 }

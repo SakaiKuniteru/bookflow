@@ -1,10 +1,18 @@
 <div class="bf-auth-description">Đăng nhập để tiếp tục sử dụng BookFlow.</div>
-<div class="bf-form-error bf-auth-login-inline-error" data-auth-form-error role="alert" hidden></div>
 {{#if error}}
     {{> feedback/alert
         type="error"
-        title="Không thể đăng nhập"
+        className="bf-auth-login-alert"
+        title=false
         message=error
+    }}
+{{else}}
+    {{> feedback/alert
+        type="error"
+        className="bf-auth-login-alert"
+        title=false
+        message=""
+        hidden=true
     }}
 {{/if}}
 {{#if success}}

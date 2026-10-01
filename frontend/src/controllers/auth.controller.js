@@ -1,5 +1,6 @@
 import config from '../config/index.js';
 import authService from '../services/auth.service.js';
+import { maHoaBanNhap, giaiMaBanNhap } from '../security/registration-draft.js';
 
 const cookieOptions = {
   httpOnly: config.env.sessionCookieHttpOnly,
@@ -14,6 +15,9 @@ function renderAuth(res, page, title, locals = {}, status = 200) {
 }
 function safeRedirect(value) {
   return typeof value === 'string' && value.startsWith('/') && !value.startsWith('//') ? value : null;
+}
+function urlDoiEmail(path, email) {
+  return `${path}?email=${encodeURIComponent(email || '')}`;
 }
 function destinationFor(context) {
   const roles = (context?.vai_tro || context?.vaiTro || []).map(role => role.ma_vai_tro || role.maVaiTro);
@@ -47,6 +51,7 @@ async function finishLogin(res, token, context, requestedRedirect) {
 const authController = {
   async loginPage(req, res) {
     if (req.user) return await finishLogin(res, req.authToken, req.user, req.query.redirect);
+    if (req.session) delete req.session.registrationDraft;
     return renderAuth(res, 'dang-nhap', 'Đăng nhập', {
       redirect: req.query.redirect || '/',
       allowRegistration: true,
@@ -80,30 +85,88 @@ const authController = {
   },
   registerPage(req, res) {
     if (req.user) return res.redirect('/');
-    return renderAuth(res, 'dang-ky', 'Đăng ký', { values: {} });
+    const resume = req.query.resume === '1';
+    let draft = {};
+    if (resume && req.session?.registrationDraft) {
+      try {
+        draft = giaiMaBanNhap(req.session.registrationDraft);
+        req.session.registrationResumeEmail = draft.email;
+      } catch {}
+    }
+    if (req.session) delete req.session.registrationDraft;
+    return renderAuth(res, 'dang-ky', 'Đăng ký', { values: resume ? draft : {} });
   },
   async register(req, res) {
     try {
-      if (!req.body.acceptTerms) throw Object.assign(new Error('Bạn cần đồng ý với điều khoản sử dụng.'), { status: 400 });
-      if (req.body.password !== req.body.passwordConfirm) throw Object.assign(new Error('Mật khẩu xác nhận chưa khớp.'), { status: 400 });
-      await authService.register({ ho_ten: req.body.fullName, email: req.body.email, mat_khau: req.body.password });
+      if (!req.body.acceptTerms) throw Object.assign(new Error('Bạn cần đồng ý với điều khoản sử dụng.'), { status: 400, field: 'acceptTerms' });
+      if (req.body.password !== req.body.passwordConfirm) throw Object.assign(new Error('Mật khẩu xác nhận chưa khớp.'), { status: 400, field: 'passwordConfirm' });
+      const draft = {
+        fullName: req.body.fullName || '',
+        username: req.body.username || '',
+        email: req.body.email || '',
+        phone: req.body.phone || '',
+        password: req.body.password || '',
+        passwordConfirm: req.body.passwordConfirm || '',
+        acceptTerms: Boolean(req.body.acceptTerms)
+      };
+      req.session.registrationDraft = maHoaBanNhap(draft);
+      const emailCu = String(req.session.registrationResumeEmail || '').trim().toLowerCase();
+      const emailMoi = String(req.body.email || '').trim().toLowerCase();
+      if (emailCu && emailCu !== emailMoi) {
+        if (!req.session.registrationResumeToken) {
+          throw loiGiaoDien('Phiên đăng ký đã hết hạn. Vui lòng bắt đầu đăng ký lại.', 410);
+        }
+        const ketQuaDoiEmail = await authService.changeRegistrationEmail({
+          token: req.session.registrationResumeToken,
+          email: req.body.email
+        });
+        req.session.registrationResumeToken = ketQuaDoiEmail.data?.registration_resume_token;
+        delete req.session.registrationResumeEmail;
+        return res.redirect(`/auth/xac-minh-dang-ky?email=${encodeURIComponent(req.body.email)}&sent=1`);
+      }
+      delete req.session.registrationResumeEmail;
+      const ketQuaDangKy = await authService.register({
+        ho_ten: req.body.fullName,
+        email: req.body.email,
+        ten_dang_nhap: req.body.username,
+        so_dien_thoai: req.body.phone,
+        mat_khau: req.body.password
+      });
+      req.session.registrationResumeToken = ketQuaDangKy.data?.registration_resume_token;
       return res.redirect(`/auth/xac-minh-dang-ky?email=${encodeURIComponent(req.body.email)}&sent=1`);
     } catch (error) {
+      const backendError = error.data?.error;
+      const tenTruongFrontend = { ho_ten: 'fullName', email: 'email', ten_dang_nhap: 'username', so_dien_thoai: 'phone', mat_khau: 'password' };
+      const fieldErrors = Object.fromEntries((backendError?.details || []).filter(item => item.field).map(item => [tenTruongFrontend[item.field] || item.field, item.message]));
+      if (error.field) fieldErrors[error.field] = error.message;
+      if (!fieldErrors.email && backendError?.code === 'EMAIL_EXISTS') fieldErrors.email = 'Email này đã được đăng ký';
+      if (!fieldErrors.username && backendError?.code === 'USERNAME_EXISTS') fieldErrors.username = 'Tên đăng nhập này đã được sử dụng';
       return renderAuth(res, 'dang-ky', 'Đăng ký', {
-        error: error.message,
-        values: { fullName: req.body.fullName || '', username: req.body.username || '', email: req.body.email || '', phone: req.body.phone || '' }
+        fieldErrors,
+        formError: Object.keys(fieldErrors).length ? '' : (backendError?.message || error.message),
+        values: {
+          fullName: req.body.fullName || '',
+          username: req.body.username || '',
+          email: req.body.email || '',
+          phone: req.body.phone || '',
+          password: req.body.password || '',
+          passwordConfirm: req.body.passwordConfirm || ''
+        }
       }, error.status >= 400 && error.status < 500 ? error.status : 500);
     }
   },
   verifyRegistrationPage(req, res) {
-    return renderAuth(res, 'xac-minh-dang-ky', 'Xác minh email', { email: req.query.email || '', codeSent: req.query.sent === '1' });
+    return renderAuth(res, 'xac-minh-dang-ky', 'Xác minh email', { email: req.query.email || '', codeSent: req.query.sent === '1', changeEmailUrl: '/auth/dang-ky?resume=1' });
   },
   async verifyRegistration(req, res) {
     try {
       await authService.verifyRegistration({ email: req.body.email, otp: req.body.otp });
-      return res.redirect('/auth/dang-nhap?registered=1');
+      delete req.session.registrationDraft;
+      delete req.session.registrationResumeToken;
+      delete req.session.registrationResumeEmail;
+      return res.redirect('/auth/dang-nhap?registered=1'); 
     } catch (error) {
-      return renderAuth(res, 'xac-minh-dang-ky', 'Xác minh email', { email: req.body.email || '', otp: req.body.otp || '', otpError: error.message }, error.status >= 400 && error.status < 500 ? error.status : 500);
+      return renderAuth(res, 'xac-minh-dang-ky', 'Xác minh email', { email: req.body.email || '', otp: req.body.otp || '', otpError: error.message, changeEmailUrl: '/auth/dang-ky?resume=1' }, error.status >= 400 && error.status < 500 ? error.status : 500);
     }
   },
   async resendRegistrationOtp(req, res) {
@@ -111,7 +174,7 @@ const authController = {
       await authService.resendRegistrationOtp({ email: req.body.email });
       return res.redirect(`/auth/xac-minh-dang-ky?email=${encodeURIComponent(req.body.email)}&sent=1`);
     } catch (error) {
-      return renderAuth(res, 'xac-minh-dang-ky', 'Xác minh email', { email: req.body.email || '', resendError: error.message }, error.status >= 400 && error.status < 500 ? error.status : 500);
+      return renderAuth(res, 'xac-minh-dang-ky', 'Xác minh email', { email: req.body.email || '', resendError: error.message, changeEmailUrl: '/auth/dang-ky?resume=1' }, error.status >= 400 && error.status < 500 ? error.status : 500);
     }
   },
   employeeActivationPage(req, res) {
@@ -158,7 +221,7 @@ const authController = {
     }
   },
   forgotPasswordPage(req, res) {
-    return renderAuth(res, 'quen-mat-khau', 'Quên mật khẩu', { values: {} });
+    return renderAuth(res, 'quen-mat-khau', 'Quên mật khẩu', { values: { email: req.query.email || '' } });
   },
   async forgotPassword(req, res) {
     try {
@@ -169,17 +232,17 @@ const authController = {
     }
   },
   resetPasswordPage(req, res) {
-    return renderAuth(res, 'dat-lai-mat-khau', 'Đặt lại mật khẩu', { email: req.query.email || '', requiresOtp: true, codeSent: req.query.sent === '1', values: {} });
+    return renderAuth(res, 'dat-lai-mat-khau', 'Đặt lại mật khẩu', { email: req.query.email || '', requiresOtp: true, codeSent: req.query.sent === '1', values: {}, changeEmailUrl: urlDoiEmail('/auth/quen-mat-khau', req.query.email) });
   },
   async resetPassword(req, res) {
     try {
       if (req.body.newPassword !== req.body.confirmNewPassword) {
-        return renderAuth(res, 'dat-lai-mat-khau', 'Đặt lại mật khẩu', { email: req.body.email || '', requiresOtp: true, values: { otp: req.body.otp || '' }, showPasswordStep: true, passwordError: 'Mật khẩu xác nhận chưa khớp.' }, 400);
+        return renderAuth(res, 'dat-lai-mat-khau', 'Đặt lại mật khẩu', { email: req.body.email || '', requiresOtp: true, values: { otp: req.body.otp || '' }, showPasswordStep: true, passwordError: 'Mật khẩu xác nhận chưa khớp.', changeEmailUrl: urlDoiEmail('/auth/quen-mat-khau', req.body.email) }, 400);
       }
       await authService.resetPassword({ email: req.body.email, otp: req.body.otp, mat_khau_moi: req.body.newPassword });
       return res.redirect('/auth/dang-nhap?reset=1');
     } catch (error) {
-      return renderAuth(res, 'dat-lai-mat-khau', 'Đặt lại mật khẩu', { email: req.body.email || '', requiresOtp: true, values: { otp: req.body.otp || '' }, otpError: error.message }, error.status >= 400 && error.status < 500 ? error.status : 500);
+      return renderAuth(res, 'dat-lai-mat-khau', 'Đặt lại mật khẩu', { email: req.body.email || '', requiresOtp: true, values: { otp: req.body.otp || '' }, otpError: error.message, changeEmailUrl: urlDoiEmail('/auth/quen-mat-khau', req.body.email) }, error.status >= 400 && error.status < 500 ? error.status : 500);
     }
   },
   async logout(req, res, next) {

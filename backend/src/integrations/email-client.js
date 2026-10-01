@@ -35,6 +35,12 @@ class EmailService {
                 disableFileAccess: true,
                 disableUrlAccess: true
             });
+            const daChapNhan = (ketQua.accepted || []).some(diaChi => String(diaChi).toLowerCase() === den.toLowerCase());
+            if (!daChapNhan) {
+                const loi = new Error('SMTP_REJECTED_RECIPIENT');
+                loi.code = 'SMTP_REJECTED_RECIPIENT';
+                throw loi;
+            }
             console.info(JSON.stringify({
                 event: 'EMAIL_SMTP_ACCEPTED',
                 accepted: ketQua.accepted?.length ?? 0,

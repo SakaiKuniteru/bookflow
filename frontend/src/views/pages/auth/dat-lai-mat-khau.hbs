@@ -22,7 +22,7 @@
             }}
         </span>
         <strong>{{email}}</strong>
-        <a href="/auth/quen-mat-khau">Đổi email</a>
+        <a href="{{changeEmailUrl}}">Đổi email</a>
     </div>
     <div class="bf-auth-reset-otp-step" data-auth-reset-otp-step {{#if showPasswordStep}}hidden{{/if}}>
         {{> forms/otp
@@ -44,6 +44,7 @@
             icon="lock"
             required=true
             minlength="8"
+            pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s])[^\r\n]{8,128}"
         }}
         {{> forms/password
             id="confirm-new-password"

@@ -97,7 +97,7 @@ const request = async (path, options = {}) => {
     const payload = await parseResponseBody(response);
     const normalized = normalizeResponse(payload, response.status);
     if (!response.ok) {
-      const message = normalized.message || `Backend API trả về HTTP ${response.status}`;
+      const message = normalized.message || normalized.error?.message || `Backend API trả về HTTP ${response.status}`;
       throw new ApiError(message, {
         status: response.status,
         code: normalized.code || payload?.code || 'API_ERROR',
