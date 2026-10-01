@@ -9,20 +9,46 @@
     data-sort="{{sort.key}}"
     data-order="{{#if sort.order}}{{sort.order}}{{else}}asc{{/if}}"
 >
-    <form class="bf-table-form" data-bf-table-form method="{{#if method}}{{method}}{{else}}get{{/if}}" action="{{action}}">
+    <form
+        class="bf-table-form"
+        data-bf-table-form
+        method="{{#if method}}{{method}}{{else}}get{{/if}}"
+        action="{{action}}"
+    >
         <input type="hidden" name="page" value="{{#if pagination.page}}{{pagination.page}}{{else}}1{{/if}}" data-table-page>
         <input type="hidden" name="sort" value="{{sort.key}}" data-table-sort>
         <input type="hidden" name="order" value="{{#if sort.order}}{{sort.order}}{{else}}asc{{/if}}" data-table-order>
-        {{> tables/toolbar search=search actions=actions}}
-        {{> tables/filters filters=filters}}
-        <div class="bf-table-viewport" role="region" aria-label="{{#if ariaLabel}}{{ariaLabel}}{{else}}Bảng dữ liệu{{/if}}" tabindex="0">
+        {{> tables/toolbar
+            search=search
+            actions=actions
+        }}
+        {{> tables/filters
+            filters=filters
+        }}
+        <div
+            class="bf-table-viewport"
+            role="region"
+            aria-label="{{#if ariaLabel}}{{ariaLabel}}{{else}}Bảng dữ liệu{{/if}}"
+            tabindex="0"
+        >
             <table class="bf-data-table" style="min-width: {{#if minWidth}}{{minWidth}}{{else}}960{{/if}}px">
                 <thead>
                     <tr>
                         {{#each columns}}
-                            <th scope="col" class="bf-table-align-{{#if align}}{{align}}{{else}}left{{/if}}" data-column-key="{{key}}" data-sort-type="{{sortType}}" {{#if width}}style="width: {{width}}"{{/if}}>
+                            <th
+                                scope="col"
+                                class="bf-table-align-{{#if align}}{{align}}{{else}}left{{/if}}"
+                                data-column-key="{{key}}"
+                                data-sort-type="{{sortType}}"
+                                {{#if width}}style="width: {{width}}"{{/if}}
+                            >
                                 {{#if sortable}}
-                                    <button type="button" class="bf-table-sort" data-table-sort-key="{{key}}" aria-label="Sắp xếp theo {{label}}">
+                                    <button
+                                        type="button"
+                                        class="bf-table-sort"
+                                        data-table-sort-key="{{key}}"
+                                        aria-label="Sắp xếp theo {{label}}"
+                                    >
                                         <span>{{label}}</span>
                                         <span class="bf-table-sort-icon" aria-hidden="true">↕</span>
                                     </button>
@@ -38,14 +64,27 @@
                                 <th data-column-key="{{key}}">
                                     {{#if searchable}}
                                         {{#if (eq searchType "select")}}
-                                            <select class="bf-table-column-search bf-form-control" data-column-search="{{key}}" name="{{#if searchName}}{{searchName}}{{else}}columnSearch[{{key}}]{{/if}}" aria-label="Lọc {{label}}">
+                                            <select
+                                                class="bf-table-column-search bf-form-control"
+                                                data-column-search="{{key}}"
+                                                name="{{#if searchName}}{{searchName}}{{else}}columnSearch[{{key}}]{{/if}}"
+                                                aria-label="Lọc {{label}}"
+                                            >
                                                 <option value="">Tất cả</option>
                                                 {{#each options}}
                                                     <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
                                                 {{/each}}
                                             </select>
                                         {{else}}
-                                            <input class="bf-table-column-search bf-form-control" type="search" data-column-search="{{key}}" name="{{#if searchName}}{{searchName}}{{else}}columnSearch[{{key}}]{{/if}}" value="{{searchValue}}" placeholder="{{#if searchPlaceholder}}{{searchPlaceholder}}{{else}}Tìm {{label}}{{/if}}" aria-label="Tìm trong {{label}}">
+                                            <input
+                                                class="bf-table-column-search bf-form-control"
+                                                type="search"
+                                                data-column-search="{{key}}"
+                                                name="{{#if searchName}}{{searchName}}{{else}}columnSearch[{{key}}]{{/if}}"
+                                                value="{{searchValue}}"
+                                                placeholder="{{#if searchPlaceholder}}{{searchPlaceholder}}{{else}}Tìm {{label}}{{/if}}"
+                                                aria-label="Tìm trong {{label}}"
+                                            >
                                         {{/if}}
                                     {{/if}}
                                 </th>
@@ -55,12 +94,23 @@
                 </thead>
                 <tbody data-bf-table-body>
                     {{#if loading}}
-                        {{> tables/loading-state columns=columns}}
+                        {{> tables/loading-state
+                            columns=columns
+                        }}
                     {{else}}
                         {{#each rows}}
-                            <tr data-table-row data-search-text="{{searchText}}" data-filter-values="{{json filterValues}}">
+                            <tr
+                                data-table-row
+                                data-search-text="{{searchText}}"
+                                data-filter-values="{{json filterValues}}"
+                            >
                                 {{#each cells}}
-                                    <td data-column-key="{{key}}" data-search-value="{{searchValue}}" data-sort-value="{{sortValue}}" class="{{className}}">
+                                    <td
+                                        data-column-key="{{key}}"
+                                        data-search-value="{{searchValue}}"
+                                        data-sort-value="{{sortValue}}"
+                                        class="{{className}}"
+                                    >
                                         {{#if href}}<a href="{{href}}">{{value}}</a>{{else}}{{value}}{{/if}}
                                     </td>
                                 {{/each}}
@@ -72,11 +122,18 @@
         </div>
         {{#unless hasRows}}
             {{#unless loading}}
-                {{> tables/empty-state title=emptyTitle description=emptyDescription actionLabel=emptyActionLabel actionHref=emptyActionHref}}
+                {{> tables/empty-state
+                    title=emptyTitle
+                    description=emptyDescription
+                    actionLabel=emptyActionLabel
+                    actionHref=emptyActionHref
+                }}
             {{/unless}}
         {{/unless}}
         {{#if pagination.enabled}}
-            {{> tables/pagination pagination=pagination}}
+            {{> tables/pagination
+                pagination=pagination
+            }}
         {{/if}}
     </form>
 </section>

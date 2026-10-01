@@ -8,16 +8,50 @@
     </section>
     <div class="bf-public-container bf-public-about-content">
         {{#if introduction}}
-            <section class="bf-public-about-section"><h2>{{introduction.title}}</h2><p>{{introduction.description}}</p>{{#if introduction.imageUrl}}<img src="{{introduction.imageUrl}}" alt="{{introduction.imageAlt}}" loading="lazy">{{/if}}</section>
+            <section class="bf-public-about-section">
+                <h2>{{introduction.title}}</h2>
+                <p>{{introduction.description}}</p>
+                {{#if introduction.imageUrl}}<img src="{{introduction.imageUrl}}" alt="{{introduction.imageAlt}}" loading="lazy">{{/if}}
+            </section>
         {{/if}}
         {{#if model}}
-            <section class="bf-public-about-section"><h2>{{model.title}}</h2><p>{{model.description}}</p>{{#if model.items}}<div class="bf-public-feature-grid">{{#each model.items}}<article><h3>{{title}}</h3><p>{{description}}</p></article>{{/each}}</div>{{/if}}</section>
+            <section class="bf-public-about-section">
+                <h2>{{model.title}}</h2>
+                <p>{{model.description}}</p>
+                {{#if model.items}}
+                    <div class="bf-public-feature-grid">
+                        {{#each model.items}}
+                            <article>
+                                <h3>{{title}}</h3>
+                                <p>{{description}}</p>
+                            </article>
+                        {{/each}}
+                    </div>
+                {{/if}}
+            </section>
         {{/if}}
         {{#if steps}}
-            <section class="bf-public-about-section"><h2>{{#if steps.title}}{{steps.title}}{{else}}Quy trình sử dụng{{/if}}</h2><ol class="bf-public-steps">{{#each steps.items}}<li><strong>{{title}}</strong><p>{{description}}</p></li>{{/each}}</ol></section>
+            <section class="bf-public-about-section">
+                <h2>{{#if steps.title}}{{steps.title}}{{else}}Quy trình sử dụng{{/if}}</h2>
+                <ol class="bf-public-steps">
+                    {{#each steps.items}}
+                        <li>
+                            <strong>{{title}}</strong>
+                            <p>{{description}}</p>
+                        </li>
+                    {{/each}}
+                </ol>
+            </section>
         {{/if}}
         {{#if contact}}
-            <section class="bf-public-contact"><div><h2>{{#if contact.title}}{{contact.title}}{{else}}Liên hệ với BookFlow{{/if}}</h2>{{#if contact.description}}<p>{{contact.description}}</p>{{/if}}</div>{{#if contact.email}}<a href="mailto:{{contact.email}}">{{contact.email}}</a>{{/if}}{{#if contact.phone}}<a href="tel:{{contact.phone}}">{{contact.phone}}</a>{{/if}}</section>
+            <section class="bf-public-contact">
+                <div>
+                    <h2>{{#if contact.title}}{{contact.title}}{{else}}Liên hệ với BookFlow{{/if}}</h2>
+                    {{#if contact.description}}<p>{{contact.description}}</p>{{/if}}
+                </div>
+                {{#if contact.email}}<a href="mailto:{{contact.email}}">{{contact.email}}</a>{{/if}}
+                {{#if contact.phone}}<a href="tel:{{contact.phone}}">{{contact.phone}}</a>{{/if}}
+            </section>
         {{/if}}
     </div>
 </section>

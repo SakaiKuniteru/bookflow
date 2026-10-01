@@ -1,21 +1,50 @@
-<div class="bf-table-pagination" data-bf-table-pagination>
-    <div class="bf-table-page-size">
-        <label for="{{#if pagination.id}}{{pagination.id}}{{else}}bf-table-page-size{{/if}}">Dòng/trang</label>
-        <select id="{{#if pagination.id}}{{pagination.id}}{{else}}bf-table-page-size{{/if}}" name="limit" class="bf-form-control" data-table-page-size>
-            <option value="20" {{#if (eq pagination.pageSize 20)}}selected{{/if}}>20</option>
-            <option value="50" {{#if (eq pagination.pageSize 50)}}selected{{/if}}>50</option>
-            <option value="100" {{#if (eq pagination.pageSize 100)}}selected{{/if}}>100</option>
-            <option value="200" {{#if (eq pagination.pageSize 200)}}selected{{/if}}>200</option>
-        </select>
+<div class="bf-table-toolbar">
+    <div class="bf-table-toolbar-main">
+        {{#if search}}
+            <div class="bf-table-global-search">
+                {{> forms/search
+                    id=search.id
+                    name=search.name
+                    value=search.value
+                    placeholder=search.placeholder
+                    mode=search.mode
+                    threshold=search.threshold
+                }}
+            </div>
+        {{/if}}
+        {{#if toolbarTitle}}<h2 class="bf-table-title">{{toolbarTitle}}</h2>{{/if}}
     </div>
-    <nav class="bf-table-page-controls" aria-label="Phân trang">
-        <button type="button" data-page-action="first" aria-label="Trang đầu" title="Trang đầu">{{> ui/icon name="first-page" size="18"}}</button>
-        <button type="button" data-page-action="prev" aria-label="Trang trước" title="Trang trước">{{> ui/icon name="chevron-left" size="18"}}</button>
-        <span class="bf-table-page-label">Trang <strong data-current-page>{{#if pagination.page}}{{pagination.page}}{{else}}1{{/if}}</strong> / <span data-total-pages>{{#if pagination.pages}}{{pagination.pages}}{{else}}1{{/if}}</span></span>
-        <button type="button" data-page-action="next" aria-label="Trang sau" title="Trang sau">{{> ui/icon name="chevron-right" size="18"}}</button>
-        <button type="button" data-page-action="last" aria-label="Trang cuối" title="Trang cuối">{{> ui/icon name="last-page" size="18"}}</button>
-    </nav>
-    <div class="bf-table-record-count">
-        <span data-page-from>{{pagination.from}}</span>–<span data-page-to>{{pagination.to}}</span> / <span data-total-records>{{pagination.total}}</span>
-    </div>
+    {{#if actions}}
+        <div class="bf-table-actions">
+            {{#each actions}}
+                {{#if href}}
+                    {{> ui/nut-bam
+                        href=href
+                        label=label
+                        icon=icon
+                        variant=variant
+                        size=size
+                        disabled=disabled
+                        className=className
+                    }}
+                {{else}}
+                    <button
+                        type="{{#if type}}{{type}}{{else}}button{{/if}}"
+                        class="bf-btn bf-btn-{{#if variant}}{{variant}}{{else}}secondary{{/if}} bf-btn-{{#if size}}{{size}}{{else}}md{{/if}} {{className}}"
+                        data-table-action="{{action}}"
+                        {{#if disabled}}disabled{{/if}}
+                        title="{{title}}"
+                    >
+                        {{#if icon}}
+                            {{> ui/icon
+                                name=icon
+                                size="18"
+                            }}
+                        {{/if}}
+                        <span class="bf-btn-text">{{label}}</span>
+                    </button>
+                {{/if}}
+            {{/each}}
+        </div>
+    {{/if}}
 </div>

@@ -180,8 +180,15 @@
 .bf-nav-menu-wrap {
     position: relative;
 }
-.bf-nav-logout-form { margin: 0; }
-.bf-nav-logout-form .bf-nav-menu-item { width: 100%; border: 0; background: transparent; font: inherit; text-align: left; cursor: pointer; }
+.bf-nav-logout-form { 
+    margin: 0; 
+}
+.bf-nav-logout-form .bf-nav-menu-item { 
+    width: 100%; border: 0; 
+    background: transparent; 
+    font: inherit; text-align: 
+    left; cursor: pointer; 
+}
 .bf-nav-account-trigger,
 .bf-nav-notification-trigger {
     position: relative;
@@ -328,7 +335,8 @@
     border-radius: 50%;
     background: var(--bf-form-primary, #2563eb);
 }
-.bf-nav-notification.is-read .bf-nav-notification-dot {
+.bf-nav-notification.is-read 
+.bf-nav-notification-dot {
     visibility: hidden;
 }
 .bf-nav-notification-empty {

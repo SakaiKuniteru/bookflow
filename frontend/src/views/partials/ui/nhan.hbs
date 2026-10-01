@@ -1,4 +1,9 @@
 <span class="bf-ui-label bf-ui-label-{{#if variant}}{{variant}}{{else}}default{{/if}} {{className}}" {{#if for}}data-for="{{for}}"{{/if}}>
-    {{#if icon}}{{> ui/icon name=icon size="16"}}{{/if}}
+    {{#if icon}}
+        {{> ui/icon 
+            name=icon 
+            size="16"
+        }}
+    {{/if}}
     {{label}}
 </span>

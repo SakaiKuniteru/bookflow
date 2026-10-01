@@ -1,6 +1,71 @@
 <header class="bf-nav-header bf-demo-header {{className}}">
-    <a class="bf-nav-brand bf-demo-brand" href="{{#if brandHref}}{{brandHref}}{{else}}/{{/if}}" aria-label="{{#if brandName}}{{brandName}}{{else}}{{app.name}}{{/if}} - Trang chủ"><span class="bf-demo-mark" aria-hidden="true"><i></i></span><span>{{#if brandName}}{{brandName}}{{else}}{{app.name}}{{/if}}</span><small>AI</small></a>
-    <button type="button" class="bf-nav-mobile-toggle" data-bf-sidebar-toggle="{{sidebarId}}" aria-label="Mở menu" aria-expanded="false">{{> ui/icon name="menu" size="22"}}</button>
-    {{#if publicNav}}<nav class="bf-nav-header-links bf-demo-nav" aria-label="Điều hướng chính"><a class="bf-nav-link {{#if (eq currentPath "/")}}is-active{{/if}}" href="/">Trang chủ</a><a class="bf-nav-link {{#if (eq currentPath "/sach")}}is-active{{/if}}" href="/sach">Khám phá sách</a><a class="bf-nav-link" href="/sach?loai=muon">Mượn &amp; thuê</a><a class="bf-nav-link {{#if (eq currentPath "/goi-hoi-vien")}}is-active{{/if}}" href="/goi-hoi-vien">Hội viên</a><a class="bf-nav-link {{#if (eq currentPath "/customer/don-hang")}}is-active{{/if}}" href="{{#if authenticated}}/customer/don-hang{{else}}/auth/dang-nhap?redirect=%2Fcustomer%2Fdon-hang{{/if}}">Đơn hàng</a></nav>{{else if links}}<nav class="bf-nav-header-links bf-demo-nav" aria-label="Điều hướng chính">{{#each links}}<a class="bf-nav-link {{#if active}}is-active{{/if}}" href="{{href}}"><span>{{label}}</span></a>{{/each}}</nav>{{/if}}
-    <div class="bf-nav-header-actions bf-demo-actions"><label class="bf-demo-branch"><span>Chi nhánh Trung tâm</span>{{> ui/icon name="chevron-down" size="16"}}</label>{{#if authenticated}}{{> navigation/account-menu user=user links=accountLinks}}{{else}}<a class="bf-demo-account" href="/auth/dang-nhap?redirect=%2Fcustomer%2Ftong-quan"><span class="bf-demo-avatar">MA</span><span>Đăng nhập</span></a>{{/if}}<a class="bf-demo-cart" href="{{#if authenticated}}/customer/gio-hang{{else}}/auth/dang-nhap?redirect=%2Fcustomer%2Fgio-hang{{/if}}" aria-label="Giỏ hàng">{{> ui/icon name="cart" size="19"}}<span>0</span></a></div>
+    <a
+        class="bf-nav-brand bf-demo-brand"
+        href="{{#if brandHref}}{{brandHref}}{{else}}/{{/if}}"
+        aria-label="{{#if brandName}}{{brandName}}{{else}}{{app.name}}{{/if}} - Trang chủ"
+    >
+        <span class="bf-demo-mark" aria-hidden="true"><i></i></span>
+        <span>{{#if brandName}}{{brandName}}{{else}}{{app.name}}{{/if}}</span>
+        <small>AI</small>
+    </a>
+    <button
+        type="button"
+        class="bf-nav-mobile-toggle"
+        data-bf-sidebar-toggle="{{sidebarId}}"
+        aria-label="Mở menu"
+        aria-expanded="false"
+    >
+        {{> ui/icon
+            name="menu"
+            size="22"
+        }}
+    </button>
+    {{#if publicNav}}
+        <nav class="bf-nav-header-links bf-demo-nav" aria-label="Điều hướng chính">
+            <a class="bf-nav-link {{#if (eq currentPath "/")}}is-active{{/if}}" href="/">Trang chủ</a>
+            <a class="bf-nav-link {{#if (eq currentPath "/sach")}}is-active{{/if}}" href="/sach">Khám phá sách</a>
+            <a class="bf-nav-link" href="/sach?loai=muon">Mượn &amp; thuê</a>
+            <a class="bf-nav-link {{#if (eq currentPath "/goi-hoi-vien")}}is-active{{/if}}" href="/goi-hoi-vien">Hội viên</a>
+            <a class="bf-nav-link {{#if (eq currentPath "/customer/don-hang")}}is-active{{/if}}" href="{{#if authenticated}}/customer/don-hang{{else}}/auth/dang-nhap?redirect=%2Fcustomer%2Fdon-hang{{/if}}">Đơn hàng</a>
+        </nav>
+    {{else if links}}
+        <nav class="bf-nav-header-links bf-demo-nav" aria-label="Điều hướng chính">
+            {{#each links}}
+                <a class="bf-nav-link {{#if active}}is-active{{/if}}" href="{{href}}">
+                    <span>{{label}}</span>
+                </a>
+            {{/each}}
+        </nav>
+    {{/if}}
+    <div class="bf-nav-header-actions bf-demo-actions">
+        <label class="bf-demo-branch">
+            <span>Chi nhánh Trung tâm</span>
+            {{> ui/icon
+                name="chevron-down"
+                size="16"
+            }}
+        </label>
+        {{#if authenticated}}
+            {{> navigation/account-menu
+                user=user
+                links=accountLinks
+            }}
+        {{else}}
+            <a class="bf-demo-account" href="/auth/dang-nhap?redirect=%2Fcustomer%2Ftong-quan">
+                <span class="bf-demo-avatar">MA</span>
+                <span>Đăng nhập</span>
+            </a>
+        {{/if}}
+        <a
+            class="bf-demo-cart"
+            href="{{#if authenticated}}/customer/gio-hang{{else}}/auth/dang-nhap?redirect=%2Fcustomer%2Fgio-hang{{/if}}"
+            aria-label="Giỏ hàng"
+        >
+            {{> ui/icon
+                name="cart"
+                size="19"
+            }}
+            <span>0</span>
+        </a>
+    </div>
 </header>

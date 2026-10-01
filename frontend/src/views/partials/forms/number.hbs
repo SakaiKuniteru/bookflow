@@ -4,7 +4,7 @@
     {{/if}}
     <input
         id="{{id}}"
-        name="{{name}}"
+        {{#if name}}name="{{name}}"{{/if}}
         type="text"
         inputmode="decimal"
         class="bf-form-control bf-number-input"
@@ -12,8 +12,11 @@
         placeholder="{{placeholder}}"
         data-number-type="{{#if type}}{{type}}{{else}}decimal{{/if}}"
         data-number-decimals="{{decimals}}"
+        {{#if ariaLabel}}aria-label="{{ariaLabel}}"{{/if}}
         data-min="{{min}}"
         data-max="{{max}}"
+        {{#if maxlength}}maxlength="{{maxlength}}"{{/if}}
+        {{#if minlength}}minlength="{{minlength}}"{{/if}}
         {{#if required}}required{{/if}}
         {{#if disabled}}disabled{{/if}}
         {{#if readonly}}readonly{{/if}}

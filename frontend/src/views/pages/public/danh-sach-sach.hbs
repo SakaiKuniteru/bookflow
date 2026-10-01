@@ -1,6 +1,56 @@
 <section class="bf-public-page bf-demo-catalog-page">
-    <header class="bf-demo-section-head"><div><p class="bf-public-eyebrow">Danh mục sách</p><h1>Tìm cuốn sách của bạn</h1><p>Đang xem tủ sách tại Chi nhánh Trung tâm</p></div><span class="bf-demo-count">{{#if meta.tong_so}}{{meta.tong_so}}{{else}}{{#if meta.tongSo}}{{meta.tongSo}}{{else}}0{{/if}}{{/if}} đầu sách</span></header>
-    <form class="bf-demo-filters" method="get" action="/sach"><nav class="bf-demo-chips" aria-label="Thể loại sách"><a class="is-active" href="/sach">Tất cả</a><a href="/sach?the_loai=van-hoc">Văn học</a><a href="/sach?the_loai=tieu-thuyet">Tiểu thuyết</a><a href="/sach?the_loai=ky-nang">Kỹ năng</a><a href="/sach?the_loai=thieu-nhi">Thiếu nhi</a></nav>{{> forms/search id="catalog-search" name="q" value=filters.q placeholder="Tên sách, tác giả..." mode="relative" threshold=85}}</form>
-    {{#if loading}}{{> common/loading visible=true fullscreen=false text="Đang tải danh sách sách..."}}{{else}}{{#if books}}<div class="bf-demo-book-grid">{{#each books}}{{> components/sach/the-sach book=this}}{{/each}}</div>{{else}}{{> tables/empty-state title="Chưa có sách trong danh mục" description="Danh mục sách tại chi nhánh này hiện chưa có dữ liệu." actionLabel="Xóa tìm kiếm" actionHref="/sach"}}{{/if}}{{/if}}
-    {{#if pagination.enabled}}{{> tables/pagination pagination=pagination}}{{/if}}
+    <header class="bf-demo-section-head">
+        <div>
+            <p class="bf-public-eyebrow">Danh mục sách</p>
+            <h1>Tìm cuốn sách của bạn</h1>
+            <p>Đang xem tủ sách tại Chi nhánh Trung tâm</p>
+        </div>
+        <span class="bf-demo-count">{{#if meta.tong_so}}{{meta.tong_so}}{{else}}{{#if meta.tongSo}}{{meta.tongSo}}{{else}}0{{/if}}{{/if}} đầu sách</span>
+    </header>
+    <form class="bf-demo-filters" method="get" action="/sach">
+        <nav class="bf-demo-chips" aria-label="Thể loại sách">
+            <a class="is-active" href="/sach">Tất cả</a>
+            <a href="/sach?the_loai=van-hoc">Văn học</a>
+            <a href="/sach?the_loai=tieu-thuyet">Tiểu thuyết</a>
+            <a href="/sach?the_loai=ky-nang">Kỹ năng</a>
+            <a href="/sach?the_loai=thieu-nhi">Thiếu nhi</a>
+        </nav>
+        {{> forms/search
+            id="catalog-search"
+            name="q"
+            value=filters.q
+            placeholder="Tên sách, tác giả..."
+            mode="relative"
+            threshold=85
+        }}
+    </form>
+    {{#if loading}}
+        {{> common/loading
+            visible=true
+            fullscreen=false
+            text="Đang tải danh sách sách..."
+        }}
+    {{else}}
+        {{#if books}}
+            <div class="bf-demo-book-grid">
+                {{#each books}}
+                    {{> components/sach/the-sach
+                        book=this
+                    }}
+                {{/each}}
+            </div>
+        {{else}}
+            {{> tables/empty-state
+                title="Chưa có sách trong danh mục"
+                description="Danh mục sách tại chi nhánh này hiện chưa có dữ liệu."
+                actionLabel="Xóa tìm kiếm"
+                actionHref="/sach"
+            }}
+        {{/if}}
+    {{/if}}
+    {{#if pagination.enabled}}
+        {{> tables/pagination
+            pagination=pagination
+        }}
+    {{/if}}
 </section>

@@ -1,23 +1,122 @@
-{{#> modals/base-modal id=id title=title description=description eyebrow=eyebrow size=size open=open loading=loading loadingText=loadingText closeOnBackdrop=closeOnBackdrop hideClose=hideClose formId=id footer=footer}}
-    <form id="{{id}}-form" class="bf-modal-form" data-bf-modal-form method="{{#if method}}{{method}}{{else}}post{{/if}}" action="{{action}}" enctype="{{#if enctype}}{{enctype}}{{else}}application/x-www-form-urlencoded{{/if}}">
+{{#> modals/base-modal
+    id=id
+    title=title
+    description=description
+    eyebrow=eyebrow
+    size=size
+    open=open
+    loading=loading
+    loadingText=loadingText
+    closeOnBackdrop=closeOnBackdrop
+    hideClose=hideClose
+    formId=id
+    footer=footer
+}}
+    <form
+        id="{{id}}-form"
+        class="bf-modal-form"
+        data-bf-modal-form
+        method="{{#if method}}{{method}}{{else}}post{{/if}}"
+        action="{{action}}"
+        enctype="{{#if enctype}}{{enctype}}{{else}}application/x-www-form-urlencoded{{/if}}"
+    >
         {{#if error}}<div class="bf-form-error bf-modal-form-error" role="alert">{{error}}</div>{{/if}}
         {{#each fields}}
             {{#if (eq type "select")}}
-                {{> forms/select id=id name=name label=label value=value placeholder=placeholder options=options required=required disabled=disabled multiple=multiple search=search error=error}}
+                {{> forms/select
+                    id=id
+                    name=name
+                    label=label
+                    value=value
+                    placeholder=placeholder
+                    options=options
+                    required=required
+                    disabled=disabled
+                    multiple=multiple
+                    search=search
+                    error=error
+                }}
             {{else if (eq type "textarea")}}
-                {{> forms/textarea id=id name=name label=label value=value placeholder=placeholder required=required disabled=disabled rows=rows helpText=helpText}}
+                {{> forms/textarea
+                    id=id
+                    name=name
+                    label=label
+                    value=value
+                    placeholder=placeholder
+                    required=required
+                    disabled=disabled
+                    rows=rows
+                    helpText=helpText
+                }}
             {{else if (eq type "date")}}
-                {{> forms/date id=id name=name label=label value=value placeholder=placeholder type="date" required=required disabled=disabled}}
+                {{> forms/date
+                    id=id
+                    name=name
+                    label=label
+                    value=value
+                    placeholder=placeholder
+                    type="date"
+                    required=required
+                    disabled=disabled
+                }}
             {{else if (eq type "datetime")}}
-                {{> forms/date id=id name=name label=label value=value placeholder=placeholder type="datetime" timeFormat=timeFormat required=required disabled=disabled}}
+                {{> forms/date
+                    id=id
+                    name=name
+                    label=label
+                    value=value
+                    placeholder=placeholder
+                    type="datetime"
+                    timeFormat=timeFormat
+                    required=required
+                    disabled=disabled
+                }}
             {{else if (eq type "email")}}
-                {{> forms/email id=id name=name label=label value=value placeholder=placeholder required=required disabled=disabled helpText=helpText}}
+                {{> forms/email
+                    id=id
+                    name=name
+                    label=label
+                    value=value
+                    placeholder=placeholder
+                    required=required
+                    disabled=disabled
+                    helpText=helpText
+                }}
             {{else if (eq type "phone")}}
-                {{> forms/phone id=id name=name label=label value=value placeholder=placeholder format=format required=required disabled=disabled helpText=helpText}}
+                {{> forms/phone
+                    id=id
+                    name=name
+                    label=label
+                    value=value
+                    placeholder=placeholder
+                    format=format
+                    required=required
+                    disabled=disabled
+                    helpText=helpText
+                }}
             {{else if (eq type "checkbox")}}
-                {{> forms/checkbox id=id name=name label=label value=value checked=checked required=required disabled=disabled}}
+                {{> forms/checkbox
+                    id=id
+                    name=name
+                    label=label
+                    value=value
+                    checked=checked
+                    required=required
+                    disabled=disabled
+                }}
             {{else}}
-                {{> forms/input id=id name=name label=label value=value placeholder=placeholder type=type required=required disabled=disabled readonly=readonly helpText=helpText}}
+                {{> forms/input
+                    id=id
+                    name=name
+                    label=label
+                    value=value
+                    placeholder=placeholder
+                    type=type
+                    required=required
+                    disabled=disabled
+                    readonly=readonly
+                    helpText=helpText
+                }}
             {{/if}}
         {{/each}}
         {{#if contentHtml}}<div class="bf-modal-form-content">{{{contentHtml}}}</div>{{/if}}

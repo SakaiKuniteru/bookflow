@@ -5,7 +5,15 @@
             <h3 class="bf-membership-card-title">{{plan.name}}</h3>
             {{#if plan.description}}<p class="bf-membership-card-description">{{plan.description}}</p>{{/if}}
         </div>
-        {{#if plan.statusLabel}}{{> components/common/trang-thai statusCode=plan.statusCode label=plan.statusLabel variant=plan.statusVariant icon=plan.statusIcon tooltip=plan.statusTooltip}}{{/if}}
+        {{#if plan.statusLabel}}
+            {{> components/common/trang-thai
+                statusCode=plan.statusCode
+                label=plan.statusLabel
+                variant=plan.statusVariant
+                icon=plan.statusIcon
+                tooltip=plan.statusTooltip
+            }}
+        {{/if}}
     </div>
     {{#if plan.priceDisplay}}<p class="bf-membership-card-price">{{plan.priceDisplay}}{{#if plan.billingLabel}}<span>/ {{plan.billingLabel}}</span>{{/if}}</p>{{/if}}
     {{#if plan.durationLabel}}<p class="bf-membership-card-duration">Thời hạn: {{plan.durationLabel}}</p>{{/if}}
@@ -17,7 +25,11 @@
     {{#if plan.actions}}
         <div class="bf-membership-card-actions">
             {{#each plan.actions}}
-                {{#if href}}<a class="bf-button bf-button--{{#if variant}}{{variant}}{{else}}primary{{/if}}" href="{{href}}">{{label}}</a>{{else}}<button class="bf-button bf-button--{{#if variant}}{{variant}}{{else}}primary{{/if}}" type="button" data-action="{{action}}">{{label}}</button>{{/if}}
+                {{#if href}}
+                    <a class="bf-button bf-button--{{#if variant}}{{variant}}{{else}}primary{{/if}}" href="{{href}}">{{label}}</a>
+                {{else}}
+                    <button class="bf-button bf-button--{{#if variant}}{{variant}}{{else}}primary{{/if}}" type="button" data-action="{{action}}">{{label}}</button>
+                {{/if}}
             {{/each}}
         </div>
     {{/if}}

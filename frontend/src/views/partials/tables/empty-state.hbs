@@ -1,8 +1,19 @@
 <div class="bf-table-empty" data-bf-table-empty>
-    <span class="bf-table-empty-icon">{{> ui/icon name="inbox" size="28"}}</span>
+    <span class="bf-table-empty-icon">
+        {{> ui/icon
+            name="inbox"
+            size="28"
+        }}
+    </span>
     <strong>{{#if title}}{{title}}{{else}}Không có dữ liệu{{/if}}</strong>
     {{#if description}}<span>{{description}}</span>{{/if}}
     {{#if actionLabel}}
-        {{> ui/nut-bam href=actionHref label=actionLabel icon="plus" variant="primary" size="sm"}}
+        {{> ui/nut-bam
+            href=actionHref
+            label=actionLabel
+            icon="plus"
+            variant="primary"
+            size="sm"
+        }}
     {{/if}}
 </div>

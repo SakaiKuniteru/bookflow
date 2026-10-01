@@ -1,15 +1,30 @@
 <section class="bf-public-container bf-public-page">
     <header class="bf-public-page-heading">
-        <div><p class="bf-public-eyebrow">Quyền lợi dành cho bạn đọc</p><h1>{{#if pageTitle}}{{pageTitle}}{{else}}Gói hội viên{{/if}}</h1>{{#if description}}<p>{{description}}</p>{{else}}<p>Chọn gói phù hợp để sử dụng các quyền lợi hội viên của BookFlow.</p>{{/if}}</div>
+        <div>
+            <p class="bf-public-eyebrow">Quyền lợi dành cho bạn đọc</p>
+            <h1>{{#if pageTitle}}{{pageTitle}}{{else}}Gói hội viên{{/if}}</h1>
+            {{#if description}}<p>{{description}}</p>{{else}}<p>Chọn gói phù hợp để sử dụng các quyền lợi hội viên của BookFlow.</p>{{/if}}
+        </div>
     </header>
     {{#if loading}}
-        {{> common/loading visible=true fullscreen=false text="Đang tải các gói hội viên..."}}
+        {{> common/loading
+            visible=true
+            fullscreen=false
+            text="Đang tải các gói hội viên..."
+        }}
     {{else if plans}}
         <div class="bf-public-plan-grid">
-            {{#each plans}}{{> components/hoi-vien/the-goi-hoi-vien plan=this}}{{/each}}
+            {{#each plans}}
+                {{> components/hoi-vien/the-goi-hoi-vien
+                    plan=this
+                }}
+            {{/each}}
         </div>
     {{else}}
-        {{> tables/empty-state title="Hiện chưa có gói hội viên" description="Các gói hội viên sẽ được cập nhật tại đây."}}
+        {{> tables/empty-state
+            title="Hiện chưa có gói hội viên"
+            description="Các gói hội viên sẽ được cập nhật tại đây."
+        }}
     {{/if}}
     {{#if membershipNote}}<aside class="bf-public-membership-note">{{membershipNote}}</aside>{{/if}}
 </section>

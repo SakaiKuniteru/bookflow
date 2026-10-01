@@ -1,6 +1,12 @@
 <section class="bf-stock-status" aria-label="{{#if ariaLabel}}{{ariaLabel}}{{else}}Trạng thái tồn kho{{/if}}">
     <div class="bf-stock-status-heading">
-        {{> components/common/trang-thai statusCode=statusCode label=label variant=variant icon=icon tooltip=tooltip}}
+        {{> components/common/trang-thai 
+            statusCode=statusCode 
+            label=label 
+            variant=variant 
+            icon=icon 
+            tooltip=tooltip
+        }}
         {{#if locationLabel}}<span class="bf-stock-status-location">{{locationLabel}}</span>{{/if}}
     </div>
     <dl class="bf-stock-status-quantities">

@@ -1,6 +1,16 @@
 <div class="bf-nav-menu-wrap {{className}}" data-bf-menu>
-    <button type="button" class="bf-nav-notification-trigger" data-bf-menu-trigger aria-expanded="false" aria-haspopup="true" aria-label="Thông báo">
-        {{> ui/icon name="bell" size="20"}}
+    <button
+        type="button"
+        class="bf-nav-notification-trigger"
+        data-bf-menu-trigger
+        aria-expanded="false"
+        aria-haspopup="true"
+        aria-label="Thông báo"
+    >
+        {{> ui/icon
+            name="bell"
+            size="20"
+        }}
         {{#if unreadCount}}<span class="bf-nav-notification-count">{{unreadCount}}</span>{{/if}}
     </button>
     <div class="bf-nav-menu bf-nav-notification-menu" data-bf-menu-panel hidden>
@@ -11,7 +21,12 @@
         <div class="bf-nav-notification-list">
             {{#if notifications}}
                 {{#each notifications}}
-                    <a class="bf-nav-notification {{#if read}}is-read{{else}}is-unread{{/if}}" href="{{#if href}}{{href}}{{else}}#{{/if}}" data-bf-notification data-notification-id="{{id}}">
+                    <a
+                        class="bf-nav-notification {{#if read}}is-read{{else}}is-unread{{/if}}"
+                        href="{{#if href}}{{href}}{{else}}#{{/if}}"
+                        data-bf-notification
+                        data-notification-id="{{id}}"
+                    >
                         <span class="bf-nav-notification-dot" aria-hidden="true"></span>
                         <span class="bf-nav-notification-content">
                             <strong>{{title}}</strong>

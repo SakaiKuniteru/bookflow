@@ -53,13 +53,16 @@
 .bf-select-search-input::placeholder {
     color: var(--bf-form-muted);
 }
-.bf-select[data-search="true"] .bf-select-search-input {
+.bf-select[data-search="true"] 
+.bf-select-search-input {
     display: block;
 }
-.bf-select[data-search="true"]:not(.is-open):not(.has-value) .bf-select-search-input {
+.bf-select[data-search="true"]:not(.is-open):not(.has-value) 
+.bf-select-search-input {
     flex-basis: 100%;
 }
-.bf-select[data-search="true"].is-open:not([data-multiple="true"]) .bf-select-value {
+.bf-select[data-search="true"].is-open:not([data-multiple="true"]) 
+.bf-select-value {
     display: none;
 }
 .bf-select-icons {

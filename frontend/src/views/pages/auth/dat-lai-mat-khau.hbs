@@ -1,17 +1,72 @@
-<div class="bf-auth-description">Tạo mật khẩu mới cho tài khoản của bạn.</div>
-{{#if error}}{{> feedback/alert type="error" title="Không thể đặt lại mật khẩu" message=error}}{{/if}}
-{{#if success}}{{> feedback/alert type="success" message=success}}{{/if}}
-<form class="bf-auth-form" method="post" action="/auth/dat-lai-mat-khau" data-bf-auth-form>
-    {{> forms/email id="reset-email" name="email" label="Email" value=email placeholder="name@example.com" required=true}}
-    {{#if requiresOtp}}
-        {{> forms/input id="reset-code" name="otp" type="text" label="Mã xác thực" value=values.otp placeholder="Nhập mã gồm 6 chữ số" autocomplete="one-time-code" maxlength="6" minlength="6" required=true className="bf-auth-otp-field"}}
-    {{/if}}
-    {{> forms/password id="new-password" name="newPassword" label="Mật khẩu mới" placeholder="Nhập mật khẩu mới" autocomplete="new-password" required=true minlength="8"}}
-    {{> forms/password id="confirm-new-password" name="confirmNewPassword" label="Xác nhận mật khẩu mới" placeholder="Nhập lại mật khẩu mới" autocomplete="new-password" required=true}}
-    <div class="bf-form-error bf-auth-password-error" data-password-error hidden>Mật khẩu xác nhận chưa khớp.</div>
-    <div class="bf-auth-submit">
-        <button class="bf-btn bf-btn-primary bf-btn-md" type="submit" data-auth-submit>Đặt lại mật khẩu</button>
-        {{> common/loading visible=false fullscreen=false text="Đang cập nhật mật khẩu..." className="bf-auth-loading"}}
+<div class="bf-auth-description">Xác minh email của bạn, sau đó tạo mật khẩu mới.</div>
+{{#if error}}
+    {{> feedback/alert
+        type="error"
+        title="Không thể đặt lại mật khẩu"
+        message=error
+    }}
+{{/if}}
+{{#if success}}
+    {{> feedback/alert
+        type="success"
+        message=success
+    }}
+{{/if}}
+<form class="bf-auth-form" method="post" action="/auth/dat-lai-mat-khau" data-bf-auth-form data-auth-loading-text="Đang cập nhật mật khẩu...">
+    <input type="hidden" name="email" value="{{email}}">
+    <div class="bf-auth-email-summary">
+        <span class="bf-input-leading-icon">
+            {{> ui/icon
+                name="email"
+                size=18
+            }}
+        </span>
+        <strong>{{email}}</strong>
+        <a href="/auth/quen-mat-khau">Đổi email</a>
     </div>
+    <div class="bf-auth-reset-otp-step" data-auth-reset-otp-step {{#if showPasswordStep}}hidden{{/if}}>
+        {{> forms/otp
+            name="otp"
+            value=values.otp
+            label="Mã xác nhận"
+            error=otpError
+        }}
+        <p class="bf-auth-otp-help">Mã có hiệu lực trong 5 phút.</p>
+        <button type="button" class="bf-btn bf-btn-primary bf-btn-md bf-auth-continue" data-otp-continue>Tiếp tục <span aria-hidden="true">→</span></button>
+    </div>
+    <div class="bf-auth-reset-password-step" data-auth-reset-password-step {{#unless showPasswordStep}}hidden{{/unless}}>
+        {{> forms/password
+            id="new-password"
+            name="newPassword"
+            label="Mật khẩu mới"
+            placeholder="Nhập mật khẩu mới"
+            autocomplete="new-password"
+            icon="lock"
+            required=true
+            minlength="8"
+        }}
+        {{> forms/password
+            id="confirm-new-password"
+            name="confirmNewPassword"
+            label="Xác nhận mật khẩu mới"
+            placeholder="Nhập lại mật khẩu mới"
+            autocomplete="new-password"
+            icon="lock"
+            required=true
+        }}
+        <div class="bf-form-error bf-auth-password-error" data-password-error {{#unless passwordError}}hidden{{/unless}}>{{#if passwordError}}{{passwordError}}{{else}}Mật khẩu xác nhận chưa khớp.{{/if}}</div>
+        <div class="bf-auth-submit">
+            <button class="bf-btn bf-btn-primary bf-btn-md" type="submit" data-auth-submit>Đặt lại mật khẩu <span aria-hidden="true">→</span></button>
+        </div>
+    </div>
+</form>
+<div class="bf-auth-divider"><span>Chưa nhận được mã?</span></div>
+<form class="bf-auth-form bf-auth-resend-form" method="post" action="/auth/quen-mat-khau" data-bf-auth-form data-auth-loading-text="Đang gửi lại mã...">
+    <input type="hidden" name="email" value="{{email}}">
+    <button class="bf-auth-text-action" type="submit" data-auth-resend-button>
+        <span data-auth-resend-label>Gửi lại mã</span>
+        <span data-auth-countdown hidden></span>
+        <span aria-hidden="true">⟳</span>
+    </button>
 </form>
 <p class="bf-auth-switch"><a href="/auth/dang-nhap">Quay lại đăng nhập</a></p>

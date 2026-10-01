@@ -33,22 +33,27 @@
     background: var(--bf-form-bg, #fff);
     box-shadow: 0 24px 70px rgba(15, 23, 42, .24);
 }
-.bf-modal[data-modal-size="sm"] .bf-modal-dialog {
+.bf-modal[data-modal-size="sm"] 
+.bf-modal-dialog {
     width: min(100%, 400px);
 }
-.bf-modal[data-modal-size="md"] .bf-modal-dialog {
+.bf-modal[data-modal-size="md"] 
+.bf-modal-dialog {
     width: min(100%, 560px);
 }
-.bf-modal[data-modal-size="lg"] .bf-modal-dialog {
+.bf-modal[data-modal-size="lg"] 
+.bf-modal-dialog {
     width: min(100%, 900px);
 }
-.bf-modal[data-modal-size="xl"] .bf-modal-dialog {
+.bf-modal[data-modal-size="xl"] 
+.bf-modal-dialog {
     width: min(100%, 1200px);
 }
 .bf-modal[data-modal-size="full"] {
     padding: 12px;
 }
-.bf-modal[data-modal-size="full"] .bf-modal-dialog {
+.bf-modal[data-modal-size="full"] 
+.bf-modal-dialog {
     width: 100%;
     height: 100%;
     max-height: 100%;
@@ -143,7 +148,8 @@
     background: #fef3c7;
     color: #b45309;
 }
-.bf-modal-confirm-danger .bf-modal-confirm-icon {
+.bf-modal-confirm-danger 
+.bf-modal-confirm-icon {
     background: #fee2e2;
     color: #b91c1c;
 }

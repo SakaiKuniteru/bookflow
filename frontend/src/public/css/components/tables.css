@@ -200,7 +200,8 @@
     background-size: 200% 100%;
     animation: bf-table-shimmer 1.3s ease-in-out infinite;
 }
-.bf-table-skeleton-row:nth-child(even) .bf-table-skeleton {
+.bf-table-skeleton-row:nth-child(even) 
+.bf-table-skeleton {
     width: 48%;
 }
 .bf-table-pagination {

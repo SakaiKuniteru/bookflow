@@ -5,9 +5,19 @@
         {{#if disabled}}aria-disabled="true" tabindex="-1"{{/if}}
         {{#if title}}title="{{title}}"{{/if}}
     >
-        {{#if icon}}{{> ui/icon name=icon size="18"}}{{/if}}
+        {{#if icon}}
+            {{> ui/icon
+                name=icon
+                size="18"
+            }}
+        {{/if}}
         {{#if label}}<span class="bf-btn-text">{{label}}</span>{{/if}}
-        {{#if iconRight}}{{> ui/icon name=iconRight size="18"}}{{/if}}
+        {{#if iconRight}}
+            {{> ui/icon
+                name=iconRight
+                size="18"
+            }}
+        {{/if}}
     </a>
 {{else}}
     <button
@@ -20,8 +30,22 @@
         {{#if loading}}disabled aria-busy="true"{{/if}}
         {{#if title}}title="{{title}}"{{/if}}
     >
-        {{#if loading}}<span class="bf-ui-spinner bf-ui-spinner-sm" aria-hidden="true"></span>{{else}}{{#if icon}}{{> ui/icon name=icon size="18"}}{{/if}}{{/if}}
+        {{#if loading}}
+            <span class="bf-ui-spinner bf-ui-spinner-sm" aria-hidden="true"></span>
+        {{else}}
+            {{#if icon}}
+                {{> ui/icon
+                    name=icon
+                    size="18"
+                }}
+            {{/if}}
+        {{/if}}
         {{#if label}}<span class="bf-btn-text">{{label}}</span>{{/if}}
-        {{#if iconRight}}{{> ui/icon name=iconRight size="18"}}{{/if}}
+        {{#if iconRight}}
+            {{> ui/icon
+                name=iconRight
+                size="18"
+            }}
+        {{/if}}
     </button>
 {{/if}}

@@ -1,11 +1,24 @@
 <div class="bf-auth-description">Nhập email đã đăng ký. BookFlow sẽ gửi mã OTP để đặt lại mật khẩu.</div>
-{{#if error}}{{> feedback/alert type="error" title="Không gửi được yêu cầu" message=error}}{{/if}}
-{{#if success}}{{> feedback/alert type="success" title="Đã tiếp nhận yêu cầu" message=success}}{{/if}}
-<form class="bf-auth-form" method="post" action="/auth/quen-mat-khau" data-bf-auth-form>
-    {{> forms/email id="forgot-email" name="email" label="Email" value=values.email placeholder="name@example.com" required=true}}
+{{#if success}}
+    {{> feedback/alert
+        type="success"
+        title="Đã tiếp nhận yêu cầu"
+        message=success
+    }}
+{{/if}}
+<form class="bf-auth-form" method="post" action="/auth/quen-mat-khau" data-bf-auth-form data-auth-loading-text="Đang gửi yêu cầu...">
+    {{> forms/email
+        id="forgot-email"
+        name="email"
+        label="Email"
+        value=values.email
+        placeholder="name@example.com"
+        icon="email"
+        required=true
+        error=emailError
+    }}
     <div class="bf-auth-submit">
-        <button class="bf-btn bf-btn-primary bf-btn-md" type="submit" data-auth-submit>Gửi yêu cầu</button>
-        {{> common/loading visible=false fullscreen=false text="Đang gửi yêu cầu..." className="bf-auth-loading"}}
+        <button class="bf-btn bf-btn-primary bf-btn-md" type="submit" data-auth-submit>Gửi mã xác nhận <span aria-hidden="true">→</span></button>
     </div>
 </form>
 <p class="bf-auth-switch"><a href="/auth/dang-nhap">Quay lại đăng nhập</a></p>

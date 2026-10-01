@@ -2,7 +2,8 @@
     {{#if label}}
         <label class="bf-form-label" for="{{id}}">{{label}}{{#if required}}<span class="bf-form-required">*</span>{{/if}}</label>
     {{/if}}
-    <div class="bf-phone-control" data-bf-phone data-phone-format="{{#if format}}{{format}}{{else}}local{{/if}}">
+    <div class="bf-phone-control {{#if icon}}has-leading-icon{{/if}}" data-bf-phone data-phone-format="{{#if format}}{{format}}{{else}}local{{/if}}">
+        {{#if icon}}<span class="bf-input-leading-icon">{{> ui/icon name=icon size=18}}</span>{{/if}}
         <input
             id="{{id}}"
             type="tel"

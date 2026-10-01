@@ -1,14 +1,30 @@
 <article class="bf-customer-card">
     <div class="bf-customer-card-avatar">
-        {{#if customer.avatarUrl}}<img src="{{customer.avatarUrl}}" alt="{{customer.name}}" loading="lazy">{{else}}<span aria-hidden="true">{{customer.initials}}</span>{{/if}}
+        {{#if customer.avatarUrl}}
+            <img src="{{customer.avatarUrl}}" alt="{{customer.name}}" loading="lazy">
+        {{else}}
+            <span aria-hidden="true">{{customer.initials}}</span>
+        {{/if}}
     </div>
     <div class="bf-customer-card-content">
         <div class="bf-customer-card-heading">
             <div>
-                {{#if customer.href}}<a class="bf-customer-card-name" href="{{customer.href}}">{{customer.name}}</a>{{else}}<h3 class="bf-customer-card-name">{{customer.name}}</h3>{{/if}}
+                {{#if customer.href}}
+                    <a class="bf-customer-card-name" href="{{customer.href}}">{{customer.name}}</a>
+                {{else}}
+                    <h3 class="bf-customer-card-name">{{customer.name}}</h3>
+                {{/if}}
                 {{#if customer.code}}<span class="bf-customer-card-code">{{customer.code}}</span>{{/if}}
             </div>
-            {{#if customer.statusLabel}}{{> components/common/trang-thai statusCode=customer.statusCode label=customer.statusLabel variant=customer.statusVariant icon=customer.statusIcon tooltip=customer.statusTooltip}}{{/if}}
+            {{#if customer.statusLabel}}
+                {{> components/common/trang-thai
+                    statusCode=customer.statusCode
+                    label=customer.statusLabel
+                    variant=customer.statusVariant
+                    icon=customer.statusIcon
+                    tooltip=customer.statusTooltip
+                }}
+            {{/if}}
         </div>
         {{#if customer.customerTypeLabel}}<p class="bf-customer-card-meta"><span>Loại khách hàng</span><strong>{{customer.customerTypeLabel}}</strong></p>{{/if}}
         {{#if customer.phone}}<p class="bf-customer-card-meta"><span>Điện thoại</span><a href="tel:{{customer.phone}}">{{customer.phone}}</a></p>{{/if}}
@@ -17,7 +33,11 @@
         {{#if customer.actions}}
             <div class="bf-customer-card-actions">
                 {{#each customer.actions}}
-                    {{#if href}}<a class="bf-button bf-button--{{#if variant}}{{variant}}{{else}}secondary{{/if}}" href="{{href}}">{{label}}</a>{{else}}<button class="bf-button bf-button--{{#if variant}}{{variant}}{{else}}secondary{{/if}}" type="button" data-action="{{action}}">{{label}}</button>{{/if}}
+                    {{#if href}}
+                        <a class="bf-button bf-button--{{#if variant}}{{variant}}{{else}}secondary{{/if}}" href="{{href}}">{{label}}</a>
+                    {{else}}
+                        <button class="bf-button bf-button--{{#if variant}}{{variant}}{{else}}secondary{{/if}}" type="button" data-action="{{action}}">{{label}}</button>
+                    {{/if}}
                 {{/each}}
             </div>
         {{/if}}

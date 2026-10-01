@@ -1,11 +1,21 @@
 <div class="bf-auth-description">Tài khoản của bạn có quyền truy cập nhiều chi nhánh. Chọn chi nhánh để tiếp tục.</div>
-{{#if error}}{{> feedback/alert type="error" title="Không thể chọn chi nhánh" message=error}}{{/if}}
-<form class="bf-auth-form" method="post" action="/auth/chon-chi-nhanh" data-bf-auth-form>
+{{#if error}}
+    {{> feedback/alert
+        type="error"
+        title="Không thể chọn chi nhánh"
+        message=error
+    }}
+{{/if}}
+<form class="bf-auth-form" method="post" action="/auth/chon-chi-nhanh" data-bf-auth-form data-auth-loading-text="Đang chuyển chi nhánh...">
     <input type="hidden" name="redirect" value="{{redirect}}">
     <label class="bf-form-label" for="auth-branch">Chi nhánh<span class="bf-form-required">*</span></label>
     <select id="auth-branch" name="chi_nhanh_id" class="bf-form-control" required>
         <option value="">Chọn chi nhánh</option>
-        {{#each branches}}<option value="{{id}}">{{tenChiNhanh}}{{ten_chi_nhanh}}{{#if maChiNhanh}} ({{maChiNhanh}}){{else}}{{#if ma_chi_nhanh}} ({{ma_chi_nhanh}}){{/if}}{{/if}}</option>{{/each}}
+        {{#each branches}}
+            <option value="{{id}}">{{tenChiNhanh}}{{ten_chi_nhanh}}{{#if maChiNhanh}} ({{maChiNhanh}}){{else}}{{#if ma_chi_nhanh}} ({{ma_chi_nhanh}}){{/if}}{{/if}}</option>
+        {{/each}}
     </select>
-    <div class="bf-auth-submit"><button class="bf-btn bf-btn-primary bf-btn-md" type="submit" data-auth-submit>Tiếp tục</button>{{> common/loading visible=false fullscreen=false text="Đang chuyển chi nhánh..." className="bf-auth-loading"}}</div>
+    <div class="bf-auth-submit">
+        <button class="bf-btn bf-btn-primary bf-btn-md" type="submit" data-auth-submit>Tiếp tục</button>
+    </div>
 </form>

@@ -1,4 +1,8 @@
 <span class="bf-domain-status bf-domain-status--{{#if variant}}{{variant}}{{else}}neutral{{/if}}" data-status="{{statusCode}}" {{#if tooltip}}title="{{tooltip}}"{{/if}}>
-    {{#if icon}}{{> ui/icon name=icon}}{{/if}}
+    {{#if icon}}
+        {{> ui/icon
+            name=icon
+        }}
+    {{/if}}
     <span>{{label}}</span>
 </span>

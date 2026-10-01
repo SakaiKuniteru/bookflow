@@ -1,15 +1,81 @@
 <div class="bf-auth-description">Tạo tài khoản để sử dụng các dịch vụ của BookFlow.</div>
-{{#if error}}{{> feedback/alert type="error" title="Không thể đăng ký" message=error}}{{/if}}
-<form class="bf-auth-form" method="post" action="/auth/dang-ky" data-bf-auth-form>
-    <div class="bf-form-field" data-form-field><label class="bf-form-label" for="register-full-name">Họ và tên <span class="bf-form-required">*</span></label><input id="register-full-name" name="fullName" type="text" class="bf-form-control" value="{{values.fullName}}" placeholder="Nhập họ và tên" autocomplete="name" required></div>
-    {{> forms/email id="register-email" name="email" label="Email" value=values.email placeholder="name@example.com" required=true}}
-    {{> forms/password id="register-password" name="password" label="Mật khẩu" placeholder="Tạo mật khẩu" autocomplete="new-password" required=true minlength="8"}}
-    {{> forms/password id="register-password-confirm" name="passwordConfirm" label="Xác nhận mật khẩu" placeholder="Nhập lại mật khẩu" autocomplete="new-password" required=true}}
+{{#if error}}
+    {{> feedback/alert
+        type="error"
+        title="Không thể đăng ký"
+        message=error
+    }}
+{{/if}}
+<form class="bf-auth-form" method="post" action="/auth/dang-ky" data-bf-auth-form data-auth-loading-text="Đang tạo tài khoản...">
+    {{> forms/input
+        id="register-full-name"
+        name="fullName"
+        type="text"
+        label="Họ và tên"
+        value=values.fullName
+        placeholder="Nhập họ và tên"
+        autocomplete="name"
+        icon="user"
+        required=true
+    }}
+    {{> forms/input
+        id="register-username"
+        name="username"
+        type="text"
+        label="Tên đăng nhập"
+        value=values.username
+        placeholder="Nhập tên đăng nhập"
+        autocomplete="username"
+        icon="user"
+        required=true
+    }}
+    {{> forms/email
+        id="register-email"
+        name="email"
+        label="Email"
+        value=values.email
+        placeholder="name@example.com"
+        icon="email"
+        required=true
+    }}
+    {{> forms/phone
+        id="register-phone"
+        name="phone"
+        label="Số điện thoại"
+        value=values.phone
+        placeholder="Nhập số điện thoại"
+        icon="phone"
+        required=true
+    }}
+    {{> forms/password
+        id="register-password"
+        name="password"
+        label="Mật khẩu"
+        placeholder="Tạo mật khẩu"
+        autocomplete="new-password"
+        icon="lock"
+        required=true
+        minlength="8"
+    }}
+    {{> forms/password
+        id="register-password-confirm"
+        name="passwordConfirm"
+        label="Xác nhận mật khẩu"
+        placeholder="Nhập lại mật khẩu"
+        autocomplete="new-password"
+        icon="lock"
+        required=true
+    }}
     <div class="bf-form-error bf-auth-password-error" data-password-error hidden>Mật khẩu xác nhận chưa khớp.</div>
-    {{> forms/checkbox id="accept-terms" name="acceptTerms" label="Tôi đồng ý với điều khoản sử dụng và chính sách quyền riêng tư." value="true" required=true}}
+    {{> forms/checkbox
+        id="accept-terms"
+        name="acceptTerms"
+        label="Tôi đồng ý với điều khoản sử dụng và chính sách quyền riêng tư."
+        value="true"
+        required=true
+    }}
     <div class="bf-auth-submit">
-        <button class="bf-btn bf-btn-primary bf-btn-md" type="submit" data-auth-submit>Đăng ký</button>
-        {{> common/loading visible=false fullscreen=false text="Đang tạo tài khoản..." className="bf-auth-loading"}}
+        <button class="bf-btn bf-btn-primary bf-btn-md" type="submit" data-auth-submit>Đăng ký <span aria-hidden="true">→</span></button>
     </div>
 </form>
 <p class="bf-auth-switch">Đã có tài khoản? <a href="/auth/dang-nhap">Đăng nhập</a></p>

@@ -15,14 +15,23 @@
             placeholder="{{#if placeholder}}{{placeholder}}{{else}}{{#if (eq type "time")}}{{#if (eq timeFormat "hm")}}HH:mm{{else}}HH:mm:ss{{/if}}{{else}}{{#if (eq type "datetime")}}{{#if (eq timeFormat "hm")}}dd/MM/yyyy HH:mm{{else}}dd/MM/yyyy HH:mm:ss{{/if}}{{else}}dd/MM/yyyy{{/if}}{{/if}}{{/if}}"
             data-date-type="{{type}}"
             data-time-format="{{timeFormat}}"
-            maxlength="{{#if (eq type "datetime")}}{{#if (eq timeFormat "hm")}}16{{else}}19{{/if}}{{else}}{{#if (eq type "time")}}{{#if (eq timeFormat "hm")}}5{{else}}8{{/if}}{{else}}10{{/if}}{{/if}}"
+            maxlength="{{#if (eq type "datetime")}}{{#if (eq timeFormat "hm")}}16{{else}}19{{/if}}{{else}}{{#if (eq type "time")}}{{#if (eq timeFormat "hm")}}5{{else}}8{{/if}}{{else}}10{{/if}}"
             autocomplete="off"
             {{#if required}}required{{/if}}
             {{#if disabled}}disabled{{/if}}
             {{#if readonly}}readonly{{/if}}
         >
-        <button type="button" class="bf-date-picker-toggle" aria-label="Mở lịch" tabindex="-1" {{#if disabled}}disabled{{/if}}>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 10h18"></path></svg>
+        <button
+            type="button"
+            class="bf-date-picker-toggle"
+            aria-label="Mở lịch"
+            tabindex="-1"
+            {{#if disabled}}disabled{{/if}}
+        >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="3" y="5" width="18" height="16" rx="2"></rect>
+                <path d="M16 3v4M8 3v4M3 10h18"></path>
+            </svg>
         </button>
         <div class="bf-date-picker" role="dialog" aria-label="Chọn ngày và giờ"></div>
     </div>

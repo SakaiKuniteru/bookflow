@@ -10,7 +10,7 @@ const cookieOptions = {
 };
 
 function renderAuth(res, page, title, locals = {}, status = 200) {
-  return res.status(status).render(`pages/auth/${page}`, { layout: 'auth', title, ...locals });
+  return res.status(status).render(`pages/auth/${page}`, { layout: 'auth', authPage: page, title, ...locals });
 }
 function safeRedirect(value) {
   return typeof value === 'string' && value.startsWith('/') && !value.startsWith('//') ? value : null;
@@ -87,23 +87,23 @@ const authController = {
       if (!req.body.acceptTerms) throw Object.assign(new Error('Bạn cần đồng ý với điều khoản sử dụng.'), { status: 400 });
       if (req.body.password !== req.body.passwordConfirm) throw Object.assign(new Error('Mật khẩu xác nhận chưa khớp.'), { status: 400 });
       await authService.register({ ho_ten: req.body.fullName, email: req.body.email, mat_khau: req.body.password });
-      return res.redirect(`/auth/xac-minh-dang-ky?email=${encodeURIComponent(req.body.email)}`);
+      return res.redirect(`/auth/xac-minh-dang-ky?email=${encodeURIComponent(req.body.email)}&sent=1`);
     } catch (error) {
       return renderAuth(res, 'dang-ky', 'Đăng ký', {
         error: error.message,
-        values: { fullName: req.body.fullName || '', email: req.body.email || '' }
+        values: { fullName: req.body.fullName || '', username: req.body.username || '', email: req.body.email || '', phone: req.body.phone || '' }
       }, error.status >= 400 && error.status < 500 ? error.status : 500);
     }
   },
   verifyRegistrationPage(req, res) {
-    return renderAuth(res, 'xac-minh-dang-ky', 'Xác minh email', { email: req.query.email || '', success: req.query.sent === '1' ? 'Mã xác minh đã được gửi lại.' : '' });
+    return renderAuth(res, 'xac-minh-dang-ky', 'Xác minh email', { email: req.query.email || '', codeSent: req.query.sent === '1' });
   },
   async verifyRegistration(req, res) {
     try {
       await authService.verifyRegistration({ email: req.body.email, otp: req.body.otp });
       return res.redirect('/auth/dang-nhap?registered=1');
     } catch (error) {
-      return renderAuth(res, 'xac-minh-dang-ky', 'Xác minh email', { email: req.body.email || '', otp: req.body.otp || '', error: error.message }, error.status >= 400 && error.status < 500 ? error.status : 500);
+      return renderAuth(res, 'xac-minh-dang-ky', 'Xác minh email', { email: req.body.email || '', otp: req.body.otp || '', otpError: error.message }, error.status >= 400 && error.status < 500 ? error.status : 500);
     }
   },
   async resendRegistrationOtp(req, res) {
@@ -111,7 +111,7 @@ const authController = {
       await authService.resendRegistrationOtp({ email: req.body.email });
       return res.redirect(`/auth/xac-minh-dang-ky?email=${encodeURIComponent(req.body.email)}&sent=1`);
     } catch (error) {
-      return renderAuth(res, 'xac-minh-dang-ky', 'Xác minh email', { email: req.body.email || '', error: error.message }, error.status >= 400 && error.status < 500 ? error.status : 500);
+      return renderAuth(res, 'xac-minh-dang-ky', 'Xác minh email', { email: req.body.email || '', resendError: error.message }, error.status >= 400 && error.status < 500 ? error.status : 500);
     }
   },
   employeeActivationPage(req, res) {
@@ -163,21 +163,23 @@ const authController = {
   async forgotPassword(req, res) {
     try {
       await authService.forgotPassword({ email: req.body.email });
-      return res.redirect(`/auth/dat-lai-mat-khau?email=${encodeURIComponent(req.body.email)}`);
+      return res.redirect(`/auth/dat-lai-mat-khau?email=${encodeURIComponent(req.body.email)}&sent=1`);
     } catch (error) {
-      return renderAuth(res, 'quen-mat-khau', 'Quên mật khẩu', { error: error.message, values: { email: req.body.email || '' } }, error.status >= 400 && error.status < 500 ? error.status : 500);
+      return renderAuth(res, 'quen-mat-khau', 'Quên mật khẩu', { emailError: error.message, values: { email: req.body.email || '' } }, error.status >= 400 && error.status < 500 ? error.status : 500);
     }
   },
   resetPasswordPage(req, res) {
-    return renderAuth(res, 'dat-lai-mat-khau', 'Đặt lại mật khẩu', { email: req.query.email || '', requiresOtp: true, values: {} });
+    return renderAuth(res, 'dat-lai-mat-khau', 'Đặt lại mật khẩu', { email: req.query.email || '', requiresOtp: true, codeSent: req.query.sent === '1', values: {} });
   },
   async resetPassword(req, res) {
     try {
-      if (req.body.newPassword !== req.body.confirmNewPassword) throw Object.assign(new Error('Mật khẩu xác nhận chưa khớp.'), { status: 400 });
+      if (req.body.newPassword !== req.body.confirmNewPassword) {
+        return renderAuth(res, 'dat-lai-mat-khau', 'Đặt lại mật khẩu', { email: req.body.email || '', requiresOtp: true, values: { otp: req.body.otp || '' }, showPasswordStep: true, passwordError: 'Mật khẩu xác nhận chưa khớp.' }, 400);
+      }
       await authService.resetPassword({ email: req.body.email, otp: req.body.otp, mat_khau_moi: req.body.newPassword });
       return res.redirect('/auth/dang-nhap?reset=1');
     } catch (error) {
-      return renderAuth(res, 'dat-lai-mat-khau', 'Đặt lại mật khẩu', { email: req.body.email || '', requiresOtp: true, values: { otp: req.body.otp || '' }, error: error.message }, error.status >= 400 && error.status < 500 ? error.status : 500);
+      return renderAuth(res, 'dat-lai-mat-khau', 'Đặt lại mật khẩu', { email: req.body.email || '', requiresOtp: true, values: { otp: req.body.otp || '' }, otpError: error.message }, error.status >= 400 && error.status < 500 ? error.status : 500);
     }
   },
   async logout(req, res, next) {

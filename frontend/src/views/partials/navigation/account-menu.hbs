@@ -1,12 +1,21 @@
 <div class="bf-nav-menu-wrap {{className}}" data-bf-menu>
-    <button type="button" class="bf-nav-account-trigger" data-bf-menu-trigger aria-expanded="false" aria-haspopup="true">
+    <button
+        type="button"
+        class="bf-nav-account-trigger"
+        data-bf-menu-trigger
+        aria-expanded="false"
+        aria-haspopup="true"
+    >
         {{#if user.avatar}}
             <img class="bf-nav-avatar" src="{{user.avatar}}" alt="">
         {{else}}
             <span class="bf-nav-avatar bf-nav-avatar-fallback">{{#if user.name}}{{user.name.[0]}}{{else}}{{#if user.taiKhoan.hoTen}}{{user.taiKhoan.hoTen.[0]}}{{else}}{{#if user.tai_khoan.ho_ten}}{{user.tai_khoan.ho_ten.[0]}}{{else}}?{{/if}}{{/if}}{{/if}}</span>
         {{/if}}
         <span class="bf-nav-account-name">{{#if user.name}}{{user.name}}{{else}}{{#if user.taiKhoan.hoTen}}{{user.taiKhoan.hoTen}}{{else}}{{#if user.tai_khoan.ho_ten}}{{user.tai_khoan.ho_ten}}{{else}}Tài khoản{{/if}}{{/if}}{{/if}}</span>
-        {{> ui/icon name="chevron-down" size="16"}}
+        {{> ui/icon
+            name="chevron-down"
+            size="16"
+        }}
     </button>
     <div class="bf-nav-menu bf-nav-account-menu" data-bf-menu-panel hidden>
         <div class="bf-nav-account-summary">
@@ -15,10 +24,17 @@
         </div>
         {{#each links}}
             <a class="bf-nav-menu-item {{#if danger}}is-danger{{/if}}" href="{{href}}">
-                {{#if icon}}{{> ui/icon name=icon size="17"}}{{/if}}
+                {{#if icon}}
+                    {{> ui/icon
+                        name=icon
+                        size="17"
+                    }}
+                {{/if}}
                 <span>{{label}}</span>
             </a>
         {{/each}}
-        <form class="bf-nav-logout-form" method="post" action="/auth/dang-xuat"><button class="bf-nav-menu-item" type="submit">Đăng xuất</button></form>
+        <form class="bf-nav-logout-form" method="post" action="/auth/dang-xuat">
+            <button class="bf-nav-menu-item" type="submit">Đăng xuất</button>
+        </form>
     </div>
 </div>

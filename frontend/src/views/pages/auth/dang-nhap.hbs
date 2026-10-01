@@ -1,19 +1,74 @@
 <div class="bf-auth-description">Đăng nhập để tiếp tục sử dụng BookFlow.</div>
-{{#if error}}{{> feedback/alert type="error" title="Không thể đăng nhập" message=error}}{{/if}}
-{{#if success}}{{> feedback/alert type="success" message=success}}{{/if}}
-{{#if registered}}{{> feedback/alert type="success" message="Đăng ký thành công. Bạn có thể đăng nhập."}}{{/if}}
-{{#if reset}}{{> feedback/alert type="success" message="Mật khẩu đã được cập nhật. Hãy đăng nhập bằng mật khẩu mới."}}{{/if}}
-<form class="bf-auth-form" method="post" action="/auth/dang-nhap" data-bf-auth-form>
+<div class="bf-form-error bf-auth-login-inline-error" data-auth-form-error role="alert" hidden></div>
+{{#if error}}
+    {{> feedback/alert
+        type="error"
+        title="Không thể đăng nhập"
+        message=error
+    }}
+{{/if}}
+{{#if success}}
+    {{> feedback/alert
+        type="success"
+        message=success
+    }}
+{{/if}}
+{{#if registered}}
+    {{> feedback/alert
+        type="success"
+        message="Đăng ký thành công. Bạn có thể đăng nhập."
+    }}
+{{/if}}
+{{#if reset}}
+    {{> feedback/alert
+        type="success"
+        message="Mật khẩu đã được cập nhật. Hãy đăng nhập bằng mật khẩu mới."
+    }}
+{{/if}}
+<form class="bf-auth-form" method="post" action="/auth/dang-nhap" data-bf-auth-form data-auth-loading-text="Đang đăng nhập...">
     <input type="hidden" name="redirect" value="{{#if redirect}}{{redirect}}{{else}}/{{/if}}">
-    <div class="bf-form-field" data-form-field><label class="bf-form-label" for="login-email">Email hoặc tên đăng nhập <span class="bf-form-required">*</span></label><input id="login-email" name="email" type="text" class="bf-form-control" value="{{values.email}}" placeholder="Nhập email hoặc tên đăng nhập" autocomplete="username" required></div>
-    {{> forms/password id="login-password" name="password" label="Mật khẩu" placeholder="Nhập mật khẩu" autocomplete="current-password" required=true}}
+    <div class="bf-form-field bf-auth-login-identity" data-form-field>
+        <label class="bf-form-label" for="login-email">Email hoặc tên đăng nhập <span class="bf-form-required">*</span></label>
+        <div class="bf-input-icon-wrap">
+            <span class="bf-input-leading-icon">
+                {{> ui/icon
+                    name="email"
+                    size=18
+                }}
+            </span>
+            <input
+                id="login-email"
+                name="email"
+                type="text"
+                class="bf-form-control"
+                value="{{values.email}}"
+                placeholder="Nhập email hoặc tên đăng nhập"
+                autocomplete="username"
+                required
+            >
+        </div>
+    </div>
+    {{> forms/password
+        id="login-password"
+        name="password"
+        label="Mật khẩu"
+        placeholder="Nhập mật khẩu"
+        autocomplete="current-password"
+        icon="lock"
+        required=true
+    }}
     <div class="bf-auth-form-row">
-        {{> forms/checkbox id="remember-me" name="remember" label="Ghi nhớ đăng nhập" value="true"}}
+        {{> forms/checkbox
+            id="remember-me"
+            name="remember"
+            label="Ghi nhớ đăng nhập"
+            value="true"
+        }}
         <a href="/auth/quen-mat-khau">Quên mật khẩu?</a>
     </div>
     <div class="bf-auth-submit">
-        <button class="bf-btn bf-btn-primary bf-btn-md" type="submit" data-auth-submit>Đăng nhập</button>
-        {{> common/loading visible=false fullscreen=false text="Đang đăng nhập..." className="bf-auth-loading" }}
+        <button class="bf-btn bf-btn-primary bf-btn-md" type="submit" data-auth-submit>Đăng nhập <span aria-hidden="true">→</span></button>
     </div>
 </form>
+<div class="bf-auth-divider"><span>Hoặc</span></div>
 {{#if allowRegistration}}<p class="bf-auth-switch">Chưa có tài khoản? <a href="/auth/dang-ky">Đăng ký</a></p>{{/if}}

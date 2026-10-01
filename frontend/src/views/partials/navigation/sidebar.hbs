@@ -4,8 +4,17 @@
         {{#each items}}
             {{#if divider}}<div class="bf-nav-sidebar-divider"></div>{{/if}}
             {{#if group}}<h2 class="bf-nav-sidebar-group">{{group}}</h2>{{/if}}
-            <a class="bf-nav-sidebar-link {{#if active}}is-active{{/if}}" href="{{href}}" {{#if active}}aria-current="page"{{/if}}>
-                {{#if icon}}{{> ui/icon name=icon size="18"}}{{/if}}
+            <a
+                class="bf-nav-sidebar-link {{#if active}}is-active{{/if}}"
+                href="{{href}}"
+                {{#if active}}aria-current="page"{{/if}}
+            >
+                {{#if icon}}
+                    {{> ui/icon
+                        name=icon
+                        size="18"
+                    }}
+                {{/if}}
                 <span class="bf-nav-sidebar-link-label">{{label}}</span>
                 {{#if badge}}<span class="bf-nav-sidebar-badge">{{badge}}</span>{{/if}}
             </a>

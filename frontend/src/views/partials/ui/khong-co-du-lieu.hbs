@@ -1,14 +1,30 @@
 <div class="bf-ui-empty {{className}}" role="status">
     <span class="bf-ui-empty-icon">
-        {{> ui/icon name=icon size="28"}}
+        {{> ui/icon
+            name=icon
+            size="28"
+        }}
     </span>
     <h3 class="bf-ui-empty-title">{{#if title}}{{title}}{{else}}Không có dữ liệu{{/if}}</h3>
     {{#if description}}<p class="bf-ui-empty-description">{{description}}</p>{{/if}}
     {{#if actionLabel}}
         {{#if actionHref}}
-            {{> ui/nut-bam href=actionHref label=actionLabel icon=actionIcon variant="primary" size="sm"}}
+            {{> ui/nut-bam
+                href=actionHref
+                label=actionLabel
+                icon=actionIcon
+                variant="primary"
+                size="sm"
+            }}
         {{else}}
-            {{> ui/nut-bam type="button" name=actionName label=actionLabel icon=actionIcon variant="primary" size="sm"}}
+            {{> ui/nut-bam
+                type="button"
+                name=actionName
+                label=actionLabel
+                icon=actionIcon
+                variant="primary"
+                size="sm"
+            }}
         {{/if}}
     {{/if}}
 </div>

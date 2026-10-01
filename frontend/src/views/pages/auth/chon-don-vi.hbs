@@ -1,10 +1,22 @@
 <div class="bf-auth-description">Tài khoản của bạn có quyền truy cập nhiều đơn vị. Chọn đơn vị để tiếp tục.</div>
-{{#if error}}{{> feedback/alert type="error" title="Không thể chọn đơn vị" message=error}}{{/if}}
-<form class="bf-auth-form" method="post" action="/auth/chon-don-vi" data-bf-auth-form>
+{{#if error}}
+    {{> feedback/alert
+        type="error"
+        title="Không thể chọn đơn vị"
+        message=error
+    }}
+{{/if}}
+<form class="bf-auth-form" method="post" action="/auth/chon-don-vi" data-bf-auth-form data-auth-loading-text="Đang chuyển đơn vị...">
     <input type="hidden" name="redirect" value="{{redirect}}">
-    {{> forms/select id="auth-organization" name="don_vi_id" label="Đơn vị" placeholder="Chọn đơn vị" options=organizationOptions required=true}}
+    {{> forms/select
+        id="auth-organization"
+        name="don_vi_id"
+        label="Đơn vị"
+        placeholder="Chọn đơn vị"
+        options=organizationOptions
+        required=true
+    }}
     <div class="bf-auth-submit">
         <button class="bf-btn bf-btn-primary bf-btn-md" type="submit" data-auth-submit>Tiếp tục</button>
-        {{> common/loading visible=false fullscreen=false text="Đang chuyển đơn vị..." className="bf-auth-loading"}}
     </div>
 </form>

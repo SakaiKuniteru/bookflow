@@ -5,6 +5,7 @@
             {{#if required}}<span class="bf-form-required">*</span>{{/if}}
         </label>
     {{/if}}
+    {{#if icon}}<div class="bf-input-icon-wrap"><span class="bf-input-leading-icon">{{> ui/icon name=icon size=18}}</span>{{/if}}
     <input
         id="{{id}}"
         name="{{name}}"
@@ -19,29 +20,7 @@
         {{#if maxlength}}maxlength="{{maxlength}}"{{/if}}
         {{#if minlength}}minlength="{{minlength}}"{{/if}}
     >
-    {{#if helpText}}<div class="bf-form-help">{{helpText}}</div>{{/if}}
-    {{#if error}}<div class="bf-form-error">{{error}}</div>{{/if}}
-</div><div class="bf-form-field {{className}}" data-form-field>
-    {{#if label}}
-        <label class="bf-form-label" for="{{id}}">
-            {{label}}
-            {{#if required}}<span class="bf-form-required">*</span>{{/if}}
-        </label>
-    {{/if}}
-    <input
-        id="{{id}}"
-        name="{{name}}"
-        type="{{type}}"
-        class="bf-form-control"
-        value="{{value}}"
-        placeholder="{{placeholder}}"
-        autocomplete="{{autocomplete}}"
-        {{#if required}}required{{/if}}
-        {{#if disabled}}disabled{{/if}}
-        {{#if readonly}}readonly{{/if}}
-        {{#if maxlength}}maxlength="{{maxlength}}"{{/if}}
-        {{#if minlength}}minlength="{{minlength}}"{{/if}}
-    >
+    {{#if icon}}</div>{{/if}}
     {{#if helpText}}<div class="bf-form-help">{{helpText}}</div>{{/if}}
     {{#if error}}<div class="bf-form-error">{{error}}</div>{{/if}}
 </div>

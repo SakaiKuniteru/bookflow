@@ -1,4 +1,10 @@
 <span class="bf-payment-method bf-payment-method--{{#if variant}}{{variant}}{{else}}neutral{{/if}}" data-method="{{code}}">
-    {{#if logoUrl}}<img class="bf-payment-method-logo" src="{{logoUrl}}" alt="" loading="lazy">{{else if icon}}{{> ui/icon name=icon}}{{/if}}
+    {{#if logoUrl}}
+        <img class="bf-payment-method-logo" src="{{logoUrl}}" alt="" loading="lazy">
+    {{else if icon}}
+        {{> ui/icon
+            name=icon
+        }}
+    {{/if}}
     <span>{{label}}</span>
 </span>

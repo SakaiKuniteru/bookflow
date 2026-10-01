@@ -2,7 +2,14 @@
     <div class="bf-table-toolbar-main">
         {{#if search}}
             <div class="bf-table-global-search">
-                {{> forms/search id=search.id name=search.name value=search.value placeholder=search.placeholder mode=search.mode threshold=search.threshold}}
+                {{> forms/search
+                    id=search.id
+                    name=search.name
+                    value=search.value
+                    placeholder=search.placeholder
+                    mode=search.mode
+                    threshold=search.threshold
+                }}
             </div>
         {{/if}}
         {{#if toolbarTitle}}<h2 class="bf-table-title">{{toolbarTitle}}</h2>{{/if}}
@@ -11,10 +18,29 @@
         <div class="bf-table-actions">
             {{#each actions}}
                 {{#if href}}
-                    {{> ui/nut-bam href=href label=label icon=icon variant=variant size=size disabled=disabled className=className}}
+                    {{> ui/nut-bam
+                        href=href
+                        label=label
+                        icon=icon
+                        variant=variant
+                        size=size
+                        disabled=disabled
+                        className=className
+                    }}
                 {{else}}
-                    <button type="{{#if type}}{{type}}{{else}}button{{/if}}" class="bf-btn bf-btn-{{#if variant}}{{variant}}{{else}}secondary{{/if}} bf-btn-{{#if size}}{{size}}{{else}}md{{/if}} {{className}}" data-table-action="{{action}}" {{#if disabled}}disabled{{/if}} title="{{title}}">
-                        {{#if icon}}{{> ui/icon name=icon size="18"}}{{/if}}
+                    <button
+                        type="{{#if type}}{{type}}{{else}}button{{/if}}"
+                        class="bf-btn bf-btn-{{#if variant}}{{variant}}{{else}}secondary{{/if}} bf-btn-{{#if size}}{{size}}{{else}}md{{/if}} {{className}}"
+                        data-table-action="{{action}}"
+                        {{#if disabled}}disabled{{/if}}
+                        title="{{title}}"
+                    >
+                        {{#if icon}}
+                            {{> ui/icon
+                                name=icon
+                                size="18"
+                            }}
+                        {{/if}}
                         <span class="bf-btn-text">{{label}}</span>
                     </button>
                 {{/if}}

@@ -1,1 +1,29 @@
-<article class="bf-demo-book-card"><a class="bf-demo-book-cover tone-{{@index}}" href="{{#if book.href}}{{book.href}}{{else}}/sach{{/if}}">{{#if book.coverUrl}}<img src="{{book.coverUrl}}" alt="{{#if book.coverAlt}}{{book.coverAlt}}{{else}}Bìa sách {{book.title}}{{/if}}" loading="lazy">{{else}}<span class="bf-demo-cover-art"><i>✦</i><b>{{book.title}}</b></span>{{/if}}</a><div class="bf-demo-book-info"><small>{{#if book.categoryName}}{{book.categoryName}}{{else}}Sách BookFlow{{/if}} · {{#if book.statusLabel}}{{book.statusLabel}}{{else}}Còn sách{{/if}}</small><a href="{{#if book.href}}{{book.href}}{{else}}/sach{{/if}}"><strong>{{book.title}}</strong></a><span class="bf-demo-author">{{#if book.authorsDisplay}}{{book.authorsDisplay}}{{else}}BookFlow{{/if}}</span><div class="bf-demo-price"><b>{{#if book.priceDisplay}}{{book.priceDisplay}}{{else}}Đang cập nhật{{/if}}</b><small>{{#if book.rentalPriceDisplay}}Thuê {{book.rentalPriceDisplay}}{{else}}Xem tại chi nhánh{{/if}}</small></div><div class="bf-demo-book-actions">{{#if book.actions}}<a class="bf-demo-button bf-demo-primary" href="{{#each book.actions}}{{#if @first}}{{href}}{{/if}}{{/each}}">♧ Thêm giỏ</a>{{else}}<a class="bf-demo-button bf-demo-primary" href="{{#if book.href}}{{book.href}}{{else}}/sach{{/if}}">Xem sách</a>{{/if}}<a class="bf-demo-button bf-demo-arrow" href="{{#if book.href}}{{book.href}}{{else}}/sach{{/if}}" aria-label="Xem chi tiết {{book.title}}">→</a></div></div></article>
+<article class="bf-demo-book-card">
+    <a class="bf-demo-book-cover tone-{{@index}}" href="{{#if book.href}}{{book.href}}{{else}}/sach{{/if}}">
+        {{#if book.coverUrl}}
+            <img src="{{book.coverUrl}}" alt="{{#if book.coverAlt}}{{book.coverAlt}}{{else}}Bìa sách {{book.title}}{{/if}}" loading="lazy">
+        {{else}}
+            <span class="bf-demo-cover-art">
+                <i>✦</i>
+                <b>{{book.title}}</b>
+            </span>
+        {{/if}}
+    </a>
+    <div class="bf-demo-book-info">
+        <small>{{#if book.categoryName}}{{book.categoryName}}{{else}}Sách BookFlow{{/if}} · {{#if book.statusLabel}}{{book.statusLabel}}{{else}}Còn sách{{/if}}</small>
+        <a href="{{#if book.href}}{{book.href}}{{else}}/sach{{/if}}"><strong>{{book.title}}</strong></a>
+        <span class="bf-demo-author">{{#if book.authorsDisplay}}{{book.authorsDisplay}}{{else}}BookFlow{{/if}}</span>
+        <div class="bf-demo-price">
+            <b>{{#if book.priceDisplay}}{{book.priceDisplay}}{{else}}Đang cập nhật{{/if}}</b>
+            <small>{{#if book.rentalPriceDisplay}}Thuê {{book.rentalPriceDisplay}}{{else}}Xem tại chi nhánh{{/if}}</small>
+        </div>
+        <div class="bf-demo-book-actions">
+            {{#if book.actions}}
+                <a class="bf-demo-button bf-demo-primary" href="{{#each book.actions}}{{#if @first}}{{href}}{{/if}}{{/each}}">♧ Thêm giỏ</a>
+            {{else}}
+                <a class="bf-demo-button bf-demo-primary" href="{{#if book.href}}{{book.href}}{{else}}/sach{{/if}}">Xem sách</a>
+            {{/if}}
+            <a class="bf-demo-button bf-demo-arrow" href="{{#if book.href}}{{book.href}}{{else}}/sach{{/if}}" aria-label="Xem chi tiết {{book.title}}">→</a>
+        </div>
+    </div>
+</article>

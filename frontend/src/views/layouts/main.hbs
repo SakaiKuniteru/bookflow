@@ -9,24 +9,50 @@
     <link rel="icon" href="/brand/logo-symbol.svg" type="image/svg+xml">
     <link rel="stylesheet" href="/css/components.css">
     <link rel="stylesheet" href="/css/components/tables.css">
-    <link rel="stylesheet" href="/css/components/forms.css?v=20261001-1">
+    <link rel="stylesheet" href="/css/components/forms.css?v=20261001-2">
     <link rel="stylesheet" href="/css/components/navigation.css">
     <link rel="stylesheet" href="/css/theme.css">
-    <link rel="stylesheet" href="/css/pages/public.css">
-    {{#each stylesheets}}<link rel="stylesheet" href="{{this}}">{{/each}}
+    <link rel="stylesheet" href="/css/pages/public.css?v=20261001-2">
+    {{#each stylesheets}}
+        <link rel="stylesheet" href="{{this}}">
+    {{/each}}
 </head>
 <body class="bf-layout bf-layout-public {{bodyClass}}" data-bf-theme="default">
-    {{> navigation/header publicNav=true brandName=app.name brandHref="/" links=navigation.headerLinks user=user accountLinks=navigation.accountLinks notifications=navigation.notifications unreadCount=navigation.unreadCount showNotifications=navigation.showNotifications sidebarId="main-sidebar"}}
+    {{> navigation/header
+        publicNav=true
+        brandName=app.name
+        brandHref="/"
+        links=navigation.headerLinks
+        user=user
+        accountLinks=navigation.accountLinks
+        notifications=navigation.notifications
+        unreadCount=navigation.unreadCount
+        showNotifications=navigation.showNotifications
+        sidebarId="main-sidebar"
+    }}
     {{#if breadcrumbs}}
-        <div class="bf-layout-container">{{> navigation/breadcrumb items=breadcrumbs}}</div>
+        <div class="bf-layout-container">
+            {{> navigation/breadcrumb
+                items=breadcrumbs
+            }}
+        </div>
     {{/if}}
     <main id="main-content" class="bf-layout-content bf-demo-main {{contentClass}}">
         {{{body}}}
     </main>
-    <footer class="bf-demo-footer"><a class="bf-nav-brand bf-demo-brand" href="/"><span class="bf-demo-mark" aria-hidden="true"><i></i></span><span>{{app.name}}</span><small>AI</small></a><span>BookFlow AI · Bán sách · Mượn miễn phí · Thuê có phí · Hội viên</span></footer>
+    <footer class="bf-demo-footer">
+        <a class="bf-nav-brand bf-demo-brand" href="/">
+            <span class="bf-demo-mark" aria-hidden="true"><i></i></span>
+            <span>{{app.name}}</span>
+            <small>AI</small>
+        </a>
+        <span>BookFlow AI · Bán sách · Mượn miễn phí · Thuê có phí · Hội viên</span>
+    </footer>
     <script type="module" src="/js/components/forms.js?v=20261001-7"></script>
     <script type="module" src="/js/page/auth.js?v=20261001-5"></script>
     <script type="module">import { initNavigation } from "/js/components/navigation.js"; initNavigation();</script>
-    {{#each scripts}}<script type="module" src="{{this}}"></script>{{/each}}
+    {{#each scripts}}
+        <script type="module" src="{{this}}"></script>
+    {{/each}}
 </body>
 </html>

@@ -1,4 +1,13 @@
-{{#> modals/base-modal id=id title=title description=description eyebrow=eyebrow size=size open=open closeOnBackdrop=closeOnBackdrop footer=footer}}
+{{#> modals/base-modal
+    id=id
+    title=title
+    description=description
+    eyebrow=eyebrow
+    size=size
+    open=open
+    closeOnBackdrop=closeOnBackdrop
+    footer=footer
+}}
     <div class="bf-modal-detail">
         {{#each sections}}
             <section class="bf-modal-detail-section">
@@ -11,7 +20,11 @@
                                 <dt>{{label}}</dt>
                                 <dd>
                                     {{#if status}}
-                                        {{> ui/trang-thai label=value status=status dot=true}}
+                                        {{> ui/trang-thai
+                                            label=value
+                                            status=status
+                                            dot=true
+                                        }}
                                     {{else if href}}
                                         <a href="{{href}}">{{value}}</a>
                                     {{else}}
@@ -26,7 +39,11 @@
                     <div class="bf-modal-detail-table-wrap">
                         <table class="bf-modal-detail-table">
                             {{#if columns}}
-                                <thead><tr>{{#each columns}}<th scope="col">{{label}}</th>{{/each}}</tr></thead>
+                                <thead>
+                                    <tr>
+                                        {{#each columns}}<th scope="col">{{label}}</th>{{/each}}
+                                    </tr>
+                                </thead>
                             {{/if}}
                             <tbody>
                                 {{#each rows}}
