@@ -1,14 +1,16 @@
+const layMaVaiTro = user => {
+  const values = Array.isArray(user?.vai_tro) ? user.vai_tro : Array.isArray(user?.vaiTro) ? user.vaiTro : Array.isArray(user?.roles) ? user.roles : [];
+  return values.map(item => typeof item === 'string' ? item : item?.ma_vai_tro ?? item?.maVaiTro).filter(Boolean);
+};
 const normalizePermissions = user => {
   if (!user) return [];
   const values = Array.isArray(user.permissions) ? user.permissions : Array.isArray(user.quyen) ? user.quyen : Array.isArray(user.permissionCodes) ? user.permissionCodes : [];
-  return values.map(item => typeof item === 'string' ? item : item?.ma_quyen).filter(Boolean);
+  return values.map(item => typeof item === 'string' ? item : item?.ma_quyen ?? item?.maQuyen).filter(Boolean);
 };
-
 const permissionMiddleware = (...requiredPermissions) => {
   return (req, res, next) => {
-    if (!req.user) {
-      return res.redirect(`/auth/dang-nhap?redirect=${encodeURIComponent(req.originalUrl || '/')}`);
-    }
+    if (!req.user) return res.redirect(`/auth/dang-nhap?redirect=${encodeURIComponent(req.originalUrl || '/')}`);
+    if (layMaVaiTro(req.user).includes('QUAN_TRI')) return next();
     const permissions = normalizePermissions(req.user);
     const hasPermission = requiredPermissions.length === 0 || requiredPermissions.some(permission => permissions.includes(permission));
     if (hasPermission) return next();
@@ -19,5 +21,4 @@ const permissionMiddleware = (...requiredPermissions) => {
     });
   };
 };
-
 export default permissionMiddleware;

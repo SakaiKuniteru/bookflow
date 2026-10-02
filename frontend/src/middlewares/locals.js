@@ -29,6 +29,7 @@ const localsMiddleware = (req, res, next) => {
   res.locals.permissions = req.user?.permissions || [];
   res.locals.roles = req.user?.roles || [];
   res.locals.currentPath = req.path;
+  res.locals.loginUrl = `/auth/dang-nhap?redirect=${encodeURIComponent(req.originalUrl || '/')}`;
   res.locals.flash = req.flash || null;
   res.locals.navigation = { ...defaultNavigation, ...(workspace ? { sidebarTitle: workspace.title, sidebarItems: workspace.entries.map(([label, href]) => ({ label, href, active: req.path === href || req.path.startsWith(`${href}/`) })) } : {}), ...(res.locals.navigation || {}) };
   next();

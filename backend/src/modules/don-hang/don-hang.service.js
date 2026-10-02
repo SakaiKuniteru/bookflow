@@ -23,6 +23,25 @@ class DonHangService {
         const trang = Math.max(1,Number(filters.trang) || 1);
         return repo.danhSach(auth.donViId,{ chi_nhanh_id: filters.chi_nhanh_id ? v.idHopLe(filters.chi_nhanh_id,'Chi nhánh') : null,khach_hang_id: filters.khach_hang_id ? v.idHopLe(filters.khach_hang_id,'Khách hàng') : null,trang_thai: filters.trang_thai ?? null,limit,offset: (trang - 1) * limit });
     }
+    async danhSachCuaToi(auth, filters = {}) {
+        const limit = Math.max(1, Math.min(100, Number(filters.gioi_han) || 20));
+        const trang = Math.max(1, Number(filters.trang) || 1);
+        return repo.danhSachCuaTaiKhoan(auth.taiKhoanId, {
+            trang_thai: filters.trang_thai ?? null,
+            limit,
+            offset: (trang - 1) * limit
+        });
+    }
+    async chiTietCuaToi(auth, id) {
+        const don = await repo.donCuaTaiKhoan(auth.taiKhoanId, v.idHopLe(id, 'Đơn hàng'));
+        if (!don) throw v.loi('Không tìm thấy đơn hàng', 404, 'ORDER_NOT_FOUND');
+        const [matHang, lichSu, vanDon] = await Promise.all([
+            repo.chiTiet(don.don_vi_id, don.id),
+            repo.lichSu(don.don_vi_id, don.id),
+            repo.vanDon(don.don_vi_id, don.id)
+        ]);
+        return { ...don, mat_hang: matHang, lich_su_trang_thai: lichSu, van_don: vanDon };
+    }
     async chiTiet(auth,id) {
         await this.quyen(auth);
         const don = await this.lay(auth,id);

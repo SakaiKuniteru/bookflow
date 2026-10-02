@@ -1,4 +1,5 @@
 import apiConfig from '../config/api.js';
+import { getCurrentRequest } from '../middlewares/request-context.js';
 
 class ApiError extends Error {
   constructor(message, options = {}) {
@@ -75,6 +76,8 @@ const request = async (path, options = {}) => {
     Accept: 'application/json',
     ...(options.headers || {})
   };
+  const authToken = getCurrentRequest()?.authToken;
+  if (authToken && !headers.Authorization && !headers.authorization) headers.Authorization = `Bearer ${authToken}`;
   if (options.body !== undefined && !(options.body instanceof FormData)) {
     headers['Content-Type'] = 'application/json';
   }

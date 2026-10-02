@@ -12,6 +12,36 @@ class DonHangRepository {
         const { rows } = await query(`SELECT * FROM chi_tiet_don_hang WHERE don_vi_id = $1 AND don_hang_id = $2 ORDER BY id${khoa ? ' FOR UPDATE' : ''}`,[donViId,donHangId],client);
         return rows;
     }
+    async danhSachCuaTaiKhoan(taiKhoanId, queryParams = {}) {
+        const { rows } = await query(
+            `SELECT dh.*
+             FROM don_hang dh
+             JOIN khach_hang kh
+               ON kh.don_vi_id = dh.don_vi_id
+              AND kh.id = dh.khach_hang_id
+             WHERE kh.tai_khoan_id = $1
+               AND kh.ngay_xoa IS NULL
+               AND ($2::varchar IS NULL OR dh.trang_thai = $2)
+             ORDER BY dh.ngay_dat DESC, dh.id DESC
+             LIMIT $3 OFFSET $4`,
+            [taiKhoanId, queryParams.trang_thai ?? null, queryParams.limit ?? 20, queryParams.offset ?? 0]
+        );
+        return rows;
+    }
+    async donCuaTaiKhoan(taiKhoanId, donHangId) {
+        const { rows } = await query(
+            `SELECT dh.*
+             FROM don_hang dh
+             JOIN khach_hang kh
+               ON kh.don_vi_id = dh.don_vi_id
+              AND kh.id = dh.khach_hang_id
+             WHERE kh.tai_khoan_id = $1
+               AND kh.ngay_xoa IS NULL
+               AND dh.id = $2`,
+            [taiKhoanId, donHangId]
+        );
+        return rows[0] ?? null;
+    }
     async lichSu(donViId,donHangId,client) {
         const { rows } = await query('SELECT * FROM lich_su_trang_thai_don_hang WHERE don_vi_id = $1 AND don_hang_id = $2 ORDER BY ngay_tao,id',[donViId,donHangId],client);
         return rows;

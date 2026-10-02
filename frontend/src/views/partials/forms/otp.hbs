@@ -3,77 +3,25 @@
         {{#if label}}{{label}}{{else}}Mã xác nhận{{/if}}<span class="bf-form-required">*</span>
     </label>
     <div class="bf-otp-inputs" role="group" aria-label="Mã xác nhận gồm 6 chữ số">
-        {{> forms/number
-            id="bf-otp-digit-1"
-            ariaLabel="Chữ số 1 của mã xác nhận"
-            label=""
-            type="positive-integer"
-            decimals="0"
-            maxlength="1"
-            required=true
-            className="bf-otp-digit-field"
-        }}
-        {{> forms/number
-            id="bf-otp-digit-2"
-            ariaLabel="Chữ số 2 của mã xác nhận"
-            label=""
-            type="positive-integer"
-            decimals="0"
-            maxlength="1"
-            required=true
-            className="bf-otp-digit-field"
-        }}
-        {{> forms/number
-            id="bf-otp-digit-3"
-            ariaLabel="Chữ số 3 của mã xác nhận"
-            label=""
-            type="positive-integer"
-            decimals="0"
-            maxlength="1"
-            required=true
-            className="bf-otp-digit-field"
-        }}
-        {{> forms/number
-            id="bf-otp-digit-4"
-            ariaLabel="Chữ số 4 của mã xác nhận"
-            label=""
-            type="positive-integer"
-            decimals="0"
-            maxlength="1"
-            required=true
-            className="bf-otp-digit-field"
-        }}
-        {{> forms/number
-            id="bf-otp-digit-5"
-            ariaLabel="Chữ số 5 của mã xác nhận"
-            label=""
-            type="positive-integer"
-            decimals="0"
-            maxlength="1"
-            required=true
-            className="bf-otp-digit-field"
-        }}
-        {{> forms/number
-            id="bf-otp-digit-6"
-            ariaLabel="Chữ số 6 của mã xác nhận"
-            label=""
-            type="positive-integer"
-            decimals="0"
-            maxlength="1"
-            required=true
-            className="bf-otp-digit-field"
-        }}
+        <div class="bf-form-field bf-otp-digit-field">
+            <input id="bf-otp-digit-1" type="text" class="bf-form-control" inputmode="numeric" pattern="[0-9]" maxlength="1" autocomplete="one-time-code" aria-label="Chữ số 1 của mã xác nhận">
+        </div>
+        <div class="bf-form-field bf-otp-digit-field">
+            <input id="bf-otp-digit-2" type="text" class="bf-form-control" inputmode="numeric" pattern="[0-9]" maxlength="1" autocomplete="off" aria-label="Chữ số 2 của mã xác nhận">
+        </div>
+        <div class="bf-form-field bf-otp-digit-field">
+            <input id="bf-otp-digit-3" type="text" class="bf-form-control" inputmode="numeric" pattern="[0-9]" maxlength="1" autocomplete="off" aria-label="Chữ số 3 của mã xác nhận">
+        </div>
+        <div class="bf-form-field bf-otp-digit-field">
+            <input id="bf-otp-digit-4" type="text" class="bf-form-control" inputmode="numeric" pattern="[0-9]" maxlength="1" autocomplete="off" aria-label="Chữ số 4 của mã xác nhận">
+        </div>
+        <div class="bf-form-field bf-otp-digit-field">
+            <input id="bf-otp-digit-5" type="text" class="bf-form-control" inputmode="numeric" pattern="[0-9]" maxlength="1" autocomplete="off" aria-label="Chữ số 5 của mã xác nhận">
+        </div>
+        <div class="bf-form-field bf-otp-digit-field">
+            <input id="bf-otp-digit-6" type="text" class="bf-form-control" inputmode="numeric" pattern="[0-9]" maxlength="1" autocomplete="off" aria-label="Chữ số 6 của mã xác nhận">
+        </div>
     </div>
-    <div
-        class="bf-form-error bf-auth-otp-error"
-        data-otp-error
-        role="alert"
-        {{#unless error}}hidden{{/unless}}
-    >{{#if error}}{{error}}{{else}}Vui lòng nhập đầy đủ mã xác nhận gồm 6 chữ số.{{/if}}</div>
-    <input
-        type="hidden"
-        name="{{#if name}}{{name}}{{else}}otp{{/if}}"
-        value="{{value}}"
-        data-bf-otp-value
-    >
+    <div class="bf-form-error bf-auth-otp-error" data-otp-error role="alert" {{#unless error}}hidden{{/unless}}>{{#if error}}{{error}}{{else}}Vui lòng nhập đầy đủ mã xác nhận gồm 6 chữ số.{{/if}}</div>
+    <input type="hidden" name="{{#if name}}{{name}}{{else}}otp{{/if}}" value="" data-bf-otp-value>
 </div>

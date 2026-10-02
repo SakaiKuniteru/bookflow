@@ -1,5 +1,5 @@
 <div class="bf-auth-description">Vui lòng nhập mã xác nhận đã được gửi đến email của bạn.</div>
-<form class="bf-auth-form" method="post" action="/auth/xac-minh-dang-ky" data-bf-auth-form data-auth-loading-text="Đang xác minh...">
+<form class="bf-auth-form" method="post" action="/auth/xac-minh-dang-ky" data-bf-auth-form data-api-endpoint="/api/xac-thuc/xac-nhan-dang-ky" data-api-success-url="/auth/dang-nhap?registered=1" data-auth-loading-text="Đang xác minh...">
     <input type="hidden" name="email" value="{{email}}">
     <div class="bf-auth-email-summary">
         <span class="bf-input-leading-icon">

@@ -3,6 +3,7 @@
         <div class="bf-form-error" role="alert">{{formError}}</div>
     {{/if}}
 <form class="bf-auth-form" method="post" action="/auth/dang-ky" data-bf-auth-form data-auth-loading-text="Đang tạo tài khoản...">
+    {{#if resumeRegistration}}<input type="hidden" name="resumeRegistration" value="1">{{/if}}
     {{> forms/input
         id="register-full-name"
         name="fullName"

@@ -1,5 +1,6 @@
 import express from 'express';
 import path from 'node:path';
+import apiProxy from './routes/api-proxy.route.js';
 import cookieParser from 'cookie-parser';
 import { engine } from 'express-handlebars';
 import config from './config/index.js';
@@ -82,6 +83,7 @@ app.use(express.static(config.view.publicDir, {
   index: false
 }));
 app.use(userMiddleware);
+app.use('/api', apiProxy);
 app.use(localsMiddleware);
 app.use(routes);
 app.use(notFoundMiddleware);

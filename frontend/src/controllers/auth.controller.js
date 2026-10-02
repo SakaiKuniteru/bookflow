@@ -13,6 +13,10 @@ const cookieOptions = {
 function renderAuth(res, page, title, locals = {}, status = 200) {
   return res.status(status).render(`pages/auth/${page}`, { layout: 'auth', authPage: page, title, ...locals });
 }
+function layTokenTiepTucDangKy(response) {
+  const data = response?.data || response || {};
+  return data.registrationResumeToken || data.registration_resume_token || '';
+}
 function safeRedirect(value) {
   return typeof value === 'string' && value.startsWith('/') && !value.startsWith('//') ? value : null;
 }
@@ -45,7 +49,7 @@ async function finishLogin(res, token, context, requestedRedirect) {
     context = selected.data || selected;
   }
   const redirect = safeRedirect(requestedRedirect);
-  return res.redirect(redirect && redirect !== '/' ? redirect : destinationFor(context));
+  return res.redirect(redirect || '/');
 }
 
 const authController = {
@@ -86,6 +90,10 @@ const authController = {
   registerPage(req, res) {
     if (req.user) return res.redirect('/');
     const resume = req.query.resume === '1';
+    if (req.session) {
+      if (resume) req.session.registrationResumeMode = true;
+      else delete req.session.registrationResumeMode;
+    }
     let draft = {};
     if (resume && req.session?.registrationDraft) {
       try {
@@ -94,7 +102,7 @@ const authController = {
       } catch {}
     }
     if (req.session) delete req.session.registrationDraft;
-    return renderAuth(res, 'dang-ky', 'Đăng ký', { values: resume ? draft : {} });
+    return renderAuth(res, 'dang-ky', 'Đăng ký', { values: resume ? draft : {}, resumeRegistration: resume });
   },
   async register(req, res) {
     try {
@@ -110,17 +118,21 @@ const authController = {
         acceptTerms: Boolean(req.body.acceptTerms)
       };
       req.session.registrationDraft = maHoaBanNhap(draft);
-      const emailCu = String(req.session.registrationResumeEmail || '').trim().toLowerCase();
-      const emailMoi = String(req.body.email || '').trim().toLowerCase();
-      if (emailCu && emailCu !== emailMoi) {
+            const dangSuaDangKy = req.body.resumeRegistration === '1' || req.session?.registrationResumeMode === true;
+      if (dangSuaDangKy) {
         if (!req.session.registrationResumeToken) {
-          throw loiGiaoDien('Phiên đăng ký đã hết hạn. Vui lòng bắt đầu đăng ký lại.', 410);
+          throw Object.assign(new Error('Phiên đăng ký đã hết hạn. Vui lòng bắt đầu đăng ký lại.'), { status: 410 });
         }
         const ketQuaDoiEmail = await authService.changeRegistrationEmail({
           token: req.session.registrationResumeToken,
-          email: req.body.email
+          ho_ten: req.body.fullName,
+          ten_dang_nhap: req.body.username,
+          email: req.body.email,
+          so_dien_thoai: req.body.phone,
+          mat_khau: req.body.password
         });
-        req.session.registrationResumeToken = ketQuaDoiEmail.data?.registration_resume_token;
+        req.session.registrationResumeToken = layTokenTiepTucDangKy(ketQuaDoiEmail);
+        if (!req.session.registrationResumeToken) throw Object.assign(new Error('Backend không trả token tiếp tục đăng ký.'), { status: 502 });
         delete req.session.registrationResumeEmail;
         return res.redirect(`/auth/xac-minh-dang-ky?email=${encodeURIComponent(req.body.email)}&sent=1`);
       }
@@ -132,7 +144,8 @@ const authController = {
         so_dien_thoai: req.body.phone,
         mat_khau: req.body.password
       });
-      req.session.registrationResumeToken = ketQuaDangKy.data?.registration_resume_token;
+      req.session.registrationResumeToken = layTokenTiepTucDangKy(ketQuaDangKy);
+      if (!req.session.registrationResumeToken) throw Object.assign(new Error('Backend không trả token tiếp tục đăng ký.'), { status: 502 });
       return res.redirect(`/auth/xac-minh-dang-ky?email=${encodeURIComponent(req.body.email)}&sent=1`);
     } catch (error) {
       const backendError = error.data?.error;
@@ -141,9 +154,11 @@ const authController = {
       if (error.field) fieldErrors[error.field] = error.message;
       if (!fieldErrors.email && backendError?.code === 'EMAIL_EXISTS') fieldErrors.email = 'Email này đã được đăng ký';
       if (!fieldErrors.username && backendError?.code === 'USERNAME_EXISTS') fieldErrors.username = 'Tên đăng nhập này đã được sử dụng';
+      if (!fieldErrors.phone && backendError?.code === 'PHONE_EXISTS') fieldErrors.phone = 'Số điện thoại này đã được đăng ký';
       return renderAuth(res, 'dang-ky', 'Đăng ký', {
         fieldErrors,
         formError: Object.keys(fieldErrors).length ? '' : (backendError?.message || error.message),
+        resumeRegistration: req.body.resumeRegistration === '1' || req.session?.registrationResumeMode === true,
         values: {
           fullName: req.body.fullName || '',
           username: req.body.username || '',
@@ -166,7 +181,7 @@ const authController = {
       delete req.session.registrationResumeEmail;
       return res.redirect('/auth/dang-nhap?registered=1'); 
     } catch (error) {
-      return renderAuth(res, 'xac-minh-dang-ky', 'Xác minh email', { email: req.body.email || '', otp: req.body.otp || '', otpError: error.message, changeEmailUrl: '/auth/dang-ky?resume=1' }, error.status >= 400 && error.status < 500 ? error.status : 500);
+            return renderAuth(res, 'xac-minh-dang-ky', 'Xác minh email', { email: req.body.email || '', otpError: error.message, changeEmailUrl: '/auth/dang-ky?resume=1' }, error.status >= 400 && error.status < 500 ? error.status : 500);
     }
   },
   async resendRegistrationOtp(req, res) {

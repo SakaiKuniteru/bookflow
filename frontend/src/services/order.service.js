@@ -12,11 +12,9 @@ const list = params => {
     if (value !== undefined && value !== null && value !== '') query.set(key, value);
   });
   const suffix = query.toString() ? `?${query.toString()}` : '';
-  return get(`/don-hang${suffix}`);
+  return get(`/don-hang/cua-toi${suffix}`);
 };
-
-const detail = id => get(`/don-hang/${encodeURIComponent(id)}`);
-
+const detail = id => get(`/don-hang/cua-toi/${encodeURIComponent(id)}`);
 const cancel = id => post(`/don-hang/${encodeURIComponent(id)}/huy`);
 
 export default {

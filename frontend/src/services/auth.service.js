@@ -18,6 +18,7 @@ const refresh = () => post('/xac-thuc/lam-moi-phien');
 export default {
   login,
   register,
+  changeRegistrationEmail,
   verifyRegistration,
   resendRegistrationOtp,
   completeEmployeeActivation,

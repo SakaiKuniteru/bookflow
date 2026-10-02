@@ -121,9 +121,9 @@ class MigrationService {
         try {
             const ketQua = await this.chayTatCaMigration();
             for (const migration of ketQua) console.log(`[${migration.trangThai}] ${migration.tenFile}`);
-            console.log('F03 OK: migration hoan tat');
+            console.log('Create OK: migration hoàn tất');
         } catch (error) {
-            console.error('F03 ERROR:', error.message);
+            console.error('Create ERROR:', error.message);
             process.exitCode = 1;
         }
     }

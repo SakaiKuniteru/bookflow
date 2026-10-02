@@ -4,6 +4,8 @@ function xuLy(hanhDong,status = 200) {
         try {
             const actions = {
                 danhSach: () => service.danhSach(req.auth,req.query),
+                danhSachCuaToi: () => service.danhSachCuaToi(req.auth, req.query),
+                chiTietCuaToi: () => service.chiTietCuaToi(req.auth, req.params.donHangId),
                 chiTiet: () => service.chiTiet(req.auth,req.params.donHangId),
                 tao: () => service.tao(req.auth,req.body),
                 doiTrangThai: () => service.doiTrangThai(req.auth,req.params.donHangId,req.body)

@@ -1,4 +1,5 @@
 import { hideLoading, showLoading } from "../components/feedback.js";
+import { apiRequest } from "../common/api.js";
 
 function otpParts(form) {
     const wrapper = form.querySelector("[data-bf-otp]");
@@ -14,6 +15,10 @@ function isOtpComplete(form) {
     const { inputs } = otpParts(form);
     return inputs.length === 6 && inputs.every(input => /^\d$/.test(input.value));
 }
+function syncOtpValue(form) {
+    const { inputs, value } = otpParts(form);
+    if (value) value.value = inputs.map(input => input.value.replace(/\D/g, "").slice(0, 1)).join("");
+}
 
 function setOtpError(form, visible) {
     const { wrapper, inputs, error } = otpParts(form);
@@ -28,19 +33,22 @@ function initializeOtpInputs(form) {
     const { wrapper, inputs, value } = otpParts(form);
     if (!wrapper || wrapper.dataset.formInitialized === "true") return;
     wrapper.dataset.formInitialized = "true";
-    const sync = () => {
-        if (value) value.value = inputs.map(input => input.value.replace(/\D/g, "").slice(0, 1)).join("");
-    };
-    const initial = String(value?.value || "").replace(/\D/g, "").slice(0, inputs.length);
+    const initial = typeof value?.value === "string" && /^\d{6}$/.test(value.value) ? value.value : "";
     inputs.forEach((input, index) => {
         input.inputMode = "numeric";
-        input.pattern = "[0-9]";
+        input.autocomplete = index === 0 ? "one-time-code" : "off";
+        input.maxLength = 1;
         input.addEventListener("input", () => {
-            input.value = input.value.replace(/\D/g, "").slice(0, 1);
-            if (input.value) input.classList.remove("is-invalid");
-            sync();
+            const digits = input.value.replace(/\D/g, "");
+            if (digits.length > 1) {
+                [...digits].slice(0, inputs.length - index).forEach((digit, offset) => { inputs[index + offset].value = digit; });
+            } else {
+                input.value = digits.slice(0, 1);
+            }
+            syncOtpValue(form);
             if (isOtpComplete(form)) setOtpError(form, false);
-            if (input.value && inputs[index + 1]) inputs[index + 1].focus();
+            const nextIndex = Math.min(index + Math.max(digits.length, 1), inputs.length - 1);
+            if (input.value && index < inputs.length - 1) inputs[nextIndex].focus();
         });
         input.addEventListener("keydown", event => {
             if (event.key === "Backspace" && !input.value && inputs[index - 1]) inputs[index - 1].focus();
@@ -51,16 +59,15 @@ function initializeOtpInputs(form) {
             const pasted = (event.clipboardData?.getData("text") || "").replace(/\D/g, "").slice(0, inputs.length);
             if (!pasted) return;
             event.preventDefault();
-            [...pasted].forEach((digit, digitIndex) => { if (inputs[digitIndex]) inputs[digitIndex].value = digit; });
-            inputs.forEach(input => input.classList.remove("is-invalid"));
-            sync();
+            [...pasted].forEach((digit, digitIndex) => { inputs[digitIndex].value = digit; });
+            syncOtpValue(form);
             if (isOtpComplete(form)) setOtpError(form, false);
             inputs[Math.min(pasted.length, inputs.length) - 1]?.focus();
         });
-        if (initial[index]) input.value = initial[index];
+        input.addEventListener("change", () => syncOtpValue(form));
+        if (initial) input.value = initial[index];
     });
-    sync();
-    if (wrapper.classList.contains("is-invalid")) inputs.forEach(input => input.classList.add("is-invalid"));
+    syncOtpValue(form);
 }
 
 function fieldMessage(input) {
@@ -166,7 +173,35 @@ function initializeCodeCountdown() {
         }
     });
 }
-
+function initializeApiOtpSubmit(form) {
+    form.addEventListener("submit", async event => {
+        if (!form.dataset.apiEndpoint) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        syncOtpValue(form);
+        if (!isOtpComplete(form)) {
+            setOtpError(form, true);
+            return;
+        }
+        const button = form.querySelector("[data-auth-submit]");
+        const errorElement = otpParts(form).error;
+        if (button) button.disabled = true;
+        try {
+            const body = Object.fromEntries(new FormData(form).entries());
+            await apiRequest(form.dataset.apiEndpoint, { method: "POST", body });
+            window.location.assign(form.dataset.apiSuccessUrl || "/auth/dang-nhap");
+        } catch (error) {
+            if (errorElement) {
+                errorElement.textContent = error.message;
+                errorElement.hidden = false;
+            }
+            setOtpError(form, true);
+            if (error.requestId) console.error("BookFlow API request_id:", error.requestId);
+        } finally {
+            if (button) button.disabled = false;
+        }
+    }, { capture: true });
+}
 function initializeAuthForm(form) {
     if (form.dataset.formInitialized === "true") return;
     form.dataset.formInitialized = "true";
@@ -179,6 +214,7 @@ function initializeAuthForm(form) {
     const passwordError = form.querySelector("[data-password-error]");
     const submit = form.querySelector("[data-auth-submit]");
     initializeOtpInputs(form);
+    initializeApiOtpSubmit(form);
     initializeResetPasswordStep(form);
     const validatePasswords = () => {
         if (!password || !confirmation) return true;
@@ -210,6 +246,7 @@ function initializeAuthForm(form) {
         if (isLogin && formAlert && [...form.querySelectorAll("input:not([type=hidden])")].every(field => field.disabled || field.checkValidity())) formAlert.hidden = true;
     });
     form.addEventListener("submit", event => {
+        syncOtpValue(form);
         validatePasswords();
         const { inputs: otpInputs } = otpParts(form);
         const otpInvalid = otpInputs.length > 0 && !isOtpComplete(form);

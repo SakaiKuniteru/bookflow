@@ -5,7 +5,16 @@ class TaiKhoanRepository {
         const { rows } = await query('INSERT INTO tai_khoan (email, ho_ten, ten_dang_nhap, so_dien_thoai, mat_khau_bam) VALUES ($1, $2, $3, $4, $5) RETURNING id, email, ho_ten, ten_dang_nhap, so_dien_thoai, trang_thai, email_da_xac_minh, ngay_tao', [email, ho_ten, ten_dang_nhap, so_dien_thoai, mat_khau_bam], client);
         return rows[0];
     }
-
+    async taoTaiKhoanDaXacMinh({ email, ho_ten, ten_dang_nhap, so_dien_thoai, mat_khau_bam }, client) {
+        const { rows } = await query(
+            `INSERT INTO tai_khoan (email, ho_ten, ten_dang_nhap, so_dien_thoai, mat_khau_bam, email_da_xac_minh, trang_thai)
+            VALUES ($1, $2, $3, $4, $5, TRUE, 'DANG_DUNG')
+            RETURNING id, email, ho_ten, ten_dang_nhap, so_dien_thoai, trang_thai, email_da_xac_minh, ngay_tao`,
+            [email, ho_ten, ten_dang_nhap, so_dien_thoai, mat_khau_bam],
+            client
+        );
+        return rows[0];
+    }
     async layHoSoTheoId(taiKhoanId, client) {
         const { rows } = await query("SELECT id, email, ho_ten, so_dien_thoai, email_da_xac_minh, so_dien_thoai_da_xac_minh, trang_thai, ngay_tao FROM tai_khoan WHERE id = $1 AND trang_thai <> 'DA_DONG'", [taiKhoanId], client);
         return rows[0] ?? null;

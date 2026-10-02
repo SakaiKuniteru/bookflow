@@ -6,11 +6,11 @@ class XacThucRepository {
             `SELECT tk.id FROM tai_khoan tk
              WHERE tk.trang_thai = 'CHO_XAC_MINH'
                AND tk.email_da_xac_minh = FALSE
-               AND tk.bat_buoc_doi_mat_khau = FALSE
+               AND tk.bat_buoc_doi_mat_khau = TRUE
                AND tk.ngay_tao <= now() - interval '1 day'
                AND EXISTS (
                    SELECT 1 FROM ma_xac_minh mx
-                   WHERE mx.tai_khoan_id = tk.id AND mx.muc_dich = 'DANG_KY'
+                   WHERE mx.tai_khoan_id = tk.id AND mx.muc_dich = 'KICH_HOAT_NHAN_VIEN'
                )
              ORDER BY tk.ngay_tao
              LIMIT $1
@@ -30,7 +30,7 @@ class XacThucRepository {
              WHERE id = ANY($1::int[])
                AND trang_thai = 'CHO_XAC_MINH'
                AND email_da_xac_minh = FALSE
-               AND bat_buoc_doi_mat_khau = FALSE`,
+               AND bat_buoc_doi_mat_khau = TRUE`,
             [ids], client
         );
         return rowCount;
@@ -44,7 +44,87 @@ class XacThucRepository {
         const { rows } = await query('SELECT * FROM tai_khoan WHERE lower(email) = $1 LIMIT 1', [email], client);
         return rows[0] ?? null;
     }
+    async timTaiKhoanTheoTenDangNhap(tenDangNhap, client) {
+        const { rows } = await query('SELECT id FROM tai_khoan WHERE lower(ten_dang_nhap)=$1 LIMIT 1', [tenDangNhap], client);
+        return rows[0] ?? null;
+    }
 
+    async timTaiKhoanTheoSoDienThoai(soDienThoai, client) {
+        const { rows } = await query('SELECT id FROM tai_khoan WHERE so_dien_thoai=$1 LIMIT 1', [soDienThoai], client);
+        return rows[0] ?? null;
+    }
+    async timDangKyChoXacMinhTheoEmail(email, client) {
+        const { rows } = await query('SELECT * FROM dang_ky_cho_xac_minh WHERE lower(email) = $1 LIMIT 1', [email], client);
+        return rows[0] ?? null;
+    }
+    async khoaDangKyChoXacMinhTheoEmail(email, client) {
+        const { rows } = await query(
+            'SELECT * FROM dang_ky_cho_xac_minh WHERE lower(email)=$1 FOR UPDATE',
+            [email],
+            client
+        );
+        return rows[0] ?? null;
+    }
+
+    async tangLanThuOtpDangKy(id, client) {
+        await query(
+            'UPDATE dang_ky_cho_xac_minh SET otp_so_lan_thu=otp_so_lan_thu+1 WHERE id=$1 AND otp_so_lan_thu<5',
+            [id],
+            client
+        );
+    }
+
+    async datOtpDangKyChoXacMinh(id, otpHash, client) {
+        await query(
+            'UPDATE dang_ky_cho_xac_minh SET otp_bam=$2 WHERE id=$1',
+            [id, otpHash],
+            client
+        );
+    }
+    async capNhatOtpDangKyChoXacMinh(id, otpHash, client) {
+        await query(
+            `UPDATE dang_ky_cho_xac_minh
+            SET otp_bam=$2, otp_het_han=NOW() + INTERVAL '10 minutes',
+                otp_ngay_gui_cuoi=NOW(), otp_so_lan_thu=0, otp_so_lan_gui=otp_so_lan_gui+1,
+                ngay_cap_nhat=NOW()
+            WHERE id=$1`,
+            [id, otpHash],
+            client
+        );
+    }
+    async timDangKyChoXacMinhTheoToken(tokenHash, client) {
+        const { rows } = await query('SELECT * FROM dang_ky_cho_xac_minh WHERE token_tiep_tuc_bam = $1 AND token_tiep_tuc_het_han > NOW() FOR UPDATE', [tokenHash], client);
+        return rows[0] ?? null;
+    }
+
+    async taoDangKyChoXacMinh(data, client) {
+        const { rows } = await query(
+            `INSERT INTO dang_ky_cho_xac_minh (ho_ten, email, ten_dang_nhap, so_dien_thoai, mat_khau_bam, otp_bam, otp_het_han, otp_ngay_gui_cuoi, token_tiep_tuc_bam, token_tiep_tuc_het_han)
+            VALUES ($1,$2,$3,$4,$5,$6,NOW() + INTERVAL '10 minutes',NOW(),$7,NOW() + INTERVAL '24 hours')
+            RETURNING *`,
+            [data.ho_ten, data.email, data.ten_dang_nhap, data.so_dien_thoai, data.mat_khau_bam, data.otp_bam, data.token_tiep_tuc_bam],
+            client
+        );
+        return rows[0];
+    }
+
+    async capNhatDangKyChoXacMinh(id, data, client) {
+        const { rows } = await query(
+            `UPDATE dang_ky_cho_xac_minh
+            SET ho_ten=$2, email=$3, ten_dang_nhap=$4, so_dien_thoai=$5, mat_khau_bam=$6, otp_bam=$7,
+                otp_het_han=NOW() + INTERVAL '10 minutes', otp_ngay_gui_cuoi=NOW(), otp_so_lan_thu=0,
+                token_tiep_tuc_bam=$8, token_tiep_tuc_het_han=NOW() + INTERVAL '24 hours', ngay_cap_nhat=NOW()
+            WHERE id=$1
+            RETURNING *`,
+            [id, data.ho_ten, data.email, data.ten_dang_nhap, data.so_dien_thoai, data.mat_khau_bam, data.otp_bam, data.token_tiep_tuc_bam],
+            client
+        );
+        return rows[0] ?? null;
+    }
+
+    async xoaDangKyChoXacMinh(id, client) {
+        await query('DELETE FROM dang_ky_cho_xac_minh WHERE id=$1', [id], client);
+    }
     async khoaTaiKhoan(id, client) {
         const { rows } = await query('SELECT * FROM tai_khoan WHERE id = $1 FOR UPDATE', [id], client);
         return rows[0] ?? null;

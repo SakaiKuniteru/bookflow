@@ -5,7 +5,9 @@ const tokenService = require('../../common/security/token.js');
 const emailService = require('../../integrations/email-client.js');
 const { taoEmailOtp, taoEmailMoiNhanVien } = require('../../integrations/email-template.js');
 const taiKhoanService = require('../tai-khoan/tai-khoan.service.js');
+const taiKhoanRepository = require('../tai-khoan/tai-khoan.repository.js');
 const { emailHopLe, dinhDanhHopLe, loiXacThuc, matKhauHopLe, maNhanVienHopLe, otpHopLe, tenDangNhapHopLe } = require('./xac-thuc.validation.js');
+const { kiemTraDuLieuTaoTaiKhoan } = require('../tai-khoan/tai-khoan.validation.js');
 const xacThucContext = require('./xac-thuc.context.js');
 const repo = require('./xac-thuc.repository.js');
 
@@ -93,53 +95,102 @@ class XacThucService {
         this._registrationCleanupBusy = false;
     }
     async dangKy(body) {
-    const tokenTiepTuc = randomBytes(32).toString('base64url');
-    const tokenHash = createHash('sha256').update(tokenTiepTuc).digest('hex');
-    const result = await trongGiaoDich(async client => {
-        const tk = await taiKhoanService.taoTaiKhoan(body, client);
-        await repo.luuTokenTiepTucDangKy(tk.id, tokenHash, client);
-        await this.guiOtp(client, tk, 'DANG_KY');
-        return { id: tk.id, email: tk.email, trang_thai: tk.trang_thai, registration_resume_token: tokenTiepTuc };
-    });
-    return { ...result, thong_bao: 'Đã gửi OTP xác minh email' };
-    }
-    async doiEmailDangKy({ token, email }) {
-    if (!token || !email) throw loiXacThuc('Thiếu token hoặc email', 400, 'INVALID_INPUT');
-    const emailMoi = emailHopLe(email);
-    const tokenHashCu = createHash('sha256').update(String(token)).digest('hex');
-    const tokenMoi = randomBytes(32).toString('base64url');
-    const tokenHashMoi = createHash('sha256').update(tokenMoi).digest('hex');
-    try {
-        const result = await trongGiaoDich(async client => {
-        const tk = await repo.timTaiKhoanTheoTokenTiepTucDangKy(tokenHashCu, client);
-        if (!tk) throw loiXacThuc('Yêu cầu đăng ký đã hết hạn hoặc không hợp lệ', 410, 'REGISTRATION_RESUME_INVALID');
-        if (String(tk.email).trim().toLowerCase() === emailMoi.trim().toLowerCase()) {
-            throw loiXacThuc('Email mới phải khác email hiện tại', 400, 'EMAIL_UNCHANGED');
+        const data = kiemTraDuLieuTaoTaiKhoan(body);
+        const tokenTiepTuc = randomBytes(32).toString('base64url');
+        const tokenHash = createHash('sha256').update(tokenTiepTuc).digest('hex');
+        let result;
+        try {
+            result = await trongGiaoDich(async client => {
+                const taiKhoanDaCo = await repo.timTaiKhoanTheoEmail(data.email, client);
+                if (taiKhoanDaCo) throw loiXacThuc('Email này đã được đăng ký', 409, 'EMAIL_EXISTS');
+                const phoneDaCo = await repo.timTaiKhoanTheoSoDienThoai(data.so_dien_thoai, client);
+                if (phoneDaCo) throw loiXacThuc('Số điện thoại này đã được đăng ký', 409, 'PHONE_EXISTS');
+                const tenDangNhapDaCo = await repo.timTaiKhoanTheoTenDangNhap(data.ten_dang_nhap, client);
+                if (tenDangNhapDaCo) throw loiXacThuc('Tên đăng nhập này đã được sử dụng', 409, 'USERNAME_EXISTS');
+                const otp = String(randomInt(0, 1000000)).padStart(6, '0');
+                const banTam = await repo.taoDangKyChoXacMinh({
+                    ...data,
+                    mat_khau_bam: bamMatKhau(data.mat_khau),
+                    otp_bam: '0'.repeat(64),
+                    token_tiep_tuc_bam: tokenHash
+                }, client);
+                const otpHash = this.bamOtp(banTam.id, 'DANG_KY', otp);
+                await repo.datOtpDangKyChoXacMinh(banTam.id, otpHash, client);
+                const emailOtp = taoEmailOtp({ tenNguoiNhan: banTam.ho_ten, otp, mucDich: 'DANG_KY' });
+                await emailService.guiEmail({ den: banTam.email, tenNguoiNhan: banTam.ho_ten, ...emailOtp });
+                return { id: banTam.id, email: banTam.email, registration_resume_token: tokenTiepTuc };
+            });
+        } catch (error) {
+            if (error.code === '23505' && error.constraint === 'uq_dkcx_email') throw loiXacThuc('Email đang được dùng bởi một đăng ký chờ xác minh khác', 409, 'EMAIL_EXISTS');
+            if (error.code === '23505' && error.constraint === 'uq_dkcx_ten_dang_nhap') throw loiXacThuc('Tên đăng nhập đang được dùng bởi một đăng ký chờ xác minh khác', 409, 'USERNAME_EXISTS');
+            if (error.code === '23505' && error.constraint === 'uq_dkcx_so_dien_thoai') throw loiXacThuc('Số điện thoại đang được dùng bởi một đăng ký chờ xác minh khác', 409, 'PHONE_EXISTS');
+            throw error;
         }
-        await repo.huyOtpCu(tk.id, 'DANG_KY', client);
-        const tkMoi = await repo.capNhatEmailDangKyChoXacMinh(tk.id, emailMoi, tokenHashMoi, client);
-        if (!tkMoi) throw loiXacThuc('Tài khoản không còn ở trạng thái chờ xác minh', 409, 'REGISTRATION_NOT_PENDING');
-        await this.guiOtp(client, tkMoi, 'DANG_KY');
-        return { email: tkMoi.email, registration_resume_token: tokenMoi };
-        });
-        return { ...result, thong_bao: 'Đã gửi OTP xác minh email mới' };
-    } catch (error) {
-        if (error.code === '23505' && error.constraint === 'uq_tai_khoan_email') {
-        throw loiXacThuc('Email này đã được đăng ký', 409, 'EMAIL_EXISTS');
-        }
-        throw error;
+        return { ...result, thong_bao: 'Đã gửi OTP xác minh email' };
     }
+    async doiEmailDangKy({ token, ho_ten, ten_dang_nhap, email, so_dien_thoai, mat_khau }) {
+        if (!token) throw loiXacThuc('Phiên đăng ký đã hết hạn', 410, 'REGISTRATION_RESUME_INVALID');
+        const data = kiemTraDuLieuTaoTaiKhoan({ ho_ten, email, ten_dang_nhap, so_dien_thoai, mat_khau });
+        const tokenHashCu = createHash('sha256').update(String(token)).digest('hex');
+        const tokenMoi = randomBytes(32).toString('base64url');
+        const tokenHashMoi = createHash('sha256').update(tokenMoi).digest('hex');
+        try {
+            const result = await trongGiaoDich(async client => {
+                const banTam = await repo.timDangKyChoXacMinhTheoToken(tokenHashCu, client);
+                if (!banTam) throw loiXacThuc('Yêu cầu đăng ký đã hết hạn hoặc không hợp lệ', 410, 'REGISTRATION_RESUME_INVALID');
+                if (await repo.timTaiKhoanTheoEmail(data.email, client)) throw loiXacThuc('Email này đã được đăng ký', 409, 'EMAIL_EXISTS');
+                if (await repo.timTaiKhoanTheoTenDangNhap(data.ten_dang_nhap, client)) throw loiXacThuc('Tên đăng nhập này đã được sử dụng', 409, 'USERNAME_EXISTS');
+                if (await repo.timTaiKhoanTheoSoDienThoai(data.so_dien_thoai, client)) throw loiXacThuc('Số điện thoại này đã được đăng ký', 409, 'PHONE_EXISTS');
+                const otp = String(randomInt(0, 1000000)).padStart(6, '0');
+                const banTamMoi = await repo.capNhatDangKyChoXacMinh(banTam.id, {
+                    ...data,
+                    mat_khau_bam: bamMatKhau(data.mat_khau),
+                    otp_bam: this.bamOtp(banTam.id, 'DANG_KY', otp),
+                    token_tiep_tuc_bam: tokenHashMoi
+                }, client);
+                if (!banTamMoi) throw loiXacThuc('Yêu cầu đăng ký không còn chờ xác minh', 409, 'REGISTRATION_NOT_PENDING');
+                const emailOtp = taoEmailOtp({ tenNguoiNhan: banTamMoi.ho_ten, otp, mucDich: 'DANG_KY' });
+                await emailService.guiEmail({ den: banTamMoi.email, tenNguoiNhan: banTamMoi.ho_ten, ...emailOtp });
+                return { email: banTamMoi.email, registration_resume_token: tokenMoi };
+            });
+            return { ...result, thong_bao: 'Đã gửi OTP xác minh email mới' };
+        } catch (error) {
+            if (error.code === '23505' && error.constraint === 'uq_dkcx_email') throw loiXacThuc('Email đang được dùng bởi một đăng ký chờ xác minh khác', 409, 'EMAIL_EXISTS');
+            if (error.code === '23505' && error.constraint === 'uq_dkcx_ten_dang_nhap') throw loiXacThuc('Tên đăng nhập đang được dùng bởi một đăng ký chờ xác minh khác', 409, 'USERNAME_EXISTS');
+            if (error.code === '23505' && error.constraint === 'uq_dkcx_so_dien_thoai') throw loiXacThuc('Số điện thoại đang được dùng bởi một đăng ký chờ xác minh khác', 409, 'PHONE_EXISTS');
+            throw error;
+        }
     }
     async xacNhanDangKy({ email, otp }) {
         email = emailHopLe(email);
         otp = otpHopLe(otp);
         const result = await trongGiaoDich(async client => {
-            const tk = await repo.timTaiKhoanTheoEmail(email, client);
-            if (!tk) return null;
-            const locked = await repo.khoaTaiKhoan(tk.id, client);
-            if (locked.trang_thai !== 'CHO_XAC_MINH' || locked.bat_buoc_doi_mat_khau) return null;
-            if (!await this.kiemTraOtp(client, locked, 'DANG_KY', otp)) return null;
-            return repo.xacMinhEmail(locked.id, client);
+            const banTam = await repo.khoaDangKyChoXacMinhTheoEmail(email, client);
+            if (!banTam) return null;
+            if (new Date(banTam.otp_het_han) <= new Date() || banTam.otp_so_lan_thu >= 5) return null;
+            const hashLuu = Buffer.from(String(banTam.otp_bam).trim(), 'hex');
+            const hashNhap = Buffer.from(this.bamOtp(banTam.id, 'DANG_KY', otp), 'hex');
+            if (!timingSafeEqual(hashLuu, hashNhap)) {
+                await repo.tangLanThuOtpDangKy(banTam.id, client);
+                return null;
+            }
+            let taiKhoan;
+            try {
+                taiKhoan = await taiKhoanRepository.taoTaiKhoanDaXacMinh({
+                    email: banTam.email,
+                    ho_ten: banTam.ho_ten,
+                    ten_dang_nhap: banTam.ten_dang_nhap,
+                    so_dien_thoai: banTam.so_dien_thoai,
+                    mat_khau_bam: banTam.mat_khau_bam
+                }, client);
+            } catch (error) {
+                if (error.code === '23505' && error.constraint === 'uq_tai_khoan_email') throw loiXacThuc('Email này đã được đăng ký', 409, 'EMAIL_EXISTS');
+                if (error.code === '23505' && error.constraint === 'uq_tai_khoan_ten_dang_nhap') throw loiXacThuc('Tên đăng nhập này đã được sử dụng', 409, 'USERNAME_EXISTS');
+                if (error.code === '23505' && error.constraint === 'uq_tai_khoan_so_dien_thoai') throw loiXacThuc('Số điện thoại này đã được đăng ký', 409, 'PHONE_EXISTS');
+                throw error;
+            }
+            await repo.xoaDangKyChoXacMinh(banTam.id, client);
+            return taiKhoan;
         });
         if (!result) throw this.loiOtp();
         return result;
@@ -148,10 +199,19 @@ class XacThucService {
     async guiLaiOtpDangKy({ email }) {
         email = emailHopLe(email);
         await trongGiaoDich(async client => {
-            const tk = await repo.timTaiKhoanTheoEmail(email, client);
-            if (!tk) return;
-            const locked = await repo.khoaTaiKhoan(tk.id, client);
-            if (locked.trang_thai === 'CHO_XAC_MINH' && !locked.bat_buoc_doi_mat_khau) await this.guiOtp(client, locked, 'DANG_KY');
+            const banTam = await repo.khoaDangKyChoXacMinhTheoEmail(email, client);
+            if (!banTam) return;
+            if (new Date(banTam.otp_ngay_gui_cuoi).getTime() + 60000 > Date.now()) {
+                throw loiXacThuc('Vui lòng chờ 60 giây trước khi gửi lại', 429, 'OTP_COOLDOWN');
+            }
+            if (banTam.otp_so_lan_gui >= 10) {
+                throw loiXacThuc('Đã đạt giới hạn gửi mã trong 24 giờ', 429, 'OTP_LIMIT');
+            }
+            const otp = String(randomInt(0, 1000000)).padStart(6, '0');
+            const otpHash = this.bamOtp(banTam.id, 'DANG_KY', otp);
+            await repo.capNhatOtpDangKyChoXacMinh(banTam.id, otpHash, client);
+            const emailOtp = taoEmailOtp({ tenNguoiNhan: banTam.ho_ten, otp, mucDich: 'DANG_KY' });
+            await emailService.guiEmail({ den: banTam.email, tenNguoiNhan: banTam.ho_ten, ...emailOtp });
         });
         return { thong_bao: 'Nếu email đang chờ xác minh, mã mới đã được gửi' };
     }

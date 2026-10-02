@@ -1,6 +1,11 @@
+import { existsSync } from 'node:fs';
+import path from 'node:path';
 const render = (view, title) => async (req, res) => {
-  return res.render(view, {
-    title
+  const viewPath = path.join(req.app.get('views'), `${view}.hbs`);
+  const viewDaCo = existsSync(viewPath);
+  return res.render(viewDaCo ? view : 'admin/chua-trien-khai', {
+    title,
+    layout: 'admin'
   });
 };
 
