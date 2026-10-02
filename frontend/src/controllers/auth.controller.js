@@ -34,6 +34,16 @@ function accessibleBranches(context) {
 }
 async function finishLogin(res, token, context, requestedRedirect) {
   res.cookie(config.env.authCookieName, token, cookieOptions);
+  const refreshToken = context?.refresh_token || context?.refreshToken;
+  if (refreshToken) {
+    res.cookie(config.env.authRefreshCookieName, refreshToken, {
+      httpOnly: true,
+      secure: config.env.authCookieSecure,
+      sameSite: config.env.authCookieSameSite,
+      maxAge: config.env.authRefreshCookieMaxAge,
+      path: '/'
+    });
+  }
   const organizations = context?.don_vi_tham_gia || context?.donViThamGia || [];
   const selectedOrganizationId = context?.don_vi_dang_chon_id || context?.donViDangChonId;
   if (organizations.length > 1 && !selectedOrganizationId) return res.redirect(`/auth/chon-don-vi?redirect=${encodeURIComponent(safeRedirect(requestedRedirect) || '/')}`);
@@ -260,6 +270,33 @@ const authController = {
       return renderAuth(res, 'dat-lai-mat-khau', 'Đặt lại mật khẩu', { email: req.body.email || '', requiresOtp: true, values: { otp: req.body.otp || '' }, otpError: error.message, changeEmailUrl: urlDoiEmail('/auth/quen-mat-khau', req.body.email) }, error.status >= 400 && error.status < 500 ? error.status : 500);
     }
   },
+  async refreshSession(req, res) {
+    const refreshToken = req.cookies?.[config.env.authRefreshCookieName];
+    if (!refreshToken) return res.status(401).json({ success: false, message: 'Phiên đăng nhập đã hết hạn' });
+    try {
+      const result = await authService.refresh(refreshToken);
+      const data = result.data || result;
+      res.cookie(config.env.authCookieName, data.access_token, {
+        ...cookieOptions,
+        maxAge: Number(data.expires_in || 600) * 1000
+      });
+      res.cookie(config.env.authRefreshCookieName, data.refresh_token, {
+        httpOnly: true,
+        secure: config.env.authCookieSecure,
+        sameSite: config.env.authCookieSameSite,
+        maxAge: config.env.authRefreshCookieMaxAge,
+        path: '/'
+      });
+      res.set('Cache-Control', 'no-store');
+      return res.json({ success: true });
+    } catch (error) {
+      if (error.status === 401) {
+        res.clearCookie(config.env.authCookieName, { path: '/' });
+        res.clearCookie(config.env.authRefreshCookieName, { path: '/' });
+      }
+      return res.status(error.status || 500).json({ success: false, message: error.message || 'Không làm mới được phiên đăng nhập' });
+    }
+  },
   async logout(req, res, next) {
     try {
       try {
@@ -267,8 +304,8 @@ const authController = {
       } catch (error) {
         if (error.status !== 401) throw error;
       }
-      res.clearCookie(config.env.authCookieName, {
-        httpOnly: config.env.sessionCookieHttpOnly,
+      res.clearCookie(config.env.authRefreshCookieName, {
+        httpOnly: true,
         secure: config.env.authCookieSecure,
         sameSite: config.env.authCookieSameSite,
         path: '/'

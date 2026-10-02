@@ -6,6 +6,7 @@ const router = Router();
 
 router.get('/dang-nhap', authController.loginPage);
 router.post('/dang-nhap', authController.login);
+router.post('/lam-moi-phien', authController.refreshSession);
 router.get('/dang-ky', authController.registerPage);
 router.post('/dang-ky', authController.register);
 router.get('/xac-minh-dang-ky', authController.verifyRegistrationPage);

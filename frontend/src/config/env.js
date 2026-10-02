@@ -25,6 +25,8 @@ const env = {
   backendApiUrl: getString('BACKEND_API_URL', 'http://localhost:4000/api'),
   backendApiTimeout: getNumber('BACKEND_API_TIMEOUT', 15000),
   authCookieName: getString('AUTH_COOKIE_NAME', 'bookflow_access_token'),
+  authRefreshCookieName: getString('AUTH_REFRESH_COOKIE_NAME', 'bookflow_refresh_token'),
+  authRefreshCookieMaxAge: getNumber('AUTH_REFRESH_COOKIE_MAX_AGE', 60 * 60 * 1000),
   authCookieSecure: getBoolean('AUTH_COOKIE_SECURE', false),
   authCookieSameSite: getString('AUTH_COOKIE_SAME_SITE', 'lax'),
   authCookieMaxAge: getNumber('AUTH_COOKIE_MAX_AGE', 86400000),

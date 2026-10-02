@@ -344,13 +344,13 @@ class XacThucService {
             const phien = await repo.layPhienTheoRefresh(maCu, client);
             if (!phien) return null;
             const refreshMoi = tokenService.taoRefreshToken();
-            const daXoay = await repo.xoayRefreshToken(phien.id, maCu, tokenService.bamRefreshToken(refreshMoi), client);
-            if (!daXoay) return null;
+            const phienDaXoay = await repo.xoayRefreshToken(phien.id, maCu, tokenService.bamRefreshToken(refreshMoi), tokenService.REFRESH_TOKEN_TTL_MINUTES, client);
+            if (!phienDaXoay) return null;
             const accessToken = await tokenService.taoAccessToken({ taiKhoanId: phien.tai_khoan_id, phienId: phien.id, phienBan: phien.phien_ban_xac_thuc });
             const thongTin = await xacThucContext.taoNguCanhDangNhap({ taiKhoanId: phien.tai_khoan_id, donViId: phien.don_vi_dang_chon_id, chiNhanhId: phien.chi_nhanh_dang_chon_id }, client);
             return {
                 access_token: accessToken, refresh_token: refreshMoi, token_type: 'Bearer',
-                expires_in: tokenService.ACCESS_TOKEN_TTL, refresh_token_expires_at: phien.ngay_het_han, ...thongTin
+                expires_in: tokenService.ACCESS_TOKEN_TTL, refresh_token_expires_at: phienDaXoay.ngay_het_han, ...thongTin
             };
         });
         if (!ketQua) throw loiXacThuc('Refresh Token không tồn tại hoặc đã hết hạn', 401, 'REFRESH_TOKEN_INVALID');

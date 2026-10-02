@@ -277,15 +277,19 @@ class XacThucRepository {
         return rows[0] ?? null;
     }
 
-    async xoayRefreshToken(phienId, maCu, maMoi, client) {
-        const { rowCount } = await query(
+    async xoayRefreshToken(phienId, maCu, maMoi, thoiHanPhut, client) {
+        const { rows } = await query(
             `UPDATE phien_dang_nhap
-             SET ma_phien_bam = $3, lan_su_dung_cuoi = now()
-             WHERE id = $1 AND ma_phien_bam = $2
-               AND ngay_thu_hoi IS NULL AND ngay_het_han > now()`,
-            [phienId, maCu, maMoi], client
+            SET ma_phien_bam = $3,
+                lan_su_dung_cuoi = now(),
+                ngay_het_han = now() + ($4::integer * interval '1 minute')
+            WHERE id = $1 AND ma_phien_bam = $2
+            AND ngay_thu_hoi IS NULL AND ngay_het_han > now()
+            RETURNING ngay_het_han`,
+            [phienId, maCu, maMoi, thoiHanPhut],
+            client
         );
-        return rowCount === 1;
+        return rows[0] ?? null;
     }
 
     async thuHoiPhien(id, lyDo, client) {
