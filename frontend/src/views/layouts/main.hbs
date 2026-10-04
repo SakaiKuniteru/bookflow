@@ -22,6 +22,7 @@
         publicNav=true
         brandName=app.name
         brandHref="/"
+        profileHref="/customer/ho-so"
         links=navigation.headerLinks
         user=user
         accountLinks=navigation.accountLinks
@@ -55,5 +56,6 @@
     {{#each scripts}}
         <script type="module" src="{{this}}"></script>
     {{/each}}
+    <script defer src="/js/common/auth-sync.js?v=20261004-2"></script>
 </body>
 </html>

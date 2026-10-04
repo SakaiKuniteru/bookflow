@@ -8,6 +8,9 @@ const staffController = {
   async dashboard(req, res) {
     return res.render('staff/tong-quan', { title: 'Tổng quan', layout: 'staff' });
   },
+  async profile(req, res) {
+    return res.render('shared/thong-tin-ca-nhan', { title: 'Thông tin cá nhân', layout: 'staff' });
+  },
   async books(req, res, next) {
     try {
       const result = await bookService.list(req.query);

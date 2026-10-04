@@ -509,7 +509,7 @@ body.bf-layout-customer {
 .bf-demo-footer {
     display: flex;
     width: min(100% - 44px, 1290px);
-    min-height: 100px;
+    min-height: 64px;
     align-items: center;
     justify-content: space-between;
     gap: 15px;
@@ -713,7 +713,7 @@ body.bf-layout-customer {
         align-items: flex-start;
         flex-direction: column;
         justify-content: center;
-        padding: 18px 0;
+        padding: 10px 0;
     }
 
     .bf-demo-footer > span {

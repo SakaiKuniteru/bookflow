@@ -72,7 +72,8 @@ app.use(session({
   secret: config.env.sessionSecret,
   resave: false,
   saveUninitialized: false,
-  cookie: { httpOnly: true, sameSite: 'lax', secure: config.app.isProduction, maxAge: 15 * 60 * 1000 }
+  rolling: true,
+  cookie: { httpOnly: true, sameSite: 'lax', secure: config.app.isProduction, maxAge: 60 * 60 * 1000 }
 }));
 app.use('/brand', express.static(path.join(config.view.assetsDir, 'brand', 'logo'), {
   maxAge: config.app.isProduction ? '1d' : 0,

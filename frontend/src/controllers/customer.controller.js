@@ -124,16 +124,8 @@ const customerController = {
       return next(error);
     }
   },
-  async profile(req, res, next) {
-    try {
-      const result = await customerService.profile();
-      return res.render('customer/ho-so', {
-        title: 'Hồ sơ',
-        profile: result.data
-      });
-    } catch (error) {
-      return next(error);
-    }
+  profile(req, res) {
+    return res.render('shared/thong-tin-ca-nhan', { title: 'Thông tin cá nhân', layout: 'customer' });
   }
 };
 

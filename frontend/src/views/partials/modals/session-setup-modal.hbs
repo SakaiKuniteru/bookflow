@@ -1,0 +1,53 @@
+<div class="bf-session-modal-overlay">
+  <section class="bf-session-modal" role="dialog" aria-modal="true" aria-labelledby="session-modal-title">
+    <header class="bf-session-modal-header">
+      <span class="bf-session-modal-icon" aria-hidden="true">⚙</span>
+      <div class="bf-session-modal-heading">
+        <h1 id="session-modal-title">Thiết lập phiên làm việc</h1>
+        <p>Vui lòng chọn chi nhánh và giao diện bạn muốn sử dụng để bắt đầu làm việc với BookFlow.</p>
+      </div>
+      <button class="bf-session-modal-close" type="submit" form="cancel-session-form" aria-label="Hủy thiết lập">×</button>
+    </header>
+    {{#if error}}<div class="bf-session-modal-error" role="alert">{{error}}</div>{{/if}}
+    <form id="session-setup-form" method="post" action="/auth/thiet-lap-phien">
+      {{#if showOrganization}}
+        <section class="bf-session-step">
+          <div class="bf-session-step-heading"><span class="bf-session-step-number">1</span><div><strong>Đơn vị <span>*</span></strong><small>Chọn đơn vị bạn muốn làm việc.</small></div></div>
+          <select id="session-organization" name="don_vi_id" required>
+            <option value="">Chọn đơn vị</option>
+            {{#each organizationOptions}}<option value="{{value}}">{{label}}</option>{{/each}}
+          </select>
+        </section>
+      {{else}}
+        {{#if showBranch}}
+          <section class="bf-session-step">
+            <div class="bf-session-step-heading"><span class="bf-session-step-number">1</span><div><strong>Chi nhánh <span>*</span></strong><small>Chọn chi nhánh bạn muốn làm việc.</small></div></div>
+            <select id="session-branch" name="chi_nhanh_id" required>
+              <option value="">Chọn chi nhánh</option>
+              {{#each branchOptions}}<option value="{{value}}">{{label}}</option>{{/each}}
+            </select>
+          </section>
+        {{/if}}
+        <section class="bf-session-step">
+          <div class="bf-session-step-heading"><span class="bf-session-step-number">{{#if showBranch}}2{{else}}1{{/if}}</span><div><strong>Giao diện <span>*</span></strong><small>Chọn giao diện phù hợp với quyền sử dụng của bạn.</small></div></div>
+          <div class="bf-session-interface-grid">
+            {{#each interfaceOptions}}
+              <label class="bf-session-interface">
+                <input type="radio" name="interface" value="{{value}}" required>
+                <span class="bf-session-radio" aria-hidden="true"></span>
+                <span class="bf-session-interface-copy"><strong>{{label}}</strong><small>{{description}}</small></span>
+              </label>
+            {{/each}}
+          </div>
+        </section>
+      {{/if}}
+    </form>
+    <form id="cancel-session-form" method="post" action="/auth/dang-xuat">
+    <input type="hidden" name="dangNhapLai" value="1">
+    </form>
+    <footer class="bf-session-modal-footer">
+      <button class="bf-session-cancel" type="submit" form="cancel-session-form">Hủy</button>
+      <button class="bf-session-confirm" type="submit" form="session-setup-form">{{#if showOrganization}}Tiếp tục{{else}}Xác nhận{{/if}} <span aria-hidden="true">→</span></button>
+    </footer>
+  </section>
+</div>

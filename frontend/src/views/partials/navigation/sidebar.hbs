@@ -1,23 +1,39 @@
 <aside id="{{id}}" class="bf-nav-sidebar {{className}}" data-bf-sidebar>
+    <a class="bf-nav-sidebar-brand" href="{{dashboardHref}}" aria-label="{{app.name}} - Tổng quan">
+        <img src="/brand/logo-symbol.svg" alt="">
+        <span>{{app.name}}</span>
+    </a>
     {{#if title}}<div class="bf-nav-sidebar-title">{{title}}</div>{{/if}}
-    <nav aria-label="{{#if ariaLabel}}{{ariaLabel}}{{else}}Điều hướng{{/if}}">
+    <nav class="bf-nav-sidebar-menu" aria-label="{{#if ariaLabel}}{{ariaLabel}}{{else}}Điều hướng{{/if}}">
         {{#each items}}
             {{#if divider}}<div class="bf-nav-sidebar-divider"></div>{{/if}}
             {{#if group}}<h2 class="bf-nav-sidebar-group">{{group}}</h2>{{/if}}
-            <a
-                class="bf-nav-sidebar-link {{#if active}}is-active{{/if}}"
-                href="{{href}}"
-                {{#if active}}aria-current="page"{{/if}}
-            >
-                {{#if icon}}
-                    {{> ui/icon
-                        name=icon
-                        size="18"
-                    }}
-                {{/if}}
+            <a class="bf-nav-sidebar-link {{#if active}}is-active{{/if}}" href="{{href}}" {{#if active}}aria-current="page"{{/if}}>
+                {{#if icon}}{{> ui/icon name=icon size="18"}}{{/if}}
                 <span class="bf-nav-sidebar-link-label">{{label}}</span>
                 {{#if badge}}<span class="bf-nav-sidebar-badge">{{badge}}</span>{{/if}}
             </a>
         {{/each}}
     </nav>
+    {{#if user}}
+        <div class="bf-nav-sidebar-account">
+            <a class="bf-nav-sidebar-account-info" href="{{profileHref}}">
+                <span class="bf-nav-sidebar-avatar">
+                    {{#if user.avatar}}
+                        <img class="bf-nav-avatar" src="{{user.avatar}}" alt="">
+                    {{else}}
+                        <img class="bf-nav-avatar" data-bf-avatar-file-id="{{user.tai_khoan.anh_dai_dien_tep_id}}" alt="" hidden>
+                        <span class="bf-nav-avatar bf-nav-avatar-fallback" data-bf-avatar-fallback>{{#if user.tai_khoan.ho_ten}}{{user.tai_khoan.ho_ten.[0]}}{{else}}{{#if user.taiKhoan.hoTen}}{{user.taiKhoan.hoTen.[0]}}{{else}}?{{/if}}{{/if}}</span>
+                    {{/if}}
+                </span>
+                <span class="bf-nav-sidebar-account-details">
+                    <strong>{{#if user.tai_khoan.ho_ten}}{{user.tai_khoan.ho_ten}}{{else}}{{#if user.taiKhoan.hoTen}}{{user.taiKhoan.hoTen}}{{else}}Tài khoản{{/if}}{{/if}}</strong>
+                    <small>{{#if user.tai_khoan.email}}{{user.tai_khoan.email}}{{else}}{{#if user.taiKhoan.email}}{{user.taiKhoan.email}}{{else}}{{user.email}}{{/if}}{{/if}}</small>
+                </span>
+            </a>
+            <form class="bf-nav-logout-form" method="post" action="/auth/dang-xuat">
+                <button class="bf-nav-sidebar-logout" type="submit">Đăng xuất</button>
+            </form>
+        </div>
+    {{/if}}
 </aside>

@@ -16,23 +16,18 @@
     {{/each}}
 </head>
 <body class="bf-layout bf-layout-staff {{bodyClass}}" data-bf-theme="default">
-    {{> navigation/header
-        brandName=app.name
-        brandHref="/"
-        links=navigation.headerLinks
-        user=user
-        accountLinks=navigation.accountLinks
-        notifications=navigation.notifications
-        unreadCount=navigation.unreadCount
-        showNotifications=navigation.showNotifications
-        sidebarId="staff-sidebar"
-    }}
+    <button type="button" class="bf-nav-mobile-toggle bf-layout-sidebar-toggle" data-bf-sidebar-toggle="staff-sidebar" aria-label="Mở menu" aria-expanded="false">
+        {{> ui/icon name="menu" size="22"}}
+    </button>
     <div class="bf-app-shell">
         {{> navigation/sidebar
             id="staff-sidebar"
             title=navigation.sidebarTitle
             ariaLabel="Menu nhân viên"
             items=navigation.sidebarItems
+            dashboardHref="/staff/tong-quan"
+            profileHref="/staff/thong-tin-ca-nhan"
+            user=user
         }}
         <div class="bf-app-main">
             {{#if breadcrumbs}}
@@ -61,5 +56,6 @@
     {{#each scripts}}
         <script type="module" src="{{this}}"></script>
     {{/each}}
+    <script defer src="/js/common/auth-sync.js?v=20261004-2"></script>
 </body>
 </html>

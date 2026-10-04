@@ -2,13 +2,14 @@ import { Router } from 'express';
 import staffController from '../controllers/staff.controller.js';
 import authMiddleware from '../middlewares/auth.js';
 import permissionMiddleware from '../middlewares/permission.js';
+import requireActiveInterface from '../middlewares/active-interface.js';
 
 const router = Router();
 
-router.use(authMiddleware);
-
+router.use(authMiddleware, requireActiveInterface('staff'));
+router.get('/', (req, res) => res.redirect('/staff/tong-quan'));
 router.get('/tong-quan', permissionMiddleware('books.read'), staffController.dashboard);
-
+router.get('/thong-tin-ca-nhan', staffController.profile);
 router.get('/sach', permissionMiddleware('BOOK_VIEW'), staffController.books);
 router.get('/sach/them', permissionMiddleware('BOOK_CREATE'), staffController.createBook);
 router.get('/sach/:id', permissionMiddleware('BOOK_VIEW'), staffController.bookDetail);

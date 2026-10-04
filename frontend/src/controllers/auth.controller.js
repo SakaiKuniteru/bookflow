@@ -28,52 +28,71 @@ function safeRedirect(value) {
 function urlDoiEmail(path, email) {
   return `${path}?email=${encodeURIComponent(email || '')}`;
 }
-function destinationFor(context) {
-  const roles = (context?.vai_tro || context?.vaiTro || []).map(role => role.ma_vai_tro || role.maVaiTro);
-  if (roles.includes('QUAN_TRI')) return '/admin/tong-quan';
-  if (roles.includes('NHAN_VIEN') || roles.includes('THU_THU')) return '/staff/tong-quan';
-  return '/customer/tong-quan';
+
+function layMaVaiTro(context) {
+  const vaiTro = context?.vai_tro || context?.vaiTro || [];
+  return vaiTro.map(item => typeof item === 'string' ? item : item?.ma_vai_tro || item?.maVaiTro).filter(Boolean);
+}
+function layMaQuyen(context) {
+  const quyen = context?.quyen || context?.permissions || [];
+  return quyen.map(item => typeof item === 'string' ? item : item?.ma_quyen || item?.maQuyen).filter(Boolean);
+}
+function interfaceOptions(context) {
+  const vaiTro = layMaVaiTro(context);
+  const quyen = layMaQuyen(context);
+  const isSuperAdmin = vaiTro.includes('SUPER_ADMIN') || quyen.some(item => item.startsWith('SUPER_ADMIN_'));
+  const isAdmin = vaiTro.includes('QUAN_TRI');
+  const isStaff = vaiTro.includes('NHAN_VIEN') || vaiTro.includes('THU_THU');
+  const options = [];
+  if (isSuperAdmin) options.push({ value: 'super-admin', label: 'Super Admin', description: 'Quản trị toàn nền tảng' });
+  if (isSuperAdmin || isAdmin) options.push({ value: 'admin', label: 'Admin', description: 'Quản trị đơn vị và hoạt động' });
+  if (isSuperAdmin || isAdmin || isStaff) options.push({ value: 'staff', label: 'Nhân viên', description: 'Thực hiện nghiệp vụ tại đơn vị' });
+  options.push({ value: 'customer', label: 'Người dùng', description: 'Khám phá, mượn và quản lý sách' });
+  return options;
+}
+function destinationForInterface(value) {
+  return { 'super-admin': '/super-admin/tong-quan', admin: '/admin/tong-quan', staff: '/staff/tong-quan', customer: '/customer/tong-quan' }[value] || '/customer/tong-quan';
+}
+function selectedOrganizationId(context) {
+  return context?.don_vi_dang_chon_id || context?.donViDangChonId || null;
+}
+function selectedBranchId(context) {
+  return context?.chi_nhanh_dang_chon_id || context?.chiNhanhDangChonId || null;
 }
 function accessibleBranches(context) {
   return context?.chi_nhanh_duoc_truy_cap || context?.chiNhanhDuocTruyCap || context?.data?.chi_nhanh_duoc_truy_cap || context?.data?.chiNhanhDuocTruyCap || [];
 }
-async function finishLogin(res, token, context, requestedRedirect) {
+async function finishLogin(req, res, token, context) {
   res.cookie(config.env.authCookieName, token, cookieOptions);
   const refreshToken = context?.refresh_token || context?.refreshToken;
-  if (refreshToken) {
-    res.cookie(config.env.authRefreshCookieName, refreshToken, {
-      httpOnly: true,
-      secure: config.env.authCookieSecure,
-      sameSite: config.env.authCookieSameSite,
-      maxAge: config.env.authRefreshCookieMaxAge,
-      path: '/'
-    });
-  }
+  if (refreshToken) res.cookie(config.env.authRefreshCookieName, refreshToken, { httpOnly: true, secure: config.env.authCookieSecure, sameSite: config.env.authCookieSameSite, maxAge: config.env.authRefreshCookieMaxAge, path: '/' });
   notifyAuthTabs(res);
   const organizations = context?.don_vi_tham_gia || context?.donViThamGia || [];
-  const selectedOrganizationId = context?.don_vi_dang_chon_id || context?.donViDangChonId;
-  if (organizations.length > 1 && !selectedOrganizationId) return res.redirect(`/auth/chon-don-vi?redirect=${encodeURIComponent(safeRedirect(requestedRedirect) || '/')}`);
-  if (organizations.length === 1 && !selectedOrganizationId) {
-    const selected = await authService.selectOrganization(token, organizations[0].id);
-    context = selected.data || selected;
+  if (organizations.length > 1 && !selectedOrganizationId(context)) return res.redirect('/auth/thiet-lap-phien');
+  if (organizations.length === 1 && !selectedOrganizationId(context)) {
+    const result = await authService.selectOrganization(token, organizations[0].id);
+    context = result.data || result;
   }
   const branches = accessibleBranches(context);
-  const selectedBranchId = context?.chi_nhanh_dang_chon_id || context?.chiNhanhDangChonId;
-  if (branches.length > 1 && !selectedBranchId) return res.redirect(`/auth/chon-chi-nhanh?redirect=${encodeURIComponent(safeRedirect(requestedRedirect) || '/')}`);
-  if (branches.length === 1 && !selectedBranchId) {
-    const selected = await authService.selectBranch(token, branches[0].id);
-    context = selected.data || selected;
+  if (branches.length === 1 && !selectedBranchId(context)) {
+    const result = await authService.selectBranch(token, branches[0].id);
+    context = result.data || result;
   }
-  const redirect = safeRedirect(requestedRedirect);
-  return res.redirect(redirect || '/');
+  const options = interfaceOptions(context);
+  if (options.length === 1) {
+    req.session.activeInterface = 'customer';
+    delete req.session.pendingLoginIdentifier;
+    return res.redirect('/customer/tong-quan');
+  }
+  return res.redirect('/auth/thiet-lap-phien');
 }
-
 const authController = {
   async loginPage(req, res) {
-    if (req.user) return await finishLogin(res, req.authToken, req.user, req.query.redirect);
+    if (req.user) return await finishLogin(req, res, req.authToken, req.user);
     if (req.session) delete req.session.registrationDraft;
     return renderAuth(res, 'dang-nhap', 'Đăng nhập', {
       redirect: req.query.redirect || '/',
+      values: { email: req.session?.pendingLoginIdentifier || '' },
       allowRegistration: true,
       registered: req.query.registered === '1',
       reset: req.query.reset === '1'
@@ -93,14 +112,16 @@ const authController = {
         error.status = 502;
         throw error;
       }
-      return await finishLogin(res, token, data, req.body.redirect);
+      req.session.pendingLoginIdentifier = String(req.body.email || '').trim().slice(0, 254);
+      return await finishLogin(req, res, token, data);
     } catch (error) {
-      return renderAuth(res, 'dang-nhap', 'Đăng nhập', {
-        error: error.message,
-        values: { email: req.body.email || '' },
-        redirect: safeRedirect(req.body.redirect) || '/',
-        allowRegistration: true
-      }, error.status >= 400 && error.status < 500 ? error.status : 500);
+    return renderAuth(res, 'dang-nhap', 'Đăng nhập', {
+      error: error.message,
+      values: { email: req.body.email || req.session?.pendingLoginIdentifier || '' },
+      redirect: safeRedirect(req.body.redirect) || '/',
+      allowRegistration: true,
+      loginFailed: true
+    }, error.status >= 400 && error.status < 500 ? error.status : 500);
     }
   },
   registerPage(req, res) {
@@ -218,21 +239,68 @@ const authController = {
       const data = result.data || result;
       const token = data.access_token || data.accessToken;
       if (!token) throw new Error('Backend không trả access token sau khi kích hoạt.');
-      return await finishLogin(res, token, data, null);
+      return await finishLogin(req, res, token, data);
     } catch (error) {
       return renderAuth(res, 'kich-hoat-nhan-vien', 'Kích hoạt tài khoản nhân viên', { identifier: req.body.identifier || '', error: error.message }, error.status >= 400 && error.status < 500 ? error.status : 500);
+    }
+  },
+  async workspaceSetupPage(req, res) {
+    if (!req.user) return res.redirect('/auth/dang-nhap');
+    const organizations = req.user.don_vi_tham_gia || req.user.donViThamGia || [];
+    if (organizations.length === 1 && !selectedOrganizationId(req.user)) {
+      const result = await authService.selectOrganization(req.authToken, organizations[0].id);
+      return res.redirect('/auth/thiet-lap-phien');
+    }
+    const options = interfaceOptions(req.user);
+    if (options.length === 1) return res.redirect('/customer/tong-quan');
+    return renderAuth(res, 'thiet-lap-phien', 'Thiết lập phiên làm việc', {
+      sessionSetup: true,
+      showOrganization: organizations.length > 1 && !selectedOrganizationId(req.user),
+      organizationOptions: organizations.map(item => ({ value: item.id, label: item.ten_hien_thi || item.tenHienThi || item.ten_don_vi || item.tenDonVi || item.ma_don_vi || item.maDonVi })),
+      showBranch: accessibleBranches(req.user).length > 1 && !selectedBranchId(req.user),
+      branchOptions: accessibleBranches(req.user).map(item => ({ value: item.id, label: item.tenChiNhanh || item.ten_chi_nhanh || item.maChiNhanh || item.ma_chi_nhanh })),
+      interfaceOptions: options,
+      error: req.query.error || ''
+    });
+  },
+  async confirmWorkspaceSetup(req, res) {
+    try {
+      let context = req.user;
+      const organizations = context?.don_vi_tham_gia || context?.donViThamGia || [];
+      if (organizations.length > 1 && !selectedOrganizationId(context)) {
+        if (!req.body.don_vi_id) return res.redirect('/auth/thiet-lap-phien?error=Vui+l%C3%B2ng+ch%E1%BB%8Dn+%C4%91%C6%A1n+v%E1%BB%8B');
+        await authService.selectOrganization(req.authToken, req.body.don_vi_id);
+        return res.redirect('/auth/thiet-lap-phien');
+      }
+      let branches = accessibleBranches(context);
+      if (branches.length > 1 && !selectedBranchId(context)) {
+        const branch = branches.find(item => String(item.id) === String(req.body.chi_nhanh_id));
+        if (!branch) return res.redirect('/auth/thiet-lap-phien?error=Vui+l%C3%B2ng+ch%E1%BB%8Dn+chi+nh%C3%A1nh');
+        const result = await authService.selectBranch(req.authToken, branch.id);
+        context = result.data || result;
+      } else if (branches.length === 1 && !selectedBranchId(context)) {
+        const result = await authService.selectBranch(req.authToken, branches[0].id);
+        context = result.data || result;
+      }
+      const option = interfaceOptions(context).find(item => item.value === req.body.interface);
+      if (!option) return res.status(403).redirect('/auth/thiet-lap-phien?error=Giao+di%E1%BB%87n+kh%C3%B4ng+h%E1%BB%A3p+l%E1%BB%87+v%E1%BB%9Bi+quy%E1%BB%81n+t%C3%A0i+kho%E1%BA%A3n');
+      req.session.activeInterface = option.value;
+      delete req.session.pendingLoginIdentifier;
+      return res.redirect(destinationForInterface(option.value));
+    } catch (error) {
+      return res.redirect(`/auth/thiet-lap-phien?error=${encodeURIComponent(error.message || 'Không thể thiết lập phiên làm việc')}`);
     }
   },
   async organizationPage(req, res) {
     if (!req.user) return res.redirect('/auth/dang-nhap');
     const organizations = req.user.don_vi_tham_gia || req.user.donViThamGia || [];
-    if (organizations.length === 1) return await finishLogin(res, req.authToken, req.user, req.query.redirect);
+    if (organizations.length === 1) return await finishLogin(req, res, req.authToken, req.user);
     return renderAuth(res, 'chon-don-vi', 'Chọn đơn vị', { redirect: safeRedirect(req.query.redirect) || '/', organizationOptions: organizations.map(item => ({ value: item.id, label: item.ten_hien_thi || item.tenHienThi || item.ten_don_vi || item.tenDonVi || item.ma_don_vi || item.maDonVi })) });
   },
   async selectOrganization(req, res) {
     try {
       const result = await authService.selectOrganization(req.authToken, req.body.don_vi_id);
-      return await finishLogin(res, req.authToken, result.data || result, req.body.redirect);
+      return await finishLogin(req, res, req.authToken, result.data || result);
     } catch (error) {
       const organizations = req.user?.don_vi_tham_gia || req.user?.donViThamGia || [];
       return renderAuth(res, 'chon-don-vi', 'Chọn đơn vị', { redirect: safeRedirect(req.body.redirect) || '/', organizationOptions: organizations.map(item => ({ value: item.id, label: item.ten_hien_thi || item.tenHienThi || item.ten_don_vi || item.tenDonVi || item.ma_don_vi || item.maDonVi })), error: error.message }, error.status >= 400 && error.status < 500 ? error.status : 500);
@@ -240,7 +308,7 @@ const authController = {
   },
   async branchPage(req, res) {
     const branches = accessibleBranches(req.user);
-    if (branches.length < 2 || req.user?.chi_nhanh_dang_chon_id || req.user?.chiNhanhDangChonId) return await finishLogin(res, req.authToken, req.user, req.query.redirect);
+    if (branches.length < 2 || req.user?.chi_nhanh_dang_chon_id || req.user?.chiNhanhDangChonId) return await finishLogin(req, res, req.authToken, req.user);
     return renderAuth(res, 'chon-chi-nhanh', 'Chọn chi nhánh', { branches, redirect: safeRedirect(req.query.redirect) || '/' });
   },
   async selectBranch(req, res) {
@@ -315,7 +383,12 @@ const authController = {
       res.clearCookie(config.env.authCookieName, cookieOptions);
       res.clearCookie(config.env.authRefreshCookieName, cookieOptions);
       notifyAuthTabs(res);
-      return res.redirect('/');
+      const quayVeDangNhap = req.body?.dangNhapLai === '1';
+      if (req.session) {
+        delete req.session.activeInterface;
+        if (!quayVeDangNhap) delete req.session.pendingLoginIdentifier;
+      }
+      return res.redirect(quayVeDangNhap ? '/auth/dang-nhap?doi-giao-dien=1' : '/');
     } catch (error) {
       return next(error);
     }

@@ -6,12 +6,16 @@ const layMaVaiTro = user => {
 const taoLienKetKhongGian = (user, currentPath) => {
   if (!user) return [];
   const vaiTro = layMaVaiTro(user);
-  const laQuanTri = vaiTro.includes('QUAN_TRI');
-  const laNhanVien = laQuanTri || vaiTro.includes('NHAN_VIEN') || vaiTro.includes('THU_THU');
-  if (!laNhanVien) return [];
-  const luaChon = [{ label: 'Người dùng', href: '/customer/tong-quan' }, { label: 'Nhân viên', href: '/staff/tong-quan' }];
-  if (laQuanTri) luaChon.push({ label: 'Quản trị', href: '/admin/tong-quan' });
-  return luaChon.map(item => ({ ...item, active: currentPath.startsWith(item.href.split('/').slice(0, 2).join('/')) }));
+  const quyen = (user?.quyen || user?.permissions || []).map(item => typeof item === 'string' ? item : item?.ma_quyen || item?.maQuyen).filter(Boolean);
+  const isSuperAdmin = vaiTro.includes('SUPER_ADMIN') || quyen.some(item => item.startsWith('SUPER_ADMIN_'));
+  const isAdmin = vaiTro.includes('QUAN_TRI');
+  const isStaff = vaiTro.includes('NHAN_VIEN') || vaiTro.includes('THU_THU');
+  if (!isSuperAdmin && !isAdmin && !isStaff) return [];
+  const choices = [{ label: 'Người dùng', interface: 'customer', prefix: '/customer', href: '/customer/tong-quan' }];
+  if (isSuperAdmin || isAdmin || isStaff) choices.push({ label: 'Nhân viên', interface: 'staff', prefix: '/staff', href: '/staff/tong-quan' });
+  if (isSuperAdmin || isAdmin) choices.push({ label: 'Admin', interface: 'admin', prefix: '/admin', href: '/admin/tong-quan' });
+  if (isSuperAdmin) choices.push({ label: 'Super Admin', interface: 'super-admin', prefix: '/super-admin', href: '/super-admin/tong-quan' });
+  return choices.map(item => ({ ...item, active: currentPath.startsWith(item.prefix) }));
 };
 const localsMiddleware = (req, res, next) => {
   const defaultNavigation = {

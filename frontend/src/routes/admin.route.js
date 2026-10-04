@@ -2,13 +2,14 @@ import { Router } from 'express';
 import adminController from '../controllers/admin.controller.js';
 import authMiddleware from '../middlewares/auth.js';
 import permissionMiddleware from '../middlewares/permission.js';
+import requireActiveInterface from '../middlewares/active-interface.js';
 
 const router = Router();
 
-router.use(authMiddleware);
-
+router.use(authMiddleware, requireActiveInterface('admin'));
+router.get('/', (req, res) => res.redirect('/admin/tong-quan'));
 router.get('/tong-quan', permissionMiddleware('members.manage'), adminController.dashboard);
-
+router.get('/thong-tin-ca-nhan', adminController.profile);
 router.get('/chi-nhanh', permissionMiddleware('BRANCH_VIEW'), adminController.branches);
 router.get('/nhan-vien', permissionMiddleware('EMPLOYEE_VIEW'), adminController.employees);
 router.get('/phan-quyen', permissionMiddleware('PERMISSION_VIEW'), adminController.permissions);

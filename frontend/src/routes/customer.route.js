@@ -2,10 +2,11 @@ import { Router } from 'express';
 import customerController from '../controllers/customer.controller.js';
 import authMiddleware from '../middlewares/auth.js';
 import permissionMiddleware from '../middlewares/permission.js';
+import requireActiveInterface from '../middlewares/active-interface.js';
 
 const router = Router();
 
-router.use(authMiddleware);
+router.use(authMiddleware, requireActiveInterface('customer'));
 
 router.get('/tong-quan', customerController.dashboard);
 router.get('/gio-hang', customerController.cart);

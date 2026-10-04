@@ -17,11 +17,34 @@ function openMenu(wrapper) {
     const panel = wrapper.querySelector("[data-bf-menu-panel]");
     if (panel) panel.hidden = false;
 }
-
+async function loadSidebarAvatars(root) {
+    const images = root.querySelectorAll("[data-bf-avatar-file-id]");
+    await Promise.all([...images].map(async image => {
+        const fileId = image.dataset.bfAvatarFileId;
+        if (!/^[1-9]\d*$/.test(fileId || "")) return;
+        try {
+            const response = await fetch(`/api/tep-tin/${fileId}/url`, { credentials: "same-origin", headers: { Accept: "application/json" } });
+            if (!response.ok) return;
+            const payload = await response.json();
+            if (typeof payload?.data?.url !== "string") return;
+            const fallback = image.parentElement?.querySelector("[data-bf-avatar-fallback]");
+            image.addEventListener("load", () => {
+                image.hidden = false;
+                if (fallback) fallback.hidden = true;
+            }, { once: true });
+            image.addEventListener("error", () => {
+                image.hidden = true;
+                if (fallback) fallback.hidden = false;
+            }, { once: true });
+            image.src = payload.data.url;
+        } catch {}
+    }));
+}
 function initNavigation(root = document) {
     const doc = root.ownerDocument || root;
     if (initializedDocuments.has(doc)) return;
     initializedDocuments.add(doc);
+    loadSidebarAvatars(doc);
     doc.addEventListener("click", event => {
         const toggle = event.target.closest("[data-bf-sidebar-toggle]");
         if (toggle) {

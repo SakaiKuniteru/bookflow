@@ -13,6 +13,9 @@ const adminController = {
   async dashboard(req, res) {
     return res.render('admin/tong-quan', { title: 'Tổng quan quản trị', layout: 'admin' });
   },
+  async profile(req, res) {
+    return res.render('shared/thong-tin-ca-nhan', { title: 'Thông tin cá nhân', layout: 'admin' });
+  },
   branches: render('admin/chi-nhanh', 'Chi nhánh'),
   employees: render('admin/nhan-vien', 'Nhân viên'),
   permissions: render('admin/phan-quyen', 'Phân quyền'),

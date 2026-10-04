@@ -1,0 +1,21 @@
+<section class="bf-profile-page">
+    <header class="bf-public-page-heading">
+        <p>Hồ sơ tài khoản</p>
+        <h1>Thông tin cá nhân</h1>
+    </header>
+    <article class="bf-profile-card">
+        <div class="bf-profile-avatar">
+            {{#if user.avatar}}
+                <img class="bf-nav-avatar" src="{{user.avatar}}" alt="Avatar">
+            {{else}}
+                <img class="bf-nav-avatar" data-bf-avatar-file-id="{{user.tai_khoan.anh_dai_dien_tep_id}}" alt="Avatar" hidden>
+                <span class="bf-nav-avatar bf-nav-avatar-fallback" data-bf-avatar-fallback>{{#if user.tai_khoan.ho_ten}}{{user.tai_khoan.ho_ten.[0]}}{{else}}{{#if user.taiKhoan.hoTen}}{{user.taiKhoan.hoTen.[0]}}{{else}}?{{/if}}{{/if}}</span>
+            {{/if}}
+        </div>
+        <div>
+            <h2>{{#if user.tai_khoan.ho_ten}}{{user.tai_khoan.ho_ten}}{{else}}{{#if user.taiKhoan.hoTen}}{{user.taiKhoan.hoTen}}{{else}}Tài khoản{{/if}}{{/if}}</h2>
+            <p>{{#if user.tai_khoan.email}}{{user.tai_khoan.email}}{{else}}{{#if user.taiKhoan.email}}{{user.taiKhoan.email}}{{else}}{{user.email}}{{/if}}{{/if}}</p>
+            {{#if user.tai_khoan.so_dien_thoai}}<p>{{user.tai_khoan.so_dien_thoai}}</p>{{/if}}
+        </div>
+    </article>
+</section>
