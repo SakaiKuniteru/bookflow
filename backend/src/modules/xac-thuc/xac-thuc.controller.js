@@ -61,7 +61,12 @@ class XacThucController {
             return tra(req, res, data);
         } catch (error) { next(error); }
     }
-
+    async hoatDong(req, res, next) {
+        try {
+            const data = await service.ghiNhanHoatDong(req.auth);
+            return tra(req, res, data);
+        } catch (error) { next(error); }
+    }
     async dangXuat(req, res, next) {
         try {
             const data = await service.dangXuat(req.auth);

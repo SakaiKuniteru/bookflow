@@ -1,7 +1,21 @@
 import config from '../config/index.js';
-
+const layMaVaiTro = user => {
+  const values = Array.isArray(user?.vai_tro) ? user.vai_tro : Array.isArray(user?.vaiTro) ? user.vaiTro : Array.isArray(user?.roles) ? user.roles : [];
+  return values.map(item => typeof item === 'string' ? item : item?.ma_vai_tro ?? item?.maVaiTro).filter(Boolean);
+};
+const taoLienKetKhongGian = (user, currentPath) => {
+  if (!user) return [];
+  const vaiTro = layMaVaiTro(user);
+  const laQuanTri = vaiTro.includes('QUAN_TRI');
+  const laNhanVien = laQuanTri || vaiTro.includes('NHAN_VIEN') || vaiTro.includes('THU_THU');
+  if (!laNhanVien) return [];
+  const luaChon = [{ label: 'Người dùng', href: '/customer/tong-quan' }, { label: 'Nhân viên', href: '/staff/tong-quan' }];
+  if (laQuanTri) luaChon.push({ label: 'Quản trị', href: '/admin/tong-quan' });
+  return luaChon.map(item => ({ ...item, active: currentPath.startsWith(item.href.split('/').slice(0, 2).join('/')) }));
+};
 const localsMiddleware = (req, res, next) => {
   const defaultNavigation = {
+    accountLinks: taoLienKetKhongGian(req.user, req.path),
     headerLinks: [
       { label: 'Trang chủ', href: '/' },
       { label: 'Khám phá sách', href: '/sach' },

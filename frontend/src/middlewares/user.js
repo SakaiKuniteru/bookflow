@@ -20,12 +20,15 @@ const userMiddleware = async (req, res, next) => {
         if (error.status !== 401) throw error;
       }
     }
-    if (!result && refreshToken) {
-      const refreshed = await authService.refresh(refreshToken);
+    if (!result && (refreshToken || req.authToken)) {
+      const refreshed = await authService.refresh(refreshToken, req.authToken);
       const tokens = refreshed.data || refreshed;
-      req.authToken = tokens.access_token;
-      res.cookie(config.env.authCookieName, tokens.access_token, { ...cookieOptions, maxAge: Number(tokens.expires_in || 600) * 1000 });
-      res.cookie(config.env.authRefreshCookieName, tokens.refresh_token, { ...cookieOptions, maxAge: config.env.authRefreshCookieMaxAge });
+      const accessToken = tokens.accessToken || tokens.access_token;
+      const refreshTokenMoi = tokens.refreshToken || tokens.refresh_token;
+      if (!accessToken || !refreshTokenMoi) throw Object.assign(new Error('Backend không trả đủ token để gia hạn phiên'), { status: 502 });
+      req.authToken = accessToken;
+      res.cookie(config.env.authCookieName, accessToken, { ...cookieOptions, maxAge: config.env.authCookieMaxAge });
+      res.cookie(config.env.authRefreshCookieName, refreshTokenMoi, { ...cookieOptions, maxAge: config.env.authRefreshCookieMaxAge });
       result = await authService.meWithToken(req.authToken);
     }
     req.user = result?.data || null;

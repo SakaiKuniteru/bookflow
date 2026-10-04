@@ -55,13 +55,17 @@ class XacThucService {
 
     async taoPhien(tk, client, nguCanh = {}) {
         const refreshToken = tokenService.taoRefreshToken();
-        const phien = await repo.taoPhienDb(tk.id, tokenService.bamRefreshToken(refreshToken), client, nguCanh.donViId ?? null, nguCanh.chiNhanhId ?? null, tokenService.REFRESH_TOKEN_TTL_MINUTES);
+        const phien = await repo.taoPhienDb(tk.id, tokenService.bamRefreshToken(refreshToken), client, nguCanh.donViId ?? null, nguCanh.chiNhanhId ?? null, tokenService.FE_SESSION_TTL_MINUTES);
         if (!phien) throw this.loiDangNhap();
         const accessToken = await tokenService.taoAccessToken({ taiKhoanId: tk.id, phienId: phien.id, phienBan: phien.phien_ban_xac_thuc });
         const thongTin = await xacThucContext.taoNguCanhDangNhap({ taiKhoanId: tk.id, donViId: phien.don_vi_dang_chon_id, chiNhanhId: phien.chi_nhanh_dang_chon_id }, client);
         return {
-            access_token: accessToken, refresh_token: refreshToken, token_type: 'Bearer',
-            expires_in: tokenService.ACCESS_TOKEN_TTL, refresh_token_expires_at: phien.ngay_het_han, ...thongTin
+            access_token: accessToken, 
+            refresh_token: refreshToken, 
+            token_type: 'Bearer',
+            expires_in: tokenService.ACCESS_TOKEN_TTL, 
+            refresh_token_expires_at: new Date(Date.now() + tokenService.REFRESH_TOKEN_TTL_MINUTES * 60000).toISOString(), 
+            ...thongTin
         };
     }
     async xoaDangKyChoXacMinhHetHan() {
@@ -336,27 +340,38 @@ class XacThucService {
         if (!result) throw this.loiOtp();
         return { thong_bao: 'Đổi mật khẩu thành công, vui lòng đăng nhập lại' };
     }
-
-    async lamMoiPhien({ refresh_token } = {}) {
-        if (!tokenService.refreshTokenHopLe(refresh_token)) throw loiXacThuc('Refresh Token không hợp lệ', 401, 'REFRESH_TOKEN_INVALID');
+    async lamMoiPhien({ refresh_token, access_token } = {}) {
         const ketQua = await trongGiaoDich(async client => {
-            const maCu = tokenService.bamRefreshToken(refresh_token);
-            const phien = await repo.layPhienTheoRefresh(maCu, client);
-            if (!phien) return null;
-            const refreshMoi = tokenService.taoRefreshToken();
-            const phienDaXoay = await repo.xoayRefreshToken(phien.id, maCu, tokenService.bamRefreshToken(refreshMoi), tokenService.REFRESH_TOKEN_TTL_MINUTES, client);
-            if (!phienDaXoay) return null;
+            let phien = null;
+            let refreshToken = null;
+            if (tokenService.refreshTokenHopLe(refresh_token)) {
+                phien = await repo.layPhienTheoRefresh(tokenService.bamRefreshToken(refresh_token), client);
+                if (phien) refreshToken = refresh_token;
+            }
+            if (!phien && access_token) {
+                const auth = await tokenService.xacMinhAccessTokenChoLamMoi(access_token);
+                phien = await repo.layPhienTheoId(auth.phienId, auth.taiKhoanId, client);
+                if (!phien || Number(phien.phien_ban_xac_thuc) !== auth.phienBan) return null;
+                refreshToken = tokenService.taoRefreshToken();
+                const capNhat = await repo.capNhatRefreshTokenTheoId(phien.id, tokenService.bamRefreshToken(refreshToken), client);
+                if (!capNhat) return null;
+            }
+            if (!phien || !refreshToken) return null;
             const accessToken = await tokenService.taoAccessToken({ taiKhoanId: phien.tai_khoan_id, phienId: phien.id, phienBan: phien.phien_ban_xac_thuc });
             const thongTin = await xacThucContext.taoNguCanhDangNhap({ taiKhoanId: phien.tai_khoan_id, donViId: phien.don_vi_dang_chon_id, chiNhanhId: phien.chi_nhanh_dang_chon_id }, client);
             return {
-                access_token: accessToken, refresh_token: refreshMoi, token_type: 'Bearer',
-                expires_in: tokenService.ACCESS_TOKEN_TTL, refresh_token_expires_at: phienDaXoay.ngay_het_han, ...thongTin
+                access_token: accessToken, refresh_token: refreshToken, token_type: 'Bearer',
+                expires_in: tokenService.ACCESS_TOKEN_TTL, refresh_token_expires_at: new Date(Date.now() + tokenService.REFRESH_TOKEN_TTL_MINUTES * 60000).toISOString(), ...thongTin
             };
         });
-        if (!ketQua) throw loiXacThuc('Refresh Token không tồn tại hoặc đã hết hạn', 401, 'REFRESH_TOKEN_INVALID');
+        if (!ketQua) throw loiXacThuc('Phiên đăng nhập FE đã hết hạn hoặc không còn hợp lệ', 401, 'SESSION_EXPIRED');
         return ketQua;
     }
-
+    async ghiNhanHoatDong(auth) {
+        const phien = await repo.ghiNhanHoatDong(auth.phienId, tokenService.FE_SESSION_TTL_MINUTES);
+        if (!phien) throw loiXacThuc('Phiên đăng nhập không còn hợp lệ', 401, 'SESSION_EXPIRED');
+        return { trang_thai: 'ok' };
+    }
     async dangXuat(auth) {
         await repo.thuHoiPhien(auth.phienId, 'DANG_XUAT');
         return { thong_bao: 'Đã đăng xuất' };

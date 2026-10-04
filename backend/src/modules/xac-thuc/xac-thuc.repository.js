@@ -276,7 +276,28 @@ class XacThucRepository {
         );
         return rows[0] ?? null;
     }
-
+    async capNhatRefreshTokenTheoId(phienId, maRefreshBam, client) {
+        const { rows } = await query(
+            `UPDATE phien_dang_nhap
+            SET ma_phien_bam = $2
+            WHERE id = $1 AND ngay_thu_hoi IS NULL AND ngay_het_han > now()
+            RETURNING id`,
+            [phienId, maRefreshBam],
+            client
+        );
+        return rows[0] ?? null;
+    }
+    async ghiNhanHoatDong(phienId, thoiHanPhut) {
+        const { rows } = await query(
+            `UPDATE phien_dang_nhap
+            SET lan_su_dung_cuoi = now(),
+                ngay_het_han = now() + ($2::integer * interval '1 minute')
+            WHERE id = $1 AND ngay_thu_hoi IS NULL AND ngay_het_han > now()
+            RETURNING id`,
+            [phienId, thoiHanPhut]
+        );
+        return rows[0] ?? null;
+    }
     async xoayRefreshToken(phienId, maCu, maMoi, thoiHanPhut, client) {
         const { rows } = await query(
             `UPDATE phien_dang_nhap

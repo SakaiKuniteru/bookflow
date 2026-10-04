@@ -1,5 +1,5 @@
 const { createHash, randomBytes } = require('node:crypto');
-const { SignJWT, jwtVerify } = require('jose');
+const { SignJWT, jwtVerify, compactVerify } = require('jose');
 const { AppError } = require('../errors/AppError.js');
 const { docCauHinhToken } = require('../../config/environment.js');
 
@@ -12,6 +12,7 @@ const REFRESH_TOKEN = /^[A-Za-z0-9_-]{43}$/;
 class TokenService {
     ACCESS_TOKEN_TTL = thoiHan.accessTtlSeconds;
     REFRESH_TOKEN_TTL_MINUTES = thoiHan.refreshTtlMinutes;
+    FE_SESSION_TTL_MINUTES = thoiHan.feSessionTtlMinutes;
 
     khoaJwt() {
         const { jwtAccessSecret } = docCauHinhToken();
@@ -70,6 +71,28 @@ class TokenService {
             && Number.isInteger(payload.exp)
             && payload.exp > payload.iat
             && payload.exp - payload.iat <= this.ACCESS_TOKEN_TTL;
+        if (!hopLe) throw this.loiAccessToken();
+        return { taiKhoanId: Number(payload.sub), phienId: Number(payload.sid), phienBan: payload.pv };
+    }
+    async xacMinhAccessTokenChoLamMoi(token) {
+        if (typeof token !== 'string' || token.length > 4096) throw this.loiAccessToken();
+        let payload;
+        try {
+            const ketQua = await compactVerify(token, this.khoaJwt(), { algorithms: ['HS256'] });
+            if (ketQua.protectedHeader.typ !== 'JWT') throw this.loiAccessToken();
+            payload = JSON.parse(new TextDecoder().decode(ketQua.payload));
+        } catch (error) {
+            throw this.loiAccessToken();
+        }
+        const audienceHopLe = payload.aud === AUDIENCE || Array.isArray(payload.aud) && payload.aud.includes(AUDIENCE);
+        const hopLe = payload.iss === ISSUER && audienceHopLe && payload.loai === 'access'
+            && typeof payload.sub === 'string' && typeof payload.sid === 'string'
+            && ID.test(payload.sub) && Number(payload.sub) <= 2147483647
+            && ID.test(payload.sid) && Number(payload.sid) <= 2147483647
+            && Number.isSafeInteger(payload.pv) && payload.pv >= 1
+            && Number.isInteger(payload.iat) && Number.isInteger(payload.exp)
+            && payload.iat <= Math.floor(Date.now() / 1000)
+            && payload.exp > payload.iat && payload.exp - payload.iat <= this.ACCESS_TOKEN_TTL;
         if (!hopLe) throw this.loiAccessToken();
         return { taiKhoanId: Number(payload.sub), phienId: Number(payload.sid), phienBan: payload.pv };
     }

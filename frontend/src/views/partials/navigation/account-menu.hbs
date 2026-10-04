@@ -22,6 +22,9 @@
             <strong>{{#if user.name}}{{user.name}}{{else}}{{#if user.taiKhoan.hoTen}}{{user.taiKhoan.hoTen}}{{else}}{{user.tai_khoan.ho_ten}}{{/if}}{{/if}}</strong>
             {{#if user.email}}<span>{{user.email}}</span>{{else}}{{#if user.taiKhoan.email}}<span>{{user.taiKhoan.email}}</span>{{else}}{{#if user.tai_khoan.email}}<span>{{user.tai_khoan.email}}</span>{{/if}}{{/if}}{{/if}}
         </div>
+        {{#if links}}
+            <div class="bf-nav-menu-heading"><strong>Chuyển không gian</strong></div>
+        {{/if}}
         {{#each links}}
             <a class="bf-nav-menu-item {{#if danger}}is-danger{{/if}}" href="{{href}}">
                 {{#if icon}}

@@ -40,6 +40,7 @@
     </footer>
     <script type="module" src="/js/components/forms.js?v=20261001-7"></script>
     <script type="module" src="/js/page/auth.js?v=20261001-5"></script>
+    {{#if authenticated}}<script defer src="/js/common/session-keepalive.js?v=20261004-1"></script>{{/if}}
     <script type="module" src="/js/components/navigation.js?v=20260930-1"></script>
     {{#each scripts}}
         <script type="module" src="{{this}}"></script>

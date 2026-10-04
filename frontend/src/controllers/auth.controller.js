@@ -10,6 +10,11 @@ const cookieOptions = {
   path: '/'
 };
 
+const authEventOptions = { httpOnly: false, secure: config.env.authCookieSecure, sameSite: config.env.authCookieSameSite, path: '/', maxAge: 315360000000 };
+function notifyAuthTabs(res) {
+  res.cookie('bookflow_auth_event', String(Date.now()), authEventOptions);
+}
+
 function renderAuth(res, page, title, locals = {}, status = 200) {
   return res.status(status).render(`pages/auth/${page}`, { layout: 'auth', authPage: page, title, ...locals });
 }
@@ -44,6 +49,7 @@ async function finishLogin(res, token, context, requestedRedirect) {
       path: '/'
     });
   }
+  notifyAuthTabs(res);
   const organizations = context?.don_vi_tham_gia || context?.donViThamGia || [];
   const selectedOrganizationId = context?.don_vi_dang_chon_id || context?.donViDangChonId;
   if (organizations.length > 1 && !selectedOrganizationId) return res.redirect(`/auth/chon-don-vi?redirect=${encodeURIComponent(safeRedirect(requestedRedirect) || '/')}`);
@@ -272,15 +278,16 @@ const authController = {
   },
   async refreshSession(req, res) {
     const refreshToken = req.cookies?.[config.env.authRefreshCookieName];
-    if (!refreshToken) return res.status(401).json({ success: false, message: 'Phiên đăng nhập đã hết hạn' });
+    const accessToken = req.cookies?.[config.env.authCookieName];
+    if (!refreshToken && !accessToken) return res.status(401).json({ success: false, message: 'Phiên đăng nhập đã hết hạn' });
     try {
-      const result = await authService.refresh(refreshToken);
+      const result = await authService.refresh(refreshToken, accessToken);
       const data = result.data || result;
-      res.cookie(config.env.authCookieName, data.access_token, {
-        ...cookieOptions,
-        maxAge: Number(data.expires_in || 600) * 1000
-      });
-      res.cookie(config.env.authRefreshCookieName, data.refresh_token, {
+      const accessTokenMoi = data.accessToken || data.access_token;
+      const refreshTokenMoi = data.refreshToken || data.refresh_token;
+      if (!accessTokenMoi || !refreshTokenMoi) return res.status(502).json({ success: false, message: 'Backend không trả đủ token để gia hạn phiên' });
+      res.cookie(config.env.authCookieName, accessTokenMoi, { ...cookieOptions, maxAge: config.env.authCookieMaxAge });
+      res.cookie(config.env.authRefreshCookieName, refreshTokenMoi, {
         httpOnly: true,
         secure: config.env.authCookieSecure,
         sameSite: config.env.authCookieSameSite,
@@ -291,8 +298,9 @@ const authController = {
       return res.json({ success: true });
     } catch (error) {
       if (error.status === 401) {
-        res.clearCookie(config.env.authCookieName, { path: '/' });
-        res.clearCookie(config.env.authRefreshCookieName, { path: '/' });
+        res.clearCookie(config.env.authCookieName, cookieOptions);
+        res.clearCookie(config.env.authRefreshCookieName, cookieOptions);
+        notifyAuthTabs(res);
       }
       return res.status(error.status || 500).json({ success: false, message: error.message || 'Không làm mới được phiên đăng nhập' });
     }
@@ -304,12 +312,9 @@ const authController = {
       } catch (error) {
         if (error.status !== 401) throw error;
       }
-      res.clearCookie(config.env.authRefreshCookieName, {
-        httpOnly: true,
-        secure: config.env.authCookieSecure,
-        sameSite: config.env.authCookieSameSite,
-        path: '/'
-      });
+      res.clearCookie(config.env.authCookieName, cookieOptions);
+      res.clearCookie(config.env.authRefreshCookieName, cookieOptions);
+      notifyAuthTabs(res);
       return res.redirect('/');
     } catch (error) {
       return next(error);

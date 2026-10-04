@@ -22,6 +22,7 @@ router.post('/dang-nhap', gioiHan(10), controller.dangNhap);
 router.post('/hoan-tat-nhan-vien', gioiHan(10), controller.hoanTatNhanVien);
 router.post('/quen-mat-khau', gioiHan(5, 3600000), controller.quenMatKhau);
 router.post('/dat-lai-mat-khau', gioiHan(10), controller.datLaiMatKhau);
+router.post('/hoat-dong', authenticate, controller.hoatDong);
 router.post('/lam-moi-phien', gioiHan(30), controller.lamMoiPhien);
 router.get('/me', authenticate, controller.me);
 router.post('/dang-xuat', authenticate, controller.dangXuat);

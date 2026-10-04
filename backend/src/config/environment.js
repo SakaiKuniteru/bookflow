@@ -63,11 +63,12 @@ function docCauHinhToken(env = process.env) {
     const jwtAccessSecret = chuoiBatBuoc(env, 'JWT_ACCESS_SECRET');
     const accessMinutes = Number(env.THOI_GIAN_ACCESS_TOKEN ?? 10);
     const refreshMinutes = Number(env.THOI_GIAN_REFRESH_TOKEN ?? 120);
+    const feSessionMinutes = Number(env.THOI_GIAN_FE_SESSION ?? 60);
     if (!/^[0-9a-fA-F]{64,}$/.test(jwtAccessSecret) || jwtAccessSecret.length % 2 !== 0) throw new Error('JWT_ACCESS_SECRET phải là chuỗi hex ít nhất 32 byte');
-    if (!Number.isInteger(accessMinutes) || accessMinutes < 1 || accessMinutes > 60 || !Number.isInteger(refreshMinutes) || refreshMinutes <= accessMinutes || refreshMinutes > 43200) {
-        throw new Error('Thời hạn Access Token hoặc Refresh Token không hợp lệ');
+    if (!Number.isInteger(accessMinutes) || accessMinutes < 1 || accessMinutes > 60 || !Number.isInteger(refreshMinutes) || refreshMinutes <= accessMinutes || refreshMinutes > 43200 || !Number.isInteger(feSessionMinutes) || feSessionMinutes <= accessMinutes || feSessionMinutes > 43200) {
+        throw new Error('Thời hạn Access Token, Refresh Token hoặc FE Session không hợp lệ');
     }
-    return { jwtAccessSecret, accessTtlSeconds: accessMinutes * 60, refreshTtlMinutes: refreshMinutes };
+    return { jwtAccessSecret, accessTtlSeconds: accessMinutes * 60, refreshTtlMinutes: refreshMinutes, feSessionTtlMinutes: feSessionMinutes };
 }
 
 module.exports = { docMoiTruong, docCauHinhEmail, docCauHinhToken };
