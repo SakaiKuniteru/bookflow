@@ -3,14 +3,13 @@ import inventoryService from '../services/inventory.service.js';
 import orderService from '../services/order.service.js';
 import borrowService from '../services/borrow.service.js';
 import customerService from '../services/customer.service.js';
+import profileController from './profile.controller.js';
 
 const staffController = {
   async dashboard(req, res) {
     return res.render('staff/tong-quan', { title: 'Tổng quan', layout: 'staff' });
   },
-  async profile(req, res) {
-    return res.render('shared/thong-tin-ca-nhan', { title: 'Thông tin cá nhân', layout: 'staff' });
-  },
+  profile(req, res, next) { return profileController.render(req, res, next, 'staff'); },
   async books(req, res, next) {
     try {
       const result = await bookService.list(req.query);

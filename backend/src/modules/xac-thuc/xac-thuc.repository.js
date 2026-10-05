@@ -473,12 +473,13 @@ class XacThucRepository {
 
     async layTaiKhoanAnToan(taiKhoanId, client) {
         const { rows } = await query(
-            `SELECT id, email, ten_dang_nhap, ho_ten, so_dien_thoai, anh_dai_dien_tep_id,
+            `SELECT id, email, ten_dang_nhap, ho_ten, ngay_sinh, gioi_tinh, quoc_tich, dan_toc, mo_ta, dia_chi_chi_tiet, quoc_gia, tinh_thanh_pho, phuong_xa, so_dien_thoai, anh_dai_dien_tep_id,
                 email_da_xac_minh, so_dien_thoai_da_xac_minh, trang_thai,
                 ngay_tao, ngay_dang_nhap_cuoi
-             FROM tai_khoan
-             WHERE id = $1 AND trang_thai = 'DANG_DUNG'`,
-            [taiKhoanId], client
+            FROM tai_khoan
+            WHERE id = $1 AND trang_thai = 'DANG_DUNG'`,
+            [taiKhoanId],
+            client
         );
         return rows[0] ?? null;
     }

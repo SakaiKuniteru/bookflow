@@ -26,7 +26,13 @@ services:
       timeout: 5s
       retries: 15
       start_period: 20s
-
+  clamav:
+    image: clamav/clamav:stable-debian13-slim
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3310:3310"
+    volumes:
+      - clamav_data:/var/lib/clamav
   redis:
     image: ${REDIS_IMAGE:-redis:7.4.5-alpine}
     restart: unless-stopped
@@ -170,3 +176,4 @@ volumes:
   redis_data:
   minio_data:
   rustfs_data:
+  clamav_data:

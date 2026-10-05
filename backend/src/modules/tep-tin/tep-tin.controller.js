@@ -17,5 +17,17 @@ module.exports = {
     danhSach: xuLy(req => service.danhSach(req.auth, req.query)),
     chiTiet: xuLy(req => service.chiTiet(req.auth, req.params.tepId)),
     urlDoc: xuLy(req => service.urlDoc(req.auth, req.params.tepId)),
+    async noiDungAnh(req, res, next) {
+        try {
+            const anh = await service.noiDungAnh(req.auth, req.params.tepId);
+            const ten = `bookflow-${anh.id}.${anh.duoi_tep || 'webp'}`;
+            res.set('Content-Type', anh.mime_type);
+            res.set('Cache-Control', 'private, no-store');
+            res.set('X-Content-Type-Options', 'nosniff');
+            res.set('Content-Disposition', `${req.query.tai_xuong === '1' ? 'attachment' : 'inline'}; filename="${ten}"`);
+            anh.body.Body.on('error', next);
+            return anh.body.Body.pipe(res);
+        } catch (error) { return next(error); }
+    },
     xoa: xuLy(req => service.xoa(req.auth, req.params.tepId))
 };

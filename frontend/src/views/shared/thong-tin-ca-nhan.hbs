@@ -1,21 +1,249 @@
-<section class="bf-profile-page">
-    <header class="bf-public-page-heading">
-        <p>Hồ sơ tài khoản</p>
-        <h1>Thông tin cá nhân</h1>
-    </header>
-    <article class="bf-profile-card">
-        <div class="bf-profile-avatar">
-            {{#if user.avatar}}
-                <img class="bf-nav-avatar" src="{{user.avatar}}" alt="Avatar">
-            {{else}}
-                <img class="bf-nav-avatar" data-bf-avatar-file-id="{{user.tai_khoan.anh_dai_dien_tep_id}}" alt="Avatar" hidden>
-                <span class="bf-nav-avatar bf-nav-avatar-fallback" data-bf-avatar-fallback>{{#if user.tai_khoan.ho_ten}}{{user.tai_khoan.ho_ten.[0]}}{{else}}{{#if user.taiKhoan.hoTen}}{{user.taiKhoan.hoTen.[0]}}{{else}}?{{/if}}{{/if}}</span>
-            {{/if}}
-        </div>
-        <div>
-            <h2>{{#if user.tai_khoan.ho_ten}}{{user.tai_khoan.ho_ten}}{{else}}{{#if user.taiKhoan.hoTen}}{{user.taiKhoan.hoTen}}{{else}}Tài khoản{{/if}}{{/if}}</h2>
-            <p>{{#if user.tai_khoan.email}}{{user.tai_khoan.email}}{{else}}{{#if user.taiKhoan.email}}{{user.taiKhoan.email}}{{else}}{{user.email}}{{/if}}{{/if}}</p>
-            {{#if user.tai_khoan.so_dien_thoai}}<p>{{user.tai_khoan.so_dien_thoai}}</p>{{/if}}
-        </div>
-    </article>
+<section class="bf-profile-page" data-bf-profile data-avatar-id="{{account.anh_dai_dien_tep_id}}">
+    <div class="bf-profile-grid">
+        <aside class="bf-profile-avatar-panel" aria-label="Hồ sơ tài khoản">
+            <div class="bf-profile-side-heading">
+                <p class="bf-profile-side-kicker">
+                    {{> ui/icon
+                        name="shield"
+                        size="19"
+                    }}
+                    Hồ sơ tài khoản
+                </p>
+                <h1>Thông tin cá nhân</h1>
+                <p class="bf-profile-side-copy">Quản lý thông tin cá nhân của bạn để sử dụng dịch vụ BookFlow tốt hơn.</p>
+            </div>
+            <div class="bf-profile-avatar-stage">
+                <img class="bf-profile-avatar-image" data-bf-profile-avatar data-bf-avatar-file-id="{{account.anh_dai_dien_tep_id}}" alt="Ảnh đại diện" hidden>
+                <span class="bf-profile-avatar-fallback" data-bf-profile-avatar-fallback data-bf-avatar-fallback data-bf-avatar-initial>{{#if account.ho_ten}}{{account.ho_ten.[0]}}{{else}}A{{/if}}</span>
+                <button class="bf-profile-avatar-edit" type="button" data-avatar-edit aria-label="Chỉnh sửa ảnh đại diện" title="Chỉnh sửa ảnh đại diện">
+                    {{> ui/icon
+                        name="edit"
+                        size="19"
+                    }}
+                </button>
+            </div>
+            <div class="bf-profile-avatar-actions">
+                <button class="bf-btn bf-btn-primary bf-btn-sm" type="button" data-avatar-view>
+                    {{> ui/icon
+                        name="eye"
+                        size="17"
+                    }}
+                    <span>Xem ảnh</span>
+                </button>
+                {{#if account.anh_dai_dien_tep_id}}
+                    <a class="bf-btn bf-btn-secondary bf-btn-sm" data-avatar-download href="/api/tep-tin/{{account.anh_dai_dien_tep_id}}/noi-dung?tai_xuong=1">
+                        {{> ui/icon
+                            name="download"
+                            size="17"
+                        }}
+                        <span>Tải ảnh</span>
+                    </a>
+                {{else}}
+                    <button class="bf-btn bf-btn-secondary bf-btn-sm" type="button" disabled>
+                        {{> ui/icon
+                            name="download"
+                            size="17"
+                        }}
+                        <span>Tải ảnh</span>
+                    </button>
+                {{/if}}
+            </div>
+            <div class="bf-profile-side-divider"></div>
+            <div class="bf-profile-account-details">
+                <div class="bf-profile-account-label">
+                    {{> ui/icon
+                        name="user"
+                        size="17"
+                    }}
+                    Tên tài khoản
+                </div>
+                <strong class="bf-profile-account-name">{{#if account.ho_ten}}{{account.ho_ten}}{{else}}Chưa cập nhật{{/if}}</strong>
+                <div class="bf-profile-account-meta">
+                    {{> ui/icon
+                        name="email"
+                        size="16"
+                    }}
+                    <span>{{account.email}}</span>
+                </div>
+                <div class="bf-profile-account-meta">
+                    {{> ui/icon
+                        name="user"
+                        size="16"
+                    }}
+                    <span>{{account.ten_dang_nhap}}</span>
+                </div>
+            </div>
+            <div class="bf-profile-books" aria-hidden="true">
+                <div class="bf-profile-book-stack"><span></span><span></span><span></span></div>
+            </div>
+        </aside>
+        <form class="bf-profile-form" data-profile-form novalidate>
+            <h2 class="bf-profile-form-title">
+                {{> ui/icon
+                    name="user"
+                    size="26"
+                }}
+                <span>Thông tin cá nhân</span>
+            </h2>
+            <p class="bf-profile-form-description">Cập nhật thông tin cá nhân của bạn. Các thông tin có dấu <strong>*</strong> là bắt buộc.</p>
+            <div class="bf-profile-fields-grid">
+                {{> forms/input
+                    id="profile-full-name"
+                    name="ho_ten"
+                    type="text"
+                    label="Họ và tên"
+                    value=account.ho_ten
+                    placeholder="Nhập họ và tên"
+                    required=true
+                    minlength="2"
+                    maxlength="200"
+                    autocomplete="name"
+                }}
+                {{> forms/input
+                    id="profile-username"
+                    name="ten_dang_nhap"
+                    type="text"
+                    label="Tên đăng nhập"
+                    value=account.ten_dang_nhap
+                    placeholder="Nhập tên đăng nhập"
+                    disabled=true
+                    autocomplete="username"
+                }}
+                {{> forms/email
+                    id="profile-email"
+                    name="email"
+                    label="Email"
+                    value=account.email
+                    placeholder="Nhập email"
+                    disabled=true
+                    helpText="Muốn thay đổi email, vui lòng thực hiện quy trình xác thực OTP."
+                }}
+                {{> forms/phone
+                    id="profile-phone"
+                    name="so_dien_thoai"
+                    label="Số điện thoại"
+                    value=account.so_dien_thoai
+                    placeholder="Nhập số điện thoại"
+                    disabled=true
+                    helpText="Muốn thay đổi số điện thoại, vui lòng thực hiện quy trình xác thực OTP."
+                }}
+                {{> forms/date
+                    id="profile-birth-date"
+                    name="ngay_sinh"
+                    type="date"
+                    label="Ngày sinh"
+                    value=account.ngay_sinh
+                    placeholder="Ngày sinh"
+                    defaultTime="00:00:00"
+                }}
+                {{> forms/select
+                    id="profile-gender"
+                    name="gioi_tinh"
+                    label="Giới tính"
+                    placeholder="Chọn giới tính"
+                    options=gioiTinhOptions
+                }}
+                {{> forms/select
+                    id="profile-nationality"
+                    name="quoc_tich"
+                    label="Quốc tịch"
+                    placeholder="Chọn quốc tịch"
+                    options=quocTichOptions
+                    search=true
+                }}
+                {{> forms/select
+                    id="profile-ethnicity"
+                    name="dan_toc"
+                    label="Dân tộc"
+                    placeholder="Chọn dân tộc"
+                    options=danTocOptions
+                    search=true
+                }}
+                {{> forms/textarea
+                    id="profile-description"
+                    name="mo_ta"
+                    label="Mô tả"
+                    value=account.mo_ta
+                    placeholder="Nhập mô tả về bản thân"
+                    maxlength="2000"
+                    rows="3"
+                    className="bf-profile-field-full"
+                }}
+            </div>
+            <h2>Địa chỉ</h2>
+            <div class="bf-profile-fields-grid">
+                {{> forms/select
+                    id="profile-country"
+                    name="quoc_gia"
+                    label="Quốc gia"
+                    placeholder="Chọn quốc gia"
+                    options=quocGiaOptions
+                    className="bf-profile-field-full"
+                    search=true
+                }}
+                {{> forms/select
+                    id="profile-province"
+                    name="tinh_thanh_pho"
+                    label="Tỉnh/Thành phố"
+                    placeholder="Chọn tỉnh/thành phố"
+                    options=tinhThanhOptions
+                    search=true
+                }}
+                {{> forms/select
+                    id="profile-ward"
+                    name="phuong_xa"
+                    label="Xã/Phường"
+                    placeholder="Chọn xã/phường"
+                    options=phuongXaOptions
+                    search=true
+                }}
+                {{> forms/textarea
+                    id="profile-address-detail"
+                    name="dia_chi_chi_tiet"
+                    label="Địa chỉ"
+                    value=account.dia_chi_chi_tiet
+                    placeholder="Nhập địa chỉ chi tiết"
+                    maxlength="300"
+                    rows="3"
+                    className="bf-profile-field-full"
+                }}
+            </div>
+            <div class="bf-profile-form-footer">
+                <span class="bf-profile-save-status" data-profile-status aria-live="polite"></span>
+                <div class="bf-profile-form-actions">
+                    <button class="bf-btn bf-btn-secondary bf-btn-md" type="button" data-profile-cancel>Hủy</button>
+                    <button class="bf-btn bf-btn-primary bf-btn-md" type="submit" data-profile-save>Lưu thay đổi</button>
+                </div>
+            </div>
+        </form>
+    </div>
 </section>
+<div id="bf-avatar-editor" class="bf-modal bf-avatar-modal" data-bf-modal data-modal-size="md" data-close-on-backdrop="true" data-loading="false" role="dialog" aria-modal="true" aria-labelledby="bf-avatar-editor-title" aria-hidden="true" hidden>
+    <button class="bf-modal-backdrop" type="button" data-bf-modal-backdrop aria-label="Đóng cửa sổ"></button>
+    <section class="bf-modal-dialog bf-avatar-dialog">
+        <header class="bf-modal-header">
+            <div class="bf-modal-heading">
+                <h2 id="bf-avatar-editor-title" class="bf-modal-title">Chỉnh sửa ảnh đại diện</h2>
+                <p class="bf-modal-description">Kéo ảnh để căn chỉnh; dùng thanh trượt để phóng to hoặc thu nhỏ.</p>
+            </div>
+            <button class="bf-modal-close" type="button" data-bf-modal-close aria-label="Đóng">×</button>
+        </header>
+        <div class="bf-modal-body bf-avatar-modal-body">
+            <div class="bf-avatar-crop-stage" data-avatar-crop-stage>
+                <canvas width="320" height="320" data-avatar-crop-preview aria-label="Xem trước ảnh đại diện"></canvas>
+                <span data-avatar-crop-empty>Chọn ảnh để xem trước</span>
+            </div>
+            <label class="bf-avatar-zoom-label" for="bf-avatar-zoom">Thu phóng ảnh</label>
+            <input id="bf-avatar-zoom" class="bf-avatar-zoom" type="range" min="100" max="400" value="100" step="1" data-avatar-zoom disabled>
+            <input class="bf-avatar-file-input" type="file" accept="image/jpeg,image/png,image/webp" data-avatar-file>
+            <button class="bf-btn bf-btn-secondary bf-btn-md" type="button" data-avatar-choose>Chọn ảnh</button>
+            <p class="bf-avatar-error" data-avatar-error role="alert" hidden></p>
+        </div>
+        <footer class="bf-modal-footer bf-avatar-modal-footer">
+            <button class="bf-btn bf-btn-secondary bf-btn-md" type="button" data-bf-modal-close>Hủy</button>
+            <div class="bf-modal-footer-actions">
+                <button class="bf-btn bf-btn-primary bf-btn-md" type="button" data-avatar-save disabled>Lưu</button>
+            </div>
+        </footer>
+    </section>
+</div>

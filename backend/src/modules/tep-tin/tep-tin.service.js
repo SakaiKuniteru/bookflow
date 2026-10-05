@@ -37,9 +37,14 @@ async function xuLyNoiDung(file, loaiTep) {
     const anh = sharp(file.buffer, { limitInputPixels: 40000000, failOn: 'error' });
     const metadata = await anh.metadata();
     if (!metadata.width || !metadata.height || metadata.pages > 1) throw v.loi('Ảnh không hợp lệ hoặc không hỗ trợ ảnh động');
-    const buffer = await anh.rotate().webp({ quality: 85, effort: 4 }).toBuffer();
+    const dinhDangAnh = {
+        'image/jpeg': { format: 'jpeg', duoiTep: 'jpg', options: { quality: 85 } },
+        'image/png': { format: 'png', duoiTep: 'png', options: { compressionLevel: 9 } },
+        'image/webp': { format: 'webp', duoiTep: 'webp', options: { quality: 85, effort: 4 } }
+    }[loaiThuc.mime];
+    const buffer = await anh.rotate().toFormat(dinhDangAnh.format, dinhDangAnh.options).toBuffer();
     const ketQua = await sharp(buffer).metadata();
-    return { buffer, mimeType: 'image/webp', duoiTep: 'webp', width: ketQua.width, height: ketQua.height };
+    return { buffer, mimeType: loaiThuc.mime, duoiTep: dinhDangAnh.duoiTep, width: ketQua.width, height: ketQua.height };
 }
 class TepTinService {
     async uploadNhieu(auth, body, files) {
@@ -65,6 +70,15 @@ class TepTinService {
                 });
                 ketQua.push({ thu_tu: index, thanh_cong: true, tep: fileMoi });
             } catch (error) {
+                console.error(JSON.stringify({
+                    event: 'tep_tin_upload_failed',
+                    loId: lo.id,
+                    thuTu: index,
+                    errorName: error?.name || 'Error',
+                    errorCode: error?.code || null,
+                    errorMessage: error?.message || String(error),
+                    stack: error?.stack || null
+                }));
                 if (object) {
                     try { await storage.xoa(object.key, object.bucket); }
                     catch { console.error(JSON.stringify({ event: 'storage_cleanup_failed', lo_id: lo.id, thu_tu: index })); }
@@ -107,6 +121,13 @@ class TepTinService {
         await this.kiemTraQuyenDoc(auth, tep);
         if (tep.trang_thai !== 'SAN_SANG' || tep.trang_thai_quet_virus !== 'SACH') throw loi('File chưa sẵn sàng để truy cập', 409, 'FILE_NOT_READY');
         return { id: tep.id, url: await storage.taoUrlDoc(tep.duong_dan_luu_tru, tep.bucket, tep.mime_type_xac_minh, tep.id, tep.duoi_tep, 60), expires_in: 60 };
+    }
+    async noiDungAnh(auth, tepId) {
+        const tep = await repo.layFile(v.idHopLe(tepId));
+        if (!tep || tep.trang_thai === 'DA_XOA') throw loi('Không tìm thấy file', 404, 'NOT_FOUND');
+        await this.kiemTraQuyenDoc(auth, tep);
+        if (tep.trang_thai !== 'SAN_SANG' || tep.trang_thai_quet_virus !== 'SACH' || !tep.mime_type_xac_minh?.startsWith('image/')) throw loi('Ảnh chưa sẵn sàng để truy cập', 409, 'FILE_NOT_READY');
+        return { id: tep.id, duoi_tep: tep.duoi_tep, mime_type: tep.mime_type_xac_minh, body: await storage.layNoiDung(tep.duong_dan_luu_tru, tep.bucket) };
     }
     async xoa(auth, tepId) {
         const tep = await repo.layFile(v.idHopLe(tepId));

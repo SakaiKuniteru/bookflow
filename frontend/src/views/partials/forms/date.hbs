@@ -15,7 +15,8 @@
             placeholder="{{#if placeholder}}{{placeholder}}{{else}}{{#if (eq type "time")}}{{#if (eq timeFormat "hm")}}HH:mm{{else}}HH:mm:ss{{/if}}{{else}}{{#if (eq type "datetime")}}{{#if (eq timeFormat "hm")}}dd/MM/yyyy HH:mm{{else}}dd/MM/yyyy HH:mm:ss{{/if}}{{else}}dd/MM/yyyy{{/if}}{{/if}}{{/if}}"
             data-date-type="{{type}}"
             data-time-format="{{timeFormat}}"
-            maxlength="{{#if (eq type "datetime")}}{{#if (eq timeFormat "hm")}}16{{else}}19{{/if}}{{else}}{{#if (eq type "time")}}{{#if (eq timeFormat "hm")}}5{{else}}8{{/if}}{{else}}10{{/if}}"
+            data-default-time="{{defaultTime}}"
+            maxlength="{{#if (eq type "datetime")}}{{#if (eq timeFormat "hm")}}16{{else}}19{{/if}}{{else}}{{#if (eq type "time")}}{{#if (eq timeFormat "hm")}}5{{else}}8{{/if}}{{else}}10{{/if}}{{/if}}"
             autocomplete="off"
             {{#if required}}required{{/if}}
             {{#if disabled}}disabled{{/if}}

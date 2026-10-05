@@ -30,6 +30,9 @@
       const response = await fetch('/auth/lam-moi-phien', { method: 'POST', credentials: 'same-origin', headers: { Accept: 'application/json' } });
       if (response.status === 401) return false;
       if (!response.ok) return false;
+      const payload = await response.json().catch(() => null);
+      if (!payload?.accessToken) return false;
+      window.BookFlowAuth?.setAccessToken(payload.accessToken);
       localStorage.setItem(refreshKey, String(Date.now()));
       return true;
     };

@@ -2,6 +2,7 @@ import customerService from '../services/customer.service.js';
 import orderService from '../services/order.service.js';
 import borrowService from '../services/borrow.service.js';
 import notificationService from '../services/notification.service.js';
+import profileController from './profile.controller.js';
 
 const customerController = {
   async dashboard(req, res, next) {
@@ -124,9 +125,7 @@ const customerController = {
       return next(error);
     }
   },
-  profile(req, res) {
-    return res.render('shared/thong-tin-ca-nhan', { title: 'Thông tin cá nhân', layout: 'customer' });
-  }
+  profile(req, res, next) { return profileController.render(req, res, next, 'customer'); }
 };
 
 export default customerController;

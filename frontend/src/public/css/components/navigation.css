@@ -215,6 +215,10 @@
     border-radius: 50%;
     object-fit: cover;
 }
+.bf-nav-avatar[hidden],
+.bf-nav-avatar-fallback[hidden] {
+    display: none;
+}
 .bf-nav-avatar-fallback {
     display: inline-flex;
     align-items: center;
@@ -266,8 +270,20 @@
     border-bottom: 1px solid var(--bf-form-border, #d9dee7);
 }
 .bf-nav-account-summary {
-    align-items: flex-start;
-    flex-direction: column;
+    align-items: center;
+    flex-direction: row;
+    justify-content: flex-start;
+}
+.bf-nav-account-summary > .bf-nav-avatar {
+    display: block;
+    flex: 0 0 36px;
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: center;
 }
 .bf-nav-account-summary span,
 .bf-nav-notification-content span,
@@ -591,7 +607,7 @@
     text-decoration: none;
 }
 .bf-demo-avatar,
-.bf-demo-actions .bf-nav-avatar {
+.bf-demo-actions .bf-nav-account-trigger .bf-nav-avatar-fallback {
     display: inline-grid;
     width: 23px;
     height: 23px;
@@ -809,8 +825,8 @@
     font-size: 12px;
 }
 .bf-profile-page {
-    width: min(100% - 40px, 1000px);
-    margin: 24px auto;
+    width: min(calc(100% - 96px), 1664px);
+    margin: 26px auto;
 }
 .bf-layout-admin .bf-profile-page,
 .bf-layout-staff .bf-profile-page {

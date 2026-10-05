@@ -22,20 +22,39 @@ async function loadSidebarAvatars(root) {
     await Promise.all([...images].map(async image => {
         const fileId = image.dataset.bfAvatarFileId;
         if (!/^[1-9]\d*$/.test(fileId || "")) return;
+        const fallback = image.parentElement?.querySelector("[data-bf-avatar-fallback]");
+        const laAnhHeader = Boolean(image.closest(".bf-nav-account-trigger, .bf-nav-account-summary"));
+        if (laAnhHeader) {
+            image.addEventListener("load", () => {
+                if (image.dataset.bfAvatarFileId !== fileId) return;
+                image.hidden = false;
+                if (fallback) fallback.hidden = true;
+            }, { once: true });
+            image.addEventListener("error", () => {
+                if (image.dataset.bfAvatarFileId !== fileId) return;
+                image.hidden = true;
+                if (fallback) fallback.hidden = false;
+            }, { once: true });
+            if (image.dataset.bfAvatarFileId !== fileId) return;
+            image.src = `/api/tep-tin/${encodeURIComponent(fileId)}/noi-dung`;
+            return;
+        }
         try {
             const response = await fetch(`/api/tep-tin/${fileId}/url`, { credentials: "same-origin", headers: { Accept: "application/json" } });
             if (!response.ok) return;
             const payload = await response.json();
             if (typeof payload?.data?.url !== "string") return;
-            const fallback = image.parentElement?.querySelector("[data-bf-avatar-fallback]");
             image.addEventListener("load", () => {
+                if (image.dataset.bfAvatarFileId !== fileId) return;
                 image.hidden = false;
                 if (fallback) fallback.hidden = true;
             }, { once: true });
             image.addEventListener("error", () => {
+                if (image.dataset.bfAvatarFileId !== fileId) return;
                 image.hidden = true;
                 if (fallback) fallback.hidden = false;
             }, { once: true });
+            if (image.dataset.bfAvatarFileId !== fileId) return;
             image.src = payload.data.url;
         } catch {}
     }));
@@ -45,6 +64,17 @@ function initNavigation(root = document) {
     if (initializedDocuments.has(doc)) return;
     initializedDocuments.add(doc);
     loadSidebarAvatars(doc);
+    doc.addEventListener("bookflow:avatar:updated", event => {
+        const fileId = String(event.detail?.fileId || "");
+        if (!/^[1-9]\d*$/.test(fileId)) return;
+        doc.querySelectorAll("[data-bf-avatar-file-id]").forEach(image => {
+            image.dataset.bfAvatarFileId = fileId;
+            image.hidden = true;
+            const fallback = image.parentElement?.querySelector("[data-bf-avatar-fallback]");
+            if (fallback) fallback.hidden = false;
+        });
+        loadSidebarAvatars(doc);
+    });
     doc.addEventListener("click", event => {
         const toggle = event.target.closest("[data-bf-sidebar-toggle]");
         if (toggle) {
@@ -81,7 +111,7 @@ function initNavigation(root = document) {
             doc.querySelectorAll("[data-bf-sidebar].is-open").forEach(sidebar => sidebar.classList.remove("is-open"));
             doc.querySelectorAll("[data-bf-sidebar-toggle][aria-expanded='true']").forEach(button => button.setAttribute("aria-expanded", "false"));
         }
-    });
+    }, true);
     doc.addEventListener("keydown", event => {
         if (event.key !== "Escape") return;
         const open = doc.querySelector("[data-bf-menu].is-open");

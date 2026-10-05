@@ -90,7 +90,10 @@ function updateDisplay(wrapper) {
     updateOptions(wrapper);
     updateHiddenValues(wrapper);
 }
-
+export function syncSelect(wrapper) {
+    if (!wrapper?.matches?.("[data-bf-select]")) return;
+    updateDisplay(wrapper);
+}
 function setActive(wrapper, index) {
     const options = getVisibleOptions(wrapper);
     if (!options.length) return;

@@ -44,6 +44,8 @@ const localsMiddleware = (req, res, next) => {
   };
   res.locals.user = req.user;
   res.locals.authenticated = Boolean(req.user);
+  res.locals.bfAccessToken = req.user && req.authToken ? req.authToken : '';
+  if (req.user) res.set('Cache-Control', 'private, no-store');
   res.locals.permissions = req.user?.permissions || [];
   res.locals.roles = req.user?.roles || [];
   res.locals.currentPath = req.path;

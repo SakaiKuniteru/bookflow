@@ -24,6 +24,7 @@ router.use(authenticate);
 router.post('/upload', nhanNhieuFile, controller.uploadNhieu);
 router.post('/upload-nhieu', nhanNhieuFile, controller.uploadNhieu);
 router.get('/', controller.danhSach);
+router.get('/:tepId/noi-dung', controller.noiDungAnh);
 router.get('/:tepId', controller.chiTiet);
 router.get('/:tepId/url', controller.urlDoc);
 router.delete('/:tepId', controller.xoa);

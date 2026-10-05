@@ -226,3 +226,12 @@
     line-height: 1;
     cursor: pointer;
 }
+.bf-select.has-value .bf-select-chevron {
+    display: none;
+}
+.bf-select.has-value .bf-select-clear {
+    display: inline-flex;
+}
+.bf-select:not(.has-value) .bf-select-clear {
+    display: none;
+}

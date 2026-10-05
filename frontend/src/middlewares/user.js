@@ -43,5 +43,6 @@ const userMiddleware = async (req, res, next) => {
     }
   }
   next();
+  if (req.user && req.authToken && req.originalUrl.split('?')[0].startsWith('/api/')) res.set('X-BookFlow-Access-Token', req.authToken);
 };
 export default userMiddleware;

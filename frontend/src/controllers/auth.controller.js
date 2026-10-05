@@ -363,7 +363,7 @@ const authController = {
         path: '/'
       });
       res.set('Cache-Control', 'no-store');
-      return res.json({ success: true });
+      return res.json({ success: true, accessToken: accessTokenMoi });
     } catch (error) {
       if (error.status === 401) {
         res.clearCookie(config.env.authCookieName, cookieOptions);

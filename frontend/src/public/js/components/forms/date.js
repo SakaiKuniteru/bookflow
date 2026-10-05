@@ -1,5 +1,5 @@
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const WEEKDAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+const MONTHS = ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"];
+const WEEKDAYS = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
 
 function getType(input) {
     return ["date", "time", "datetime"].includes(input.dataset.dateType) ? input.dataset.dateType : "date";
@@ -37,11 +37,12 @@ function getParts(input) {
     const timeText = type === "datetime" ? value.split(/\s+/)[1] : type === "time" ? value : "";
     const dateMatch = dateText?.match(/^(\d{1,2})\/(\d{1,2})\/(\d{1,4})$/);
     const timeMatch = timeText?.match(/^(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$/);
+    const defaultTime = input.dataset.defaultTime?.match(/^(\d{2}):(\d{2})(?::(\d{2}))?$/);
     return {
         date: dateMatch ? localDate(Number(dateMatch[3]), Number(dateMatch[2]) - 1, Number(dateMatch[1])) : localDate(now.getFullYear(), now.getMonth(), now.getDate()),
-        hour: timeMatch ? Number(timeMatch[1]) : 0,
-        minute: timeMatch ? Number(timeMatch[2]) : 0,
-        second: timeMatch?.[3] ? Number(timeMatch[3]) : 0
+        hour: timeMatch ? Number(timeMatch[1]) : Number(defaultTime?.[1] ?? 0),
+        minute: timeMatch ? Number(timeMatch[2]) : Number(defaultTime?.[2] ?? 0),
+        second: timeMatch?.[3] ? Number(timeMatch[3]) : Number(defaultTime?.[3] ?? 0)
     };
 }
 
@@ -126,7 +127,8 @@ function commitInput(input) {
         if (year.length === 2) year = `20${year}`;
         else year = year.padStart(4, "0");
         const date = `${pad(dateMatch[1])}/${pad(dateMatch[2])}/${year}`;
-        input.value = type === "datetime" ? `${date} ${timeMatch ? `${pad(timeMatch[1])}:${pad(timeMatch[2])}${getTimeFormat(input) === "hms" ? `:${pad(timeMatch[3] || 0)}` : ""}` : `00:00${getTimeFormat(input) === "hms" ? ":00" : ""}`}` : date;
+        const defaultTime = input.dataset.defaultTime || `00:00${getTimeFormat(input) === "hms" ? ":00" : ""}`;
+        input.value = type === "datetime" ? `${date} ${timeMatch ? `${pad(timeMatch[1])}:${pad(timeMatch[2])}${getTimeFormat(input) === "hms" ? `:${pad(timeMatch[3] || 0)}` : ""}` : defaultTime}` : date;
     } else if (type === "time" && timeMatch) {
         input.value = `${pad(timeMatch[1])}:${pad(timeMatch[2])}${getTimeFormat(input) === "hms" ? `:${pad(timeMatch[3] || 0)}` : ""}`;
     }
@@ -145,20 +147,26 @@ function renderCalendar(picker, input) {
         const selected = day.toDateString() === date.toDateString();
         return `<button type="button" class="bf-date-day${day.getMonth() !== month ? " is-outside" : ""}${selected ? " is-selected" : ""}" data-day="${day.getFullYear()}-${day.getMonth()}-${day.getDate()}">${day.getDate()}</button>`;
     }).join("");
+    const decadeStart = Math.floor(year / 10) * 10;
+    const centuryStart = Math.floor(year / 100) * 100;
     const content = state.view === "day"
         ? `<div class="bf-date-weekdays">${WEEKDAYS.map(day => `<span>${day}</span>`).join("")}</div><div class="bf-date-days">${days}</div>`
         : state.view === "month"
             ? `<div class="bf-date-grid bf-date-month-grid">${MONTHS.map((name, index) => `<button type="button" class="bf-date-option${index === month ? " is-selected" : ""}" data-month="${index}">${name}</button>`).join("")}</div>`
             : state.view === "year"
-                ? `<div class="bf-date-grid">${Array.from({ length: 12 }, (_, index) => year - 1 + index).map(item => `<button type="button" class="bf-date-option${item === year ? " is-selected" : ""}" data-year="${item}">${item}</button>`).join("")}</div>`
-                : (() => {
-                    const startYear = Math.floor(year / 10) * 10 - 10;
-                    return `<div class="bf-date-grid">${Array.from({ length: 12 }, (_, index) => {
-                        const first = startYear + index * 10;
-                        return `<button type="button" class="bf-date-option${year >= first && year <= first + 9 ? " is-selected" : ""}" data-decade="${first}">${first}-${first + 9}</button>`;
-                    }).join("")}</div>`;
-                })();
-    return `<div class="bf-date-calendar"><div class="bf-date-header"><button type="button" data-action="prev" aria-label="Trước">«</button><button type="button" class="bf-date-title" data-action="title">${state.view === "day" ? `${MONTHS[month]} ${year}` : state.view === "month" ? year : state.view === "year" ? `${Math.floor(year / 10) * 10}-${Math.floor(year / 10) * 10 + 9}` : `${Math.floor(year / 100) * 100}-${Math.floor(year / 100) * 100 + 99}`}</button><button type="button" data-action="next" aria-label="Sau">»</button></div><div class="bf-date-calendar-content">${content}</div></div>`;
+                ? `<div class="bf-date-grid bf-date-year-grid">${Array.from({ length: 12 }, (_, index) => {
+                    const item = decadeStart - 1 + index;
+                    const outside = item < decadeStart || item > decadeStart + 9;
+                    return `<button type="button" class="bf-date-option${outside ? " is-outside" : ""}${item === year ? " is-selected" : ""}" data-year="${item}">${item}</button>`;
+                }).join("")}</div>`
+                : `<div class="bf-date-grid bf-date-decade-grid">${Array.from({ length: 12 }, (_, index) => {
+                    const first = centuryStart - 10 + index * 10;
+                    const outside = first < centuryStart || first > centuryStart + 90;
+                    const selected = year >= first && year <= first + 9;
+                    return `<button type="button" class="bf-date-option${outside ? " is-outside" : ""}${selected ? " is-selected" : ""}" data-decade="${first}">${first}-${first + 9}</button>`;
+                }).join("")}</div>`;
+    const title = state.view === "day" ? `${MONTHS[month]} ${year}` : state.view === "month" ? year : state.view === "year" ? `${decadeStart}-${decadeStart + 9}` : `${centuryStart}-${centuryStart + 99}`;
+    return `<div class="bf-date-calendar"><div class="bf-date-header"><button type="button" data-action="prev" data-step="small" aria-label="Lùi một bước">&lt;</button><button type="button" data-action="prev" data-step="large" aria-label="Lùi nhiều bước">&laquo;</button><button type="button" class="bf-date-title" data-action="title">${title}</button><button type="button" data-action="next" data-step="large" aria-label="Tiến nhiều bước">&raquo;</button><button type="button" data-action="next" data-step="small" aria-label="Tiến một bước">&gt;</button></div><div class="bf-date-calendar-content">${content}</div></div>`;
 }
 
 function renderTime(picker, input) {
@@ -169,8 +177,14 @@ function renderTime(picker, input) {
 }
 
 function renderPicker(picker, input) {
-    picker.innerHTML = `${getType(input) === "time" ? `<div class="bf-date-time bf-date-time-only"><div class="bf-date-time-title">${formatTime(picker._state, input)}</div><div class="bf-date-time-columns">${[["hour", 24], ["minute", 60], ...(getTimeFormat(input) === "hms" ? [["second", 60]] : [])].map(([key, length]) => `<div class="bf-date-time-column" data-time-column="${key}">${Array.from({ length }, (_, index) => `<button type="button" class="bf-date-time-option${index === picker._state[key] ? " is-selected" : ""}" data-time="${key}:${index}">${pad(index)}</button>`).join("")}</div>`).join("")}</div></div>` : renderCalendar(picker, input)}${getType(input) === "datetime" ? renderTime(picker, input) : ""}<div class="bf-date-footer"><button type="button" class="bf-date-now" data-action="now">Bây giờ</button><button type="button" class="bf-date-ok" data-action="ok">OK</button></div>`;
-    picker.querySelectorAll(".bf-date-time-option.is-selected").forEach(option => option.scrollIntoView({ block: "center" }));
+    const type = getType(input);
+    const timeOnly = `<div class="bf-date-time bf-date-time-only"><div class="bf-date-time-title">${formatTime(picker._state, input)}</div><div class="bf-date-time-columns">${[["hour", 24], ["minute", 60], ...(getTimeFormat(input) === "hms" ? [["second", 60]] : [])].map(([key, length]) => `<div class="bf-date-time-column" data-time-column="${key}">${Array.from({ length }, (_, index) => `<button type="button" class="bf-date-time-option${index === picker._state[key] ? " is-selected" : ""}" data-time="${key}:${index}">${pad(index)}</button>`).join("")}</div>`).join("")}</div></div>`;
+    const content = type === "time" ? timeOnly : `${renderCalendar(picker, input)}${type === "datetime" ? renderTime(picker, input) : ""}`;
+    picker.innerHTML = `<div class="bf-date-picker-main">${content}</div><div class="bf-date-footer"><button type="button" class="bf-date-now" data-action="now">Bây giờ</button><button type="button" class="bf-date-ok" data-action="ok">OK</button></div>`;
+    picker.querySelectorAll(".bf-date-time-option.is-selected").forEach(option => {
+        const column = option.closest(".bf-date-time-column");
+        column.scrollTop += option.getBoundingClientRect().top - column.getBoundingClientRect().top;
+    });
 }
 
 function openPicker(input, picker) {
@@ -188,11 +202,11 @@ function selectNow(input, picker) {
     const now = new Date();
     picker._state.date = localDate(now.getFullYear(), now.getMonth(), now.getDate());
     if (getType(input) !== "date") {
-        picker._state.hour = getType(input) === "datetime" ? 0 : now.getHours();
-        picker._state.minute = getType(input) === "datetime" ? 0 : now.getMinutes();
-        picker._state.second = getType(input) === "datetime" ? 0 : now.getSeconds();
+        picker._state.hour = now.getHours();
+        picker._state.minute = now.getMinutes();
+        picker._state.second = now.getSeconds();
     }
-    renderPicker(picker, input);
+    selectValue(input, picker);
 }
 
 function selectValue(input, picker) {
@@ -217,10 +231,21 @@ function handlePickerClick(event, input, picker) {
         state.view = state.view === "day" ? "month" : state.view === "month" ? "year" : state.view === "year" ? "decade" : "day";
     } else if (action === "prev" || action === "next") {
         const direction = action === "prev" ? -1 : 1;
-        if (state.view === "day") state.date.setMonth(state.date.getMonth() + direction);
-        if (state.view === "month") state.date.setFullYear(state.date.getFullYear() + direction);
-        if (state.view === "year") state.date.setFullYear(state.date.getFullYear() + direction * 10);
-        if (state.view === "decade") state.date.setFullYear(state.date.getFullYear() + direction * 100);
+        const large = button.dataset.step === "large";
+        const year = state.date.getFullYear();
+        const month = state.date.getMonth();
+        const day = state.date.getDate();
+        if (state.view === "day") {
+            const nextMonth = localDate(year, month + direction * (large ? 12 : 1), 1);
+            const lastDay = new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 0).getDate();
+            state.date = localDate(nextMonth.getFullYear(), nextMonth.getMonth(), Math.min(day, lastDay));
+        } else if (state.view === "month") {
+            state.date = localDate(year + direction * (large ? 10 : 1), month, Math.min(day, 28));
+        } else if (state.view === "year") {
+            state.date = localDate(year + direction * (large ? 100 : 10), month, Math.min(day, 28));
+        } else {
+            state.date = localDate(year + direction * (large ? 1000 : 100), month, Math.min(day, 28));
+        }
     } else if (button.dataset.day) {
         const [year, month, day] = button.dataset.day.split("-").map(Number);
         state.date = localDate(year, month, day);
