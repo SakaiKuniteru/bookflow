@@ -21,7 +21,7 @@ router.use(async (req, res) => {
         }
     }
     try {
-        const upstream = await fetch(`${config.api.baseUrl}${req.url}`, { method: req.method, headers, body, redirect: 'manual', ...(multipart ? { duplex: 'half' } : {}) });
+        const upstream = await fetch(`${config.api.baseUrl}${req.url}`, { method: req.method, headers, body, redirect: 'manual', signal: AbortSignal.timeout(config.api.timeout), ...(multipart ? { duplex: 'half' } : {}) });
         const responseBody = Buffer.from(await upstream.arrayBuffer());
         res.status(upstream.status);
         const contentType = upstream.headers.get('content-type');
@@ -32,8 +32,9 @@ router.use(async (req, res) => {
         if (requestId) res.set('X-Request-Id', requestId);
         res.set('Cache-Control', 'no-store');
         return res.send(responseBody);
-    } catch {
-        return res.status(502).json({ success: false, error: { code: 'BACKEND_UNAVAILABLE', message: 'Không kết nối được Backend' } });
+    } catch (error) {
+        const timedOut = error?.name === 'TimeoutError' || error?.name === 'AbortError';
+        return res.status(timedOut ? 504 : 502).json({ success: false, error: { code: timedOut ? 'BACKEND_TIMEOUT' : 'BACKEND_UNAVAILABLE', message: timedOut ? 'Backend phản hồi quá thời gian' : 'Không kết nối được Backend' } });
     }
 });
 export default router;

@@ -15,6 +15,7 @@ router.post('/', authorize('branches.manage'), controller.taoChiNhanh);
 router.get('/:chiNhanhId', controller.chiTietChiNhanh);
 router.patch('/:chiNhanhId', controller.capNhatChiNhanh);
 router.patch('/:chiNhanhId/trang-thai', authorize('branches.manage'), controller.doiTrangThaiChiNhanh);
+router.delete('/:chiNhanhId', authorize('branches.manage'), controller.xoaChiNhanh);
 router.get('/:chiNhanhId/nhan-vien', controller.danhSachNhanVien);
 router.put('/:chiNhanhId/nhan-vien/:thanhVienId', controller.phanCongNhanVien);
 router.delete('/:chiNhanhId/nhan-vien/:thanhVienId', controller.boPhanCongNhanVien);

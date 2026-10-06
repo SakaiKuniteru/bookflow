@@ -2,6 +2,7 @@
     {{#if label}}
         <label class="bf-form-label" for="{{id}}">{{label}}{{#if required}}<span class="bf-form-required">*</span>{{/if}}</label>
     {{/if}}
+    {{#if icon}}<div class="bf-input-icon-wrap bf-textarea-icon-wrap"><span class="bf-input-leading-icon">{{> ui/icon name=icon size=18}}</span>{{/if}}
     <textarea
         id="{{id}}"
         name="{{name}}"
@@ -13,5 +14,6 @@
         {{#if readonly}}readonly{{/if}}
         {{#if maxlength}}maxlength="{{maxlength}}"{{/if}}
     >{{value}}</textarea>
+    {{#if icon}}</div>{{/if}}
     {{#if helpText}}<div class="bf-form-help">{{helpText}}</div>{{/if}}
 </div>

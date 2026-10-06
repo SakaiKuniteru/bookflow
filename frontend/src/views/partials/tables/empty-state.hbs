@@ -1,12 +1,21 @@
-<div class="bf-table-empty" data-bf-table-empty>
-    <span class="bf-table-empty-icon">
-        {{> ui/icon
-            name="inbox"
-            size="28"
-        }}
-    </span>
+<div class="bf-table-empty" data-bf-table-empty {{#if hidden}}hidden{{/if}}>
+    {{#if illustration}}
+        <svg class="bf-table-empty-illustration" viewBox="0 0 260 120" role="img" aria-label="Minh họa vị trí chi nhánh">
+            <path d="M28 95h204M48 89c12-16 27-17 40-4 12-23 40-26 55-5 15-16 36-16 51 2 18-10 34-5 44 7" fill="#e4f2ec"></path>
+            <path d="M82 83h96l-8-28H90l-8 28Z" fill="#0b745d"></path>
+            <path d="M91 83v31h78V83M111 114V94h27v20" fill="#a8dec8"></path>
+            <path d="M90 59h80M98 52h65" stroke="#0b745d" stroke-width="6" stroke-linecap="round"></path>
+            <path d="M130 7c-11 0-20 9-20 20 0 15 20 34 20 34s20-19 20-34c0-11-9-20-20-20Z" fill="#08745d"></path>
+            <circle cx="130" cy="27" r="7" fill="#fff"></circle>
+            <path d="M68 92v-9m0 0c-8-1-11-6-10-12 7 0 12 4 12 10m-2 2c7-1 11-5 12-11-7-1-12 3-12 8" stroke="#59aa82" stroke-width="3" stroke-linecap="round"></path>
+        </svg>
+    {{else}}
+        <span class="bf-table-empty-icon">
+            {{> ui/icon name="inbox" size="28"}}
+        </span>
+    {{/if}}
     <strong>{{#if title}}{{title}}{{else}}Không có dữ liệu{{/if}}</strong>
-    {{#if description}}<span>{{description}}</span>{{/if}}
+    {{#if description}}<span data-table-empty-description>{{description}}</span>{{/if}}
     {{#if actionLabel}}
         {{> ui/nut-bam
             href=actionHref

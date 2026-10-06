@@ -7,7 +7,7 @@ const TRUONG_TAO = [
     'quoc_gia', 'vi_do', 'kinh_do', 'so_dien_thoai', 'email',
     'cho_nhan_tai_quay', 'cho_ban_truc_tuyen'
 ];
-const TRUONG_SUA = [...TRUONG_TAO.filter(ten => ten !== 'ma_chi_nhanh'), 'quan_ly_thanh_vien_id'];
+const TRUONG_SUA = [...TRUONG_TAO.filter(ten => ten !== 'ma_chi_nhanh'), 'quan_ly_thanh_vien_id', 'trang_thai'];
 const TRUONG_CO_THE_XOA = new Set([
     'dia_chi_chi_tiet', 'ma_tinh_thanh', 'ten_tinh_thanh', 'ma_phuong_xa',
     'ten_phuong_xa', 'vi_do', 'kinh_do', 'so_dien_thoai', 'email', 'quan_ly_thanh_vien_id'
@@ -47,6 +47,11 @@ function chuanHoa(body, taoMoi) {
         }
         if (ten === 'cho_nhan_tai_quay' || ten === 'cho_ban_truc_tuyen') {
             if (typeof giaTri !== 'boolean') throw loiDuLieu(`${ten} phải là boolean`);
+            ketQua[ten] = giaTri;
+            continue;
+        }
+        if (ten === 'trang_thai') {
+            if (!['DANG_DUNG', 'TAM_KHOA'].includes(giaTri)) throw loiDuLieu('Trạng thái chi nhánh không hợp lệ');
             ketQua[ten] = giaTri;
             continue;
         }

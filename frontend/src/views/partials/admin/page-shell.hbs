@@ -1,0 +1,21 @@
+<div class="bf-admin-page-shell">
+    <header class="bf-admin-page-heading">
+        <span class="bf-admin-page-heading-icon" aria-hidden="true">
+            {{#if (eq icon "store")}}
+                <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M7 20h34l-3-12H10L7 20Z"></path>
+                    <path d="M10 20v20h28V20"></path>
+                    <path d="M18 40V28h12v12"></path>
+                    <path d="M7 20c0 4 6 5 8 1 2 4 8 4 10 0 2 4 8 4 10 0 2 4 6 3 6-1"></path>
+                </svg>
+            {{else}}
+                {{> ui/icon name=icon size="34"}}
+            {{/if}}
+        </span>
+        <span class="bf-admin-page-heading-copy">
+            <h1>{{title}}</h1>
+            <p>{{description}}</p>
+        </span>
+    </header>
+    <div class="bf-admin-page-content">{{> @partial-block}}</div>
+</div>

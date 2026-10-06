@@ -3,6 +3,11 @@ const service = require('./chi-nhanh.service.js');
 function tra(req, res, data, status = 200) {
     return res.status(status).json({ success: true, request_id: req.requestId, data });
 }
+function bodySangSnakeCase(req) {
+    const body = req.body ?? {};
+    if (!body || typeof body !== 'object' || Array.isArray(body)) return body;
+    return Object.fromEntries(Object.entries(body).map(([key, value]) => [key.replace(/[A-Z]/g, kyTu => `_${kyTu.toLowerCase()}`), value]));
+}
 
 class ChiNhanhController {
     async danhSachChiNhanh(req, res, next) {
@@ -21,25 +26,30 @@ class ChiNhanhController {
 
     async taoChiNhanh(req, res, next) {
         try {
-            const data = await service.taoChiNhanh(req.auth, req.body ?? {}, req.requestId);
+            const data = await service.taoChiNhanh(req.auth, bodySangSnakeCase(req), req.requestId);
             return tra(req, res, data, 201);
         } catch (error) { next(error); }
     }
 
     async capNhatChiNhanh(req, res, next) {
         try {
-            const data = await service.capNhatChiNhanh(req.auth, req.params.chiNhanhId, req.body ?? {}, req.requestId);
+            const data = await service.capNhatChiNhanh(req.auth, req.params.chiNhanhId, bodySangSnakeCase(req), req.requestId);
             return tra(req, res, data);
         } catch (error) { next(error); }
     }
 
     async doiTrangThaiChiNhanh(req, res, next) {
         try {
-            const data = await service.doiTrangThaiChiNhanh(req.auth, req.params.chiNhanhId, req.body ?? {}, req.requestId);
+            const data = await service.doiTrangThaiChiNhanh(req.auth, req.params.chiNhanhId, bodySangSnakeCase(req), req.requestId);
             return tra(req, res, data);
         } catch (error) { next(error); }
     }
-
+    async xoaChiNhanh(req, res, next) {
+        try {
+            const data = await service.xoaChiNhanh(req.auth, req.params.chiNhanhId, req.requestId);
+            return tra(req, res, data);
+        } catch (error) { next(error); }
+    }
     async chonChiNhanh(req, res, next) {
         try {
             const data = await service.chonChiNhanh(req.auth, req.body ?? {});

@@ -433,3 +433,57 @@
         animation-duration: 1.5s;
     }
 }
+
+.bf-input-icon-wrap {
+    position: relative;
+    display: block;
+    width: 100%;
+}
+.bf-input-leading-icon {
+    position: absolute;
+    z-index: 1;
+    top: 50%;
+    left: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bf-form-muted);
+    pointer-events: none;
+    transform: translateY(-50%);
+}
+.bf-input-leading-icon .bf-icon {
+    width: 18px;
+    height: 18px;
+}
+.bf-input-icon-wrap > .bf-form-control {
+    padding-left: 42px;
+}
+
+.bf-input-icon-wrap {
+    position: relative;
+    display: block;
+    width: 100%;
+}
+.bf-input-leading-icon {
+    position: absolute;
+    z-index: 1;
+    top: 50%;
+    left: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bf-form-text);
+    pointer-events: none;
+    transform: translateY(-50%);
+}
+.bf-input-leading-icon .bf-icon {
+    width: 18px;
+    height: 18px;
+}
+.bf-input-icon-wrap > .bf-form-control {
+    padding-left: 42px;
+}
+.bf-textarea-icon-wrap .bf-input-leading-icon {
+    top: 14px;
+    transform: none;
+}

@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import profileController from './profile.controller.js';
+import branchService from '../services/branch.service.js';
 const render = (view, title) => async (req, res) => {
   const viewPath = path.join(req.app.get('views'), `${view}.hbs`);
   const viewDaCo = existsSync(viewPath);
@@ -15,7 +16,41 @@ const adminController = {
     return res.render('admin/tong-quan', { title: 'Tổng quan quản trị', layout: 'admin' });
   },
   profile(req, res, next) { return profileController.render(req, res, next, 'admin'); },
-  branches: render('admin/chi-nhanh', 'Chi nhánh'),
+async branches(req, res) {
+  const columns = [
+    { key: 'stt', label: 'STT', sortable: false, sortType: 'number', width: '20px' },
+    { key: 'maChiNhanh', label: 'Mã chi nhánh', sortable: true, sortType: 'text', width: '100px' },
+    { key: 'tenChiNhanh', label: 'Tên chi nhánh', sortable: true, sortType: 'text', width: '150px' },
+    { key: 'loaiChiNhanh', label: 'Loại', align: 'center', sortable: true, sortType: 'text', width: '100px' },
+    { key: 'diaChiChiTiet', label: 'Địa chỉ chi tiết', sortable: true, sortType: 'text', width: '250px' },
+    { key: 'maTinhThanh', label: 'Mã tỉnh/thành', sortable: true, sortType: 'text', width: '140px' },
+    { key: 'actions', label: 'Thao tác', sortable: false, width: '100px' }
+  ];
+  return res.render('admin/chi-nhanh', {
+    title: 'Chi nhánh',
+    layout: 'admin',
+    mode: 'client',
+    action: '/admin/chi-nhanh',
+    ariaLabel: 'Danh sách chi nhánh',
+    minWidth: '1050',
+    columns,
+    rows: [],
+    hasRows: false,
+    tableLoading: true,
+    search: { id: 'branch-search', name: 'q', placeholder: 'Tìm mã, tên, loại hoặc địa chỉ chi nhánh', mode: 'relative', threshold: 100 },
+    actions: [{ label: 'Thêm chi nhánh', action: 'create-branch', icon: 'plus', variant: 'primary', size: 'md' }],
+    branchTypes: [
+      { value: 'NHA_SACH', label: 'Nhà sách' },
+      { value: 'THU_VIEN', label: 'Thư viện' },
+      { value: 'KET_HOP', label: 'Kết hợp' }
+    ],
+    sort: { key: 'tenChiNhanh', order: 'asc' },
+    pagination: { enabled: true, page: 1, pageSize: 20, total: 0, pages: 1, from: 0, to: 0 },
+    emptyTitle: 'Chưa có chi nhánh để hiển thị',
+    emptyDescription: 'Nếu đơn vị đã có chi nhánh, hãy kiểm tra đơn vị đang chọn hoặc quyền xem chi nhánh của tài khoản.',
+    scripts: ['/js/page/admin-chi-nhanh.js?v=20261006-4']
+  });
+},
   employees: render('admin/nhan-vien', 'Nhân viên'),
   permissions: render('admin/phan-quyen', 'Phân quyền'),
   books: render('admin/sach', 'Quản lý sách'),

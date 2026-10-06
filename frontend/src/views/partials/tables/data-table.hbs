@@ -8,6 +8,7 @@
     data-pages="{{pagination.pages}}"
     data-sort="{{sort.key}}"
     data-order="{{#if sort.order}}{{sort.order}}{{else}}asc{{/if}}"
+    data-loading="{{loading}}"
 >
     <form
         class="bf-table-form"
@@ -37,8 +38,9 @@
                         {{#each columns}}
                             <th
                                 scope="col"
-                                class="bf-table-align-{{#if align}}{{align}}{{else}}left{{/if}}"
+                                class="bf-table-align-{{#if align}}{{align}}{{else}}center{{/if}}"
                                 data-column-key="{{key}}"
+                                data-column-align="{{align}}"
                                 data-sort-type="{{sortType}}"
                                 {{#if width}}style="width: {{width}}"{{/if}}
                             >
@@ -120,16 +122,14 @@
                 </tbody>
             </table>
         </div>
-        {{#unless hasRows}}
-            {{#unless loading}}
-                {{> tables/empty-state
-                    title=emptyTitle
-                    description=emptyDescription
-                    actionLabel=emptyActionLabel
-                    actionHref=emptyActionHref
-                }}
-            {{/unless}}
-        {{/unless}}
+        {{> tables/empty-state
+            title=emptyTitle
+            description=emptyDescription
+            actionLabel=emptyActionLabel
+            actionHref=emptyActionHref
+            illustration=emptyIllustration
+            hidden=(or hasRows loading)
+        }}
         {{#if pagination.enabled}}
             {{> tables/pagination
                 pagination=pagination

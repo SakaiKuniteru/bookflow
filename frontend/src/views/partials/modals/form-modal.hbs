@@ -14,7 +14,7 @@
 }}
     <form
         id="{{id}}-form"
-        class="bf-modal-form"
+        class="bf-modal-form bf-modal-form-grid"
         data-bf-modal-form
         method="{{#if method}}{{method}}{{else}}post{{/if}}"
         action="{{action}}"
@@ -25,6 +25,7 @@
             {{#if (eq type "select")}}
                 {{> forms/select
                     id=id
+                    className=className
                     name=name
                     label=label
                     value=value
@@ -39,6 +40,7 @@
             {{else if (eq type "textarea")}}
                 {{> forms/textarea
                     id=id
+                    className=className
                     name=name
                     label=label
                     value=value
@@ -51,6 +53,7 @@
             {{else if (eq type "date")}}
                 {{> forms/date
                     id=id
+                    className=className
                     name=name
                     label=label
                     value=value
@@ -62,6 +65,7 @@
             {{else if (eq type "datetime")}}
                 {{> forms/date
                     id=id
+                    className=className
                     name=name
                     label=label
                     value=value
@@ -74,6 +78,7 @@
             {{else if (eq type "email")}}
                 {{> forms/email
                     id=id
+                    className=className
                     name=name
                     label=label
                     value=value
@@ -85,6 +90,7 @@
             {{else if (eq type "phone")}}
                 {{> forms/phone
                     id=id
+                    className=className
                     name=name
                     label=label
                     value=value
@@ -97,6 +103,7 @@
             {{else if (eq type "checkbox")}}
                 {{> forms/checkbox
                     id=id
+                    className=className
                     name=name
                     label=label
                     value=value
@@ -107,6 +114,7 @@
             {{else}}
                 {{> forms/input
                     id=id
+                    className=className
                     name=name
                     label=label
                     value=value

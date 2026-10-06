@@ -35,6 +35,7 @@ app.engine('hbs', engine({
     or: (left, right) => Boolean(left || right),
     not: value => !value,
     includes: (value, item) => Array.isArray(value) && value.includes(item),
+    array: (...values) => values.slice(0, -1),
     formatNumber: value => {
       const number = Number(value);
       if (!Number.isFinite(number)) return '';

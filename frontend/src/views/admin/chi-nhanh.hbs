@@ -1,0 +1,22 @@
+<section class="bf-branch-page">
+    {{#> admin/page-shell title=title description="Danh sách chi nhánh trong phạm vi đơn vị của bạn." icon="store"}}
+        {{> tables/data-table
+            mode=mode
+            action=action
+            ariaLabel=ariaLabel
+            minWidth=minWidth
+            columns=columns
+            rows=rows
+            hasRows=hasRows
+            loading=tableLoading
+            search=search
+            actions=actions
+            sort=sort
+            pagination=pagination
+            emptyTitle=emptyTitle
+            emptyDescription=emptyDescription
+            emptyIllustration=true
+        }}
+    {{/admin/page-shell}}
+</section>
+{{> modals/chi-nhanh-form branchTypes=branchTypes}}

@@ -3,6 +3,7 @@ const apiRouter = require('./routes/index.js');
 const { AppError } = require('./common/errors/AppError.js');
 const { ganRequestId } = require('./common/middlewares/request-id.js');
 const { chuanHoaResponse } = require('./common/middlewares/response-camel-case.js');
+const { chuanHoaRequestSnakeCase } = require('./common/middlewares/request-snake-case.js');
 const { xuLyLoi } = require('./common/middlewares/error-handler.js');
 
 function taoUngDung({ kiemTraSanSang = null } = {}) {
@@ -11,6 +12,7 @@ function taoUngDung({ kiemTraSanSang = null } = {}) {
     app.use(ganRequestId);
     app.use(chuanHoaResponse);
     app.use(express.json({ limit: '1mb' }));
+    app.use(chuanHoaRequestSnakeCase);
     app.get('/health', (req, res) => res.status(200).json({ success: true, request_id: req.requestId, data: { status: 'ok', service: 'backend' } }));
     app.get('/ready', async (req, res, next) => {
         try {

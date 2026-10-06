@@ -54,22 +54,28 @@ class ChiNhanhService {
     async capNhatChiNhanh(auth, chiNhanhId, body, requestId) {
         chiNhanhId = idHopLe(chiNhanhId, 'Chi nhánh');
         const duLieu = capNhatChiNhanhHopLe(body);
+        const trangThaiMoi = duLieu.trang_thai;
+        delete duLieu.trang_thai;
         return trongGiaoDich(async client => {
             const chiNhanh = await repo.layChiNhanh(auth.donViId, chiNhanhId, client, true);
             if (!chiNhanh) throw loi('Không tìm thấy chi nhánh', 404, 'NOT_FOUND');
-            if (chiNhanh.trang_thai !== 'DANG_DUNG') throw loi('Chi nhánh đang tạm khóa', 409, 'BRANCH_INACTIVE');
             await yeuCauQuanLy(auth, chiNhanhId, client);
             if (duLieu.quan_ly_thanh_vien_id) {
                 const thanhVien = await repo.layThanhVien(auth.donViId, duLieu.quan_ly_thanh_vien_id, client);
                 const phanCong = await repo.phanCongTheoThanhVien(auth.donViId, duLieu.quan_ly_thanh_vien_id, chiNhanhId, client);
                 if (!thanhVien || thanhVien.trang_thai !== 'DANG_LAM' || !phanCong) throw loi('Người quản lý chưa được phân công vào chi nhánh', 422, 'INVALID_MANAGER');
             }
-            const ketQua = await repo.capNhatChiNhanhDb(auth.donViId, chiNhanhId, auth.taiKhoanId, duLieu, client);
-            await repo.ghiNhatKyChiNhanh({
-                donViId: auth.donViId, actorId: auth.taiKhoanId,
-                doiTuongId: chiNhanhId, hanhDong: 'branch.update', requestId
-            }, client);
-            return ketQua;
+            let ketQua = chiNhanh;
+            if (Object.keys(duLieu).length) {
+                ketQua = await repo.capNhatChiNhanhDb(auth.donViId, chiNhanhId, auth.taiKhoanId, duLieu, client);
+                await repo.ghiNhatKyChiNhanh({ donViId: auth.donViId, actorId: auth.taiKhoanId, doiTuongId: chiNhanhId, hanhDong: 'branch.update', requestId }, client);
+            }
+            if (trangThaiMoi && trangThaiMoi !== chiNhanh.trang_thai) {
+                ketQua = await repo.doiTrangThaiChiNhanh(auth.donViId, chiNhanhId, auth.taiKhoanId, trangThaiMoi, client);
+                if (trangThaiMoi === 'TAM_KHOA') await repo.boChiNhanhKhoiPhien(auth.donViId, chiNhanhId, null, client);
+                await repo.ghiNhatKyChiNhanh({ donViId: auth.donViId, actorId: auth.taiKhoanId, doiTuongId: chiNhanhId, hanhDong: `branch.${trangThaiMoi === 'TAM_KHOA' ? 'suspend' : 'resume'}`, requestId }, client);
+            }
+            return { ...ketQua, trang_thai: trangThaiMoi || ketQua.trang_thai };
         });
     }
 
@@ -96,7 +102,20 @@ class ChiNhanhService {
             return ketQua;
         });
     }
-
+    async xoaChiNhanh(auth, chiNhanhId, requestId) {
+        chiNhanhId = idHopLe(chiNhanhId, 'Chi nhánh');
+        return trongGiaoDich(async client => {
+            const chiNhanh = await repo.layChiNhanh(auth.donViId, chiNhanhId, client, true);
+            if (!chiNhanh) throw loi('Không tìm thấy chi nhánh', 404, 'NOT_FOUND');
+            await yeuCauQuanLy(auth, null, client);
+            await repo.ketThucPhanCongChiNhanh(auth.donViId, chiNhanhId, auth.taiKhoanId, client);
+            await repo.ketThucVaiTroChiNhanhTatCa(auth.donViId, chiNhanhId, auth.taiKhoanId, client);
+            await repo.boChiNhanhKhoiPhien(auth.donViId, chiNhanhId, null, client);
+            const ketQua = await repo.xoaChiNhanhMem(auth.donViId, chiNhanhId, auth.taiKhoanId, client);
+            await repo.ghiNhatKyChiNhanh({ donViId: auth.donViId, actorId: auth.taiKhoanId, doiTuongId: chiNhanhId, hanhDong: 'branch.delete', requestId }, client);
+            return ketQua;
+        });
+    }
     async chonChiNhanh(auth, body) {
         if (!body || typeof body !== 'object' || Array.isArray(body) || Object.keys(body).length !== 1) throw loi('Dữ liệu chọn chi nhánh không hợp lệ', 422, 'INVALID_INPUT');
         const chiNhanhId = idHopLe(body.chi_nhanh_id, 'Chi nhánh');

@@ -10,16 +10,13 @@ const TRUONG_GHI = new Set([
 class ChiNhanhRepository {
     async danhSachChiNhanh(donViId, taiKhoanId, xemTatCa, client) {
         const { rows } = await query(
-            `SELECT cn.id, cn.ma_chi_nhanh, cn.ten_chi_nhanh, cn.loai_chi_nhanh,
-                cn.dia_chi_chi_tiet, cn.ten_tinh_thanh, cn.ten_phuong_xa,
-                cn.so_dien_thoai, cn.trang_thai, cn.quan_ly_thanh_vien_id
+            `SELECT cn.*
              FROM chi_nhanh cn
-             WHERE cn.don_vi_id = $1 AND (
+             WHERE cn.don_vi_id = $1 AND cn.trang_thai <> 'DA_XOA' AND (
                  $3::boolean OR (
                      cn.trang_thai = 'DANG_DUNG' AND EXISTS (
                          SELECT 1 FROM thanh_vien_chi_nhanh tvcn
-                         JOIN thanh_vien_don_vi tv ON tv.id = tvcn.thanh_vien_don_vi_id
-                            AND tv.don_vi_id = tvcn.don_vi_id
+                         JOIN thanh_vien_don_vi tv ON tv.id = tvcn.thanh_vien_don_vi_id AND tv.don_vi_id = tvcn.don_vi_id
                          WHERE tvcn.don_vi_id = cn.don_vi_id AND tvcn.chi_nhanh_id = cn.id
                            AND tv.tai_khoan_id = $2 AND tv.trang_thai = 'DANG_LAM'
                            AND tvcn.trang_thai = 'HIEU_LUC' AND tvcn.ngay_bat_dau <= CURRENT_DATE
@@ -33,7 +30,7 @@ class ChiNhanhRepository {
     }
 
     async layChiNhanh(donViId, chiNhanhId, client, khoa = false) {
-        const sql = `SELECT * FROM chi_nhanh WHERE don_vi_id = $1 AND id = $2${khoa ? ' FOR UPDATE' : ''}`;
+        const sql = `SELECT * FROM chi_nhanh WHERE don_vi_id = $1 AND id = $2 AND trang_thai <> 'DA_XOA'${khoa ? ' FOR UPDATE' : ''}`;
         const { rows } = await query(sql, [donViId, chiNhanhId], client);
         return rows[0] ?? null;
     }
@@ -59,7 +56,7 @@ class ChiNhanhRepository {
         const giaTri = [donViId, chiNhanhId, actorId, ...cacTruong.map(ten => duLieu[ten])];
         const { rows } = await query(
             `UPDATE chi_nhanh SET ${cauLenhSet}, nguoi_cap_nhat_id = $3
-             WHERE don_vi_id = $1 AND id = $2 AND trang_thai = 'DANG_DUNG'
+             WHERE don_vi_id = $1 AND id = $2 AND trang_thai <> 'DA_XOA'
              RETURNING *`,
             giaTri, client
         );
@@ -69,7 +66,7 @@ class ChiNhanhRepository {
     async doiTrangThaiChiNhanh(donViId, chiNhanhId, actorId, trangThai, client) {
         const { rows } = await query(
             `UPDATE chi_nhanh SET trang_thai = $4, nguoi_cap_nhat_id = $3
-             WHERE don_vi_id = $1 AND id = $2
+             WHERE don_vi_id = $1 AND id = $2 AND trang_thai <> 'DA_XOA'
              RETURNING id, ma_chi_nhanh, ten_chi_nhanh, trang_thai`,
             [donViId, chiNhanhId, actorId, trangThai], client
         );
@@ -207,7 +204,29 @@ class ChiNhanhRepository {
             [donViId, chiNhanhId, taiKhoanId], client
         );
     }
-
+    async xoaChiNhanhMem(donViId, chiNhanhId, actorId, client) {
+        const { rows } = await query(
+            `UPDATE chi_nhanh SET trang_thai = 'DA_XOA', quan_ly_thanh_vien_id = NULL, nguoi_cap_nhat_id = $3
+             WHERE don_vi_id = $1 AND id = $2 AND trang_thai <> 'DA_XOA'
+             RETURNING id, ma_chi_nhanh, ten_chi_nhanh, trang_thai`,
+            [donViId, chiNhanhId, actorId], client
+        );
+        return rows[0] ?? null;
+    }
+    async ketThucPhanCongChiNhanh(donViId, chiNhanhId, actorId, client) {
+        await query(
+            `UPDATE thanh_vien_chi_nhanh SET trang_thai = 'KET_THUC', ngay_ket_thuc = CURRENT_DATE, la_chi_nhanh_chinh = FALSE, nguoi_cap_nhat_id = $3
+             WHERE don_vi_id = $1 AND chi_nhanh_id = $2 AND trang_thai = 'HIEU_LUC'`,
+            [donViId, chiNhanhId, actorId], client
+        );
+    }
+    async ketThucVaiTroChiNhanhTatCa(donViId, chiNhanhId, actorId, client) {
+        await query(
+            `UPDATE thanh_vien_vai_tro SET ngay_ket_thuc = now(), nguoi_cap_nhat_id = $3
+             WHERE don_vi_id = $1 AND chi_nhanh_id = $2 AND ngay_ket_thuc IS NULL`,
+            [donViId, chiNhanhId, actorId], client
+        );
+    }
     async ghiNhatKyChiNhanh({ donViId, actorId, doiTuongId, hanhDong, requestId }, client) {
         await query(
             `INSERT INTO nhat_ky_he_thong (don_vi_id, tai_khoan_id, hanh_dong, doi_tuong_loai,

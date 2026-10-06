@@ -1,0 +1,138 @@
+{{#> modals/base-modal
+    id="branch-create-modal"
+    title="Thêm chi nhánh"
+    description="Nhập thông tin chi nhánh mới."
+    size="xl"
+    closeOnBackdrop=false
+    loading=false
+}}
+    <form id="branch-create-form" class="bf-modal-form bf-modal-form-grid" data-branch-create-form novalidate>
+        <p class="bf-form-error" data-branch-create-error role="alert" hidden></p>
+        {{> forms/input
+            id="branch-code"
+            name="maChiNhanh"
+            type="text"
+            label="Mã chi nhánh"
+            placeholder="Ví dụ: CN_HANOI"
+            required=true
+            maxlength=40
+            icon="building"
+        }}
+        {{> forms/input
+            id="branch-name"
+            name="tenChiNhanh"
+            type="text"
+            label="Tên chi nhánh"
+            placeholder="Nhập tên chi nhánh"
+            required=true
+            maxlength=200
+            icon="user"
+        }}
+        {{> forms/input
+            id="branch-phone"
+            name="soDienThoai"
+            type="tel"
+            label="Hot line"
+            placeholder="Nhập số điện thoại liên hệ"
+            required=true
+            maxlength=30
+            icon="phone"
+        }}
+        {{> forms/input
+            id="branch-email"
+            name="email"
+            type="email"
+            label="Email"
+            placeholder="Nhập email liên hệ"
+            required=true
+            maxlength=254
+            icon="email"
+        }}
+        {{> forms/select
+            id="branch-type"
+            name="loaiChiNhanh"
+            label="Loại chi nhánh"
+            placeholder="Chọn loại chi nhánh"
+            required=true
+            options=branchTypes
+            icon="grid"
+        }}
+        {{> forms/select
+            id="branch-country"
+            name="quocGia"
+            label="Quốc gia"
+            placeholder="Chọn quốc gia"
+            options=branchCountries
+            icon="globe"
+        }}
+        {{> forms/select
+            id="branch-province"
+            name="tenTinhThanh"
+            label="Tỉnh thành"
+            placeholder="Chọn tỉnh/thành"
+            options=branchProvinces
+            icon="map-pin"
+        }}
+        {{> forms/select
+            id="branch-ward"
+            name="tenPhuongXa"
+            label="Xã/phường"
+            placeholder="Chọn xã/phường"
+            options=branchWards
+            icon="map"
+        }}
+        {{> forms/textarea
+            id="branch-address"
+            className="bf-form-grid-full"
+            name="diaChiChiTiet"
+            label="Địa chỉ chi tiết"
+            placeholder="Nhập địa chỉ chi tiết"
+            required=true
+            maxlength=500
+            rows=4
+            icon="map-marked"
+        }}
+        {{> forms/number
+            id="branch-longitude"
+            name="kinhDo"
+            type="number"
+            label="Kinh độ"
+            placeholder="Nhập kinh độ (ví dụ: 105.8342)"
+            icon="crosshair"
+        }}
+        {{> forms/number
+            id="branch-latitude"
+            name="viDo"
+            type="number"
+            label="Vĩ độ"
+            placeholder="Nhập vĩ độ (ví dụ: 21.0285)"
+            icon="crosshair"
+        }}
+        <div class="bf-form-options bf-form-grid-full">
+            {{> forms/checkbox
+                id="branch-active"
+                name="active"
+                label="Hoạt động"
+                checked=true
+            }}
+            {{> forms/checkbox
+                id="branch-counter"
+                name="choNhanTaiQuay"
+                label="Tại quầy"
+                checked=true
+            }}
+            {{> forms/checkbox
+                id="branch-online"
+                name="choBanTrucTuyen"
+                label="Trực tuyến"
+                checked=true
+            }}
+        </div>
+    </form>
+    <footer class="bf-modal-footer">
+        <div class="bf-modal-footer-actions">
+            <button type="button" class="bf-btn bf-btn-secondary bf-btn-md" data-bf-modal-close>Hủy</button>
+            <button type="submit" form="branch-create-form" class="bf-btn bf-btn-primary bf-btn-md" data-bf-modal-submit>Thêm chi nhánh</button>
+        </div>
+    </footer>
+{{/modals/base-modal}}

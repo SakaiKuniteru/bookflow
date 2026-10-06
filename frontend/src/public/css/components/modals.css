@@ -47,7 +47,7 @@
 }
 .bf-modal[data-modal-size="xl"] 
 .bf-modal-dialog {
-    width: min(100%, 1200px);
+    width: min(100%, 800px);
 }
 .bf-modal[data-modal-size="full"] {
     padding: 12px;
@@ -131,6 +131,39 @@
 }
 .bf-modal-form-error {
     margin-bottom: 14px;
+}
+.bf-modal-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 20px;
+}
+.bf-modal-form-grid > .bf-form-field {
+    min-width: 0;
+    margin: 0;
+}
+.bf-modal-form-grid > .bf-form-grid-full,
+.bf-modal-form-grid > [data-edit-only],
+.bf-modal-form-grid > .bf-form-options,
+.bf-modal-form-grid > .bf-modal-form-error {
+    grid-column: 1 / -1;
+}
+.bf-form-options {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 20px;
+}
+@media (max-width: 700px) {
+    .bf-modal-form-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+    }
+    .bf-modal-form-grid > .bf-form-grid-full,
+    .bf-modal-form-grid > [data-edit-only],
+    .bf-modal-form-grid > .bf-form-options,
+    .bf-modal-form-grid > .bf-modal-form-error {
+        grid-column: auto;
+    }
 }
 .bf-modal-confirm {
     display: flex;
@@ -284,4 +317,7 @@
     .bf-modal-detail-list {
         grid-template-columns: 1fr;
     }
+}
+#branch-create-form {
+    margin-bottom: 30px;
 }

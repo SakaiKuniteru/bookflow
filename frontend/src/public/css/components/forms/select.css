@@ -235,3 +235,11 @@
 .bf-select:not(.has-value) .bf-select-clear {
     display: none;
 }
+.bf-select.has-leading-icon .bf-select-control {
+    position: relative;
+    padding-left: 42px;
+}
+.bf-select.is-invalid .bf-select-control {
+    border-color: var(--bf-form-danger);
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, .08);
+}

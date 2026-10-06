@@ -9,7 +9,27 @@
             {{#if divider}}<div class="bf-nav-sidebar-divider"></div>{{/if}}
             {{#if group}}<h2 class="bf-nav-sidebar-group">{{group}}</h2>{{/if}}
             <a class="bf-nav-sidebar-link {{#if active}}is-active{{/if}}" href="{{href}}" {{#if active}}aria-current="page"{{/if}}>
-                {{#if icon}}{{> ui/icon name=icon size="18"}}{{/if}}
+                {{#if icon}}
+                    {{> ui/icon name=icon size="16"}}
+                {{else if (eq href "/admin/tong-quan")}}
+                    <svg class="bf-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"></path></svg>
+                {{else if (eq href "/admin/chi-nhanh")}}
+                    <svg class="bf-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10h18l-2-6H5Z"></path><path d="M5 10v10h14V10M9 20v-6h6v6"></path><path d="M3 10c0 3 4 3 4 0 0 3 4 3 4 0 0 3 4 3 4 0 0 3 4 3 4 0"></path></svg>
+                {{else if (eq href "/admin/nhan-vien")}}
+                    <svg class="bf-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg>
+                {{else if (eq href "/admin/sach")}}
+                    <svg class="bf-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6.5C10.2 4.8 7.4 4 3 4v15c4.4 0 7.2.8 9 2.5m0-15C13.8 4.8 16.6 4 21 4v15c-4.4 0-7.2.8-9 2.5m0-15v15"></path></svg>
+                {{else if (eq href "/admin/kho")}}
+                    <svg class="bf-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5Z"></path><path d="M3 8v9l9 5 9-5V8M12 13v9"></path></svg>
+                {{else if (eq href "/admin/khach-hang")}}
+                    <svg class="bf-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"></circle><circle cx="17" cy="9" r="2.5"></circle><path d="M2 20a7 7 0 0 1 14 0m1-5a5 5 0 0 1 5 5"></path></svg>
+                {{else if (eq href "/admin/hoi-vien")}}
+                    <svg class="bf-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 8 5 4 4-7 4 7 5-4-2 12H5Z"></path><path d="M5 22h14"></path></svg>
+                {{else if (eq href "/admin/bao-cao")}}
+                    <svg class="bf-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20h18M5 16l5-5 4 3 6-8"></path><path d="M16 6h4v4"></path></svg>
+                {{else if (eq href "/admin/cai-dat")}}
+                    <svg class="bf-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.6a8 8 0 0 1-1.5.9l-.3 1.8h-2.8l-.3-1.8a8 8 0 0 1-1.5-.9l-1.7.6-1.4-2.4 1.4-1.1a7 7 0 0 1 0-1.8l-1.4-1.1 1.4-2.4 1.7.6a8 8 0 0 1 1.5-.9l.3-1.8h2.8l.3 1.8a8 8 0 0 1 1.5.9l1.7-.6 1.4 2.4-1.4 1.1a7 7 0 0 1 0 1.7Z"></path></svg>
+                {{/if}}
                 <span class="bf-nav-sidebar-link-label">{{label}}</span>
                 {{#if badge}}<span class="bf-nav-sidebar-badge">{{badge}}</span>{{/if}}
             </a>

@@ -2,6 +2,7 @@ const { Router } = require('express');
 const multer = require('multer');
 const { authenticate } = require('../../common/middlewares/authenticate.js');
 const { AppError } = require('../../common/errors/AppError.js');
+const { chuyenRequestSnakeCase } = require('../../common/middlewares/request-snake-case.js');
 const controller = require('./tep-tin.controller.js');
 
 const router = Router();
@@ -15,7 +16,10 @@ const upload = multer({
 });
 function nhanNhieuFile(req, res, next) {
     upload.array('files', 10)(req, res, error => {
-        if (!error) return next();
+        if (!error) {
+            req.body = chuyenRequestSnakeCase(req.body ?? {});
+            return next();
+        }
         if (error instanceof multer.MulterError) return next(new AppError({ code: 'UPLOAD_LIMIT', message: 'Tối đa 10 file, mỗi file không quá 5 MB', status: 413 }));
         return next(error);
     });

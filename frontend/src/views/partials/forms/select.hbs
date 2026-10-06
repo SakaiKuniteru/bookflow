@@ -7,7 +7,7 @@
     {{/if}}
     <div
         id="{{id}}"
-        class="bf-select"
+        class="bf-select {{#if icon}}has-leading-icon{{/if}}"
         data-bf-select
         data-name="{{name}}"
         data-multiple="{{multiple}}"
@@ -15,8 +15,10 @@
         data-search="{{search}}"
         data-checkbox="{{checkbox}}"
         data-placeholder="{{placeholder}}"
+        data-required="{{required}}"
     >
         <div class="bf-select-control" role="combobox" tabindex="{{#if search}}-1{{else}}0{{/if}}" aria-haspopup="listbox" aria-expanded="false">
+            {{#if icon}}<span class="bf-input-leading-icon">{{> ui/icon name=icon size=18}}</span>{{/if}}
             <span class="bf-select-value"></span>
             {{#if search}}
                 <input type="text" class="bf-select-search-input" placeholder="{{placeholder}}" autocomplete="off" aria-label="{{label}}" tabindex="0">

@@ -7,7 +7,16 @@ function normalize(value) {
 function getRows(table) {
     return [...table.querySelectorAll("[data-table-row]")];
 }
-
+function applyColumnAlignment(table) {
+    const alignments = new Map([...table.querySelectorAll("thead [data-column-key]")].map(header => [header.dataset.columnKey, header.dataset.columnAlign || ""]));
+    getRows(table).forEach(row => row.querySelectorAll("[data-column-key]").forEach(cell => {
+        const key = cell.dataset.columnKey;
+        const requested = alignments.get(key);
+        const align = ["left", "center", "right"].includes(requested) ? requested : key === "stt" || key === "actions" ? "center" : "left";
+        cell.classList.remove("bf-table-align-left", "bf-table-align-center", "bf-table-align-right");
+        cell.classList.add(`bf-table-align-${align}`);
+    }));
+}
 function getState(table) {
     const pageSize = table.querySelector("[data-table-page-size]");
     const pageInput = table.querySelector("[data-table-page]");
@@ -89,6 +98,7 @@ function updatePagination(table, filteredRows = null) {
 }
 
 function applyClientTable(table) {
+    applyColumnAlignment(table);
     const rows = getRows(table);
     const query = table.querySelector(".bf-search-input")?.value.trim() || "";
     const searchWrapper = table.querySelector("[data-bf-search]");
@@ -107,11 +117,19 @@ function applyClientTable(table) {
     const pageCount = Math.max(1, Math.ceil(sorted.length / state.size));
     const page = Math.min(state.page, pageCount);
     const start = (page - 1) * state.size;
+    sorted.forEach((row, index) => {
+        const cell = row.querySelector('[data-column-key="stt"]');
+        if (!cell) return;
+        const value = String(start + index + 1);
+        cell.textContent = value;
+        cell.dataset.searchValue = value;
+        cell.dataset.sortValue = value;
+    });
     const visible = new Set(sorted.slice(start, start + state.size));
     rows.forEach(row => row.hidden = !visible.has(row));
     sorted.forEach(row => table.querySelector("[data-bf-table-body]").appendChild(row));
     const empty = table.querySelector("[data-bf-table-empty]");
-    if (empty) empty.hidden = sorted.length > 0;
+    if (empty) empty.hidden = sorted.length > 0 || table.dataset.loading === "true";
     updatePagination(table, sorted);
 }
 
@@ -126,6 +144,7 @@ function initialize(table) {
     const form = table.querySelector("[data-bf-table-form]");
     if (!form) return;
     table.dataset.formInitialized = "true";
+    applyColumnAlignment(table);
     const client = table.dataset.mode === "client";
     const refresh = () => client ? applyClientTable(table) : submitServerTable(table);
     table.querySelectorAll("[data-table-sort-key]").forEach(button => {
@@ -194,6 +213,10 @@ function initialize(table) {
             if (pageInput) pageInput.value = "1";
             applyClientTable(table);
         }
+    });
+    table.addEventListener("bookflow:table:refresh", () => {
+        if (client) applyClientTable(table);
+        else updatePagination(table);
     });
     if (client) applyClientTable(table);
     else updatePagination(table);
