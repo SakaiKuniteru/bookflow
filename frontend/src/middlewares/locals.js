@@ -1,12 +1,12 @@
 import config from '../config/index.js';
 const layMaVaiTro = user => {
-  const values = Array.isArray(user?.vai_tro) ? user.vai_tro : Array.isArray(user?.vaiTro) ? user.vaiTro : Array.isArray(user?.roles) ? user.roles : [];
-  return values.map(item => typeof item === 'string' ? item : item?.ma_vai_tro ?? item?.maVaiTro).filter(Boolean);
+  const values = Array.isArray(user?.vaiTro) ? user.vaiTro : Array.isArray(user?.roles) ? user.roles : [];
+  return values.map(item => typeof item === 'string' ? item : item?.maVaiTro).filter(Boolean);
 };
 const taoLienKetKhongGian = (user, currentPath) => {
   if (!user) return [];
   const vaiTro = layMaVaiTro(user);
-  const quyen = (user?.quyen || user?.permissions || []).map(item => typeof item === 'string' ? item : item?.ma_quyen || item?.maQuyen).filter(Boolean);
+  const quyen = (user?.quyen || user?.permissions || []).map(item => typeof item === 'string' ? item : item?.maQuyen).filter(Boolean);
   const isSuperAdmin = vaiTro.includes('SUPER_ADMIN') || quyen.some(item => item.startsWith('SUPER_ADMIN_'));
   const isAdmin = vaiTro.includes('QUAN_TRI');
   const isStaff = vaiTro.includes('NHAN_VIEN') || vaiTro.includes('THU_THU');

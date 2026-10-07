@@ -1,4 +1,4 @@
-<section class="bf-profile-page" data-bf-profile data-avatar-id="{{account.anh_dai_dien_tep_id}}">
+<section class="bf-profile-page" data-bf-profile data-avatar-id="{{account.anhDaiDienTepId}}">
     <div class="bf-profile-grid">
         <aside class="bf-profile-avatar-panel" aria-label="Hồ sơ tài khoản">
             <div class="bf-profile-side-heading">
@@ -13,8 +13,8 @@
                 <p class="bf-profile-side-copy">Quản lý thông tin cá nhân của bạn để sử dụng dịch vụ BookFlow tốt hơn.</p>
             </div>
             <div class="bf-profile-avatar-stage">
-                <img class="bf-profile-avatar-image" data-bf-profile-avatar data-bf-avatar-file-id="{{account.anh_dai_dien_tep_id}}" alt="Ảnh đại diện" hidden>
-                <span class="bf-profile-avatar-fallback" data-bf-profile-avatar-fallback data-bf-avatar-fallback data-bf-avatar-initial>{{#if account.ho_ten}}{{account.ho_ten.[0]}}{{else}}A{{/if}}</span>
+                <img class="bf-profile-avatar-image" data-bf-profile-avatar data-bf-avatar-file-id="{{account.anhDaiDienTepId}}" alt="Ảnh đại diện" hidden>
+                <span class="bf-profile-avatar-fallback" data-bf-profile-avatar-fallback data-bf-avatar-fallback data-bf-avatar-initial>{{#if account.hoTen}}{{account.hoTen.[0]}}{{else}}A{{/if}}</span>
                 <button class="bf-profile-avatar-edit" type="button" data-avatar-edit aria-label="Chỉnh sửa ảnh đại diện" title="Chỉnh sửa ảnh đại diện">
                     {{> ui/icon
                         name="edit"
@@ -30,8 +30,8 @@
                     }}
                     <span>Xem ảnh</span>
                 </button>
-                {{#if account.anh_dai_dien_tep_id}}
-                    <a class="bf-btn bf-btn-secondary bf-btn-sm" data-avatar-download href="/api/tep-tin/{{account.anh_dai_dien_tep_id}}/noi-dung?tai_xuong=1">
+                {{#if account.anhDaiDienTepId}}
+                    <a class="bf-btn bf-btn-secondary bf-btn-sm" data-avatar-download href="/api/tep-tin/{{account.anhDaiDienTepId}}/noi-dung?taiXuong=1">
                         {{> ui/icon
                             name="download"
                             size="17"
@@ -57,7 +57,7 @@
                     }}
                     Tên tài khoản
                 </div>
-                <strong class="bf-profile-account-name">{{#if account.ho_ten}}{{account.ho_ten}}{{else}}Chưa cập nhật{{/if}}</strong>
+                <strong class="bf-profile-account-name">{{#if account.hoTen}}{{account.hoTen}}{{else}}Chưa cập nhật{{/if}}</strong>
                 <div class="bf-profile-account-meta">
                     {{> ui/icon
                         name="email"
@@ -70,7 +70,7 @@
                         name="user"
                         size="16"
                     }}
-                    <span>{{account.ten_dang_nhap}}</span>
+                    <span>{{account.tenDangNhap}}</span>
                 </div>
             </div>
             <div class="bf-profile-books" aria-hidden="true">
@@ -89,10 +89,10 @@
             <div class="bf-profile-fields-grid">
                 {{> forms/input
                     id="profile-full-name"
-                    name="ho_ten"
+                    name="hoTen"
                     type="text"
                     label="Họ và tên"
-                    value=account.ho_ten
+                    value=account.hoTen
                     placeholder="Nhập họ và tên"
                     required=true
                     minlength="2"
@@ -101,10 +101,10 @@
                 }}
                 {{> forms/input
                     id="profile-username"
-                    name="ten_dang_nhap"
+                    name="tenDangNhap"
                     type="text"
                     label="Tên đăng nhập"
-                    value=account.ten_dang_nhap
+                    value=account.tenDangNhap
                     placeholder="Nhập tên đăng nhập"
                     disabled=true
                     autocomplete="username"
@@ -120,50 +120,48 @@
                 }}
                 {{> forms/phone
                     id="profile-phone"
-                    name="so_dien_thoai"
+                    name="soDienThoai"
                     label="Số điện thoại"
-                    value=account.so_dien_thoai
+                    value=account.soDienThoai
                     placeholder="Nhập số điện thoại"
                     disabled=true
                     helpText="Muốn thay đổi số điện thoại, vui lòng thực hiện quy trình xác thực OTP."
                 }}
                 {{> forms/date
                     id="profile-birth-date"
-                    name="ngay_sinh"
+                    name="ngaySinh"
                     type="date"
                     label="Ngày sinh"
-                    value=account.ngay_sinh
+                    value=account.ngaySinh
                     placeholder="Ngày sinh"
                     defaultTime="00:00:00"
                 }}
                 {{> forms/select
                     id="profile-gender"
-                    name="gioi_tinh"
+                    name="gioiTinh"
                     label="Giới tính"
                     placeholder="Chọn giới tính"
                     options=gioiTinhOptions
                 }}
                 {{> forms/select
                     id="profile-nationality"
-                    name="quoc_tich"
+                    name="quocTich"
                     label="Quốc tịch"
                     placeholder="Chọn quốc tịch"
-                    options=quocTichOptions
                     search=true
                 }}
                 {{> forms/select
                     id="profile-ethnicity"
-                    name="dan_toc"
+                    name="danToc"
                     label="Dân tộc"
                     placeholder="Chọn dân tộc"
-                    options=danTocOptions
                     search=true
                 }}
                 {{> forms/textarea
                     id="profile-description"
-                    name="mo_ta"
+                    name="moTa"
                     label="Mô tả"
-                    value=account.mo_ta
+                    value=account.moTa
                     placeholder="Nhập mô tả về bản thân"
                     maxlength="2000"
                     rows="3"
@@ -174,34 +172,33 @@
             <div class="bf-profile-fields-grid">
                 {{> forms/select
                     id="profile-country"
-                    name="quoc_gia"
+                    name="quocGia"
                     label="Quốc gia"
                     placeholder="Chọn quốc gia"
-                    options=quocGiaOptions
                     className="bf-profile-field-full"
                     search=true
                 }}
                 {{> forms/select
                     id="profile-province"
-                    name="tinh_thanh_pho"
+                    name="tinhThanhPho"
                     label="Tỉnh/Thành phố"
                     placeholder="Chọn tỉnh/thành phố"
-                    options=tinhThanhOptions
                     search=true
+                    disabled=true
                 }}
                 {{> forms/select
                     id="profile-ward"
-                    name="phuong_xa"
+                    name="phuongXa"
                     label="Xã/Phường"
                     placeholder="Chọn xã/phường"
-                    options=phuongXaOptions
                     search=true
+                    disabled=true
                 }}
                 {{> forms/textarea
                     id="profile-address-detail"
-                    name="dia_chi_chi_tiet"
+                    name="diaChiChiTiet"
                     label="Địa chỉ"
-                    value=account.dia_chi_chi_tiet
+                    value=account.diaChiChiTiet
                     placeholder="Nhập địa chỉ chi tiết"
                     maxlength="300"
                     rows="3"

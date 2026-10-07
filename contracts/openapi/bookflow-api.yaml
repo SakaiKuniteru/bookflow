@@ -6,7 +6,7 @@ info:
   description: |
     Hợp đồng API nghiệp vụ của BookFlow.
 
-    JSON sử dụng snake_case.
+    JSON request/response sử dụng camelCase.
     Tiền sử dụng chuỗi decimal, không sử dụng floating-point.
     Thời điểm sử dụng ISO 8601 UTC.
 
@@ -55,7 +55,7 @@ paths:
 
               example:
                 success: true
-                request_id: req-health-001
+                requestId: req-health-001
                 data:
                   status: ok
                   service: backend
@@ -137,14 +137,14 @@ components:
 
       required:
         - success
-        - request_id
+        - requestId
         - data
 
       properties:
         success:
           const: true
 
-        request_id:
+        requestId:
           type: string
           minLength: 1
 
@@ -185,25 +185,25 @@ components:
 
       required:
         - trang
-        - kich_thuoc_trang
-        - tong_ban_ghi
-        - tong_trang
+        - kichThuocTrang
+        - tongBanGhi
+        - tongTrang
 
       properties:
         trang:
           type: integer
           minimum: 1
 
-        kich_thuoc_trang:
+        kichThuocTrang:
           type: integer
           minimum: 1
           maximum: 100
 
-        tong_ban_ghi:
+        tongBanGhi:
           type: integer
           minimum: 0
 
-        tong_trang:
+        tongTrang:
           type: integer
           minimum: 0
 

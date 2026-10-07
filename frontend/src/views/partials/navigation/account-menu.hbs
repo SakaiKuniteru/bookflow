@@ -6,9 +6,9 @@
         aria-expanded="false"
         aria-haspopup="true"
     >
-        <img class="bf-nav-avatar" src="{{user.avatar}}" data-bf-avatar-file-id="{{#if user.taiKhoan.anhDaiDienTepId}}{{user.taiKhoan.anhDaiDienTepId}}{{else}}{{user.tai_khoan.anh_dai_dien_tep_id}}{{/if}}" alt="" {{#unless user.avatar}}hidden{{/unless}}>
-        <span class="bf-nav-avatar bf-nav-avatar-fallback" data-bf-avatar-fallback data-bf-avatar-initial {{#if user.avatar}}hidden{{/if}}>{{#if user.name}}{{user.name.[0]}}{{else}}{{#if user.taiKhoan.hoTen}}{{user.taiKhoan.hoTen.[0]}}{{else}}{{#if user.tai_khoan.ho_ten}}{{user.tai_khoan.ho_ten.[0]}}{{else}}A{{/if}}{{/if}}{{/if}}</span>
-        <span class="bf-nav-account-name" data-bf-account-name>{{#if user.name}}{{user.name}}{{else}}{{#if user.taiKhoan.hoTen}}{{user.taiKhoan.hoTen}}{{else}}{{#if user.tai_khoan.ho_ten}}{{user.tai_khoan.ho_ten}}{{else}}Tài khoản{{/if}}{{/if}}{{/if}}</span>
+        <img class="bf-nav-avatar" src="{{user.avatar}}" data-bf-avatar-file-id="{{user.taiKhoan.anhDaiDienTepId}}" alt="" {{#unless user.avatar}}hidden{{/unless}}>
+        <span class="bf-nav-avatar bf-nav-avatar-fallback" data-bf-avatar-fallback data-bf-avatar-initial {{#if user.avatar}}hidden{{/if}}>{{#if user.name}}{{user.name.[0]}}{{else}}{{#if user.taiKhoan.hoTen}}{{user.taiKhoan.hoTen.[0]}}{{else}}A{{/if}}{{/if}}</span>
+        <span class="bf-nav-account-name" data-bf-account-name>{{#if user.name}}{{user.name}}{{else}}{{#if user.taiKhoan.hoTen}}{{user.taiKhoan.hoTen}}{{else}}Tài khoản{{/if}}{{/if}}</span>
         {{> ui/icon
             name="chevron-down"
             size="16"
@@ -16,11 +16,11 @@
     </button>
     <div class="bf-nav-menu bf-nav-account-menu" data-bf-menu-panel hidden>
         <a class="bf-nav-account-summary" href="{{profileHref}}">
-            <img class="bf-nav-avatar" src="{{user.avatar}}" data-bf-avatar-file-id="{{#if user.taiKhoan.anhDaiDienTepId}}{{user.taiKhoan.anhDaiDienTepId}}{{else}}{{user.tai_khoan.anh_dai_dien_tep_id}}{{/if}}" alt="" {{#unless user.avatar}}hidden{{/unless}}>
-            <span class="bf-nav-avatar bf-nav-avatar-fallback" data-bf-avatar-fallback data-bf-avatar-initial {{#if user.avatar}}hidden{{/if}}>{{#if user.name}}{{user.name.[0]}}{{else}}{{#if user.taiKhoan.hoTen}}{{user.taiKhoan.hoTen.[0]}}{{else}}{{#if user.tai_khoan.ho_ten}}{{user.tai_khoan.ho_ten.[0]}}{{else}}A{{/if}}{{/if}}{{/if}}</span>
+            <img class="bf-nav-avatar" src="{{user.avatar}}" data-bf-avatar-file-id="{{user.taiKhoan.anhDaiDienTepId}}" alt="" {{#unless user.avatar}}hidden{{/unless}}>
+            <span class="bf-nav-avatar bf-nav-avatar-fallback" data-bf-avatar-fallback data-bf-avatar-initial {{#if user.avatar}}hidden{{/if}}>{{#if user.name}}{{user.name.[0]}}{{else}}{{#if user.taiKhoan.hoTen}}{{user.taiKhoan.hoTen.[0]}}{{else}}A{{/if}}{{/if}}</span>
             <span class="bf-nav-account-summary-details">
-                <strong data-bf-account-name>{{#if user.name}}{{user.name}}{{else}}{{#if user.tai_khoan.ho_ten}}{{user.tai_khoan.ho_ten}}{{else}}{{#if user.taiKhoan.hoTen}}{{user.taiKhoan.hoTen}}{{else}}Tài khoản{{/if}}{{/if}}{{/if}}</strong>
-                <span data-bf-account-email>{{#if user.email}}{{user.email}}{{else}}{{#if user.tai_khoan.email}}{{user.tai_khoan.email}}{{else}}{{user.taiKhoan.email}}{{/if}}{{/if}}</span>
+                <strong data-bf-account-name>{{#if user.name}}{{user.name}}{{else}}{{#if user.taiKhoan.hoTen}}{{user.taiKhoan.hoTen}}{{else}}Tài khoản{{/if}}{{/if}}</strong>
+                <span data-bf-account-email>{{#if user.email}}{{user.email}}{{else}}{{user.taiKhoan.email}}{{/if}}</span>
             </span>
         </a>
         {{#if dashboardHref}}<a class="bf-nav-menu-item" href="{{dashboardHref}}">Tổng quan</a>{{/if}}

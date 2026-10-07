@@ -196,7 +196,7 @@ function initializeApiOtpSubmit(form) {
                 errorElement.hidden = false;
             }
             setOtpError(form, true);
-            if (error.requestId) console.error("BookFlow API request_id:", error.requestId);
+            if (error.requestId) console.error("BookFlow API requestId:", error.requestId);
         } finally {
             if (button) button.disabled = false;
         }

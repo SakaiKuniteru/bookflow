@@ -21,29 +21,29 @@ function kiemTraDuLieuTaoTaiKhoan(duLieu) {
 }
 
 function kiemTraCapNhatHoSo(duLieu) {
-    const truongChoPhep = ['hoTen', 'ngaySinh', 'gioiTinh', 'quocTich', 'danToc', 'moTa', 'diaChiChiTiet', 'quocGia', 'tinhThanhPho', 'phuongXa'];
-    if (!duLieu || typeof duLieu !== 'object' || Array.isArray(duLieu)) throw loiDuLieu('hoTen', 'Dữ liệu cập nhật không hợp lệ');
+    const truongChoPhep = ['ho_ten', 'ngay_sinh', 'gioi_tinh', 'quoc_tich', 'dan_toc', 'mo_ta', 'dia_chi_chi_tiet', 'quoc_gia', 'tinh_thanh_pho', 'phuong_xa'];
+    if (!duLieu || typeof duLieu !== 'object' || Array.isArray(duLieu)) throw loiDuLieu('ho_ten', 'Dữ liệu cập nhật không hợp lệ');
     const truongKhongChoPhep = Object.keys(duLieu).find(ten => !truongChoPhep.includes(ten));
     if (truongKhongChoPhep) {
-        const tenTruong = truongKhongChoPhep.replace(/_([a-z])/g, (_, chu) => chu.toUpperCase());
-        throw loiDuLieu(tenTruong, `Trường ${tenTruong} không được phép cập nhật`);
+        const tenTruongCamel = truongKhongChoPhep.replace(/_([a-z])/g, (_, chu) => chu.toUpperCase());
+        throw loiDuLieu(truongKhongChoPhep, `Trường ${tenTruongCamel} không được phép cập nhật`);
     }
-    const ho_ten = typeof duLieu.hoTen === 'string' ? duLieu.hoTen.trim().replace(/\s+/g, ' ') : '';
-    if (ho_ten.length < 2 || ho_ten.length > 200) throw loiDuLieu('hoTen', 'Họ và tên phải có từ 2 đến 200 ký tự');
-    const ngaySinhNhap = duLieu.ngaySinh == null ? '' : String(duLieu.ngaySinh).trim();
+    const ho_ten = typeof duLieu.ho_ten === 'string' ? duLieu.ho_ten.trim().replace(/\s+/g, ' ') : '';
+    if (ho_ten.length < 2 || ho_ten.length > 200) throw loiDuLieu('ho_ten', 'Họ và tên phải có từ 2 đến 200 ký tự');
+    const ngaySinhNhap = duLieu.ngay_sinh == null ? '' : String(duLieu.ngay_sinh).trim();
     const ngay_sinh = ngaySinhNhap || null;
     if (ngay_sinh) {
         const match = ngay_sinh.match(/^(\d{4})-(\d{2})-(\d{2})$/);
         const ngay = match ? new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]))) : null;
-        if (!match || ngay.getUTCFullYear() !== Number(match[1]) || ngay.getUTCMonth() !== Number(match[2]) - 1 || ngay.getUTCDate() !== Number(match[3]) || ngay_sinh > new Date().toISOString().slice(0, 10)) throw loiDuLieu('ngaySinh', 'Ngày sinh không hợp lệ');
+        if (!match || ngay.getUTCFullYear() !== Number(match[1]) || ngay.getUTCMonth() !== Number(match[2]) - 1 || ngay.getUTCDate() !== Number(match[3]) || ngay_sinh > new Date().toISOString().slice(0, 10)) throw loiDuLieu('ngay_sinh', 'Ngày sinh không hợp lệ');
     }
-    const gioi_tinh = duLieu.gioiTinh ? String(duLieu.gioiTinh).trim() : null;
-    if (gioi_tinh && !['NAM', 'NU', 'KHAC', 'KHONG_TIET_LO'].includes(gioi_tinh)) throw loiDuLieu('gioiTinh', 'Giới tính không hợp lệ');
+    const gioi_tinh = duLieu.gioi_tinh ? String(duLieu.gioi_tinh).trim() : null;
+    if (gioi_tinh && !['NAM', 'NU', 'KHAC', 'KHONG_TIET_LO'].includes(gioi_tinh)) throw loiDuLieu('gioi_tinh', 'Giới tính không hợp lệ');
     const ketQua = { ho_ten, ngay_sinh, gioi_tinh };
-    for (const [tenCamel, tenDb, gioiHan] of [['quocTich', 'quoc_tich', 100], ['danToc', 'dan_toc', 100], ['diaChiChiTiet', 'dia_chi_chi_tiet', 300], ['quocGia', 'quoc_gia', 100], ['tinhThanhPho', 'tinh_thanh_pho', 150], ['phuongXa', 'phuong_xa', 150], ['moTa', 'mo_ta', 2000]]) {
-        const giaTri = duLieu[tenCamel] == null ? null : String(duLieu[tenCamel]).trim().replace(/\s+/g, ' ') || null;
-        if (giaTri && giaTri.length > gioiHan) throw loiDuLieu(tenCamel, `Trường này không được vượt quá ${gioiHan} ký tự`);
-        ketQua[tenDb] = giaTri;
+    for (const [tenTruong, gioiHan] of [['quoc_tich', 100], ['dan_toc', 100], ['dia_chi_chi_tiet', 300], ['quoc_gia', 100], ['tinh_thanh_pho', 150], ['phuong_xa', 150], ['mo_ta', 2000]]) {
+        const giaTri = duLieu[tenTruong] == null ? null : String(duLieu[tenTruong]).trim().replace(/\s+/g, ' ') || null;
+        if (giaTri && giaTri.length > gioiHan) throw loiDuLieu(tenTruong, `Trường này không được vượt quá ${gioiHan} ký tự`);
+        ketQua[tenTruong] = giaTri;
     }
     return ketQua;
 }

@@ -1,6 +1,6 @@
 {
   "success": true,
-  "request_id": "req-health-001",
+  "requestId": "req-health-001",
   "data": {
     "status": "ok",
     "service": "backend"

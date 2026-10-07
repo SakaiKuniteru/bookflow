@@ -99,8 +99,10 @@ export function setSelectDisabled(wrapper, disabled) {
     wrapper.dataset.disabled = String(disabled);
     wrapper.classList.toggle("is-disabled", disabled);
     const control = wrapper.querySelector(".bf-select-control");
+    const search = wrapper.querySelector(".bf-select-search-input");
     control?.setAttribute("aria-disabled", String(disabled));
     if (control) control.tabIndex = disabled ? -1 : 0;
+    if (search) { search.disabled = disabled; search.tabIndex = disabled ? -1 : 0; }
     if (disabled) close(wrapper);
 }
 function setActive(wrapper, index) {
@@ -144,16 +146,17 @@ function close(wrapper, restoreSearch = true) {
 }
 
 function filterOptions(wrapper, query) {
-    const normalizedQuery = String(query ?? "").trim().toLocaleLowerCase();
+    const normalize = value => String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').toLocaleLowerCase('vi').trim();
+    const normalizedQuery = normalize(query);
     let visible = 0;
     getOptions(wrapper).forEach(option => {
-        const label = String(option.dataset.label ?? "").toLocaleLowerCase();
-        option.hidden = !label.includes(normalizedQuery);
+        const searchableText = normalize(`${option.dataset.label ?? ''} ${option.dataset.value ?? ''}`);
+        option.hidden = Boolean(normalizedQuery) && !searchableText.includes(normalizedQuery);
         if (!option.hidden) visible++;
     });
-    const empty = wrapper.querySelector(".bf-select-empty");
+    const empty = wrapper.querySelector('.bf-select-empty');
     if (empty) empty.hidden = visible > 0;
-    getOptions(wrapper).forEach(option => option.classList.remove("is-active"));
+    getOptions(wrapper).forEach(option => option.classList.remove('is-active'));
     if (visible) setActive(wrapper, 0);
 }
 

@@ -13,7 +13,7 @@
       {{#if showOrganization}}
         <section class="bf-session-step">
           <div class="bf-session-step-heading"><span class="bf-session-step-number">1</span><div><strong>Đơn vị <span>*</span></strong><small>Chọn đơn vị bạn muốn làm việc.</small></div></div>
-          <select id="session-organization" name="don_vi_id" required>
+          <select id="session-organization" name="donViId" required>
             <option value="">Chọn đơn vị</option>
             {{#each organizationOptions}}<option value="{{value}}">{{label}}</option>{{/each}}
           </select>
@@ -22,7 +22,7 @@
         {{#if showBranch}}
           <section class="bf-session-step">
             <div class="bf-session-step-heading"><span class="bf-session-step-number">1</span><div><strong>Chi nhánh <span>*</span></strong><small>Chọn chi nhánh bạn muốn làm việc.</small></div></div>
-            <select id="session-branch" name="chi_nhanh_id" required>
+            <select id="session-branch" name="chiNhanhId" required>
               <option value="">Chọn chi nhánh</option>
               {{#each branchOptions}}<option value="{{value}}">{{label}}</option>{{/each}}
             </select>

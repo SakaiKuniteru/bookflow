@@ -12,9 +12,9 @@ const me = token => get('/xac-thuc/me', { headers: { Authorization: `Bearer ${to
 const meWithToken = token => get('/xac-thuc/me', {
   headers: { Authorization: `Bearer ${token}` }
 });
-const selectOrganization = (token, organizationId) => post('/xac-thuc/chon-don-vi', { don_vi_id: organizationId }, { headers: { Authorization: `Bearer ${token}` } });
-const selectBranch = (token, branchId) => post('/chi-nhanh/chon', { chi_nhanh_id: branchId }, { headers: { Authorization: `Bearer ${token}` } });
-const refresh = (refreshToken, accessToken) => post('/xac-thuc/lam-moi-phien', { refresh_token: refreshToken, access_token: accessToken });
+const selectOrganization = (token, organizationId) => post('/xac-thuc/chon-don-vi', { donViId: organizationId }, { headers: { Authorization: `Bearer ${token}` } });
+const selectBranch = (token, branchId) => post('/chi-nhanh/chon', { chiNhanhId: branchId }, { headers: { Authorization: `Bearer ${token}` } });
+const refresh = (refreshToken, accessToken) => post('/xac-thuc/lam-moi-phien', { refreshToken, accessToken });
 export default {
   login,
   register,

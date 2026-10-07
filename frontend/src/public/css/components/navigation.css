@@ -40,26 +40,26 @@
 .bf-layout-admin .bf-app-shell,
 .bf-layout-staff .bf-app-shell {
     min-height: 100vh;
+    padding-left: 250px;
+    box-sizing: border-box;
 }
-
 .bf-layout-admin .bf-nav-sidebar,
 .bf-layout-staff .bf-nav-sidebar {
     box-sizing: border-box;
     display: flex;
-    flex: 0 0 250px;
     flex-direction: column;
-    position: sticky;
+    position: fixed;
+    z-index: 300;
     top: 0;
+    left: 0;
+    width: 250px;
     height: 100vh;
     min-height: 100vh;
     overflow: hidden;
 }
-
 .bf-layout-admin .bf-nav-sidebar {
-    position: relative;
     isolation: isolate;
     width: 250px;
-    flex-basis: 250px;
     padding: 16px 12px;
     border-right: 1px solid #e1ece7;
     background: #f4faf7;
@@ -751,7 +751,10 @@
     .bf-layout-content {
         width: min(100% - 24px, 1440px);
     }
-
+    .bf-layout-admin .bf-app-shell,
+    .bf-layout-staff .bf-app-shell {
+        padding-left: 0;
+    }
     .bf-nav-header {
         gap: 10px;
         padding: 0 12px;

@@ -32,7 +32,7 @@
     return;
   }
   if (document.body.dataset.loginFailed === 'true') clearDraft();
-  else if (new URLSearchParams(window.location.search).get('doi-giao-dien') === '1') {
+  else if (new URLSearchParams(window.location.search).get('doiGiaoDien') === '1') {
     const draft = readDraft();
     if (draft && Date.now() - draft.createdAt < lifetime) {
       const email = loginForm.querySelector('[name="email"]');

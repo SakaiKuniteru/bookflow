@@ -9,10 +9,10 @@
 <form class="bf-auth-form" method="post" action="/auth/chon-chi-nhanh" data-bf-auth-form data-auth-loading-text="Đang chuyển chi nhánh...">
     <input type="hidden" name="redirect" value="{{redirect}}">
     <label class="bf-form-label" for="auth-branch">Chi nhánh<span class="bf-form-required">*</span></label>
-    <select id="auth-branch" name="chi_nhanh_id" class="bf-form-control" required>
+    <select id="auth-branch" name="chiNhanhId" class="bf-form-control" required>
         <option value="">Chọn chi nhánh</option>
         {{#each branches}}
-            <option value="{{id}}">{{tenChiNhanh}}{{ten_chi_nhanh}}{{#if maChiNhanh}} ({{maChiNhanh}}){{else}}{{#if ma_chi_nhanh}} ({{ma_chi_nhanh}}){{/if}}{{/if}}</option>
+            <option value="{{id}}">{{tenChiNhanh}}{{#if maChiNhanh}} ({{maChiNhanh}}){{/if}}</option>
         {{/each}}
     </select>
     <div class="bf-auth-submit">

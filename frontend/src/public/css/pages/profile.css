@@ -534,3 +534,17 @@
         padding: 14px;
     }
 }
+
+body.bf-profile-scroll {
+    height: auto;
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+body.bf-profile-scroll .bf-app-shell,
+body.bf-profile-scroll .bf-app-main,
+body.bf-profile-scroll #main-content {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+}

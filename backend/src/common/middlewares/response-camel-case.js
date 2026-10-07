@@ -7,7 +7,7 @@ function chuyenResponseCamelCase(giaTri) {
     if (giaTri === null || typeof giaTri !== 'object') return giaTri;
     const prototype = Object.getPrototypeOf(giaTri);
     if (prototype !== Object.prototype && prototype !== null) return giaTri;
-    return Object.fromEntries(Object.entries(giaTri).map(([ten, value]) => [doiTenTruong(ten), chuyenResponseCamelCase(value)]));
+    return Object.fromEntries(Object.entries(giaTri).map(([ten, value]) => [doiTenTruong(ten), chuyenResponseCamelCase(ten === 'field' && typeof value === 'string' ? doiTenTruong(value) : value)]));
 }
 
 function chuanHoaResponse(req, res, next) {

@@ -1,0 +1,226 @@
+{
+  "meta": {
+    "description": "Danh mục 54 dân tộc Việt Nam, mã theo danh mục của Cục Thống kê Việt Nam.",
+    "source": "Cục Thống kê Việt Nam, Danh mục các dân tộc Việt Nam",
+    "sourceUrl": "https://www.gso.gov.vn/phuong-phap-luan-thong-ke/danh-muc/cac-dan-toc-viet-nam/",
+    "codeSystem": "Mã dân tộc Việt Nam 01–54"
+  },
+  "data": [
+    {
+      "code": "01",
+      "name": "Kinh"
+    },
+    {
+      "code": "02",
+      "name": "Tày"
+    },
+    {
+      "code": "03",
+      "name": "Thái"
+    },
+    {
+      "code": "04",
+      "name": "Hoa"
+    },
+    {
+      "code": "05",
+      "name": "Khơ-me"
+    },
+    {
+      "code": "06",
+      "name": "Mường"
+    },
+    {
+      "code": "07",
+      "name": "Nùng"
+    },
+    {
+      "code": "08",
+      "name": "HMông"
+    },
+    {
+      "code": "09",
+      "name": "Dao"
+    },
+    {
+      "code": "10",
+      "name": "Gia-rai"
+    },
+    {
+      "code": "11",
+      "name": "Ngái"
+    },
+    {
+      "code": "12",
+      "name": "Ê-đê"
+    },
+    {
+      "code": "13",
+      "name": "Ba na"
+    },
+    {
+      "code": "14",
+      "name": "Xơ-Đăng"
+    },
+    {
+      "code": "15",
+      "name": "Sán Chay"
+    },
+    {
+      "code": "16",
+      "name": "Cơ-ho"
+    },
+    {
+      "code": "17",
+      "name": "Chăm"
+    },
+    {
+      "code": "18",
+      "name": "Sán Dìu"
+    },
+    {
+      "code": "19",
+      "name": "Hrê"
+    },
+    {
+      "code": "20",
+      "name": "Mnông"
+    },
+    {
+      "code": "21",
+      "name": "Ra-glai"
+    },
+    {
+      "code": "22",
+      "name": "Xtiêng"
+    },
+    {
+      "code": "23",
+      "name": "Bru-Vân Kiều"
+    },
+    {
+      "code": "24",
+      "name": "Thổ"
+    },
+    {
+      "code": "25",
+      "name": "Giáy"
+    },
+    {
+      "code": "26",
+      "name": "Cơ-tu"
+    },
+    {
+      "code": "27",
+      "name": "Gié Triêng"
+    },
+    {
+      "code": "28",
+      "name": "Mạ"
+    },
+    {
+      "code": "29",
+      "name": "Khơ-mú"
+    },
+    {
+      "code": "30",
+      "name": "Co"
+    },
+    {
+      "code": "31",
+      "name": "Tà-ôi"
+    },
+    {
+      "code": "32",
+      "name": "Chơ-ro"
+    },
+    {
+      "code": "33",
+      "name": "Kháng"
+    },
+    {
+      "code": "34",
+      "name": "Xinh-mun"
+    },
+    {
+      "code": "35",
+      "name": "Hà Nhì"
+    },
+    {
+      "code": "36",
+      "name": "Chu ru"
+    },
+    {
+      "code": "37",
+      "name": "Lào"
+    },
+    {
+      "code": "38",
+      "name": "La Chí"
+    },
+    {
+      "code": "39",
+      "name": "La Ha"
+    },
+    {
+      "code": "40",
+      "name": "Phù Lá"
+    },
+    {
+      "code": "41",
+      "name": "La Hủ"
+    },
+    {
+      "code": "42",
+      "name": "Lự"
+    },
+    {
+      "code": "43",
+      "name": "Lô Lô"
+    },
+    {
+      "code": "44",
+      "name": "Chứt"
+    },
+    {
+      "code": "45",
+      "name": "Mảng"
+    },
+    {
+      "code": "46",
+      "name": "Pà Thẻn"
+    },
+    {
+      "code": "47",
+      "name": "Co Lao"
+    },
+    {
+      "code": "48",
+      "name": "Cống"
+    },
+    {
+      "code": "49",
+      "name": "Bố Y"
+    },
+    {
+      "code": "50",
+      "name": "Si La"
+    },
+    {
+      "code": "51",
+      "name": "Pu Péo"
+    },
+    {
+      "code": "52",
+      "name": "Brâu"
+    },
+    {
+      "code": "53",
+      "name": "Ơ Đu"
+    },
+    {
+      "code": "54",
+      "name": "Rơ măm"
+    }
+  ]
+}

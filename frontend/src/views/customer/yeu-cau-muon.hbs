@@ -13,13 +13,13 @@
                 <article class="bf-demo-loan-card">
                     <span class="bf-demo-mini-cover">✦</span>
                     <div>
-                        <strong>{{this.ten_sach}}</strong>
-                        <small>{{this.ma_phieu_muon}} · {{this.hinh_thuc_hien_thi}} · Chi nhánh {{this.ten_chi_nhanh}}</small>
-                        <small>Ngày yêu cầu: {{formatDate this.ngay_tao}} · Hẹn trả: {{formatDate this.han_tra}}</small>
+                        <strong>{{this.tenSach}}</strong>
+                        <small>{{this.maPhieuMuon}} · {{this.hinhThucHienThi}} · Chi nhánh {{this.tenChiNhanh}}</small>
+                        <small>Ngày yêu cầu: {{formatDate this.ngayTao}} · Hẹn trả: {{formatDate this.hanTra}}</small>
                     </div>
                     <div class="bf-demo-loan-status">
-                        <span class="bf-demo-status">{{#if this.trang_thai_hien_thi}}{{this.trang_thai_hien_thi}}{{else}}Đang mượn{{/if}}</span>
-                        <small>{{#if this.phi_hien_thi}}{{this.phi_hien_thi}}{{else}}Mượn miễn phí{{/if}}</small>
+                        <span class="bf-demo-status">{{#if this.trangThaiHienThi}}{{this.trangThaiHienThi}}{{else}}Đang mượn{{/if}}</span>
+                        <small>{{#if this.phiHienThi}}{{this.phiHienThi}}{{else}}Mượn miễn phí{{/if}}</small>
                     </div>
                 </article>
             {{/each}}

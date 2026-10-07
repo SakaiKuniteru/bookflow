@@ -38,11 +38,11 @@
     {{#if user}}
         <div class="bf-nav-sidebar-account">
             <a class="bf-nav-sidebar-account-info" href="{{profileHref}}">
-                    <img class="bf-nav-avatar" src="{{user.avatar}}" data-bf-avatar-file-id="{{#if user.taiKhoan.anhDaiDienTepId}}{{user.taiKhoan.anhDaiDienTepId}}{{else}}{{user.tai_khoan.anh_dai_dien_tep_id}}{{/if}}" alt="" {{#unless user.avatar}}hidden{{/unless}}>
-                    <span class="bf-nav-avatar bf-nav-avatar-fallback" data-bf-avatar-fallback data-bf-avatar-initial {{#if user.avatar}}hidden{{/if}}>{{#if user.name}}{{user.name.[0]}}{{else}}{{#if user.taiKhoan.hoTen}}{{user.taiKhoan.hoTen.[0]}}{{else}}{{#if user.tai_khoan.ho_ten}}{{user.tai_khoan.ho_ten.[0]}}{{else}}A{{/if}}{{/if}}{{/if}}</span>
+                    <img class="bf-nav-avatar" src="{{user.avatar}}" data-bf-avatar-file-id="{{user.taiKhoan.anhDaiDienTepId}}" alt="" {{#unless user.avatar}}hidden{{/unless}}>
+                    <span class="bf-nav-avatar bf-nav-avatar-fallback" data-bf-avatar-fallback data-bf-avatar-initial {{#if user.avatar}}hidden{{/if}}>{{#if user.name}}{{user.name.[0]}}{{else}}{{#if user.taiKhoan.hoTen}}{{user.taiKhoan.hoTen.[0]}}{{else}}A{{/if}}{{/if}}</span>
                 <span class="bf-nav-sidebar-account-details">
-                    <strong data-bf-account-name>{{#if user.tai_khoan.ho_ten}}{{user.tai_khoan.ho_ten}}{{else}}{{#if user.taiKhoan.hoTen}}{{user.taiKhoan.hoTen}}{{else}}Tài khoản{{/if}}{{/if}}</strong>
-                    <small data-bf-account-email>{{#if user.tai_khoan.email}}{{user.tai_khoan.email}}{{else}}{{#if user.taiKhoan.email}}{{user.taiKhoan.email}}{{else}}{{user.email}}{{/if}}{{/if}}</small>
+                    <strong data-bf-account-name>{{#if user.taiKhoan.hoTen}}{{user.taiKhoan.hoTen}}{{else}}Tài khoản{{/if}}</strong>
+                    <small data-bf-account-email>{{#if user.taiKhoan.email}}{{user.taiKhoan.email}}{{else}}{{user.email}}{{/if}}</small>
                 </span>
             </a>
             <form class="bf-nav-logout-form" method="post" action="/auth/dang-xuat">

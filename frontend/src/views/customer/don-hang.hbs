@@ -11,24 +11,24 @@
                 <article class="bf-demo-order-card">
                     <header>
                         <div>
-                            <strong>{{this.ma_don_hang}}</strong>
-                            <small>{{#if this.ngay_tao}}{{formatDate this.ngay_tao}}{{/if}}{{#if this.ten_chi_nhanh}} · Chi nhánh {{this.ten_chi_nhanh}}{{/if}}</small>
+                            <strong>{{this.maDonHang}}</strong>
+                            <small>{{#if this.ngayTao}}{{formatDate this.ngayTao}}{{/if}}{{#if this.tenChiNhanh}} · Chi nhánh {{this.tenChiNhanh}}{{/if}}</small>
                         </div>
-                        <span class="bf-demo-status">{{#if this.trang_thai_hien_thi}}{{this.trang_thai_hien_thi}}{{else}}Đang xử lý{{/if}}</span>
+                        <span class="bf-demo-status">{{#if this.trangThaiHienThi}}{{this.trangThaiHienThi}}{{else}}Đang xử lý{{/if}}</span>
                     </header>
-                    {{#each this.chi_tiet}}
+                    {{#each this.chiTiet}}
                         <div class="bf-demo-order-line">
                             <span class="bf-demo-mini-cover">✦</span>
                             <div>
-                                <strong>{{this.ten_sach}}</strong>
-                                <small>{{this.so_luong}} cuốn × {{this.don_gia_hien_thi}}</small>
+                                <strong>{{this.tenSach}}</strong>
+                                <small>{{this.soLuong}} cuốn × {{this.donGiaHienThi}}</small>
                             </div>
-                            <b>{{this.thanh_tien_hien_thi}}</b>
+                            <b>{{this.thanhTienHienThi}}</b>
                         </div>
                     {{/each}}
                     <footer>
                         <span>Thanh toán khi nhận</span>
-                        <strong>{{this.tong_tien_hien_thi}}</strong>
+                        <strong>{{this.tongTienHienThi}}</strong>
                     </footer>
                 </article>
             {{/each}}

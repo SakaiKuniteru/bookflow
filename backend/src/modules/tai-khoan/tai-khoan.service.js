@@ -45,8 +45,8 @@ class TaiKhoanService {
         return taoTaiKhoanDto(taiKhoan);
     }
     async capNhatAnhDaiDien(taiKhoanId, duLieu) {
-        if (!duLieu || typeof duLieu !== 'object' || Array.isArray(duLieu) || Object.keys(duLieu).some(ten => ten !== 'anhDaiDienTepId')) throw new AppError({ code: 'INVALID_INPUT', message: 'Dữ liệu Avatar không hợp lệ', status: 422, details: [{ field: 'anhDaiDienTepId', message: 'Dữ liệu Avatar không hợp lệ' }] });
-        const tepId = idTepHopLe(duLieu.anhDaiDienTepId);
+        if (!duLieu || typeof duLieu !== 'object' || Array.isArray(duLieu) || Object.keys(duLieu).some(ten => ten !== 'anh_dai_dien_tep_id')) throw new AppError({ code: 'INVALID_INPUT', message: 'Dữ liệu Avatar không hợp lệ', status: 422, details: [{ field: 'anh_dai_dien_tep_id', message: 'Dữ liệu Avatar không hợp lệ' }] });
+        const tepId = idTepHopLe(duLieu.anh_dai_dien_tep_id);
         return trongGiaoDich(async client => {
             if (!await taiKhoanRepository.anhDaiDienThuocTaiKhoan(taiKhoanId, tepId, client)) throw new AppError({ code: 'AVATAR_FILE_FORBIDDEN', message: 'Ảnh không thuộc tài khoản hoặc chưa sẵn sàng', status: 422, details: [{ field: 'anhDaiDienTepId', message: 'Vui lòng chọn ảnh đại diện hợp lệ' }] });
             const taiKhoan = await taiKhoanRepository.capNhatAnhDaiDien(taiKhoanId, tepId, client);

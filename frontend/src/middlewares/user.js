@@ -23,8 +23,8 @@ const userMiddleware = async (req, res, next) => {
     if (!result && (refreshToken || req.authToken)) {
       const refreshed = await authService.refresh(refreshToken, req.authToken);
       const tokens = refreshed.data || refreshed;
-      const accessToken = tokens.accessToken || tokens.access_token;
-      const refreshTokenMoi = tokens.refreshToken || tokens.refresh_token;
+      const accessToken = tokens.accessToken;
+      const refreshTokenMoi = tokens.refreshToken;
       if (!accessToken || !refreshTokenMoi) throw Object.assign(new Error('Backend không trả đủ token để gia hạn phiên'), { status: 502 });
       req.authToken = accessToken;
       res.cookie(config.env.authCookieName, accessToken, { ...cookieOptions, maxAge: config.env.authCookieMaxAge });

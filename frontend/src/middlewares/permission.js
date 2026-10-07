@@ -1,11 +1,11 @@
 const layMaVaiTro = user => {
-  const values = Array.isArray(user?.vai_tro) ? user.vai_tro : Array.isArray(user?.vaiTro) ? user.vaiTro : Array.isArray(user?.roles) ? user.roles : [];
-  return values.map(item => typeof item === 'string' ? item : item?.ma_vai_tro ?? item?.maVaiTro).filter(Boolean);
+  const values = Array.isArray(user?.vaiTro) ? user.vaiTro : Array.isArray(user?.roles) ? user.roles : [];
+  return values.map(item => typeof item === 'string' ? item : item?.maVaiTro).filter(Boolean);
 };
 const normalizePermissions = user => {
   if (!user) return [];
   const values = Array.isArray(user.permissions) ? user.permissions : Array.isArray(user.quyen) ? user.quyen : Array.isArray(user.permissionCodes) ? user.permissionCodes : [];
-  return values.map(item => typeof item === 'string' ? item : item?.ma_quyen ?? item?.maQuyen).filter(Boolean);
+  return values.map(item => typeof item === 'string' ? item : item?.maQuyen).filter(Boolean);
 };
 const permissionMiddleware = (...requiredPermissions) => {
   return (req, res, next) => {

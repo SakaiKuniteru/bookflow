@@ -20,7 +20,7 @@ function renderAuth(res, page, title, locals = {}, status = 200) {
 }
 function layTokenTiepTucDangKy(response) {
   const data = response?.data || response || {};
-  return data.registrationResumeToken || data.registration_resume_token || '';
+  return data.registrationResumeToken || '';
 }
 function safeRedirect(value) {
   return typeof value === 'string' && value.startsWith('/') && !value.startsWith('//') ? value : null;
@@ -30,12 +30,12 @@ function urlDoiEmail(path, email) {
 }
 
 function layMaVaiTro(context) {
-  const vaiTro = context?.vai_tro || context?.vaiTro || [];
-  return vaiTro.map(item => typeof item === 'string' ? item : item?.ma_vai_tro || item?.maVaiTro).filter(Boolean);
+  const vaiTro = context?.vaiTro || [];
+  return vaiTro.map(item => typeof item === 'string' ? item : item?.maVaiTro).filter(Boolean);
 }
 function layMaQuyen(context) {
   const quyen = context?.quyen || context?.permissions || [];
-  return quyen.map(item => typeof item === 'string' ? item : item?.ma_quyen || item?.maQuyen).filter(Boolean);
+  return quyen.map(item => typeof item === 'string' ? item : item?.maQuyen).filter(Boolean);
 }
 function interfaceOptions(context) {
   const vaiTro = layMaVaiTro(context);
@@ -54,20 +54,20 @@ function destinationForInterface(value) {
   return { 'super-admin': '/super-admin/tong-quan', admin: '/admin/tong-quan', staff: '/staff/tong-quan', customer: '/customer/tong-quan' }[value] || '/customer/tong-quan';
 }
 function selectedOrganizationId(context) {
-  return context?.don_vi_dang_chon_id || context?.donViDangChonId || null;
+  return context?.donViDangChonId || null;
 }
 function selectedBranchId(context) {
-  return context?.chi_nhanh_dang_chon_id || context?.chiNhanhDangChonId || null;
+  return context?.chiNhanhDangChonId || null;
 }
 function accessibleBranches(context) {
-  return context?.chi_nhanh_duoc_truy_cap || context?.chiNhanhDuocTruyCap || context?.data?.chi_nhanh_duoc_truy_cap || context?.data?.chiNhanhDuocTruyCap || [];
+  return context?.chiNhanhDuocTruyCap || context?.data?.chiNhanhDuocTruyCap || [];
 }
 async function finishLogin(req, res, token, context) {
   res.cookie(config.env.authCookieName, token, cookieOptions);
-  const refreshToken = context?.refresh_token || context?.refreshToken;
+  const refreshToken = context?.refreshToken;
   if (refreshToken) res.cookie(config.env.authRefreshCookieName, refreshToken, { httpOnly: true, secure: config.env.authCookieSecure, sameSite: config.env.authCookieSameSite, maxAge: config.env.authRefreshCookieMaxAge, path: '/' });
   notifyAuthTabs(res);
-  const organizations = context?.don_vi_tham_gia || context?.donViThamGia || [];
+  const organizations = context?.donViThamGia || [];
   if (organizations.length > 1 && !selectedOrganizationId(context)) return res.redirect('/auth/thiet-lap-phien');
   if (organizations.length === 1 && !selectedOrganizationId(context)) {
     const result = await authService.selectOrganization(token, organizations[0].id);
@@ -101,12 +101,12 @@ const authController = {
   async login(req, res) {
     try {
       const result = await authService.login({
-        dinh_danh: req.body.email,
-        mat_khau: req.body.password
+        dinhDanh: req.body.email,
+        matKhau: req.body.password
       });
       const data = result.data || result;
-      if (data.yeu_cau_kich_hoat || data.yeuCauKichHoat) return res.redirect(`/auth/kich-hoat-nhan-vien?dinh_danh=${encodeURIComponent(req.body.email || '')}`);
-      const token = data.accessToken || data.access_token;
+      if (data.yeuCauKichHoat) return res.redirect(`/auth/kich-hoat-nhan-vien?dinhDanh=${encodeURIComponent(req.body.email || '')}`);
+      const token = data.accessToken;
       if (!token) {
         const error = new Error('Backend không trả access token.');
         error.status = 502;
@@ -162,11 +162,11 @@ const authController = {
         }
         const ketQuaDoiEmail = await authService.changeRegistrationEmail({
           token: req.session.registrationResumeToken,
-          ho_ten: req.body.fullName,
-          ten_dang_nhap: req.body.username,
+          hoTen: req.body.fullName,
+          tenDangNhap: req.body.username,
           email: req.body.email,
-          so_dien_thoai: req.body.phone,
-          mat_khau: req.body.password
+          soDienThoai: req.body.phone,
+          matKhau: req.body.password
         });
         req.session.registrationResumeToken = layTokenTiepTucDangKy(ketQuaDoiEmail);
         if (!req.session.registrationResumeToken) throw Object.assign(new Error('Backend không trả token tiếp tục đăng ký.'), { status: 502 });
@@ -175,19 +175,19 @@ const authController = {
       }
       delete req.session.registrationResumeEmail;
       const ketQuaDangKy = await authService.register({
-        ho_ten: req.body.fullName,
+        hoTen: req.body.fullName,
         email: req.body.email,
-        ten_dang_nhap: req.body.username,
-        so_dien_thoai: req.body.phone,
-        mat_khau: req.body.password
+        tenDangNhap: req.body.username,
+        soDienThoai: req.body.phone,
+        matKhau: req.body.password
       });
       req.session.registrationResumeToken = layTokenTiepTucDangKy(ketQuaDangKy);
       if (!req.session.registrationResumeToken) throw Object.assign(new Error('Backend không trả token tiếp tục đăng ký.'), { status: 502 });
       return res.redirect(`/auth/xac-minh-dang-ky?email=${encodeURIComponent(req.body.email)}&sent=1`);
     } catch (error) {
       const backendError = error.data?.error;
-      const tenTruongFrontend = { ho_ten: 'fullName', email: 'email', ten_dang_nhap: 'username', so_dien_thoai: 'phone', mat_khau: 'password' };
-      const fieldErrors = Object.fromEntries((backendError?.details || []).filter(item => item.field).map(item => [tenTruongFrontend[item.field] || item.field, item.message]));
+      const tenTruongFrontend = { hoTen: 'fullName', email: 'email', tenDangNhap: 'username', soDienThoai: 'phone', matKhau: 'password' };
+      const fieldErrors = Object.fromEntries((backendError?.details || []).filter(item => item.field).map(item => { const field = item.field.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase()); return [tenTruongFrontend[field] || field, item.message]; }));
       if (error.field) fieldErrors[error.field] = error.message;
       if (!fieldErrors.email && backendError?.code === 'EMAIL_EXISTS') fieldErrors.email = 'Email này đã được đăng ký';
       if (!fieldErrors.username && backendError?.code === 'USERNAME_EXISTS') fieldErrors.username = 'Tên đăng nhập này đã được sử dụng';
@@ -230,14 +230,14 @@ const authController = {
     }
   },
   employeeActivationPage(req, res) {
-    return renderAuth(res, 'kich-hoat-nhan-vien', 'Kích hoạt tài khoản nhân viên', { identifier: req.query.dinh_danh || '' });
+    return renderAuth(res, 'kich-hoat-nhan-vien', 'Kích hoạt tài khoản nhân viên', { identifier: req.query.dinhDanh || '' });
   },
   async completeEmployeeActivation(req, res) {
     try {
       if (req.body.newPassword !== req.body.confirmNewPassword) throw Object.assign(new Error('Mật khẩu xác nhận chưa khớp.'), { status: 400 });
-      const result = await authService.completeEmployeeActivation({ dinh_danh: req.body.identifier, mat_khau_tam: req.body.temporaryPassword, otp: req.body.otp, mat_khau_moi: req.body.newPassword });
+      const result = await authService.completeEmployeeActivation({ dinhDanh: req.body.identifier, matKhauTam: req.body.temporaryPassword, otp: req.body.otp, matKhauMoi: req.body.newPassword });
       const data = result.data || result;
-      const token = data.access_token || data.accessToken;
+      const token = data.accessToken;
       if (!token) throw new Error('Backend không trả access token sau khi kích hoạt.');
       return await finishLogin(req, res, token, data);
     } catch (error) {
@@ -246,7 +246,7 @@ const authController = {
   },
   async workspaceSetupPage(req, res) {
     if (!req.user) return res.redirect('/auth/dang-nhap');
-    const organizations = req.user.don_vi_tham_gia || req.user.donViThamGia || [];
+    const organizations = req.user.donViThamGia || [];
     if (organizations.length === 1 && !selectedOrganizationId(req.user)) {
       const result = await authService.selectOrganization(req.authToken, organizations[0].id);
       return res.redirect('/auth/thiet-lap-phien');
@@ -256,9 +256,9 @@ const authController = {
     return renderAuth(res, 'thiet-lap-phien', 'Thiết lập phiên làm việc', {
       sessionSetup: true,
       showOrganization: organizations.length > 1 && !selectedOrganizationId(req.user),
-      organizationOptions: organizations.map(item => ({ value: item.id, label: item.ten_hien_thi || item.tenHienThi || item.ten_don_vi || item.tenDonVi || item.ma_don_vi || item.maDonVi })),
+      organizationOptions: organizations.map(item => ({ value: item.id, label: item.tenHienThi || item.tenDonVi || item.maDonVi })),
       showBranch: accessibleBranches(req.user).length > 1 && !selectedBranchId(req.user),
-      branchOptions: accessibleBranches(req.user).map(item => ({ value: item.id, label: item.tenChiNhanh || item.ten_chi_nhanh || item.maChiNhanh || item.ma_chi_nhanh })),
+      branchOptions: accessibleBranches(req.user).map(item => ({ value: item.id, label: item.tenChiNhanh || item.maChiNhanh })),
       interfaceOptions: options,
       error: req.query.error || ''
     });
@@ -266,15 +266,15 @@ const authController = {
   async confirmWorkspaceSetup(req, res) {
     try {
       let context = req.user;
-      const organizations = context?.don_vi_tham_gia || context?.donViThamGia || [];
+      const organizations = context?.donViThamGia || [];
       if (organizations.length > 1 && !selectedOrganizationId(context)) {
-        if (!req.body.don_vi_id) return res.redirect('/auth/thiet-lap-phien?error=Vui+l%C3%B2ng+ch%E1%BB%8Dn+%C4%91%C6%A1n+v%E1%BB%8B');
-        await authService.selectOrganization(req.authToken, req.body.don_vi_id);
+        if (!req.body.donViId) return res.redirect('/auth/thiet-lap-phien?error=Vui+l%C3%B2ng+ch%E1%BB%8Dn+%C4%91%C6%A1n+v%E1%BB%8B');
+        await authService.selectOrganization(req.authToken, req.body.donViId);
         return res.redirect('/auth/thiet-lap-phien');
       }
       let branches = accessibleBranches(context);
       if (branches.length > 1 && !selectedBranchId(context)) {
-        const branch = branches.find(item => String(item.id) === String(req.body.chi_nhanh_id));
+        const branch = branches.find(item => String(item.id) === String(req.body.chiNhanhId));
         if (!branch) return res.redirect('/auth/thiet-lap-phien?error=Vui+l%C3%B2ng+ch%E1%BB%8Dn+chi+nh%C3%A1nh');
         const result = await authService.selectBranch(req.authToken, branch.id);
         context = result.data || result;
@@ -293,27 +293,27 @@ const authController = {
   },
   async organizationPage(req, res) {
     if (!req.user) return res.redirect('/auth/dang-nhap');
-    const organizations = req.user.don_vi_tham_gia || req.user.donViThamGia || [];
+    const organizations = req.user.donViThamGia || [];
     if (organizations.length === 1) return await finishLogin(req, res, req.authToken, req.user);
-    return renderAuth(res, 'chon-don-vi', 'Chọn đơn vị', { redirect: safeRedirect(req.query.redirect) || '/', organizationOptions: organizations.map(item => ({ value: item.id, label: item.ten_hien_thi || item.tenHienThi || item.ten_don_vi || item.tenDonVi || item.ma_don_vi || item.maDonVi })) });
+    return renderAuth(res, 'chon-don-vi', 'Chọn đơn vị', { redirect: safeRedirect(req.query.redirect) || '/', organizationOptions: organizations.map(item => ({ value: item.id, label: item.tenHienThi || item.tenDonVi || item.maDonVi })) });
   },
   async selectOrganization(req, res) {
     try {
-      const result = await authService.selectOrganization(req.authToken, req.body.don_vi_id);
+      const result = await authService.selectOrganization(req.authToken, req.body.donViId);
       return await finishLogin(req, res, req.authToken, result.data || result);
     } catch (error) {
-      const organizations = req.user?.don_vi_tham_gia || req.user?.donViThamGia || [];
-      return renderAuth(res, 'chon-don-vi', 'Chọn đơn vị', { redirect: safeRedirect(req.body.redirect) || '/', organizationOptions: organizations.map(item => ({ value: item.id, label: item.ten_hien_thi || item.tenHienThi || item.ten_don_vi || item.tenDonVi || item.ma_don_vi || item.maDonVi })), error: error.message }, error.status >= 400 && error.status < 500 ? error.status : 500);
+      const organizations = req.user?.donViThamGia || [];
+      return renderAuth(res, 'chon-don-vi', 'Chọn đơn vị', { redirect: safeRedirect(req.body.redirect) || '/', organizationOptions: organizations.map(item => ({ value: item.id, label: item.tenHienThi || item.tenDonVi || item.maDonVi })), error: error.message }, error.status >= 400 && error.status < 500 ? error.status : 500);
     }
   },
   async branchPage(req, res) {
     const branches = accessibleBranches(req.user);
-    if (branches.length < 2 || req.user?.chi_nhanh_dang_chon_id || req.user?.chiNhanhDangChonId) return await finishLogin(req, res, req.authToken, req.user);
+    if (branches.length < 2 || req.user?.chiNhanhDangChonId) return await finishLogin(req, res, req.authToken, req.user);
     return renderAuth(res, 'chon-chi-nhanh', 'Chọn chi nhánh', { branches, redirect: safeRedirect(req.query.redirect) || '/' });
   },
   async selectBranch(req, res) {
     try {
-      const result = await authService.selectBranch(req.authToken, req.body.chi_nhanh_id);
+      const result = await authService.selectBranch(req.authToken, req.body.chiNhanhId);
       return res.redirect(safeRedirect(req.body.redirect) && safeRedirect(req.body.redirect) !== '/' ? safeRedirect(req.body.redirect) : destinationFor(result.data || result));
     } catch (error) {
       return renderAuth(res, 'chon-chi-nhanh', 'Chọn chi nhánh', { branches: accessibleBranches(req.user), redirect: safeRedirect(req.body.redirect) || '/', error: error.message }, error.status >= 400 && error.status < 500 ? error.status : 500);
@@ -338,7 +338,7 @@ const authController = {
       if (req.body.newPassword !== req.body.confirmNewPassword) {
         return renderAuth(res, 'dat-lai-mat-khau', 'Đặt lại mật khẩu', { email: req.body.email || '', requiresOtp: true, values: { otp: req.body.otp || '' }, showPasswordStep: true, passwordError: 'Mật khẩu xác nhận chưa khớp.', changeEmailUrl: urlDoiEmail('/auth/quen-mat-khau', req.body.email) }, 400);
       }
-      await authService.resetPassword({ email: req.body.email, otp: req.body.otp, mat_khau_moi: req.body.newPassword });
+      await authService.resetPassword({ email: req.body.email, otp: req.body.otp, matKhauMoi: req.body.newPassword });
       return res.redirect('/auth/dang-nhap?reset=1');
     } catch (error) {
       return renderAuth(res, 'dat-lai-mat-khau', 'Đặt lại mật khẩu', { email: req.body.email || '', requiresOtp: true, values: { otp: req.body.otp || '' }, otpError: error.message, changeEmailUrl: urlDoiEmail('/auth/quen-mat-khau', req.body.email) }, error.status >= 400 && error.status < 500 ? error.status : 500);
@@ -351,8 +351,8 @@ const authController = {
     try {
       const result = await authService.refresh(refreshToken, accessToken);
       const data = result.data || result;
-      const accessTokenMoi = data.accessToken || data.access_token;
-      const refreshTokenMoi = data.refreshToken || data.refresh_token;
+      const accessTokenMoi = data.accessToken;
+      const refreshTokenMoi = data.refreshToken;
       if (!accessTokenMoi || !refreshTokenMoi) return res.status(502).json({ success: false, message: 'Backend không trả đủ token để gia hạn phiên' });
       res.cookie(config.env.authCookieName, accessTokenMoi, { ...cookieOptions, maxAge: config.env.authCookieMaxAge });
       res.cookie(config.env.authRefreshCookieName, refreshTokenMoi, {
@@ -388,7 +388,7 @@ const authController = {
         delete req.session.activeInterface;
         if (!quayVeDangNhap) delete req.session.pendingLoginIdentifier;
       }
-      return res.redirect(quayVeDangNhap ? '/auth/dang-nhap?doi-giao-dien=1' : '/');
+      return res.redirect(quayVeDangNhap ? '/auth/dang-nhap?doiGiaoDien=1' : '/');
     } catch (error) {
       return next(error);
     }

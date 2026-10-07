@@ -117,7 +117,7 @@ function initialize(wrapper) {
             const url = item.dataset.url || "";
             const removed = document.createElement("input");
             removed.type = "hidden";
-            removed.name = `${name}_removed[]`;
+            removed.name = `${name}Removed[]`;
             removed.value = url;
             removedFiles?.appendChild(removed);
             item.remove();
@@ -131,7 +131,7 @@ function initialize(wrapper) {
             const url = item.dataset.url || "";
             const removed = document.createElement("input");
             removed.type = "hidden";
-            removed.name = `${name}_removed[]`;
+            removed.name = `${name}Removed[]`;
             removed.value = url;
             removedFiles?.appendChild(removed);
             item.remove();

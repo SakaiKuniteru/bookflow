@@ -1,14 +1,14 @@
 import bookService from '../services/book.service.js';
 
 function presentBook(item = {}, authenticated = false) {
-  const title = item.ten_hien_thi || item.tenHienThi || item.ten_sach || item.tenSach || 'Sách chưa có tên';
+  const title = item.tenHienThi || item.tenSach || 'Sách chưa có tên';
   const buyRedirect = encodeURIComponent(`/sach/${item.id}?intent=buy`);
   const borrowRedirect = encodeURIComponent(`/sach/${item.id}?intent=borrow`);
-  return { ...item, title, subtitle: item.ten_phu || item.tenPhu || '', authorsDisplay: item.tac_gia || item.tacGia || '', categoryName: item.the_loai || item.theLoai || '', isbn: item.isbn || '', description: item.mo_ta_day_du || item.moTaDayDu || item.mo_ta_ngan || item.moTaNgan || '', href: `/sach/${item.id}`, statusLabel: 'Đang phát hành', statusCode: 'DANG_HIEN_THI', statusVariant: 'success', actions: [{ label: 'Mua sách', variant: 'primary', href: authenticated ? '/customer/gio-hang' : `/auth/dang-nhap?redirect=${buyRedirect}` }, { label: 'Mượn sách', variant: 'secondary', href: authenticated ? '/customer/yeu-cau-muon' : `/auth/dang-nhap?redirect=${borrowRedirect}` }] };
+  return { ...item, title, subtitle: item.tenPhu || '', authorsDisplay: item.tacGia || '', categoryName: item.theLoai || '', isbn: item.isbn || '', description: item.moTaDayDu || item.moTaNgan || '', href: `/sach/${item.id}`, statusLabel: 'Đang phát hành', statusCode: 'DANG_HIEN_THI', statusVariant: 'success', actions: [{ label: 'Mua sách', variant: 'primary', href: authenticated ? '/customer/gio-hang' : `/auth/dang-nhap?redirect=${buyRedirect}` }, { label: 'Mượn sách', variant: 'secondary', href: authenticated ? '/customer/yeu-cau-muon' : `/auth/dang-nhap?redirect=${borrowRedirect}` }] };
 }
 function pageData(result, authenticated = false) {
   const data = result.data || {};
-  return { books: (data.sach || []).map(item => presentBook(item, authenticated)), meta: data.phan_trang || data.phanTrang || null };
+  return { books: (data.sach || []).map(item => presentBook(item, authenticated)), meta: data.phanTrang || null };
 }
 
 const publicController = {
@@ -41,7 +41,7 @@ const publicController = {
         books,
         meta,
         filters: req.query,
-        pagination: (() => { const page = meta?.trang || meta?.page || 1; const pageSize = meta?.kich_thuoc || meta?.kichThuoc || meta?.pageSize || 20; const total = meta?.tong_so || meta?.tongSo || meta?.total || 0; return { enabled: true, page, pageSize, total, totalPages: meta?.tong_trang || meta?.tongTrang || meta?.totalPages || 0, pages: meta?.tong_trang || meta?.tongTrang || meta?.totalPages || 0, from: total ? (page - 1) * pageSize + 1 : 0, to: Math.min(page * pageSize, total) }; })()
+        pagination: (() => { const page = meta?.trang || meta?.page || 1; const pageSize = meta?.kichThuoc || meta?.pageSize || 20; const total = meta?.tongSo || meta?.total || 0; return { enabled: true, page, pageSize, total, totalPages: meta?.tongTrang || meta?.totalPages || 0, pages: meta?.tongTrang || meta?.totalPages || 0, from: total ? (page - 1) * pageSize + 1 : 0, to: Math.min(page * pageSize, total) }; })()
       });
     } catch (error) {
       return next(error);

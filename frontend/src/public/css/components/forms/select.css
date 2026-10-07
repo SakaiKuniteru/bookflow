@@ -167,7 +167,9 @@
     cursor: pointer;
     box-sizing: border-box;
 }
-
+.bf-select-option[hidden] {
+    display: none !important;
+}
 .bf-select-option:hover,
 .bf-select-option.is-active {
     background: var(--bf-form-hover);

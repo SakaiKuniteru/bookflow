@@ -12,7 +12,7 @@ export async function apiRequest(path, { method = 'GET', body, headers = {} } = 
         const error = new Error(payload?.error?.message || payload?.message || `API trả về HTTP ${response.status}`);
         error.status = response.status;
         error.code = payload?.error?.code || payload?.code || 'API_ERROR';
-        error.requestId = payload?.request_id || response.headers.get('x-request-id') || '';
+        error.requestId = payload?.requestId || response.headers.get('x-request-id') || '';
         error.data = payload;
         throw error;
     }
