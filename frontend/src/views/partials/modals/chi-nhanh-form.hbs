@@ -3,6 +3,7 @@
     title="Thêm chi nhánh"
     description="Nhập thông tin chi nhánh mới."
     size="xl"
+    className="bf-modal-sticky-footer"
     closeOnBackdrop=false
     loading=false
 }}
@@ -32,7 +33,7 @@
             id="branch-phone"
             name="soDienThoai"
             type="tel"
-            label="Hot line"
+            label="Hotline"
             placeholder="Nhập số điện thoại liên hệ"
             required=true
             maxlength=30
@@ -61,24 +62,27 @@
             id="branch-country"
             name="quocGia"
             label="Quốc gia"
-            placeholder="Chọn quốc gia"
+            placeholder="Việt Nam"
             options=branchCountries
+            disabled=true
             icon="globe"
         }}
         {{> forms/select
             id="branch-province"
-            name="tenTinhThanh"
+            name="maTinhThanh"
             label="Tỉnh thành"
             placeholder="Chọn tỉnh/thành"
             options=branchProvinces
+            disabled=true
             icon="map-pin"
         }}
         {{> forms/select
             id="branch-ward"
-            name="tenPhuongXa"
+            name="maPhuongXa"
             label="Xã/phường"
             placeholder="Chọn xã/phường"
             options=branchWards
+            disabled=true
             icon="map"
         }}
         {{> forms/textarea

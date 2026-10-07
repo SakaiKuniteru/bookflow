@@ -1,6 +1,6 @@
 import { closeModal, openModal } from "/js/components/modals.js";
 import { hideLoading, showLoading } from "/js/components/feedback.js";
-import { syncSelect } from "/js/components/forms/select.js";
+import { setSelectDisabled, syncSelect } from "/js/components/forms/select.js";
 import { bindInlineValidation, validateForm } from "/js/components/forms/validation.js";
 const table = document.querySelector(".bf-branch-page [data-bf-table]");
 if (table) {
@@ -44,6 +44,64 @@ if (table) {
         });
         syncSelect(select);
     };
+    const provinceData = [];
+    let wardData = [];
+    const selectById = id => form.querySelector(`#${id}`);
+    const selectedValue = id => selectById(id)?.querySelector(".bf-select-option.is-selected")?.dataset.value || "";
+    const selectedLabel = id => selectById(id)?.querySelector(".bf-select-option.is-selected")?.dataset.label || "";
+    const setSelectOptions = (id, rows) => {
+        const select = selectById(id);
+        const optionsBox = select?.querySelector(".bf-select-options");
+        if (!select || !optionsBox) return;
+        const options = rows.map(row => {
+            const option = document.createElement("button");
+            option.type = "button";
+            option.className = "bf-select-option";
+            option.dataset.value = row.code;
+            option.dataset.label = row.name;
+            option.setAttribute("role", "option");
+            option.setAttribute("aria-selected", "false");
+            const label = document.createElement("span");
+            label.className = "bf-select-option-label";
+            label.textContent = row.name;
+            const check = document.createElement("span");
+            check.className = "bf-select-check";
+            check.setAttribute("aria-hidden", "true");
+            check.textContent = "✓";
+            option.append(label, check);
+            return option;
+        });
+        optionsBox.replaceChildren(...options);
+        syncSelect(select);
+    };
+    const locationDataReady = Promise.all([
+        fetch("/data/dia-chi/countries.json").then(response => { if (!response.ok) throw new Error("Không tải được danh sách quốc gia."); return response.json(); }),
+        fetch("/data/dia-chi/provinces.json").then(response => { if (!response.ok) throw new Error("Không tải được danh sách tỉnh/thành."); return response.json(); }),
+        fetch("/data/dia-chi/wards.json").then(response => { if (!response.ok) throw new Error("Không tải được danh sách xã/phường."); return response.json(); })
+    ]).then(([countryJson, provinceJson, wardJson]) => {
+        const vietnam = countryJson.data.find(country => country.code === "VN");
+        if (!vietnam) throw new Error("Không tìm thấy quốc gia Việt Nam trong dữ liệu.");
+        provinceData.push(...provinceJson.data.filter(province => province.countryCode === vietnam.code));
+        wardData = wardJson.data.filter(ward => ward.countryCode === vietnam.code);
+        setSelectOptions("branch-country", [vietnam]);
+        setSelectValue("branch-country", vietnam.code);
+        setSelectOptions("branch-province", provinceData);
+        setSelectOptions("branch-ward", []);
+        setSelectDisabled(selectById("branch-country"), true);
+        setSelectDisabled(selectById("branch-province"), false);
+        setSelectDisabled(selectById("branch-ward"), true);
+        return true;
+    }).catch(error => {
+        if (formError) { formError.textContent = error.message || "Không tải được dữ liệu địa chỉ."; formError.hidden = false; }
+        return false;
+    });
+    form.addEventListener("change", event => {
+        if (event.target.closest("#branch-province") !== selectById("branch-province")) return;
+        const provinceCode = selectedValue("branch-province");
+        setSelectOptions("branch-ward", wardData.filter(ward => ward.provinceCode === provinceCode));
+        setSelectValue("branch-ward", "");
+        setSelectDisabled(selectById("branch-ward"), !provinceCode);
+    });
     const setField = (name, value) => {
         const field = form.elements.namedItem(name);
         if (!field) return;
@@ -53,6 +111,7 @@ if (table) {
     const setMode = (editing, branch = null) => {
         form.reset();
         form.querySelectorAll("input,select,textarea").forEach(field => field.disabled = false);
+        form.querySelectorAll("[data-bf-select]").forEach(select => setSelectDisabled(select, select.id === "branch-country"));
         const submitButton = form.querySelector("[data-bf-modal-submit]");
         if (submitButton) submitButton.hidden = false;
         form.dataset.mode = editing ? "edit" : "create";
@@ -66,15 +125,25 @@ if (table) {
         if (title) title.textContent = editing ? "Sửa chi nhánh" : "Thêm chi nhánh";
         if (description) description.textContent = editing ? "Cập nhật đầy đủ thông tin chi nhánh." : "Nhập thông tin chi nhánh mới.";
         if (submit) submit.textContent = editing ? "Lưu thay đổi" : "Thêm chi nhánh";
+        setSelectValue("branch-type", editing ? branch.loaiChiNhanh : "");
+        setSelectValue("branch-country", "VN");
         if (!editing) {
-            setSelectValue("branch-type", "");
-            setField("quocGia", "VN");
+            setSelectValue("branch-province", "");
+            setSelectOptions("branch-ward", []);
+            setSelectValue("branch-ward", "");
+            setSelectDisabled(selectById("branch-province"), false);
+            setSelectDisabled(selectById("branch-ward"), true);
             setField("choNhanTaiQuay", true);
             setField("choBanTrucTuyen", true);
             return;
         }
-        ["maChiNhanh", "tenChiNhanh", "diaChiChiTiet", "maTinhThanh", "tenTinhThanh", "maPhuongXa", "tenPhuongXa", "quocGia", "viDo", "kinhDo", "soDienThoai", "email", "quanLyThanhVienId"].forEach(name => setField(name, branch[name]));
-        setSelectValue("branch-type", branch.loaiChiNhanh);
+        ["maChiNhanh", "tenChiNhanh", "diaChiChiTiet", "viDo", "kinhDo", "soDienThoai", "email", "quanLyThanhVienId"].forEach(name => setField(name, branch[name]));
+        const provinceCode = String(branch.maTinhThanh || "");
+        setSelectValue("branch-province", provinceCode);
+        setSelectOptions("branch-ward", wardData.filter(ward => ward.provinceCode === provinceCode));
+        setSelectValue("branch-ward", String(branch.maPhuongXa || ""));
+        setSelectDisabled(selectById("branch-province"), false);
+        setSelectDisabled(selectById("branch-ward"), !provinceCode);
         setField("choNhanTaiQuay", branch.choNhanTaiQuay);
         setField("choBanTrucTuyen", branch.choBanTrucTuyen);
         setField("active", branch.trangThai === "DANG_DUNG");
@@ -143,8 +212,6 @@ if (table) {
     deleteModal.querySelector("[data-branch-delete-confirm]").addEventListener("click", async () => {
         if (!branchPendingDelete || busy) return;
         const branch = branchPendingDelete;
-        event.preventDefault();
-        if (busy || !validateForm(form)) return;
         busy = true;
         closeModal(deleteModal);
         showLoading(document.body, { fullscreen: true, text: "Đang xóa chi nhánh..." });
@@ -160,19 +227,22 @@ if (table) {
             hideLoading(document.body);
         }
     });
-    table.addEventListener("bookflow:table:action", event => {
+    table.addEventListener("bookflow:table:action", async event => {
         if (event.detail?.action !== "create-branch") return;
+        if (!await locationDataReady) return;
         setMode(false);
         openModal(modal, event.target);
     });
     table.addEventListener("click", async event => {
         const button = event.target.closest("[data-branch-action]");
         if (!button || busy) return;
+        if (button.dataset.branchAction !== "delete" && !await locationDataReady) return;
         const row = button.closest("[data-table-row]");
         const branch = JSON.parse(row.dataset.branch);
         if (button.dataset.branchAction === "view") {
             setMode(true, branch);
             form.querySelectorAll("input,select,textarea").forEach(field => field.disabled = true);
+            form.querySelectorAll("[data-bf-select]").forEach(select => setSelectDisabled(select, true));
             const submitButton = form.querySelector("[data-bf-modal-submit]");
             if (submitButton) submitButton.hidden = true;
             const title = modal.querySelector(".bf-modal-title");
@@ -191,7 +261,7 @@ if (table) {
     });
     form?.addEventListener("submit", async event => {
         event.preventDefault();
-        if (busy) return;
+        if (busy || !validateForm(form)) return;
         busy = true;
         if (formError) formError.hidden = true;
         const values = Object.fromEntries(new FormData(form).entries());
@@ -204,10 +274,10 @@ if (table) {
             loaiChiNhanh: values.loaiChiNhanh,
             diaChiChiTiet: optional("diaChiChiTiet"),
             maTinhThanh: optional("maTinhThanh"),
-            tenTinhThanh: optional("tenTinhThanh"),
+            tenTinhThanh: selectedLabel("branch-province") || null,
             maPhuongXa: optional("maPhuongXa"),
-            tenPhuongXa: optional("tenPhuongXa"),
-            quocGia: String(values.quocGia || "VN").trim().toUpperCase(),
+            tenPhuongXa: selectedLabel("branch-ward") || null,
+            quocGia: "VN",
             viDo: numberOrNull("viDo"),
             kinhDo: numberOrNull("kinhDo"),
             soDienThoai: optional("soDienThoai"),
@@ -224,7 +294,6 @@ if (table) {
         if (submit) submit.disabled = true;
         showLoading(document.body, { fullscreen: true, text: editing ? "Đang lưu chi nhánh..." : "Đang thêm chi nhánh..." });
         try {
-            if (!payload.loaiChiNhanh) fail("Vui lòng chọn loại chi nhánh.");
             await request(editing ? `/api/chi-nhanh/${branchId}` : "/api/chi-nhanh", { method: editing ? "PATCH" : "POST", body: JSON.stringify(payload) });
             hideLoading(document.body);
             closeModal(modal);

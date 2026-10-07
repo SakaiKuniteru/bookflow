@@ -39,6 +39,62 @@ body.bf-layout {
     font-family: Inter, "Segoe UI", sans-serif;
 }
 
+.bf-layout-content {
+    width: min(100% - 48px, 1320px);
+    padding-top: 28px;
+}
+
+.bf-app-shell {
+    background: var(--bf-page-bg);
+}
+
+body.bf-layout-public,
+body.bf-layout-customer {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+}
+
+body.bf-layout-public > .bf-demo-main,
+body.bf-layout-customer > .bf-demo-main {
+    flex: 1 0 auto;
+    min-height: 0;
+}
+
+body.bf-layout-public > .bf-demo-footer,
+body.bf-layout-customer > .bf-demo-footer {
+    flex: 0 0 auto;
+}
+
+.bf-app-main {
+    display: flex;
+    flex-direction: column;
+}
+
+.bf-app-main > .bf-layout-content {
+    flex: 1 0 auto;
+    min-height: 0;
+    width: 100%;
+    margin-inline: 0;
+    box-sizing: border-box;
+}
+
+.bf-app-main > .bf-nav-footer {
+    flex: 0 0 auto;
+}
+
+.bf-layout-admin .bf-app-shell,
+.bf-layout-staff .bf-app-shell,
+.bf-layout-admin .bf-app-main,
+.bf-layout-staff .bf-app-main {
+    min-height: 100vh;
+}
+
+.bf-layout-super-admin .bf-app-shell,
+.bf-layout-super-admin .bf-app-main {
+    min-height: calc(100vh - 76px);
+}
+
 .bf-nav-header {
     min-height: 76px;
     padding-inline: max(24px, calc((100vw - 1320px) / 2));
@@ -88,15 +144,6 @@ body.bf-layout {
     background: var(--bf-pine-deep);
 }
 
-.bf-layout-content {
-    width: min(100% - 48px, 1320px);
-    padding-top: 28px;
-}
-
-.bf-app-shell {
-    background: var(--bf-page-bg);
-}
-
 .bf-nav-sidebar {
     background: var(--bf-paper);
 }
@@ -109,6 +156,17 @@ body.bf-layout {
 .bf-nav-sidebar-link.is-active {
     background: var(--bf-mint);
     color: var(--bf-pine);
+}
+
+@media (max-width: 760px) {
+    .bf-nav-header {
+        min-height: 64px;
+        padding-inline: 14px;
+    }
+
+    .bf-layout-content {
+        width: min(100% - 28px, 1320px);
+    }
 }
 
 .bf-btn-primary,
@@ -166,6 +224,16 @@ body.bf-layout {
     width: min(100% - 48px, 1240px);
     margin: 0 auto;
     padding: 18px 0 56px;
+}
+
+@media (max-width: 600px) {
+    .bf-workspace-page {
+        width: min(100% - 28px, 1240px);
+    }
+
+    .bf-workspace-shortcuts {
+        grid-template-columns: 1fr;
+    }
 }
 
 .bf-workspace-welcome {
@@ -247,65 +315,4 @@ body.bf-layout {
     .bf-workspace-shortcuts {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-}
-
-@media (max-width: 600px) {
-    .bf-workspace-page {
-        width: min(100% - 28px, 1240px);
-    }
-
-    .bf-workspace-shortcuts {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 760px) {
-    .bf-nav-header {
-        min-height: 64px;
-        padding-inline: 14px;
-    }
-
-    .bf-layout-content {
-        width: min(100% - 28px, 1320px);
-    }
-}
-
-body.bf-layout-public,
-body.bf-layout-customer {
-    display: flex;
-    min-height: 100vh;
-    flex-direction: column;
-}
-body.bf-layout-public > .bf-demo-main,
-body.bf-layout-customer > .bf-demo-main {
-    flex: 1 0 auto;
-    min-height: 0;
-}
-body.bf-layout-public > .bf-demo-footer,
-body.bf-layout-customer > .bf-demo-footer {
-    flex: 0 0 auto;
-}
-.bf-app-main {
-    display: flex;
-    flex-direction: column;
-}
-.bf-app-main > .bf-layout-content {
-    flex: 1 0 auto;
-    min-height: 0;
-    width: 100%;
-    margin-inline: 0;
-    box-sizing: border-box;
-}
-.bf-app-main > .bf-nav-footer {
-    flex: 0 0 auto;
-}
-.bf-layout-admin .bf-app-shell,
-.bf-layout-staff .bf-app-shell,
-.bf-layout-admin .bf-app-main,
-.bf-layout-staff .bf-app-main {
-    min-height: 100vh;
-}
-.bf-layout-super-admin .bf-app-shell,
-.bf-layout-super-admin .bf-app-main {
-    min-height: calc(100vh - 76px);
 }

@@ -1,13 +1,16 @@
 .bf-phone-control {
     width: 100%;
 }
+
 .bf-phone-input {
     width: 100%;
 }
+
 .bf-phone-input.is-invalid {
     border-color: var(--bf-form-danger);
     box-shadow: 0 0 0 3px rgba(220, 38, 38, .08);
 }
+
 .bf-phone-error[hidden] {
     display: none;
 }

@@ -1,0 +1,251 @@
+{
+  "meta": {
+    "description": "Danh sách 34 đơn vị hành chính cấp tỉnh Việt Nam theo mã quốc gia ban hành tại Quyết định 19/2025/QĐ-TTg.",
+    "source": "Open Admin Data, đối chiếu mã theo Quyết định 19/2025/QĐ-TTg",
+    "sourceUrl": "https://github.com/open-admin-data/vietnam-administrative-divisions",
+    "officialCodeSource": "https://baochinhphu.vn/bang-danh-muc-va-ma-so-cua-34-tinh-thanh-moi-3321-don-vi-hanh-chinh-cap-xa-moi-102250704153652947.htm",
+    "license": "CC-BY-4.0",
+    "countryCode": "VN",
+    "updatedAt": "2026-09-08"
+  },
+  "data": [
+    {
+      "code": "01",
+      "countryCode": "VN",
+      "name": "Hà Nội",
+      "nameEn": "Hanoi",
+      "level": 1
+    },
+    {
+      "code": "04",
+      "countryCode": "VN",
+      "name": "Cao Bằng",
+      "nameEn": "Cao Bang",
+      "level": 1
+    },
+    {
+      "code": "08",
+      "countryCode": "VN",
+      "name": "Tuyên Quang",
+      "nameEn": "Tuyen Quang",
+      "level": 1
+    },
+    {
+      "code": "11",
+      "countryCode": "VN",
+      "name": "Điện Biên",
+      "nameEn": "Dien Bien",
+      "level": 1
+    },
+    {
+      "code": "12",
+      "countryCode": "VN",
+      "name": "Lai Châu",
+      "nameEn": "Lai Chau",
+      "level": 1
+    },
+    {
+      "code": "14",
+      "countryCode": "VN",
+      "name": "Sơn La",
+      "nameEn": "Son La",
+      "level": 1
+    },
+    {
+      "code": "15",
+      "countryCode": "VN",
+      "name": "Lào Cai",
+      "nameEn": "Lao Cai",
+      "level": 1
+    },
+    {
+      "code": "19",
+      "countryCode": "VN",
+      "name": "Thái Nguyên",
+      "nameEn": "Thai Nguyen",
+      "level": 1
+    },
+    {
+      "code": "20",
+      "countryCode": "VN",
+      "name": "Lạng Sơn",
+      "nameEn": "Lang Son",
+      "level": 1
+    },
+    {
+      "code": "22",
+      "countryCode": "VN",
+      "name": "Quảng Ninh",
+      "nameEn": "Quang Ninh",
+      "level": 1
+    },
+    {
+      "code": "24",
+      "countryCode": "VN",
+      "name": "Bắc Ninh",
+      "nameEn": "Bac Ninh",
+      "level": 1
+    },
+    {
+      "code": "25",
+      "countryCode": "VN",
+      "name": "Phú Thọ",
+      "nameEn": "Phu Tho",
+      "level": 1
+    },
+    {
+      "code": "31",
+      "countryCode": "VN",
+      "name": "Hải Phòng",
+      "nameEn": "Hai Phong",
+      "level": 1
+    },
+    {
+      "code": "33",
+      "countryCode": "VN",
+      "name": "Hưng Yên",
+      "nameEn": "Hung Yen",
+      "level": 1
+    },
+    {
+      "code": "37",
+      "countryCode": "VN",
+      "name": "Ninh Bình",
+      "nameEn": "Ninh Binh",
+      "level": 1
+    },
+    {
+      "code": "38",
+      "countryCode": "VN",
+      "name": "Thanh Hóa",
+      "nameEn": "Thanh Hoa",
+      "level": 1
+    },
+    {
+      "code": "40",
+      "countryCode": "VN",
+      "name": "Nghệ An",
+      "nameEn": "Nghe An",
+      "level": 1
+    },
+    {
+      "code": "42",
+      "countryCode": "VN",
+      "name": "Hà Tĩnh",
+      "nameEn": "Ha Tinh",
+      "level": 1
+    },
+    {
+      "code": "44",
+      "countryCode": "VN",
+      "name": "Quảng Trị",
+      "nameEn": "Quang Tri",
+      "level": 1
+    },
+    {
+      "code": "46",
+      "countryCode": "VN",
+      "name": "Huế",
+      "nameEn": "Hue",
+      "level": 1
+    },
+    {
+      "code": "48",
+      "countryCode": "VN",
+      "name": "Đà Nẵng",
+      "nameEn": "Da Nang",
+      "level": 1
+    },
+    {
+      "code": "51",
+      "countryCode": "VN",
+      "name": "Quảng Ngãi",
+      "nameEn": "Quang Ngai",
+      "level": 1
+    },
+    {
+      "code": "52",
+      "countryCode": "VN",
+      "name": "Gia Lai",
+      "nameEn": "Gia Lai",
+      "level": 1
+    },
+    {
+      "code": "56",
+      "countryCode": "VN",
+      "name": "Khánh Hòa",
+      "nameEn": "Khanh Hoa",
+      "level": 1
+    },
+    {
+      "code": "66",
+      "countryCode": "VN",
+      "name": "Đắk Lắk",
+      "nameEn": "Dak Lak",
+      "level": 1
+    },
+    {
+      "code": "68",
+      "countryCode": "VN",
+      "name": "Lâm Đồng",
+      "nameEn": "Lam Dong",
+      "level": 1
+    },
+    {
+      "code": "75",
+      "countryCode": "VN",
+      "name": "Đồng Nai",
+      "nameEn": "Dong Nai",
+      "level": 1
+    },
+    {
+      "code": "79",
+      "countryCode": "VN",
+      "name": "Hồ Chí Minh",
+      "nameEn": "Ho Chi Minh City",
+      "level": 1
+    },
+    {
+      "code": "80",
+      "countryCode": "VN",
+      "name": "Tây Ninh",
+      "nameEn": "Tay Ninh",
+      "level": 1
+    },
+    {
+      "code": "82",
+      "countryCode": "VN",
+      "name": "Đồng Tháp",
+      "nameEn": "Dong Thap",
+      "level": 1
+    },
+    {
+      "code": "86",
+      "countryCode": "VN",
+      "name": "Vĩnh Long",
+      "nameEn": "Vinh Long",
+      "level": 1
+    },
+    {
+      "code": "91",
+      "countryCode": "VN",
+      "name": "An Giang",
+      "nameEn": "An Giang",
+      "level": 1
+    },
+    {
+      "code": "92",
+      "countryCode": "VN",
+      "name": "Cần Thơ",
+      "nameEn": "Can Tho",
+      "level": 1
+    },
+    {
+      "code": "96",
+      "countryCode": "VN",
+      "name": "Cà Mau",
+      "nameEn": "Ca Mau",
+      "level": 1
+    }
+  ]
+}

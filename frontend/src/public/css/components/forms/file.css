@@ -1,6 +1,7 @@
 .bf-file-upload {
     width: 100%;
 }
+
 .bf-file-input {
     position: absolute;
     width: 1px;
@@ -10,6 +11,7 @@
     white-space: nowrap;
     clip-path: inset(50%);
 }
+
 .bf-file-dropzone {
     display: flex;
     flex-direction: column;
@@ -23,16 +25,19 @@
     cursor: pointer;
     transition: border-color .18s ease, background .18s ease;
 }
+
 .bf-file-dropzone:hover,
 .bf-file-dropzone.is-dragover {
     border-color: var(--bf-form-primary);
     background: rgba(37, 99, 235, .025);
 }
+
 .bf-file-dropzone.is-disabled {
     opacity: .55;
     cursor: not-allowed;
     pointer-events: none;
 }
+
 .bf-file-upload-icon {
     display: flex;
     align-items: center;
@@ -44,6 +49,7 @@
     background: #eef3ff;
     color: var(--bf-form-primary);
 }
+
 .bf-file-upload-icon svg,
 .bf-file-item-icon svg,
 .bf-file-delete svg {
@@ -55,22 +61,26 @@
     stroke-linecap: round;
     stroke-linejoin: round;
 }
+
 .bf-file-upload-title {
     color: var(--bf-form-text);
     font-size: 13px;
     font-weight: 600;
 }
+
 .bf-file-upload-description {
     margin-top: 3px;
     color: var(--bf-form-muted);
     font-size: 12px;
 }
+
 .bf-file-list {
     display: flex;
     flex-direction: column;
     gap: 5px;
     margin-top: 8px;
 }
+
 .bf-file-item {
     display: flex;
     align-items: center;
@@ -83,6 +93,7 @@
     background: #f5f5f5;
     box-sizing: border-box;
 }
+
 .bf-file-item-icon {
     display: inline-flex;
     flex: 0 0 auto;
@@ -92,6 +103,7 @@
     height: 24px;
     color: #888;
 }
+
 .bf-file-name {
     flex: 1 1 auto;
     min-width: 0;
@@ -102,19 +114,23 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+
 a.bf-file-name {
     color: #2584e8;
     font-weight: 600;
     text-decoration: none;
 }
+
 a.bf-file-name:hover {
     text-decoration: underline;
 }
+
 .bf-file-size {
     flex: 0 0 auto;
     color: var(--bf-form-muted);
     font-size: 11px;
 }
+
 .bf-file-delete {
     display: inline-flex;
     flex: 0 0 auto;
@@ -129,10 +145,12 @@ a.bf-file-name:hover {
     color: #888;
     cursor: pointer;
 }
+
 .bf-file-delete:hover {
     background: #fef2f2;
     color: var(--bf-form-danger);
 }
+
 .bf-file-delete svg {
     width: 18px;
     height: 18px;

@@ -5,6 +5,7 @@
     flex-direction: column;
     gap: 12px;
 }
+
 .bf-table-form {
     display: flex;
     min-width: 0;
@@ -13,6 +14,7 @@
     flex-direction: column;
     gap: 12px;
 }
+
 .bf-table-toolbar,
 .bf-table-toolbar-main,
 .bf-table-actions,
@@ -23,24 +25,29 @@
     display: flex;
     align-items: center;
 }
+
 .bf-table-toolbar,
 .bf-table-pagination {
     justify-content: space-between;
     gap: 12px;
 }
+
 .bf-table-toolbar-main {
     min-width: 220px;
     flex: 1;
     gap: 14px;
 }
+
 .bf-table-global-search {
     width: min(100%, 360px);
 }
+
 .bf-table-actions {
     flex-wrap: wrap;
     justify-content: flex-end;
     gap: 8px;
 }
+
 .bf-table-filters {
     display: flex;
     flex-wrap: wrap;
@@ -52,6 +59,7 @@
     border-radius: var(--bf-form-radius);
     background: var(--bf-form-bg);
 }
+
 .bf-table-filter-list {
     display: flex;
     flex: 1;
@@ -59,21 +67,26 @@
     align-items: flex-end;
     gap: 12px;
 }
+
 .bf-table-filter {
     min-width: 180px;
     flex: 1 1 180px;
 }
+
 .bf-table-filter .bf-form-field {
     margin-bottom: 0;
 }
+
 .bf-table-date-range {
     display: flex;
     gap: 10px;
 }
+
 .bf-table-date-range .bf-form-field {
     min-width: 150px;
     flex: 1;
 }
+
 .bf-table-checkbox-filter {
     display: inline-flex;
     align-items: center;
@@ -82,9 +95,11 @@
     color: var(--bf-form-text);
     font-size: 14px;
 }
+
 .bf-table-filter-actions {
     gap: 8px;
 }
+
 .bf-table-viewport {
     width: 100%;
     max-height: 65vh;
@@ -95,12 +110,14 @@
     background: var(--bf-form-bg);
     overscroll-behavior: contain;
 }
+
 .bf-data-table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
     table-layout: fixed;
 }
+
 .bf-data-table th,
 .bf-data-table td {
     min-width: 100px;
@@ -112,40 +129,51 @@
     vertical-align: middle;
     overflow-wrap: anywhere;
 }
+
 .bf-data-table thead {
     position: sticky;
     z-index: 2;
     top: 0;
     background: #f8fafc;
 }
+
 .bf-data-table th {
     font-weight: 700;
 }
+
 .bf-branch-page .bf-data-table tbody tr:nth-child(even) td {
     background: #f5f8f7;
 }
+
 .bf-data-table tbody tr:last-child td {
     border-bottom: 0;
 }
+
 .bf-data-table tbody tr:hover td {
     background: #fafbfc;
 }
+
 .bf-data-table td a {
     color: var(--bf-form-primary);
     text-decoration: none;
 }
+
 .bf-data-table td a:hover {
     text-decoration: underline;
 }
+
 .bf-table-align-left {
     text-align: left !important;
 }
+
 .bf-table-align-center {
     text-align: center !important;
 }
+
 .bf-table-align-right {
     text-align: right !important;
 }
+
 .bf-table-sort {
     display: inline-flex;
     align-items: center;
@@ -158,21 +186,26 @@
     font-weight: inherit;
     cursor: pointer;
 }
+
 .bf-table-sort:hover {
     color: var(--bf-form-primary);
 }
+
 .bf-table-sort-icon {
     color: var(--bf-form-muted);
 }
+
 .bf-table-column-filters th {
     padding: 6px;
     background: #fff;
 }
+
 .bf-table-column-search {
     min-height: 34px;
     padding: 5px 8px;
     font-size: 12px;
 }
+
 .bf-table-empty {
     display: flex;
     flex-direction: column;
@@ -187,16 +220,20 @@
     color: var(--bf-form-muted);
     text-align: center;
 }
+
 .bf-table-empty strong {
     color: var(--bf-form-text);
     font-size: 15px;
 }
+
 .bf-table-empty-icon {
     color: #94a3b8;
 }
+
 .bf-table-skeleton-row td {
     padding-block: 14px;
 }
+
 .bf-table-skeleton {
     display: block;
     width: 70%;
@@ -206,10 +243,12 @@
     background-size: 200% 100%;
     animation: bf-table-shimmer 1.3s ease-in-out infinite;
 }
+
 .bf-table-skeleton-row:nth-child(even) 
 .bf-table-skeleton {
     width: 48%;
 }
+
 .bf-table-pagination {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
@@ -223,6 +262,7 @@
     color: var(--bf-form-muted);
     font-size: 12px;
 }
+
 .bf-table-page-size {
     display: flex;
     align-items: center;
@@ -230,6 +270,7 @@
     gap: 6px;
     white-space: nowrap;
 }
+
 .bf-table-page-size select {
     appearance: none;
     box-sizing: border-box;
@@ -246,15 +287,18 @@
     font: inherit;
     cursor: pointer;
 }
+
 .bf-table-page-size select:focus-visible {
     outline: 2px solid var(--bf-form-primary);
     outline-offset: 1px;
 }
+
 .bf-table-page-controls {
     justify-self: center;
     justify-content: center;
     gap: 3px;
 }
+
 .bf-table-page-controls button {
     display: inline-flex;
     align-items: center;
@@ -267,23 +311,339 @@
     color: var(--bf-form-text);
     cursor: pointer;
 }
+
 .bf-table-page-controls button:hover:not(:disabled) {
     border-color: var(--bf-form-primary);
     color: var(--bf-form-primary);
 }
+
 .bf-table-page-controls button:disabled {
     opacity: .4;
     cursor: not-allowed;
 }
+
 .bf-table-page-label {
     padding: 0 8px;
     white-space: nowrap;
 }
+
 .bf-table-record-count {
     justify-self: end;
     text-align: right;
     white-space: nowrap;
 }
+
+@keyframes bf-table-shimmer {
+    to { background-position: -200% 0; }
+}
+
+.bf-admin-page-shell {
+    width: 100%;
+    min-height: calc(100vh - 84px);
+    padding: 20px;
+    border: 1px solid #e5e9e7;
+    border-radius: 13px;
+    background: #fff;
+    box-sizing: border-box;
+}
+
+.bf-admin-page-heading {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 0 0 22px;
+}
+
+.bf-admin-page-heading-icon {
+    display: grid;
+    width: 64px;
+    height: 64px;
+    flex: 0 0 64px;
+    place-items: center;
+    border-radius: 16px;
+    background: #f0f7f4;
+    color: #075b4d;
+}
+
+.bf-admin-page-heading-icon svg {
+    width: 42px;
+    height: 42px;
+}
+
+.bf-admin-page-heading-copy {
+    display: block;
+}
+
+.bf-admin-page-heading h1 {
+    margin: 0 0 4px;
+    color: #075b4d;
+    font-size: 27px;
+    line-height: 1.2;
+    font-weight: 750;
+}
+
+.bf-admin-page-heading p {
+    margin: 0;
+    color: #6c8798;
+    font-size: 14px;
+}
+
+.bf-admin-page-content,
+.bf-admin-page-content > .bf-table {
+    min-width: 0;
+}
+
+.bf-admin-page-content > .bf-table {
+    gap: 14px;
+}
+
+.bf-admin-page-shell .bf-table-form {
+    gap: 14px;
+}
+
+.bf-admin-page-shell .bf-table-pagination {
+    margin-top: auto;
+    flex: 0 0 auto;
+}
+
+.bf-admin-page-shell .bf-table-toolbar {
+    align-items: center;
+    min-height: 50px;
+}
+
+.bf-admin-page-shell .bf-table-toolbar-main {
+    min-width: 0;
+}
+
+.bf-admin-page-shell .bf-table-global-search {
+    width: min(100%, 660px);
+}
+
+.bf-admin-page-shell .bf-table-actions {
+    flex: 0 0 auto;
+}
+
+.bf-admin-page-shell .bf-table-viewport {
+    min-height: 230px;
+    max-height: 58vh;
+    border-color: #e3eae8;
+    border-radius: 13px;
+    background: #fff;
+    box-shadow: none;
+}
+
+.bf-admin-page-shell .bf-data-table {
+    width: 100% !important;
+    min-width: 100% !important;
+    table-layout: fixed;
+}
+
+.bf-admin-page-shell .bf-data-table th,
+.bf-admin-page-shell .bf-data-table td {
+    min-width: 0;
+    padding: 7px 12px;
+    border-right: 1px solid #e6eeeb;
+    border-bottom-color: #edf1ef;
+    color: #075b4d;
+    font-size: 10px;
+    line-height: 1.35;
+}
+
+.bf-admin-page-shell .bf-data-table th:last-child,
+.bf-admin-page-shell .bf-data-table td:last-child {
+    border-right: 0;
+}
+
+.bf-admin-page-shell .bf-data-table thead th {
+    background: #eff6f4;
+}
+
+.bf-admin-page-shell .bf-data-table tbody tr:nth-child(even) td {
+    background: #f2f7f6;
+}
+
+.bf-admin-page-shell .bf-data-table tbody tr:hover td {
+    background: #eaf3f0;
+}
+
+.bf-branch-type {
+    display: inline-flex;
+    align-items: center;
+    min-height: 27px;
+    padding: 2px 12px;
+    border-radius: 999px;
+    background: #c9f7df;
+    color: #08754e;
+    white-space: nowrap;
+}
+
+.bf-branch-type-NHA_SACH {
+    background: #d7efff;
+    color: #1680bf;
+}
+
+.bf-branch-row-actions {
+    white-space: nowrap;
+}
+
+.bf-branch-icon-action {
+    display: inline-grid;
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    padding: 0;
+    place-items: center;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.bf-branch-icon-action:hover {
+    background: transparent;
+    opacity: .7;
+}
+
+.bf-branch-icon-view {
+    color: #087568;
+}
+
+.bf-branch-icon-edit {
+    color: #2878c8;
+}
+
+.bf-branch-icon-delete {
+    color: #d14343;
+}
+
+.bf-branch-icon-action svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.bf-admin-page-shell .bf-table-empty {
+    min-height: 300px;
+    border-color: #e5ece9;
+    border-radius: 13px;
+    background: #fff;
+}
+
+.bf-admin-page-shell .bf-table-empty[hidden] {
+    display: none;
+}
+
+.bf-table-empty-illustration {
+    width: min(260px, 70vw);
+    height: 120px;
+}
+
+.bf-admin-page-shell .bf-table-pagination {
+    min-height: 42px;
+    padding: 4px 14px;
+    border-color: #e5ece9;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: none;
+    color: #6c8798;
+    font-size: 11px;
+}
+
+.bf-admin-page-shell .bf-table-page-controls {
+    gap: 5px;
+}
+
+.bf-admin-page-shell .bf-table-page-controls button {
+    width: 28px;
+    height: 28px;
+    border-color: #e5ece9;
+    border-radius: 7px;
+    background: #fff;
+    color: #6c8798;
+}
+
+.bf-admin-page-shell .bf-table-page-controls .bf-table-current-page {
+    border-color: #84c9ad;
+    background: #e5f5ee;
+    color: #087455;
+    opacity: 1;
+}
+
+.bf-admin-page-shell .bf-table-page-size select {
+    height: 26px;
+}
+
+.bf-table-visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    clip-path: inset(50%);
+}
+
+body.bf-layout-admin .bf-admin-page-content > .bf-table {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+}
+
+body.bf-layout-admin .bf-admin-page-shell .bf-table-form {
+    display: flex;
+    height: 100%;
+    min-height: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 14px;
+    overflow: hidden;
+}
+
+body.bf-layout-admin .bf-admin-page-shell .bf-table-toolbar {
+    flex: 0 0 auto;
+}
+
+body.bf-layout-admin .bf-admin-page-shell .bf-table-viewport {
+    min-height: 0;
+    max-height: none;
+    flex: 1 1 auto;
+    overflow: auto;
+}
+
+body.bf-layout-admin .bf-admin-page-shell .bf-table-pagination {
+    margin-top: auto;
+    flex: 0 0 auto;
+}
+
+@media (max-width: 760px) {
+    .bf-admin-page-shell {
+        min-height: 0;
+        padding: 14px;
+    }
+    .bf-admin-page-heading-icon {
+        width: 52px;
+        height: 52px;
+        flex-basis: 52px;
+    }
+    .bf-admin-page-heading h1 {
+        font-size: 22px;
+    }
+    .bf-admin-page-shell .bf-table-viewport {
+        max-height: 65vh;
+    }
+    .bf-admin-page-shell .bf-data-table {
+        min-width: 900px !important;
+    }
+}
+
 @media (max-width: 700px) {
     .bf-table-pagination {
         grid-template-columns: 1fr;
@@ -294,11 +654,7 @@
     .bf-table-record-count {
         justify-self: center;
     }
-}
-@keyframes bf-table-shimmer {
-    to { background-position: -200% 0; }
-}
-@media (max-width: 700px) {
+
     .bf-table-toolbar {
         align-items: stretch;
         flex-direction: column;
@@ -329,6 +685,7 @@
         text-align: left;
     }
 }
+
 @media (prefers-reduced-motion: reduce) {
     .bf-table-skeleton {
         animation: none;
@@ -341,252 +698,25 @@
     padding: 18px 16px 28px;
     box-sizing: border-box;
 }
-.bf-admin-page-shell {
-    width: 100%;
-    min-height: calc(100vh - 84px);
-    padding: 20px;
-    border: 1px solid #e5e9e7;
-    border-radius: 13px;
-    background: #fff;
-    box-sizing: border-box;
-}
-.bf-admin-page-heading {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin: 0 0 22px;
-}
-.bf-admin-page-heading-icon {
-    display: grid;
-    width: 64px;
-    height: 64px;
-    flex: 0 0 64px;
-    place-items: center;
-    border-radius: 16px;
-    background: #f0f7f4;
-    color: #075b4d;
-}
-.bf-admin-page-heading-icon svg {
-    width: 42px;
-    height: 42px;
-}
-.bf-admin-page-heading-copy {
-    display: block;
-}
-.bf-admin-page-heading h1 {
-    margin: 0 0 4px;
-    color: #075b4d;
-    font-size: 27px;
-    line-height: 1.2;
-    font-weight: 750;
-}
-.bf-admin-page-heading p {
-    margin: 0;
-    color: #6c8798;
-    font-size: 14px;
-}
-.bf-admin-page-content,
-.bf-admin-page-content > .bf-table {
-    min-width: 0;
-}
-.bf-admin-page-content > .bf-table {
-    gap: 14px;
-}
-.bf-admin-page-shell .bf-table-form {
-    gap: 14px;
-}
-.bf-admin-page-shell .bf-table-pagination {
-    margin-top: auto;
-    flex: 0 0 auto;
-}
-.bf-admin-page-shell .bf-table-toolbar {
-    align-items: center;
-    min-height: 50px;
-}
-.bf-admin-page-shell .bf-table-toolbar-main {
-    min-width: 0;
-}
-.bf-admin-page-shell .bf-table-global-search {
-    width: min(100%, 660px);
-}
-.bf-admin-page-shell .bf-table-actions {
-    flex: 0 0 auto;
-}
-.bf-admin-page-shell .bf-table-viewport {
-    min-height: 230px;
-    max-height: 58vh;
-    border-color: #e3eae8;
-    border-radius: 13px;
-    background: #fff;
-    box-shadow: none;
-}
-.bf-admin-page-shell .bf-data-table {
-    width: 100% !important;
-    min-width: 100% !important;
-    table-layout: fixed;
-}
-.bf-admin-page-shell .bf-data-table th,
-.bf-admin-page-shell .bf-data-table td {
-    min-width: 0;
-    padding: 7px 12px;
-    border-right: 1px solid #e6eeeb;
-    border-bottom-color: #edf1ef;
-    color: #075b4d;
-    font-size: 10px;
-    line-height: 1.35;
-}
-.bf-admin-page-shell .bf-data-table th:last-child,
-.bf-admin-page-shell .bf-data-table td:last-child {
-    border-right: 0;
-}
-.bf-admin-page-shell .bf-data-table thead th {
-    background: #eff6f4;
-}
-.bf-admin-page-shell .bf-data-table tbody tr:nth-child(even) td {
-    background: #f2f7f6;
-}
-.bf-admin-page-shell .bf-data-table tbody tr:hover td {
-    background: #eaf3f0;
-}
-.bf-branch-type {
-    display: inline-flex;
-    align-items: center;
-    min-height: 27px;
-    padding: 2px 12px;
-    border-radius: 999px;
-    background: #c9f7df;
-    color: #08754e;
-    white-space: nowrap;
-}
-.bf-branch-type-NHA_SACH {
-    background: #d7efff;
-    color: #1680bf;
-}
-.bf-branch-row-actions {
-    white-space: nowrap;
-}
-.bf-branch-icon-action {
-    display: inline-grid;
-    width: 20px;
-    height: 20px;
-    margin-right: 8px;
-    padding: 0;
-    place-items: center;
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    cursor: pointer;
-}
-.bf-branch-icon-action:hover {
-    background: transparent;
-    opacity: .7;
-}
-.bf-branch-icon-view {
-    color: #087568;
-}
-.bf-branch-icon-edit {
-    color: #2878c8;
-}
-.bf-branch-icon-delete {
-    color: #d14343;
-}
-.bf-branch-icon-action svg {
-    width: 18px;
-    height: 18px;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-}
-.bf-admin-page-shell .bf-table-empty {
-    min-height: 300px;
-    border-color: #e5ece9;
-    border-radius: 13px;
-    background: #fff;
-}
-.bf-admin-page-shell .bf-table-empty[hidden] {
-    display: none;
-}
-.bf-table-empty-illustration {
-    width: min(260px, 70vw);
-    height: 120px;
-}
-.bf-admin-page-shell .bf-table-pagination {
-    min-height: 42px;
-    padding: 4px 14px;
-    border-color: #e5ece9;
-    border-radius: 10px;
-    background: #fff;
-    box-shadow: none;
-    color: #6c8798;
-    font-size: 11px;
-}
-.bf-admin-page-shell .bf-table-page-controls {
-    gap: 5px;
-}
-.bf-admin-page-shell .bf-table-page-controls button {
-    width: 28px;
-    height: 28px;
-    border-color: #e5ece9;
-    border-radius: 7px;
-    background: #fff;
-    color: #6c8798;
-}
-.bf-admin-page-shell .bf-table-page-controls .bf-table-current-page {
-    border-color: #84c9ad;
-    background: #e5f5ee;
-    color: #087455;
-    opacity: 1;
-}
-.bf-admin-page-shell .bf-table-page-size select {
-    height: 26px;
-}
-.bf-table-visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    clip-path: inset(50%);
-}
-@media (max-width: 760px) {
-    .bf-admin-page-shell {
-        min-height: 0;
-        padding: 14px;
-    }
-    .bf-admin-page-heading-icon {
-        width: 52px;
-        height: 52px;
-        flex-basis: 52px;
-    }
-    .bf-admin-page-heading h1 {
-        font-size: 22px;
-    }
-    .bf-admin-page-shell .bf-table-viewport {
-        max-height: 65vh;
-    }
-    .bf-admin-page-shell .bf-data-table {
-        min-width: 900px !important;
-    }
-}
+
 body.bf-layout-admin {
     height: 100dvh;
     min-height: 0;
     overflow: hidden;
 }
+
 body.bf-layout-admin .bf-app-shell {
     height: 100dvh;
     min-height: 0;
     overflow: hidden;
 }
+
 body.bf-layout-admin .bf-app-main {
     height: 100dvh;
     min-height: 0;
     overflow: hidden;
 }
+
 body.bf-layout-admin .bf-app-main > .bf-layout-content {
     display: flex;
     height: 100%;
@@ -595,6 +725,7 @@ body.bf-layout-admin .bf-app-main > .bf-layout-content {
     overflow: hidden;
     box-sizing: border-box;
 }
+
 body.bf-layout-admin .bf-branch-page {
     display: flex;
     min-width: 0;
@@ -602,6 +733,7 @@ body.bf-layout-admin .bf-branch-page {
     flex: 1 1 auto;
     overflow: hidden;
 }
+
 body.bf-layout-admin .bf-admin-page-shell {
     display: flex;
     width: 100%;
@@ -610,9 +742,11 @@ body.bf-layout-admin .bf-admin-page-shell {
     flex-direction: column;
     overflow: hidden;
 }
+
 body.bf-layout-admin .bf-admin-page-heading {
     flex: 0 0 auto;
 }
+
 body.bf-layout-admin .bf-admin-page-content {
     display: flex;
     width: 100%;
@@ -621,36 +755,7 @@ body.bf-layout-admin .bf-admin-page-content {
     flex: 1 1 auto;
     overflow: hidden;
 }
-body.bf-layout-admin .bf-admin-page-content > .bf-table {
-    display: flex;
-    width: 100%;
-    height: 100%;
-    min-height: 0;
-    flex: 1 1 auto;
-    flex-direction: column;
-}
-body.bf-layout-admin .bf-admin-page-shell .bf-table-form {
-    display: flex;
-    height: 100%;
-    min-height: 0;
-    flex: 1 1 auto;
-    flex-direction: column;
-    gap: 14px;
-    overflow: hidden;
-}
-body.bf-layout-admin .bf-admin-page-shell .bf-table-toolbar {
-    flex: 0 0 auto;
-}
-body.bf-layout-admin .bf-admin-page-shell .bf-table-viewport {
-    min-height: 0;
-    max-height: none;
-    flex: 1 1 auto;
-    overflow: auto;
-}
-body.bf-layout-admin .bf-admin-page-shell .bf-table-pagination {
-    margin-top: auto;
-    flex: 0 0 auto;
-}
+
 body.bf-layout-admin .bf-table-empty[hidden] {
     display: none !important;
 }

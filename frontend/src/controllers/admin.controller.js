@@ -48,7 +48,7 @@ async branches(req, res) {
     pagination: { enabled: true, page: 1, pageSize: 20, total: 0, pages: 1, from: 0, to: 0 },
     emptyTitle: 'Chưa có chi nhánh để hiển thị',
     emptyDescription: 'Nếu đơn vị đã có chi nhánh, hãy kiểm tra đơn vị đang chọn hoặc quyền xem chi nhánh của tài khoản.',
-    scripts: ['/js/page/admin-chi-nhanh.js?v=20261006-4']
+    scripts: ['/js/page/admin-chi-nhanh.js?v=20261007-1']
   });
 },
   employees: render('admin/nhan-vien', 'Nhân viên'),

@@ -154,6 +154,29 @@
     text-align: right;
 }
 
+@media (max-width: 640px) {
+    .bf-book-card {
+        grid-template-columns: 96px minmax(0, 1fr);
+        gap: 12px;
+        padding: 12px;
+    }
+
+    .bf-book-card-cover {
+        min-height: 140px;
+    }
+
+    .bf-book-card-title,
+    .bf-customer-card-name {
+        font-size: 16px;
+    }
+
+    .bf-book-card-heading,
+    .bf-customer-card-heading,
+    .bf-membership-card-heading {
+        flex-direction: column;
+    }
+}
+
 .bf-book-provisions,
 .bf-book-card-actions,
 .bf-customer-card-actions,
@@ -488,27 +511,4 @@
     color: #fff;
     font-size: 24px;
     cursor: pointer;
-}
-
-@media (max-width: 640px) {
-    .bf-book-card {
-        grid-template-columns: 96px minmax(0, 1fr);
-        gap: 12px;
-        padding: 12px;
-    }
-
-    .bf-book-card-cover {
-        min-height: 140px;
-    }
-
-    .bf-book-card-title,
-    .bf-customer-card-name {
-        font-size: 16px;
-    }
-
-    .bf-book-card-heading,
-    .bf-customer-card-heading,
-    .bf-membership-card-heading {
-        flex-direction: column;
-    }
 }

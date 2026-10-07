@@ -94,6 +94,15 @@ export function syncSelect(wrapper) {
     if (!wrapper?.matches?.("[data-bf-select]")) return;
     updateDisplay(wrapper);
 }
+export function setSelectDisabled(wrapper, disabled) {
+    if (!wrapper?.matches?.("[data-bf-select]")) return;
+    wrapper.dataset.disabled = String(disabled);
+    wrapper.classList.toggle("is-disabled", disabled);
+    const control = wrapper.querySelector(".bf-select-control");
+    control?.setAttribute("aria-disabled", String(disabled));
+    if (control) control.tabIndex = disabled ? -1 : 0;
+    if (disabled) close(wrapper);
+}
 function setActive(wrapper, index) {
     const options = getVisibleOptions(wrapper);
     if (!options.length) return;
@@ -108,6 +117,7 @@ function getActiveIndex(wrapper) {
 }
 
 function open(wrapper, focusSearch = false) {
+    if (wrapper.dataset.disabled === "true") return;
     wrapper.classList.add("is-open");
     wrapper.querySelector(".bf-select-control")?.setAttribute("aria-expanded", "true");
     setActive(wrapper, 0);
@@ -153,7 +163,7 @@ function clearSelection(wrapper) {
 }
 
 function toggleOption(wrapper, option) {
-    if (!option || option.disabled) return;
+    if (!option || option.disabled || wrapper.dataset.disabled === "true") return;
     if (isMultiple(wrapper)) {
         option.classList.toggle("is-selected");
     } else {
@@ -185,6 +195,7 @@ function initialize(wrapper) {
     if (!control || !optionsBox) return;
     wrapper.dataset.formInitialized = "true";
     control.addEventListener("click", event => {
+        if (wrapper.dataset.disabled === "true") { event.preventDefault(); return; }
         const chipRemove = event.target.closest("[data-remove-value]");
         if (chipRemove) {
             event.preventDefault();
@@ -204,6 +215,7 @@ function initialize(wrapper) {
         else open(wrapper, hasSearch(wrapper));
     });
     control.addEventListener("keydown", event => {
+        if (wrapper.dataset.disabled === "true") { event.preventDefault(); return; }
         if (hasSearch(wrapper)) return;
         if (event.key === "ArrowDown" || event.key === "ArrowUp") {
             event.preventDefault();
@@ -256,6 +268,7 @@ function initialize(wrapper) {
         if (!wrapper.contains(event.target)) close(wrapper);
     });
     updateDisplay(wrapper);
+    setSelectDisabled(wrapper, wrapper.dataset.disabled === "true");
 }
 
 export function initSelectInputs(root = document) {
