@@ -53,10 +53,28 @@ function docCauHinhEmail(env = process.env) {
         user: chuoiBatBuoc(env, 'SMTP_USER'),
         password: chuoiBatBuoc(env, 'SMTP_PASSWORD'),
         from: chuoiBatBuoc(env, 'SMTP_FROM'),
-        fromName: env.SMTP_FROM_NAME?.trim() || 'BookFlow',
+        fromName: docCauHinhThuongHieu(null, env).name,
         loginUrl: urlHttp(env, 'PUBLIC_LOGIN_URL'),
         otpSecret
     };
+}
+
+function docCauHinhThuongHieu(donVi = null, env = process.env) {
+    const tenCauHinh = String(env.APP_NAME ?? '').trim() || String(env.SMTP_FROM_NAME ?? '').trim();
+    const ten = tenCauHinh || String(donVi?.ten_hien_thi ?? '').trim() || 'BookFlow';
+    let goc = 'http://localhost:3000';
+    try {
+        const urlCongKhai = new URL(env.PUBLIC_LOGIN_URL || goc);
+        if (['http:', 'https:'].includes(urlCongKhai.protocol)) goc = urlCongKhai.origin;
+    }
+    catch {}
+    let logoUrl = String(env.APP_LOGO_URL || '').trim();
+    if (!logoUrl && donVi?.id && donVi?.logo_tep_id && /^[1-9]\d*$/.test(String(donVi.logo_tep_id))) logoUrl = `/api/tep-tin/don-vi/${Number(donVi.id)}/logo`;
+    if (!logoUrl) logoUrl = '/brand/logo-symbol.svg';
+    try { logoUrl = new URL(logoUrl, `${goc}/`).toString(); }
+    catch { logoUrl = `${goc}/brand/logo-symbol.svg`; }
+    if (!/^https?:$/.test(new URL(logoUrl).protocol)) logoUrl = `${goc}/brand/logo-symbol.svg`;
+    return { name: ten, logoUrl };
 }
 
 function docCauHinhToken(env = process.env) {
@@ -71,4 +89,4 @@ function docCauHinhToken(env = process.env) {
     return { jwtAccessSecret, accessTtlSeconds: accessMinutes * 60, refreshTtlMinutes: refreshMinutes, feSessionTtlMinutes: feSessionMinutes };
 }
 
-module.exports = { docMoiTruong, docCauHinhEmail, docCauHinhToken };
+module.exports = { docMoiTruong, docCauHinhEmail, docCauHinhToken, docCauHinhThuongHieu };

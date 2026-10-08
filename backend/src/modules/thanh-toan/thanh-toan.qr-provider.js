@@ -1,7 +1,8 @@
 const { AppError } = require('../../common/errors/AppError.js');
-async function taoYeuCauQR({ giaoDich,phuongThuc,taiKhoanNhan }) {
+const { docCauHinhThuongHieu } = require('../../config/environment.js');
+async function taoYeuCauQR({ giaoDich,phuongThuc,taiKhoanNhan,thuongHieu }) {
     if (!giaoDich || phuongThuc.loai !== 'QR' || !taiKhoanNhan) throw new TypeError('Dữ liệu yêu cầu QR không hợp lệ');
-    return { tich_hop_ngan_hang: false,trang_thai: 'CHO_TICH_HOP',ma_giao_dich: giaoDich.ma_giao_dich,so_tien: giaoDich.so_tien,noi_dung: `BookFlow ${giaoDich.ma_giao_dich}`,qr_payload: null,qr_image_url: null };
+    return { tich_hop_ngan_hang: false,trang_thai: 'CHO_TICH_HOP',ma_giao_dich: giaoDich.ma_giao_dich,so_tien: giaoDich.so_tien,noi_dung: `${docCauHinhThuongHieu(thuongHieu).name} ${giaoDich.ma_giao_dich}`,qr_payload: null,qr_image_url: null };
 }
 async function xacMinhSuKien({ nhaCungCap,headers,rawBody }) {
     if (!nhaCungCap || !headers || !Buffer.isBuffer(rawBody)) throw new AppError({ code: 'INVALID_QR_WEBHOOK',message: 'Thiếu dữ liệu xác thực webhook ngân hàng',status: 400 });

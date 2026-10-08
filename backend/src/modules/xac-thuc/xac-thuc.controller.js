@@ -37,10 +37,15 @@ class XacThucController {
     async dangNhap(req, res, next) {
         try {
             const data = await service.dangNhap(req.body ?? {});
-            return tra(req, res, data, data.yeu_cau_kich_hoat ? 202 : 200);
+            return tra(req, res, data, data.yeu_cau_kich_hoat || data.yeu_cau_doi_mat_khau ? 202 : 200);
         } catch (error) { next(error); }
     }
-
+    async doiMatKhauTamNhanVien(req, res, next) {
+        try {
+            const data = await service.doiMatKhauTamNhanVien(req.body ?? {});
+            return tra(req, res, data);
+        } catch (error) { next(error); }
+    }
     async hoanTatNhanVien(req, res, next) {
         try {
             const data = await service.hoanTatNhanVien(req.body ?? {}, req.requestId);

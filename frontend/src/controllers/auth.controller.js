@@ -106,6 +106,7 @@ const authController = {
       });
       const data = result.data || result;
       if (data.yeuCauKichHoat) return res.redirect(`/auth/kich-hoat-nhan-vien?dinhDanh=${encodeURIComponent(req.body.email || '')}`);
+      if (data.yeuCauDoiMatKhau) return res.redirect(`/auth/doi-mat-khau-tam?dinhDanh=${encodeURIComponent(req.body.email || '')}`);
       const token = data.accessToken;
       if (!token) {
         const error = new Error('Backend không trả access token.');
@@ -243,6 +244,20 @@ const authController = {
     } catch (error) {
       return renderAuth(res, 'kich-hoat-nhan-vien', 'Kích hoạt tài khoản nhân viên', { identifier: req.body.identifier || '', error: error.message }, error.status >= 400 && error.status < 500 ? error.status : 500);
     }
+  },
+  temporaryEmployeePasswordPage(req, res) {
+      return renderAuth(res, 'doi-mat-khau-tam', 'Đổi mật khẩu tạm', { identifier: req.query.dinhDanh || '' });
+  },
+  async completeTemporaryEmployeePasswordChange(req, res) {
+      try {
+          if (req.body.newPassword !== req.body.confirmNewPassword) throw Object.assign(new Error('Mật khẩu xác nhận chưa khớp.'), { status: 400 });
+          const result = await authService.changeTemporaryEmployeePassword({ dinhDanh: req.body.identifier, matKhauTam: req.body.temporaryPassword, matKhauMoi: req.body.newPassword });
+          const data = result.data || result;
+          if (!data.accessToken) throw new Error('Backend không trả access token sau khi đổi mật khẩu.');
+          return await finishLogin(req, res, data.accessToken, data);
+      } catch (error) {
+          return renderAuth(res, 'doi-mat-khau-tam', 'Đổi mật khẩu tạm', { identifier: req.body.identifier || '', error: error.message }, error.status >= 400 && error.status < 500 ? error.status : 500);
+      }
   },
   async workspaceSetupPage(req, res) {
     if (!req.user) return res.redirect('/auth/dang-nhap');

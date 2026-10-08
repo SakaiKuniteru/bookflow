@@ -4,10 +4,12 @@ const { bamMatKhau, kiemTraMatKhau } = require('../../common/security/mat-khau.j
 const tokenService = require('../../common/security/token.js');
 const emailService = require('../../integrations/email-client.js');
 const { taoEmailOtp, taoEmailMoiNhanVien } = require('../../integrations/email-template.js');
+const { docCauHinhThuongHieu } = require('../../config/environment.js');
 const taiKhoanService = require('../tai-khoan/tai-khoan.service.js');
 const taiKhoanRepository = require('../tai-khoan/tai-khoan.repository.js');
 const { emailHopLe, dinhDanhHopLe, loiXacThuc, matKhauHopLe, maNhanVienHopLe, otpHopLe, tenDangNhapHopLe } = require('./xac-thuc.validation.js');
 const { kiemTraDuLieuTaoTaiKhoan } = require('../tai-khoan/tai-khoan.validation.js');
+const nhanVienValidation = require('../nhan-vien/nhan-vien.validation.js');
 const phanQuyenService = require('../phan-quyen/phan-quyen.service.js');
 const xacThucContext = require('./xac-thuc.context.js');
 const repo = require('./xac-thuc.repository.js');
@@ -38,7 +40,8 @@ class XacThucService {
         const otp = String(randomInt(0, 1000000)).padStart(6, '0');
         await repo.huyOtpCu(tk.id, mucDich, client);
         await repo.taoOtp(tk.id, tk.email, mucDich, this.bamOtp(tk.id, mucDich, otp), soLan + 1, client);
-        const email = taoEmailOtp({ tenNguoiNhan: tk.ho_ten, otp, mucDich });
+        const donViThuongHieu = tk.don_vi_kich_hoat_id ? await repo.layThuongHieuDonVi(tk.don_vi_kich_hoat_id, client) : await repo.layThuongHieuDonViTaiKhoan(tk.id, client);
+        const email = taoEmailOtp({ tenNguoiNhan: tk.ho_ten, otp, mucDich, thuongHieu: docCauHinhThuongHieu(donViThuongHieu) });
         await emailService.guiEmail({ den: tk.email, tenNguoiNhan: tk.ho_ten, ...email });
     }
 
@@ -242,6 +245,7 @@ class XacThucService {
             }
             if (locked.bat_buoc_doi_mat_khau) {
                 if (!locked.mat_khau_tam_het_han || new Date(locked.mat_khau_tam_het_han) <= new Date()) return { loi: 'TEMP_EXPIRED' };
+                if (locked.trang_thai === 'DANG_DUNG' && locked.email_da_xac_minh) return { yeu_cau_doi_mat_khau: true };
                 await this.guiOtp(client, locked, 'KICH_HOAT_NHAN_VIEN');
                 return { yeu_cau_kich_hoat: true, email: locked.email };
             }
@@ -279,7 +283,23 @@ class XacThucService {
         if (!result || result.otpSai) throw this.loiOtp();
         return result;
     }
-
+    async doiMatKhauTamNhanVien({ dinh_danh, mat_khau_tam, mat_khau_moi }) {
+        const dinhDanh = dinhDanhHopLe(dinh_danh);
+        if (typeof mat_khau_tam !== 'string' || mat_khau_tam.length > 128) throw this.loiDangNhap();
+        matKhauHopLe(mat_khau_moi);
+        const result = await trongGiaoDich(async client => {
+            const tk = await repo.timTaiKhoan(dinhDanh, client);
+            if (!tk) return null;
+            const locked = await repo.khoaTaiKhoan(tk.id, client);
+            if (!locked.bat_buoc_doi_mat_khau || locked.trang_thai !== 'DANG_DUNG' || !locked.email_da_xac_minh || !locked.mat_khau_tam_het_han || new Date(locked.mat_khau_tam_het_han) <= new Date()) return null;
+            if (!kiemTraMatKhau(mat_khau_tam, locked.mat_khau_bam) || kiemTraMatKhau(mat_khau_moi, locked.mat_khau_bam)) return null;
+            const taiKhoan = await repo.capNhatMatKhau(tk.id, bamMatKhau(mat_khau_moi), client, false);
+            await repo.thuHoiTatCaPhien(tk.id, 'EMPLOYEE_TEMP_PASSWORD', client);
+            return this.taoPhien(taiKhoan, client);
+        });
+        if (!result) throw this.loiDangNhap();
+        return result;
+    }
     async quenMatKhau({ email }) {
         email = emailHopLe(email);
         const ketQua = await trongGiaoDich(async client => {
@@ -393,37 +413,63 @@ class XacThucService {
         });
     }
 
-    async taoNhanVienBoiAdmin(auth, body, requestId) {
+    async taoNhanVienBoiAdmin(auth, body, requestId, kiemTraChi = false) {
         if (!body || typeof body !== 'object' || Array.isArray(body)) throw loiXacThuc('Dữ liệu tạo nhân viên không hợp lệ');
         const payload = Object.fromEntries(Object.entries(body).map(([key, value]) => [key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase()), value]));
-        const allowedFields = ['email', 'tenDangNhap', 'maNhanVien', 'hoTen', 'chiNhanhId', 'ngaySinh', 'gioiTinh', 'quocTich', 'danToc', 'quocGia', 'tinhThanh', 'xaPhuong', 'moTa', 'diaChi','loaiTaiKhoan', 'active'];
-        if (Object.keys(payload).some(key => !allowedFields.includes(key))) throw loiXacThuc('Dữ liệu tạo nhân viên có trường không được phép');
-        const loiTruong = (field, message) => loiXacThuc(message, 422, 'INVALID_INPUT', [{ field, message }]);
-        const kiemTraTruong = (field, callback) => {
+        const allowedFields = ['email', 'tenDangNhap', 'maNhanVien', 'hoTen', 'chiNhanhId', 'ngaySinh', 'gioiTinh', 'quocTich', 'danToc', 'quocGia', 'tinhThanh', 'xaPhuong', 'moTa', 'diaChi', 'loaiTaiKhoan', 'active', 'ngayVaoLam', 'chucDanh', 'emailCongViec', 'soDienThoaiCongViec', 'cccdSo', 'cccdNgayCap', 'cccdNoiCap', 'lienHeKhanCapHoTen', 'lienHeKhanCapQuanHe', 'lienHeKhanCapSoDienThoai', 'lienHeKhanCapDiaChi', 'trinhDoHocVan', 'chuyenNganh', 'truong', 'chungChi', 'ngoaiNgu', 'kyNang'];
+        const truongKhongHopLe = Object.keys(payload).filter(key => !allowedFields.includes(key));
+        const loiNhapLieu = truongKhongHopLe.map(field => ({ field, message: `Trường ${field} không được phép` }));
+        const kiemTraTruong = (field, callback, fallback) => {
             try { return callback(); }
-            catch (error) { error.details = [{ field, message: error.message }]; throw error; }
+            catch (error) { loiNhapLieu.push({ field, message: error.message }); return fallback; }
         };
-        const email = kiemTraTruong('email', () => emailHopLe(payload.email));
-        const tenDangNhap = kiemTraTruong('tenDangNhap', () => tenDangNhapHopLe(payload.tenDangNhap));
-        const maNhanVien = kiemTraTruong('maNhanVien', () => maNhanVienHopLe(payload.maNhanVien));
+        const email = kiemTraTruong('email', () => emailHopLe(payload.email), '');
+        const tenDangNhap = kiemTraTruong('tenDangNhap', () => tenDangNhapHopLe(payload.tenDangNhap), '');
+        const maNhanVien = kiemTraTruong('maNhanVien', () => maNhanVienHopLe(payload.maNhanVien), '');
         const hoTen = typeof payload.hoTen === 'string' ? payload.hoTen.trim().replace(/\s+/g, ' ') : '';
-        if (hoTen.length < 2 || hoTen.length > 200) throw loiTruong('hoTen', 'Họ tên phải có từ 2 đến 200 ký tự');
-        const chiNhanhId = kiemTraTruong('chiNhanhId', () => this.idHopLe(payload.chiNhanhId, 'Chi nhánh'));
+        if (hoTen.length < 2 || hoTen.length > 200) loiNhapLieu.push({ field: 'hoTen', message: 'Họ tên phải có từ 2 đến 200 ký tự' });
+        const chiNhanhId = kiemTraTruong('chiNhanhId', () => this.idHopLe(payload.chiNhanhId, 'Chi nhánh'), 0);
+        const chiKiemTra = kiemTraChi === true;
         const optionalText = (value, label, maxLength, field) => {
             if (value == null || value === '') return null;
-            if (typeof value !== 'string') throw loiTruong(field, `${label} không hợp lệ`);
+            if (typeof value !== 'string') {
+                const error = loiTruong(field, `${label} không hợp lệ`);
+                if (!chiKiemTra) throw error;
+                loiNhapLieu.push(...error.details);
+                return null;
+            }
             const text = value.trim().replace(/\s+/g, ' ');
-            if (text.length > maxLength) throw loiTruong(field, `${label} không được vượt quá ${maxLength} ký tự`);
+            if (text.length > maxLength) {
+                const error = loiTruong(field, `${label} không được vượt quá ${maxLength} ký tự`);
+                if (!chiKiemTra) throw error;
+                loiNhapLieu.push(...error.details);
+                return null;
+            }
             return text || null;
         };
-        const ngaySinh = optionalText(payload.ngaySinh, 'Ngày sinh', 10, 'ngaySinh');
-        if (ngaySinh && !/^\d{4}-\d{2}-\d{2}$/.test(ngaySinh)) throw loiTruong('ngaySinh', 'Ngày sinh phải có định dạng yyyy-mm-dd');
+        const loiTruong = (field, message) => loiXacThuc(message, 422, 'INVALID_INPUT', [{ field, message }]);
+        let ngaySinh = optionalText(payload.ngaySinh, 'Ngày sinh', 10, 'ngaySinh');
+        if (ngaySinh && !/^\d{4}-\d{2}-\d{2}$/.test(ngaySinh)) {
+            const error = loiTruong('ngaySinh', 'Ngày sinh phải có định dạng yyyy-mm-dd');
+            if (!chiKiemTra) throw error;
+            loiNhapLieu.push(...error.details);
+            ngaySinh = null;
+        }
         if (ngaySinh) {
             const parsedDate = new Date(`${ngaySinh}T00:00:00.000Z`);
-            if (Number.isNaN(parsedDate.getTime()) || parsedDate.toISOString().slice(0, 10) !== ngaySinh || ngaySinh > new Date().toISOString().slice(0, 10)) throw loiTruong('ngaySinh', 'Ngày sinh không hợp lệ');
+            if (Number.isNaN(parsedDate.getTime()) || parsedDate.toISOString().slice(0, 10) !== ngaySinh || ngaySinh > new Date().toISOString().slice(0, 10)) {
+                const error = loiTruong('ngaySinh', 'Ngày sinh không hợp lệ');
+                if (!chiKiemTra) throw error;
+                loiNhapLieu.push(...error.details);
+                ngaySinh = null;
+            }
         }
         const gioiTinh = optionalText(payload.gioiTinh, 'Giới tính', 20, 'gioiTinh');
-        if (gioiTinh && !['NAM', 'NU', 'KHAC', 'KHONG_TIET_LO'].includes(gioiTinh)) throw loiTruong('gioiTinh', 'Giới tính không hợp lệ');
+        if (gioiTinh && !['NAM', 'NU', 'KHAC', 'KHONG_TIET_LO'].includes(gioiTinh)) {
+            const error = loiTruong('gioiTinh', 'Giới tính không hợp lệ');
+            if (!chiKiemTra) throw error;
+            loiNhapLieu.push(...error.details);
+        }
         const quocTich = optionalText(payload.quocTich, 'Quốc tịch', 100, 'quocTich');
         const danToc = optionalText(payload.danToc, 'Dân tộc', 100, 'danToc');
         const quocGia = optionalText(payload.quocGia, 'Quốc gia', 100, 'quocGia');
@@ -431,20 +477,49 @@ class XacThucService {
         const xaPhuong = optionalText(payload.xaPhuong, 'Xã/phường', 150, 'xaPhuong');
         const moTa = optionalText(payload.moTa, 'Mô tả', 2000, 'moTa');
         const diaChi = optionalText(payload.diaChi, 'Địa chỉ', 300, 'diaChi');
-        const loaiTaiKhoan = payload.loaiTaiKhoan ?? 'NHAN_VIEN';
-        if (!['NHAN_VIEN', 'QUAN_TRI'].includes(loaiTaiKhoan)) throw loiXacThuc('Loại tài khoản không hợp lệ');
-        if (payload.active !== undefined && typeof payload.active !== 'boolean') throw loiXacThuc('Trạng thái hoạt động không hợp lệ');
-        const active = payload.active ?? true;
+        const profileFields = ['ngayVaoLam', 'chucDanh', 'emailCongViec', 'soDienThoaiCongViec', 'cccdSo', 'cccdNgayCap', 'cccdNoiCap', 'lienHeKhanCapHoTen', 'lienHeKhanCapQuanHe', 'lienHeKhanCapSoDienThoai', 'lienHeKhanCapDiaChi', 'trinhDoHocVan', 'chuyenNganh', 'truong', 'chungChi', 'ngoaiNgu', 'kyNang'];
+        const employeeProfileInput = Object.fromEntries(profileFields.filter(field => payload[field] !== undefined).map(field => [field, payload[field]]));
+        let employeeProfile = {};
+        try { employeeProfile = Object.keys(employeeProfileInput).length ? nhanVienValidation.capNhatHopLe(employeeProfileInput) : {}; }
+        catch (error) {
+            if (!chiKiemTra) throw error;
+            const field = profileFields.find(name => error.message?.toLowerCase().includes(name.toLowerCase())) || 'ngayVaoLam';
+            loiNhapLieu.push(...(error.details?.length ? error.details : [{ field, message: error.message }]));
+        }
+        let loaiTaiKhoan = payload.loaiTaiKhoan ?? 'NHAN_VIEN';
+        if (!['NHAN_VIEN', 'QUAN_TRI'].includes(loaiTaiKhoan)) {
+            const error = loiXacThuc('Loại tài khoản không hợp lệ', 422, 'INVALID_INPUT', [{ field: 'loaiTaiKhoan', message: 'Loại tài khoản không hợp lệ' }]);
+            if (!chiKiemTra) throw error;
+            loiNhapLieu.push(...error.details);
+            loaiTaiKhoan = 'NHAN_VIEN';
+        }
+        let active = payload.active ?? true;
+        if (payload.active !== undefined && typeof payload.active !== 'boolean') {
+            const error = loiXacThuc('Trạng thái hoạt động không hợp lệ', 422, 'INVALID_INPUT', [{ field: 'active', message: 'Trạng thái hoạt động không hợp lệ' }]);
+            if (!chiKiemTra) throw error;
+            loiNhapLieu.push(...error.details);
+            active = true;
+        }
         if (!auth.donViId) throw loiXacThuc('Chưa chọn đơn vị làm việc', 403, 'FORBIDDEN');
         const matKhauTam = `Aq7!${randomBytes(18).toString('base64url')}`;
         const result = await trongGiaoDich(async client => {
             if (!await repo.coQuyenQuanLyNhanVien(auth.taiKhoanId, auth.donViId, client)) throw loiXacThuc('Không có quyền tạo nhân viên', 403, 'FORBIDDEN');
             if (loaiTaiKhoan === 'QUAN_TRI' && !await phanQuyenService.kiemTraQuyen(auth, 'roles.manage', {}, client)) throw loiXacThuc('Không có quyền tạo tài khoản quản trị viên', 403, 'FORBIDDEN');
-            if (!await repo.chiNhanhDangHoatDong(auth.donViId, chiNhanhId, client)) throw loiXacThuc('Chi nhánh không tồn tại hoặc không hoạt động', 422, 'BRANCH_NOT_FOUND');
-            const loiTrungLap = [];
-            if (await repo.timTaiKhoanTheoEmail(email, client)) loiTrungLap.push({ field: 'email', message: 'Email này đã được đăng ký' });
-            if (await repo.timTaiKhoanTheoTenDangNhap(tenDangNhap, client)) loiTrungLap.push({ field: 'tenDangNhap', message: 'Tên đăng nhập này đã được sử dụng' });
-            if (loiTrungLap.length) throw loiXacThuc(loiTrungLap.map(item => item.message).join('. '), 409, 'ACCOUNT_EXISTS', loiTrungLap);
+            const loiTrungLap = [...loiNhapLieu];
+            let coTrungLap = false;
+            if (chiNhanhId > 0 && !await repo.chiNhanhDangHoatDong(auth.donViId, chiNhanhId, client)) loiTrungLap.push({ field: 'chiNhanhId', message: 'Chi nhánh không tồn tại hoặc không hoạt động' });
+            const emailTim = typeof payload.email === 'string' ? payload.email.trim().toLowerCase() : '';
+            const tenDangNhapTim = typeof payload.tenDangNhap === 'string' ? payload.tenDangNhap.trim().toLowerCase() : '';
+            const maNhanVienTim = typeof payload.maNhanVien === 'string' ? payload.maNhanVien.trim().toLowerCase() : '';
+            if (emailTim && await repo.timTaiKhoanTheoEmail(emailTim, client)) { loiTrungLap.push({ field: 'email', message: 'Email này đã được đăng ký' }); coTrungLap = true; }
+            if (tenDangNhapTim && await repo.timTaiKhoanTheoTenDangNhap(tenDangNhapTim, client)) { loiTrungLap.push({ field: 'tenDangNhap', message: 'Tên đăng nhập này đã được sử dụng' }); coTrungLap = true; }
+            if (maNhanVienTim && await repo.timThanhVienTheoMaNhanVien(auth.donViId, maNhanVienTim, client)) { loiTrungLap.push({ field: 'maNhanVien', message: 'Mã nhân viên đã tồn tại trong đơn vị' }); coTrungLap = true; }
+            if (loiTrungLap.length) {
+                const loiKhongTrung = [...new Map(loiTrungLap.map(item => [`${item.field}:${item.message}`, item])).values()];
+                const coLoiChiNhanh = loiKhongTrung.some(item => item.field === 'chiNhanhId');
+                throw loiXacThuc(loiKhongTrung.map(item => item.message).join('. '), coTrungLap ? 409 : 422, coTrungLap ? 'DUPLICATE' : coLoiChiNhanh ? 'BRANCH_NOT_FOUND' : 'INVALID_INPUT', loiKhongTrung);
+            }
+            if (chiKiemTra) return { da_kiem_tra: true };
             let account;
             try {
                 account = await repo.taoTaiKhoanNhanVien({ email, hoTen, tenDangNhap, matKhauBam: bamMatKhau(matKhauTam), donViId: auth.donViId, ngaySinh, gioiTinh, quocTich, danToc, moTa, diaChi, quocGia, tinhThanh, xaPhuong }, client);
@@ -455,17 +530,19 @@ class XacThucService {
             }
             let member;
             try {
-                member = await repo.taoThanhVien({ donViId: auth.donViId, taiKhoanId: account.id, maNhanVien, email, nguoiTaoId: auth.taiKhoanId, trangThai: active ? 'CHO_MOI' : 'TAM_KHOA' }, client);
+                member = await repo.taoThanhVien({ donViId: auth.donViId, taiKhoanId: account.id, maNhanVien, email, chucDanh: employeeProfile.chucDanh, emailCongViec: employeeProfile.emailCongViec, soDienThoaiCongViec: employeeProfile.soDienThoaiCongViec, nguoiTaoId: auth.taiKhoanId, trangThai: active ? 'CHO_MOI' : 'TAM_KHOA', ngayVaoLam: employeeProfile.ngayVaoLam }, client);
             } catch (error) {
                 if (error.code === '23505') throw loiXacThuc('Mã nhân viên đã tồn tại trong đơn vị', 409, 'EMPLOYEE_CODE_EXISTS', [{ field: 'maNhanVien', message: 'Mã nhân viên đã tồn tại trong đơn vị' }]);
                 throw error;
             }
+            await repo.taoHoSoNhanVien({ donViId: auth.donViId, thanhVienId: member.id, actorId: auth.taiKhoanId, duLieu: employeeProfile }, client);
             await repo.taoPhanCongChiNhanh(auth.donViId, member.id, chiNhanhId, auth.taiKhoanId, client);
             if (!await repo.ganVaiTroNhanVien(auth.donViId, member.id, loaiTaiKhoan, client)) throw loiXacThuc(`Đơn vị chưa có vai trò ${loaiTaiKhoan}`, 409, 'ROLE_NOT_READY');
             await repo.ghiAuditNhanVien({ donViId: auth.donViId, actorId: auth.taiKhoanId, targetId: account.id, requestId, hanhDong: 'account.employee.create' }, client);
             const loginUrl = process.env.PUBLIC_LOGIN_URL;
             if (!/^https?:\/\//.test(loginUrl ?? '')) throw new Error('Chưa cấu hình PUBLIC_LOGIN_URL');
-            const invitationEmail = taoEmailMoiNhanVien({ tenNguoiNhan: hoTen, tenDangNhap, matKhauTam, linkDangNhap: loginUrl });
+            const donViThuongHieu = await repo.layThuongHieuDonVi(auth.donViId, client);
+            const invitationEmail = taoEmailMoiNhanVien({ tenNguoiNhan: hoTen, tenDangNhap, matKhauTam, linkDangNhap: loginUrl, thuongHieu: docCauHinhThuongHieu(donViThuongHieu) });
             await emailService.guiEmail({ den: email, tenNguoiNhan: hoTen, ...invitationEmail });
             return { id: account.id, email, tenDangNhap, maNhanVien, loaiTaiKhoan, trangThai: active ? 'CHO_XAC_MINH' : 'TAM_KHOA', thanhVienId: member.id };
         });
@@ -486,13 +563,33 @@ class XacThucService {
                 donViId: auth.donViId, actorId: auth.taiKhoanId,
                 targetId: tk.id, requestId, hanhDong: 'account.employee.reinvite'
             }, client);
+            const donViThuongHieu = await repo.layThuongHieuDonVi(auth.donViId, client);
             const emailMoiNhanVien = taoEmailMoiNhanVien({
                 tenNguoiNhan: tk.ho_ten, tenDangNhap: tk.ten_dang_nhap,
-                matKhauTam, linkDangNhap: process.env.PUBLIC_LOGIN_URL, guiLai: true
+                matKhauTam, linkDangNhap: process.env.PUBLIC_LOGIN_URL, guiLai: true, thuongHieu: docCauHinhThuongHieu(donViThuongHieu)
             });
             await emailService.guiEmail({ den: tk.email, tenNguoiNhan: tk.ho_ten, ...emailMoiNhanVien });
             return { thong_bao: 'Đã gửi lại lời mời và vô hiệu mật khẩu tạm cũ' };
         });
+    }
+    async taoMatKhauTamNhanVien(auth, thanhVienId, requestId, client = null, hanhDong = 'account.employee.password.reset') {
+        const thucThi = async tx => {
+            if (!auth.donViId || !await repo.coQuyenQuanLyNhanVien(auth.taiKhoanId, auth.donViId, tx)) throw loiXacThuc('Không có quyền', 403, 'FORBIDDEN');
+            const tk = await repo.layNhanVienDangLam(thanhVienId, auth.donViId, tx);
+            if (!tk) throw loiXacThuc('Nhân viên hoặc email chưa xác minh', 409, 'EMPLOYEE_NOT_READY');
+            const loginUrl = process.env.PUBLIC_LOGIN_URL;
+            if (!/^https?:\/\//.test(loginUrl ?? '')) throw new Error('Chưa cấu hình PUBLIC_LOGIN_URL');
+            const matKhauTam = `Aq7!${randomBytes(18).toString('base64url')}`;
+            if (!await repo.datMatKhauTamNhanVienDangHoatDong(tk.id, bamMatKhau(matKhauTam), tx)) throw loiXacThuc('Không thể đặt mật khẩu tạm cho tài khoản này', 409, 'ACCOUNT_NOT_READY');
+            await repo.huyOtpCu(tk.id, 'KICH_HOAT_NHAN_VIEN', tx);
+            await repo.thuHoiTatCaPhien(tk.id, 'EMPLOYEE_TEMP_PASSWORD', tx);
+            await repo.ghiAuditNhanVien({ donViId: auth.donViId, actorId: auth.taiKhoanId, targetId: tk.id, requestId, hanhDong }, tx);
+            const donViThuongHieu = await repo.layThuongHieuDonVi(auth.donViId, tx);
+            const email = taoEmailMoiNhanVien({ tenNguoiNhan: tk.ho_ten, tenDangNhap: tk.ten_dang_nhap, matKhauTam, linkDangNhap: loginUrl, guiLai: true, khongCanOtp: true, thuongHieu: docCauHinhThuongHieu(donViThuongHieu) });
+            await emailService.guiEmail({ den: tk.email, tenNguoiNhan: tk.ho_ten, ...email });
+            return { thong_bao: 'Đã gửi mật khẩu tạm mới qua email nhân viên' };
+        };
+        return client ? thucThi(client) : trongGiaoDich(thucThi);
     }
 }
 

@@ -21,6 +21,7 @@ function fieldError(field, message) {
     if (field.matches("[data-bf-select]")) field.querySelector(".bf-select-control")?.setAttribute("aria-invalid", String(Boolean(message)));
     error.textContent = message || "";
     error.hidden = !message;
+    return error;
 }
 function fieldByName(form, name) {
     const camelName = name.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
@@ -32,14 +33,22 @@ function fieldByName(form, name) {
 }
 export function applyServerFieldErrors(form, error) {
     const details = error?.details || error?.error?.details || [];
-    let applied = false;
+    const grouped = new Map();
     details.forEach(detail => {
         const field = fieldByName(form, detail.field || "");
         if (!field || !detail.message) return;
-        fieldError(field, detail.message);
-        applied = true;
+        const messages = grouped.get(field) || [];
+        messages.push(detail.message);
+        grouped.set(field, messages);
     });
-    return applied;
+    grouped.forEach((serverMessages, field) => {
+        const container = field.closest("[data-form-field]");
+        if (!container) return;
+        const existing = field.matches(".bf-email-input") ? container.querySelector(".bf-email-error") : field.matches(".bf-phone-input") ? container.querySelector(".bf-phone-error") : container.querySelector("[data-bf-field-error]");
+        const messages = [existing && !existing.hidden ? existing.textContent.trim() : "", ...serverMessages].filter(Boolean);
+        fieldError(field, [...new Set(messages)].join(" "));
+    });
+    return grouped.size > 0;
 }
 function messageFor(field) {
     const value = valueOf(field);
@@ -47,6 +56,10 @@ function messageFor(field) {
     const required = field.required || field.dataset.required === "true";
     if (required && !value) return `Vui lòng nhập ${label.toLocaleLowerCase("vi")}.`;
     if (!value) return "";
+    if (field.matches(".bf-phone-input")) {
+        const digits = value.replace(/\D/g, "");
+        if (!((digits.length === 10 && digits.startsWith("0")) || (digits.length === 11 && digits.startsWith("84")))) return "Số điện thoại Việt Nam phải gồm mã 0 và 9 chữ số.";
+    }
     if (field.type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return "Email không đúng định dạng.";
     if (field.type === "number" && !Number.isFinite(Number(value))) return `${label} phải là số hợp lệ.`;
     if (field.maxLength > 0 && value.length > field.maxLength) return `${label} không được vượt quá ${field.maxLength} ký tự.`;

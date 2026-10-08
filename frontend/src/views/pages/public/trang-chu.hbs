@@ -3,7 +3,7 @@
         <div class="bf-demo-hero-copy">
             <p class="bf-public-eyebrow">Đọc một trang · mở một thế giới</p>
             <h1>Mỗi cuốn sách,<br>một hành trình mới.</h1>
-            <p>Khám phá sách yêu thích, mua để sở hữu, mượn miễn phí hoặc thuê linh hoạt ngay tại BookFlow.</p>
+            <p>Khám phá sách yêu thích, mua để sở hữu, mượn miễn phí hoặc thuê linh hoạt ngay tại {{app.name}}.</p>
             <div class="bf-demo-hero-buttons">
                 <a class="bf-demo-button bf-demo-primary" href="/sach">Khám phá sách <span>→</span></a>
                 <a class="bf-demo-button" href="/sach?loai=muon">Mượn &amp; thuê sách <span>▤</span></a>
@@ -44,7 +44,7 @@
     <section class="bf-demo-books-section">
         <header class="bf-demo-section-head">
             <div>
-                <p class="bf-public-eyebrow">Tủ sách BookFlow</p>
+                <p class="bf-public-eyebrow">Tủ sách {{app.name}}</p>
                 <h2>Gợi ý dành cho bạn</h2>
                 <p>Sách nổi bật tại Chi nhánh Trung tâm</p>
             </div>
@@ -60,7 +60,7 @@
                         <div class="bf-demo-book-info">
                             <small>{{#if categoryName}}{{categoryName}}{{else}}Văn học{{/if}} · Còn sách</small>
                             <a href="{{#if href}}{{href}}{{else}}/sach{{/if}}"><strong>{{title}}</strong></a>
-                            <span class="bf-demo-author">{{#if authorsDisplay}}{{authorsDisplay}}{{else}}BookFlow{{/if}}</span>
+                            <span class="bf-demo-author">{{#if authorsDisplay}}{{authorsDisplay}}{{else}}Tác giả chưa cập nhật{{/if}}</span>
                             <div class="bf-demo-price">
                                 <b>{{#if priceDisplay}}{{priceDisplay}}{{else}}Đang cập nhật{{/if}}</b>
                                 <small>{{#if rentalPriceDisplay}}Thuê {{rentalPriceDisplay}}{{else}}Thuê tại chi nhánh{{/if}}</small>

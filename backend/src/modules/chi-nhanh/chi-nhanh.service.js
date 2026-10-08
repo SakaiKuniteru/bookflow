@@ -34,13 +34,34 @@ class ChiNhanhService {
     }
 
     async taoChiNhanh(auth, body, requestId) {
-        const duLieu = chiNhanhMoiHopLe(body);
+        const chiKiemTra = body?.kiem_tra === true;
+        const dauVao = { ...body };
+        delete dauVao.kiem_tra;
+        let duLieu;
+        let loiTruong = [];
+        try { duLieu = chiNhanhMoiHopLe(dauVao); }
+        catch (error) {
+            if (!chiKiemTra) throw error;
+            loiTruong = error.details || [];
+            duLieu = {};
+        }
+        if (chiKiemTra) return trongGiaoDich(async client => {
+            await yeuCauQuanLy(auth, null, client);
+            const maChiNhanh = typeof dauVao.ma_chi_nhanh === 'string' ? dauVao.ma_chi_nhanh.trim().toUpperCase() : '';
+            if (maChiNhanh && await repo.maChiNhanhDaTonTai(auth.donViId, maChiNhanh, null, client)) loiTruong.push({ field: 'ma_chi_nhanh', message: 'Mã chi nhánh đã tồn tại trong đơn vị' });
+            if (loiTruong.length) {
+                const coTrungMa = loiTruong.some(item => item.field === 'ma_chi_nhanh' && item.message === 'Mã chi nhánh đã tồn tại trong đơn vị');
+                throw new AppError({ code: coTrungMa ? 'BRANCH_EXISTS' : 'INVALID_INPUT', message: loiTruong.map(item => item.message).join('. '), status: coTrungMa ? 409 : 422, details: loiTruong });
+            }
+            return { da_kiem_tra: true };
+        });
         return trongGiaoDich(async client => {
             await yeuCauQuanLy(auth, null, client);
             let chiNhanh;
             try { chiNhanh = await repo.taoChiNhanhDb(auth.donViId, auth.taiKhoanId, duLieu, client); }
             catch (error) {
-                if (error.code === '23505') throw loi('Mã chi nhánh đã tồn tại trong đơn vị', 409, 'BRANCH_EXISTS');
+                if (error.code === '23505' && error.constraint === 'uq_chi_nhanh_ma') throw new AppError({ code: 'BRANCH_EXISTS', message: 'Mã chi nhánh đã tồn tại trong đơn vị', status: 409, details: [{ field: 'ma_chi_nhanh', message: 'Mã chi nhánh đã tồn tại trong đơn vị' }] });
+                if (error.code === '23505') throw loi('Không thể tạo chi nhánh do dữ liệu bị trùng', 409, 'BRANCH_EXISTS');
                 throw error;
             }
             await repo.ghiNhatKyChiNhanh({
@@ -53,7 +74,29 @@ class ChiNhanhService {
 
     async capNhatChiNhanh(auth, chiNhanhId, body, requestId) {
         chiNhanhId = idHopLe(chiNhanhId, 'Chi nhánh');
-        const duLieu = capNhatChiNhanhHopLe(body);
+        const chiKiemTra = body?.kiem_tra === true;
+        const dauVao = { ...body };
+        delete dauVao.kiem_tra;
+        let duLieu;
+        let loiTruong = [];
+        try { duLieu = capNhatChiNhanhHopLe(dauVao); }
+        catch (error) {
+            if (!chiKiemTra) throw error;
+            loiTruong = error.details || [];
+            duLieu = {};
+        }
+        if (chiKiemTra) return trongGiaoDich(async client => {
+            const chiNhanh = await repo.layChiNhanh(auth.donViId, chiNhanhId, client);
+            if (!chiNhanh) throw loi('Không tìm thấy chi nhánh', 404, 'NOT_FOUND');
+            await yeuCauQuanLy(auth, chiNhanhId, client);
+            if (duLieu.quan_ly_thanh_vien_id) {
+                const thanhVien = await repo.layThanhVien(auth.donViId, duLieu.quan_ly_thanh_vien_id, client);
+                const phanCong = await repo.phanCongTheoThanhVien(auth.donViId, duLieu.quan_ly_thanh_vien_id, chiNhanhId, client);
+                if ((!thanhVien || thanhVien.trang_thai !== 'DANG_LAM' || !phanCong) && !loiTruong.some(item => item.field === 'quan_ly_thanh_vien_id')) loiTruong.push({ field: 'quan_ly_thanh_vien_id', message: 'Người quản lý chưa được phân công vào chi nhánh' });
+            }
+            if (loiTruong.length) throw new AppError({ code: 'INVALID_INPUT', message: loiTruong.map(item => item.message).join('. '), status: 422, details: loiTruong });
+            return { da_kiem_tra: true };
+        });
         const trangThaiMoi = duLieu.trang_thai;
         delete duLieu.trang_thai;
         return trongGiaoDich(async client => {
@@ -63,7 +106,7 @@ class ChiNhanhService {
             if (duLieu.quan_ly_thanh_vien_id) {
                 const thanhVien = await repo.layThanhVien(auth.donViId, duLieu.quan_ly_thanh_vien_id, client);
                 const phanCong = await repo.phanCongTheoThanhVien(auth.donViId, duLieu.quan_ly_thanh_vien_id, chiNhanhId, client);
-                if (!thanhVien || thanhVien.trang_thai !== 'DANG_LAM' || !phanCong) throw loi('Người quản lý chưa được phân công vào chi nhánh', 422, 'INVALID_MANAGER');
+                if (!thanhVien || thanhVien.trang_thai !== 'DANG_LAM' || !phanCong) throw new AppError({ code: 'INVALID_MANAGER', message: 'Người quản lý chưa được phân công vào chi nhánh', status: 422, details: [{ field: 'quan_ly_thanh_vien_id', message: 'Người quản lý chưa được phân công vào chi nhánh' }] });
             }
             let ketQua = chiNhanh;
             if (Object.keys(duLieu).length) {

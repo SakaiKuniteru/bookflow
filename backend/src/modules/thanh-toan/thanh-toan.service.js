@@ -149,7 +149,8 @@ class ThanhToanService {
             let ketQua = gd;
             if (pt.loai === 'TIEN_MAT') ketQua = await soCai.ghiSoGiaoDich(auth.donViId,gd,auth.taiKhoanId,client);
             await repo.nhatKy(auth.donViId,auth.taiKhoanId,'giao_dich_thanh_toan',`payments.${data.loai_giao_dich.toLowerCase()}.create`,requestId,pt.loai,client);
-            return { ...ketQua,qr: pt.loai === 'QR' ? await qrProvider.taoYeuCauQR({ giaoDich: gd,phuongThuc: pt,taiKhoanNhan: tk }) : undefined };
+            const donViThuongHieu = pt.loai === 'QR' ? await repo.mot('SELECT id,ten_hien_thi,logo_tep_id FROM don_vi WHERE id = $1',[auth.donViId],client) : null;
+            return { ...ketQua,qr: pt.loai === 'QR' ? await qrProvider.taoYeuCauQR({ giaoDich: gd,phuongThuc: pt,taiKhoanNhan: tk,thuongHieu: donViThuongHieu }) : undefined };
         });
     }
     async danhSachGiaoDich(auth,query = {}) {

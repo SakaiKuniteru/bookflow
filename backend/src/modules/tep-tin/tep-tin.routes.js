@@ -24,6 +24,7 @@ function nhanNhieuFile(req, res, next) {
         return next(error);
     });
 }
+router.get('/don-vi/:donViId/logo', controller.logoDonViCongKhai);
 router.use(authenticate);
 router.post('/upload', nhanNhieuFile, controller.uploadNhieu);
 router.post('/upload-nhieu', nhanNhieuFile, controller.uploadNhieu);

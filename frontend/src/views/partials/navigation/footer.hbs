@@ -1,11 +1,8 @@
 <footer class="bf-nav-footer {{className}}">
     <div class="bf-nav-footer-main">
         <div class="bf-nav-footer-brand">
-            {{#if brandLogo}}
-                <img class="bf-nav-brand-logo" src="{{brandLogo}}" alt="{{brandName}}">
-            {{else}}
-                <strong>{{#if brandName}}{{brandName}}{{else}}{{app.name}}{{/if}}</strong>
-            {{/if}}
+            <img class="bf-nav-brand-logo" src="{{app.logoUrl}}" alt="">
+            <strong class="bf-nav-footer-brand-name" title="{{#if brandName}}{{brandName}}{{else}}{{app.name}}{{/if}}">{{#if brandName}}{{brandName}}{{else}}{{app.name}}{{/if}}</strong>
             {{#if description}}<p>{{description}}</p>{{/if}}
         </div>
         {{#each groups}}

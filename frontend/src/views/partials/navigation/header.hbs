@@ -4,9 +4,8 @@
         href="{{#if brandHref}}{{brandHref}}{{else}}/{{/if}}"
         aria-label="{{#if brandName}}{{brandName}}{{else}}{{app.name}}{{/if}} - Trang chủ"
     >
-        <span class="bf-demo-mark" aria-hidden="true"><i></i></span>
-        <span>{{#if brandName}}{{brandName}}{{else}}{{app.name}}{{/if}}</span>
-        <small>AI</small>
+        <img class="bf-nav-brand-logo" src="{{app.logoUrl}}" alt="">
+        <span class="bf-nav-brand-name" title="{{#if brandName}}{{brandName}}{{else}}{{app.name}}{{/if}}">{{#if brandName}}{{brandName}}{{else}}{{app.name}}{{/if}}</span>
     </a>
     <button
         type="button"

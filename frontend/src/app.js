@@ -43,18 +43,20 @@ app.engine('hbs', engine({
     },
     formatDate: value => {
       if (!value) return '';
+      const text = String(value);
+      const dateOnly = text.match(/^(\d{4})-(\d{2})-(\d{2})$/) || text.match(/^(\d{4})-(\d{2})-(\d{2})T00:00:00(?:\.000)?Z$/);
+      if (dateOnly) return `${dateOnly[3]}/${dateOnly[2]}/${dateOnly[1]}`;
       const date = new Date(value);
       if (Number.isNaN(date.getTime())) return '';
-      return new Intl.DateTimeFormat('vi-VN').format(date);
+      const parts = Object.fromEntries(new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).formatToParts(date).filter(part => part.type !== 'literal').map(part => [part.type, part.value]));
+      return `${parts.day}/${parts.month}/${parts.year}`;
     },
     formatDateTime: value => {
       if (!value) return '';
       const date = new Date(value);
       if (Number.isNaN(date.getTime())) return '';
-      return new Intl.DateTimeFormat('vi-VN', {
-        dateStyle: 'short',
-        timeStyle: 'short'
-      }).format(date);
+      const parts = Object.fromEntries(new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(date).filter(part => part.type !== 'literal').map(part => [part.type, part.value]));
+      return `${parts.day}/${parts.month}/${parts.year} ${parts.hour}:${parts.minute}`;
     }
   }
 }));

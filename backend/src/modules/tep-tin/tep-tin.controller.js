@@ -15,6 +15,16 @@ const xuLy = (fn, status = 200) => async (req, res, next) => {
 module.exports = {
     uploadNhieu: xuLy(req => service.uploadNhieu(req.auth, req.body, req.files), 201),
     danhSach: xuLy(req => service.danhSach(req.auth, req.query)),
+    async logoDonViCongKhai(req, res, next) {
+        try {
+            const logo = await service.logoDonViCongKhai(req.params.donViId);
+            res.set('Content-Type', logo.mime_type);
+            res.set('Cache-Control', 'public, max-age=300, stale-while-revalidate=3600');
+            res.set('X-Content-Type-Options', 'nosniff');
+            logo.body.Body.on('error', next);
+            return logo.body.Body.pipe(res);
+        } catch (error) { return next(error); }
+    },
     chiTiet: xuLy(req => service.chiTiet(req.auth, req.params.tepId)),
     urlDoc: xuLy(req => service.urlDoc(req.auth, req.params.tepId)),
     async noiDungAnh(req, res, next) {

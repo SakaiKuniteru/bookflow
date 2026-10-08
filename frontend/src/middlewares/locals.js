@@ -77,9 +77,15 @@ const localsMiddleware = (req, res, next) => {
     { prefix: '/super-admin', title: 'Quản trị nền tảng', entries: [['Tổng quan', '/super-admin/tong-quan'], ['Đơn vị', '/super-admin/don-vi'], ['Gói dịch vụ', '/super-admin/goi-dich-vu'], ['Đăng ký dịch vụ', '/super-admin/dang-ky-dich-vu'], ['Hóa đơn', '/super-admin/hoa-don'], ['Sử dụng AI', '/super-admin/su-dung-ai'], ['Nhật ký', '/super-admin/nhat-ky'], ['Cài đặt', '/super-admin/cai-dat']] }
   ];
   const workspace = workspaceMenus.find(menu => req.path.startsWith(menu.prefix));
+  const donViHienTai = req.user?.donVi || {};
+  const donViId = String(donViHienTai.id ?? '');
+  const logoTepId = String(donViHienTai.logoTepId ?? '');
+  const logoDonViUrl = /^[1-9]\d*$/.test(donViId) && /^[1-9]\d*$/.test(logoTepId) ? `/api/tep-tin/don-vi/${donViId}/logo` : '';
+  const logoUrl = config.app.logoUrlConfigured ? config.app.logoUrl : logoDonViUrl || config.app.logoUrl;
   res.locals.app = {
-    name: config.app.name,
-    url: config.app.url
+    name: String(config.app.nameConfigured ? config.app.name : donViHienTai.tenHienThi || config.app.name || 'BookFlow').trim(),
+    url: config.app.url,
+    logoUrl
   };
   res.locals.request = {
     id: req.requestId

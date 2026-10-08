@@ -512,7 +512,18 @@
 }
 
 .bf-demo-footer .bf-demo-brand {
+    min-width: 0;
+    max-width: 45%;
     font-size: 18px;
+}
+
+.bf-demo-footer-summary {
+    min-width: 0;
+    max-width: 55%;
+    overflow: hidden;
+    text-align: right;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .bf-public-page {
@@ -961,7 +972,9 @@
     }
 
     .bf-demo-footer > span {
+        max-width: 100%;
         font-size: 11px;
+        text-align: left;
     }
 }
 

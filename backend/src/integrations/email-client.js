@@ -17,17 +17,17 @@ class EmailService {
         };
     }
 
-    diaChiNguoiGui(cfg) {
+    diaChiNguoiGui(cfg, tenNguoiGui = null) {
         const diaChiDaDinhDang = /<([^<>]+)>/.exec(cfg.from);
-        return { name: cfg.fromName, address: (diaChiDaDinhDang?.[1] ?? cfg.from).trim() };
+        return { name: String(tenNguoiGui || cfg.fromName).trim(), address: (diaChiDaDinhDang?.[1] ?? cfg.from).trim() };
     }
 
-    async guiEmail({ den, tenNguoiNhan, tieuDe, noiDung, html }) {
+    async guiEmail({ den, tenNguoiNhan, tieuDe, noiDung, html, tenNguoiGui }) {
         this.transporter ??= nodemailer.createTransport(this.cauHinhMail());
         const cfg = docCauHinhEmail();
         try {
             const ketQua = await this.transporter.sendMail({
-                from: this.diaChiNguoiGui(cfg),
+                from: this.diaChiNguoiGui(cfg, tenNguoiGui),
                 to: { name: tenNguoiNhan?.trim() || '', address: den },
                 subject: tieuDe,
                 text: noiDung,

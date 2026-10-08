@@ -5,6 +5,7 @@ const phanQuyenService = require('../phan-quyen/phan-quyen.service.js');
 const xacThucService = require('../xac-thuc/xac-thuc.service.js');
 const v = require('./nhan-vien.validation.js');
 const repo = require('./nhan-vien.repository.js');
+const { soNgayLamViec } = require('../../common/utils/ngay-lich.js');
 
 function loi(message, status = 403, code = 'FORBIDDEN') {
     return new AppError({ code, message, status });
@@ -22,6 +23,10 @@ class NhanVienService {
         await yeuCauQuanLy(auth);
         return repo.danhSach(auth.donViId, v.phanTrangHopLe(queryString));
     }
+    async kiemTraTaoMoi(auth, body) {
+        await yeuCauQuanLy(auth);
+        return xacThucService.taoNhanVienBoiAdmin(auth, body, null, true);
+    }
     async chiTiet(auth, thanhVienId, client, laChinhMinh = false) {
         const id = v.idHopLe(thanhVienId, 'Nhân viên');
         const coBan = await repo.layCoBan(auth.donViId, id, client);
@@ -36,7 +41,9 @@ class NhanVienService {
             repo.layLichSu(auth.donViId, id, 50, 0, client),
             phanQuyenService.quyenCuaToi({ taiKhoanId: coBan.tai_khoan.id, donViId: auth.donViId }, client)
         ]);
-        return { ...coBan, chi_nhanh: chiNhanh, vai_tro: vaiTro, phan_cong_vi_tri: phanCongViTri, quyen: quyen.quyen, loi_moi: loiMoi, lich_su: lichSu };
+        const { mui_gio, ngay_vao_lam_chuan, ngay_nghi_viec_chuan, ...thongTin } = coBan;
+        const thanhVien = { ...thongTin.thanh_vien, ngay_vao_lam: ngay_vao_lam_chuan, ngay_nghi_viec: ngay_nghi_viec_chuan, so_ngay_lam_viec: soNgayLamViec(ngay_vao_lam_chuan, thongTin.thanh_vien.trang_thai === 'DA_ROI' ? ngay_nghi_viec_chuan : null, mui_gio) };
+        return { ...thongTin, thanh_vien: thanhVien, chi_nhanh: chiNhanh, vai_tro: vaiTro, phan_cong_vi_tri: phanCongViTri, quyen: quyen.quyen, loi_moi: loiMoi, lich_su: lichSu };
     }
     async cuaToi(auth) {
         const tv = await repo.layThanhVienCuaToi(auth.donViId, auth.taiKhoanId);
@@ -50,24 +57,41 @@ class NhanVienService {
     }
     async capNhat(auth, thanhVienId, body, requestId) {
         const id = v.idHopLe(thanhVienId, 'Nhân viên');
-        const duLieu = v.capNhatHopLe(body);
+        const chiKiemTra = body?.kiemTra === true;
+        const dauVao = { ...body };
+        delete dauVao.kiemTra;
+        let duLieu;
+        let loiNhapLieu = [];
+        try { duLieu = v.capNhatHopLe(dauVao); }
+        catch (error) {
+            if (!chiKiemTra) throw error;
+            loiNhapLieu = error.details || [];
+            duLieu = {};
+        }
         const loiTruong = (field, message, status = 422, code = 'INVALID_INPUT') => new AppError({ code, message, status, details: [{ field, message }] });
         await trongGiaoDich(async client => {
             await yeuCauQuanLy(auth, client);
             const tv = await yeuCauThanhVien(auth.donViId, id, client);
-            if (tv.trang_thai === 'DA_ROI') throw loi('Nhân viên đã nghỉ việc', 409, 'MEMBER_INACTIVE');
-            if (duLieu.email !== undefined) {
-                const { rowCount } = await query('SELECT id FROM tai_khoan WHERE lower(email) = lower($1) AND id <> $2', [duLieu.email, tv.tai_khoan_id], client);
-                if (rowCount) throw loiTruong('email', 'Email này đã được sử dụng', 409, 'EMAIL_EXISTS');
+            if (tv.trang_thai === 'DA_ROI' && ['chiNhanhId', 'loaiTaiKhoan', 'active'].some(truong => duLieu[truong] !== undefined)) throw loi('Nhân viên đã nghỉ; chỉ cập nhật hồ sơ cá nhân, chi nhánh và vai trò được chọn khi quay lại làm', 409, 'MEMBER_INACTIVE');
+            const loiTrungLap = [...loiNhapLieu];
+            let coTrungLap = false;
+            const emailTim = typeof dauVao.email === 'string' ? dauVao.email.trim() : '';
+            const tenDangNhapTim = typeof dauVao.tenDangNhap === 'string' ? dauVao.tenDangNhap.trim() : '';
+            const maNhanVienTim = typeof dauVao.maNhanVien === 'string' ? dauVao.maNhanVien.trim() : '';
+            if (emailTim) {
+                const { rowCount } = await query('SELECT id FROM tai_khoan WHERE lower(email) = lower($1) AND id <> $2', [emailTim, tv.tai_khoan_id], client);
+                if (rowCount) { loiTrungLap.push({ field: 'email', message: 'Email này đã được sử dụng' }); coTrungLap = true; }
             }
-            if (duLieu.tenDangNhap !== undefined) {
-                const { rowCount } = await query('SELECT id FROM tai_khoan WHERE lower(ten_dang_nhap) = lower($1) AND id <> $2', [duLieu.tenDangNhap, tv.tai_khoan_id], client);
-                if (rowCount) throw loiTruong('tenDangNhap', 'Tên đăng nhập này đã được sử dụng', 409, 'USERNAME_EXISTS');
+            if (tenDangNhapTim) {
+                const { rowCount } = await query('SELECT id FROM tai_khoan WHERE lower(ten_dang_nhap) = lower($1) AND id <> $2', [tenDangNhapTim, tv.tai_khoan_id], client);
+                if (rowCount) { loiTrungLap.push({ field: 'tenDangNhap', message: 'Tên đăng nhập này đã được sử dụng' }); coTrungLap = true; }
             }
-            if (duLieu.maNhanVien !== undefined) {
-                const { rowCount } = await query('SELECT id FROM thanh_vien_don_vi WHERE don_vi_id = $1 AND lower(ma_nhan_vien) = lower($2) AND id <> $3', [auth.donViId, duLieu.maNhanVien, id], client);
-                if (rowCount) throw loiTruong('maNhanVien', 'Mã nhân viên đã tồn tại trong đơn vị', 409, 'EMPLOYEE_CODE_EXISTS');
+            if (maNhanVienTim) {
+                const { rowCount } = await query('SELECT id FROM thanh_vien_don_vi WHERE don_vi_id = $1 AND lower(ma_nhan_vien) = lower($2) AND id <> $3', [auth.donViId, maNhanVienTim, id], client);
+                if (rowCount) { loiTrungLap.push({ field: 'maNhanVien', message: 'Mã nhân viên đã tồn tại trong đơn vị' }); coTrungLap = true; }
             }
+            if (loiTrungLap.length) throw new AppError({ code: coTrungLap ? 'DUPLICATE' : 'INVALID_INPUT', message: loiTrungLap.map(item => item.message).join('. '), status: coTrungLap ? 409 : 422, details: loiTrungLap });
+            if (chiKiemTra) return { da_kiem_tra: true };
             const { rows: vaiTroHienTai } = await query(`SELECT vt.ma_vai_tro FROM thanh_vien_vai_tro g JOIN vai_tro vt ON vt.id = g.vai_tro_id AND vt.don_vi_id = g.don_vi_id WHERE g.don_vi_id = $1 AND g.thanh_vien_don_vi_id = $2 AND vt.ma_vai_tro IN ('NHAN_VIEN','QUAN_TRI') AND vt.trang_thai = 'DANG_DUNG' AND g.ngay_bat_dau <= now() AND (g.ngay_ket_thuc IS NULL OR g.ngay_ket_thuc > now())`, [auth.donViId, id], client);
             const laQuanTriHienTai = vaiTroHienTai.some(item => item.ma_vai_tro === 'QUAN_TRI');
             if (duLieu.loaiTaiKhoan === 'QUAN_TRI' && !laQuanTriHienTai && !await phanQuyenService.kiemTraQuyen(auth, 'roles.manage', {}, client)) throw loiTruong('loaiTaiKhoan', 'Không có quyền cấp loại tài khoản quản trị viên', 403, 'FORBIDDEN');
@@ -142,7 +166,7 @@ class NhanVienService {
             if (tv.trang_thai === 'DA_ROI') throw loi('Nhân viên đã nghỉ việc; cần quy trình mời lại', 409, 'MEMBER_LEFT');
             if (tv.trang_thai === trangThai) return;
             if (trangThai === 'DANG_LAM' && tv.trang_thai !== 'TAM_KHOA') throw loi('Chỉ được mở khóa nhân viên đang tạm khóa', 409, 'INVALID_STATE');
-            await query(`UPDATE thanh_vien_don_vi SET trang_thai = $3, ngay_nghi_viec = CASE WHEN $3 = 'DA_ROI' THEN now() ELSE ngay_nghi_viec END, nguoi_cap_nhat_id = $4 WHERE don_vi_id = $1 AND id = $2`, [auth.donViId, id, trangThai, auth.taiKhoanId], client);
+            await query(`UPDATE thanh_vien_don_vi SET trang_thai = $3::varchar, ngay_nghi_viec = CASE WHEN $3::varchar = 'DA_ROI' THEN now() ELSE ngay_nghi_viec END, ly_do_nghi_viec = CASE WHEN $3::varchar = 'DA_ROI' THEN $4::text ELSE ly_do_nghi_viec END, nguoi_cap_nhat_id = $5::integer WHERE don_vi_id = $1 AND id = $2`, [auth.donViId, id, trangThai, lyDo, auth.taiKhoanId], client);
             if (trangThai !== 'DANG_LAM') {
                 await query('UPDATE phien_dang_nhap SET don_vi_dang_chon_id = NULL, chi_nhanh_dang_chon_id = NULL WHERE tai_khoan_id = $1 AND don_vi_dang_chon_id = $2', [tv.tai_khoan_id, auth.donViId], client);
             }
@@ -155,6 +179,40 @@ class NhanVienService {
             await repo.ghiAudit(auth.donViId, auth.taiKhoanId, id, 'employee.status.update', requestId, client);
         });
         return this.chiTiet(auth, id);
+    }
+    async quayLaiLam(auth, thanhVienId, body, requestId) {
+        const id = v.idHopLe(thanhVienId, 'Nhân viên');
+        const chiNhanhId = v.idHopLe(body.chiNhanhId, 'Chi nhánh');
+        await trongGiaoDich(async client => {
+            await yeuCauQuanLy(auth, client);
+            const tv = await yeuCauThanhVien(auth.donViId, id, client);
+            if (tv.trang_thai !== 'DA_ROI') throw loi('Chỉ nhân viên đã nghỉ mới được quay lại làm', 409, 'INVALID_STATE');
+            const { rowCount: chiNhanhHopLe } = await query(`SELECT id FROM chi_nhanh WHERE don_vi_id = $1 AND id = $2 AND trang_thai = 'DANG_DUNG'`, [auth.donViId, chiNhanhId], client);
+            if (!chiNhanhHopLe) throw loi('Chi nhánh không tồn tại hoặc không hoạt động', 422, 'BRANCH_NOT_FOUND');
+            const { rows: [vaiTroCu] } = await query(`SELECT vt.id, vt.ma_vai_tro FROM thanh_vien_vai_tro g JOIN vai_tro vt ON vt.id = g.vai_tro_id AND vt.don_vi_id = g.don_vi_id WHERE g.don_vi_id = $1 AND g.thanh_vien_don_vi_id = $2 AND vt.ma_vai_tro IN ('NHAN_VIEN','QUAN_TRI') ORDER BY g.ngay_bat_dau DESC, g.id DESC LIMIT 1`, [auth.donViId, id], client);
+            const maVaiTro = vaiTroCu?.ma_vai_tro || 'NHAN_VIEN';
+            if (maVaiTro === 'QUAN_TRI' && !await phanQuyenService.kiemTraQuyen(auth, 'roles.manage', {}, client)) throw loi('Không có quyền cấp lại vai trò quản trị viên', 403, 'FORBIDDEN');
+            let vaiTro = vaiTroCu;
+            if (!vaiTro) {
+                const { rows } = await query(`SELECT id, ma_vai_tro FROM vai_tro WHERE don_vi_id = $1 AND ma_vai_tro = 'NHAN_VIEN' AND trang_thai = 'DANG_DUNG'`, [auth.donViId], client);
+                vaiTro = rows[0];
+            }
+            if (!vaiTro) throw loi('Vai trò nhân viên chưa được cấu hình trong đơn vị', 409, 'ROLE_NOT_READY');
+            await query(`UPDATE thanh_vien_don_vi SET trang_thai = 'DANG_LAM', ngay_quay_lai_lam = now(), da_quay_lai_lam = TRUE, nguoi_cap_nhat_id = $3 WHERE don_vi_id = $1 AND id = $2`, [auth.donViId, id, auth.taiKhoanId], client);
+            await query(`INSERT INTO thanh_vien_chi_nhanh (don_vi_id, thanh_vien_don_vi_id, chi_nhanh_id, la_chi_nhanh_chinh, ngay_bat_dau, trang_thai, nguoi_tao_id) VALUES ($1,$2,$3,TRUE,CURRENT_DATE,'HIEU_LUC',$4)`, [auth.donViId, id, chiNhanhId, auth.taiKhoanId], client);
+            await query(`INSERT INTO thanh_vien_vai_tro (don_vi_id, thanh_vien_don_vi_id, vai_tro_id) VALUES ($1,$2,$3)`, [auth.donViId, id, vaiTro.id], client);
+            await xacThucService.taoMatKhauTamNhanVien(auth, id, requestId, client, 'account.employee.rehire');
+            await repo.ghiLichSu({ donViId: auth.donViId, thanhVienId: id, actorId: auth.taiKhoanId, loai: 'DOI_TRANG_THAI', trangThaiCu: 'DA_ROI', trangThaiMoi: 'DANG_LAM', lyDo: 'Nhân viên quay lại làm' }, client);
+            await repo.ghiAudit(auth.donViId, auth.taiKhoanId, id, 'employee.rehire', requestId, client);
+        });
+        return this.chiTiet(auth, id);
+    }
+    async resetMatKhau(auth, thanhVienId, requestId) {
+        const id = v.idHopLe(thanhVienId, 'Nhân viên');
+        await yeuCauQuanLy(auth);
+        const tv = await yeuCauThanhVien(auth.donViId, id);
+        if (tv.trang_thai !== 'DANG_LAM') throw loi('Chỉ reset mật khẩu nhân viên đang làm', 409, 'INVALID_STATE');
+        return xacThucService.taoMatKhauTamNhanVien(auth, id, requestId);
     }
     async chuyenChiNhanh(auth, thanhVienId, body, requestId) {
         const id = v.idHopLe(thanhVienId, 'Nhân viên');

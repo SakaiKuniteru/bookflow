@@ -28,7 +28,7 @@
                                     {{else if href}}
                                         <a href="{{href}}">{{value}}</a>
                                     {{else}}
-                                        {{#if value}}{{value}}{{else}}—{{/if}}
+                                        {{#if (eq value 0)}}0{{else}}{{#if value}}{{value}}{{/if}}{{/if}}
                                     {{/if}}
                                 </dd>
                             </div>

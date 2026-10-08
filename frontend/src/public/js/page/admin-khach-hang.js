@@ -48,8 +48,8 @@ if (table) {
         organizationField.hidden = !isOrganization;
         organizationInput.required = isOrganization;
     };
-    const customerTypeLabel = value => ({ CA_NHAN: "Cá nhân", TO_CHUC: "Tổ chức" })[value] || value || "—";
-    const customerStatusLabel = value => ({ HOAT_DONG: "Hoạt động", TAM_KHOA: "Tạm khóa", NGUNG_HOAT_DONG: "Ngừng hoạt động" })[value] || value || "—";
+    const customerTypeLabel = value => ({ CA_NHAN: "Cá nhân", TO_CHUC: "Tổ chức" })[value] || value || "";
+    const customerStatusLabel = value => ({ HOAT_DONG: "Hoạt động", TAM_KHOA: "Tạm khóa", NGUNG_HOAT_DONG: "Ngừng hoạt động" })[value] || value || "";
     const customerAction = (type, customerId) => {
         const config = {
             view: { label: "Xem khách hàng", svg: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path><circle cx="12" cy="12" r="3"></circle></svg>' },
@@ -66,7 +66,7 @@ if (table) {
         return button;
     };
     const renderCustomer = (customer, index) => {
-        const customerName = customer.loai_khach_hang === "TO_CHUC" ? customer.ten_to_chuc || customer.ho_ten || "—" : customer.ho_ten || "—";
+        const customerName = customer.loai_khach_hang === "TO_CHUC" ? customer.ten_to_chuc || customer.ho_ten || "" : customer.ho_ten || "";
         const values = [["stt", index], ["maKhachHang", customer.ma_khach_hang], ["hoTen", customerName], ["loaiKhachHang", customerTypeLabel(customer.loai_khach_hang)], ["email", customer.email], ["soDienThoai", customer.so_dien_thoai], ["trangThai", customerStatusLabel(customer.trang_thai)]];
         const row = document.createElement("tr");
         row.dataset.tableRow = "true";
@@ -76,9 +76,9 @@ if (table) {
         values.forEach(([key, value]) => {
             const cell = document.createElement("td");
             cell.dataset.columnKey = key;
-            cell.dataset.searchValue = String(value ?? "—");
+            cell.dataset.searchValue = String(value ?? "");
             cell.dataset.sortValue = String(value ?? "");
-            cell.textContent = value ?? "—";
+            cell.textContent = value ?? "";
             row.appendChild(cell);
         });
         const actions = document.createElement("td");
@@ -141,7 +141,7 @@ if (table) {
             labelNode.textContent = label;
             const valueNode = document.createElement("p");
             valueNode.className = "bf-form-help";
-            valueNode.textContent = String(value ?? "—");
+            valueNode.textContent = value == null ? "" : String(value);
             field.append(labelNode, valueNode);
             return field;
         }));

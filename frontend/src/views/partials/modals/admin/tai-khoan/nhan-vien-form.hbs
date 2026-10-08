@@ -8,6 +8,9 @@
     loading=false
 }}
     <form id="employee-create-form" class="bf-modal-form bf-modal-form-grid" data-employee-form novalidate>
+        <div class="bf-form-grid-full">
+            <h3 class="bf-employee-section-title">Thông tin tài khoản</h3>
+        </div>
         {{> forms/input
             id="employee-name"
             name="hoTen"
@@ -16,17 +19,6 @@
             placeholder="Nhập họ và tên"
             required=true
             maxlength=200
-            icon="user"
-        }}
-        {{> forms/input
-            id="employee-username"
-            name="tenDangNhap"
-            type="text"
-            label="Tên đăng nhập"
-            placeholder="Nhập tên đăng nhập"
-            required=true
-            minlength=3
-            maxlength=40
             icon="user"
         }}
         {{> forms/input
@@ -39,6 +31,17 @@
             minlength=2
             maxlength=40
             icon="building"
+        }}
+        {{> forms/input
+            id="employee-username"
+            name="tenDangNhap"
+            type="text"
+            label="Tên đăng nhập"
+            placeholder="Nhập tên đăng nhập"
+            required=true
+            minlength=3
+            maxlength=40
+            icon="user"
         }}
         {{> forms/email
             id="employee-email"
@@ -56,6 +59,15 @@
             placeholder="Nhập số điện thoại"
         }}
         {{> forms/select
+            id="employee-account-type"
+            name="loaiTaiKhoan"
+            label="Loại tài khoản"
+            placeholder="Chọn loại tài khoản"
+            required=true
+            options=accountTypeOptions
+            icon="shield"
+        }}
+        {{> forms/select
             id="employee-branch"
             name="chiNhanhId"
             label="Chi nhánh"
@@ -65,15 +77,51 @@
             search=true
             icon="store"
         }}
-        {{> forms/select
-            id="employee-account-type"
-            name="loaiTaiKhoan"
-            label="Loại tài khoản"
-            placeholder="Chọn loại tài khoản"
-            required=true
-            options=accountTypeOptions
-            icon="shield"
+        <div class="bf-form-grid-full">
+            <h3 class="bf-employee-section-title">Thông tin công việc</h3>
+        </div>
+        {{> forms/input
+            id="employee-job-title"
+            name="chucDanh"
+            type="text"
+            label="Chức danh"
+            placeholder="Nhập chức danh"
+            maxlength=120
         }}
+        {{> forms/email
+            id="employee-work-email"
+            name="emailCongViec"
+            label="Email công việc"
+            placeholder="Nhập email công việc"
+            maxlength=254
+        }}
+        {{> forms/phone
+            id="employee-work-phone"
+            name="soDienThoaiCongViec"
+            label="Điện thoại công việc"
+            placeholder="Nhập số điện thoại công việc"
+        }}
+        {{> forms/date
+            id="employee-hire-date"
+            name="ngayVaoLam"
+            label="Ngày vào làm"
+            placeholder="Ngày vào làm"
+        }}
+        {{> forms/date
+            id="employee-leave-date"
+            name="ngayNghiViec"
+            label="Ngày nghỉ việc"
+            placeholder="Ngày nghỉ việc"
+            readonly=true
+            disabled=true
+        }}
+        <div class="bf-form-field" data-employee-work-days-field>
+            <label class="bf-form-label" for="employee-work-days">Số ngày làm việc</label>
+            <input id="employee-work-days" class="bf-form-control" type="text" value="" readonly data-employee-work-days disabled>
+        </div>
+        <div class="bf-form-grid-full">
+            <h3 class="bf-employee-section-title">Thông tin cá nhân</h3>
+        </div>
         {{> forms/date
             id="employee-birthday"
             name="ngaySinh"
@@ -134,6 +182,16 @@
             icon="map"
         }}
         {{> forms/textarea
+            id="employee-address"
+            className="bf-form-grid-full"
+            name="diaChi"
+            label="Địa chỉ"
+            placeholder="Nhập địa chỉ chi tiết"
+            maxlength=300
+            rows=3
+            icon="map-marked"
+        }}
+        {{> forms/textarea
             id="employee-description"
             className="bf-form-grid-full"
             name="moTa"
@@ -143,15 +201,114 @@
             rows=3
             icon="file"
         }}
-        {{> forms/textarea
-            id="employee-address"
-            className="bf-form-grid-full"
-            name="diaChi"
+        <div class="bf-form-grid-full">
+            <h3 class="bf-employee-section-title">CCCD/CMND</h3>
+        </div>
+        {{> forms/input
+            id="employee-national-id"
+            name="cccdSo"
+            type="text"
+            label="Số CCCD/CMND"
+            placeholder="Nhập số CCCD/CMND"
+            maxlength=30
+        }}
+        {{> forms/date
+            id="employee-national-id-date"
+            name="cccdNgayCap"
+            label="Ngày cấp"
+            placeholder="Ngày cấp"
+        }}
+        {{> forms/input
+            id="employee-national-id-place"
+            name="cccdNoiCap"
+            type="text"
+            label="Nơi cấp"
+            placeholder="Nhập nơi cấp"
+            maxlength=200
+        }}
+        <div class="bf-form-grid-full">
+            <h3 class="bf-employee-section-title">Người liên hệ khẩn cấp</h3>
+        </div>
+        {{> forms/input
+            id="employee-emergency-name"
+            name="lienHeKhanCapHoTen"
+            type="text"
+            label="Họ tên"
+            placeholder="Nhập họ tên"
+            maxlength=200
+        }}
+        {{> forms/input
+            id="employee-emergency-relationship"
+            name="lienHeKhanCapQuanHe"
+            type="text"
+            label="Quan hệ"
+            placeholder="Nhập quan hệ"
+            maxlength=100
+        }}
+        {{> forms/phone
+            id="employee-emergency-phone"
+            name="lienHeKhanCapSoDienThoai"
+            label="Số điện thoại"
+            placeholder="Nhập số điện thoại"
+        }}
+        {{> forms/input
+            id="employee-emergency-address"
+            name="lienHeKhanCapDiaChi"
+            type="text"
             label="Địa chỉ"
-            placeholder="Nhập địa chỉ chi tiết"
-            maxlength=300
-            rows=3
-            icon="map-marked"
+            placeholder="Nhập địa chỉ"
+            maxlength=500
+        }}
+        <div class="bf-form-grid-full">
+            <h3 class="bf-employee-section-title">Trình độ và chuyên môn</h3>
+        </div>
+        {{> forms/input
+            id="employee-education"
+            name="trinhDoHocVan"
+            type="text"
+            label="Trình độ học vấn"
+            placeholder="Nhập trình độ học vấn"
+            maxlength=200
+        }}
+        {{> forms/input
+            id="employee-major"
+            name="chuyenNganh"
+            type="text"
+            label="Chuyên ngành"
+            placeholder="Nhập chuyên ngành"
+            maxlength=200
+        }}
+        {{> forms/input
+            id="employee-school"
+            name="truong"
+            type="text"
+            label="Trường"
+            placeholder="Nhập tên trường"
+            maxlength=200
+        }}
+        {{> forms/input
+            id="employee-certificates"
+            name="chungChi"
+            label="Chứng chỉ"
+            placeholder="Nhập chứng chỉ"
+            maxlength=5000
+            rows=2
+        }}
+        {{> forms/textarea
+            id="employee-languages"
+            name="ngoaiNgu"
+            label="Ngoại ngữ"
+            placeholder="Nhập ngoại ngữ"
+            maxlength=3000
+            rows=2
+        }}
+        {{> forms/textarea
+            id="employee-skills"
+            name="kyNang"
+            label="Kỹ năng"
+            placeholder="Nhập kỹ năng"
+            maxlength=5000
+            rows=2
         }}
         <div class="bf-form-options bf-form-grid-full">
             {{> forms/checkbox

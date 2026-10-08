@@ -1,0 +1,13 @@
+<div class="bf-auth-description">Nhập mật khẩu tạm trong email và tạo mật khẩu mới để tiếp tục đăng nhập. Bước này không cần OTP.</div>
+{{#if error}}
+    {{> feedback/alert type="error" title="Không thể đổi mật khẩu" message=error}}
+{{/if}}
+<form class="bf-auth-form" method="post" action="/auth/doi-mat-khau-tam" data-bf-auth-form data-auth-loading-text="Đang cập nhật mật khẩu...">
+    {{> forms/input id="temp-password-identifier" name="identifier" type="text" label="Email hoặc tên đăng nhập" value=identifier placeholder="Email hoặc tên đăng nhập" autocomplete="username" required=true}}
+    {{> forms/password id="temp-password-current" name="temporaryPassword" label="Mật khẩU hiện tại" placeholder="Nhập mật khẩu trong email" autocomplete="current-password" required=true}}
+    {{> forms/password id="temp-password-new" name="newPassword" label="Mật khẩu mới" placeholder="Tạo mật khẩu mới" autocomplete="new-password" required=true minlength="8"}}
+    {{> forms/password id="temp-password-confirm" name="confirmNewPassword" label="Xác nhận mật khẩu mới" placeholder="Nhập lại mật khẩu mới" autocomplete="new-password" required=true}}
+    <div class="bf-form-error bf-auth-password-error" data-password-error hidden>Mật khẩu xác nhận chưa khớp.</div>
+    <div class="bf-auth-submit"><button class="bf-btn bf-btn-primary bf-btn-md" type="submit" data-auth-submit>Đổi mật khẩu</button></div>
+</form>
+<p class="bf-auth-switch"><a href="/auth/dang-nhap">Quay lại đăng nhập</a></p>

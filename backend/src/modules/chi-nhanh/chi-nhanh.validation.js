@@ -34,52 +34,65 @@ function chuanHoa(body, taoMoi) {
     const truongChoPhep = taoMoi ? TRUONG_TAO : TRUONG_SUA;
     const cacTruong = Object.keys(body);
     if (!cacTruong.length || cacTruong.some(ten => !truongChoPhep.includes(ten))) throw loiDuLieu('Dữ liệu có trường không được phép');
-    if (taoMoi && ['ma_chi_nhanh', 'ten_chi_nhanh'].some(ten => !(ten in body))) throw loiDuLieu('Thiếu mã hoặc tên chi nhánh');
+    const nhan = { ma_chi_nhanh: 'Mã chi nhánh', ten_chi_nhanh: 'Tên chi nhánh', loai_chi_nhanh: 'Loại chi nhánh', dia_chi_chi_tiet: 'Địa chỉ chi tiết', so_dien_thoai: 'Hotline', email: 'Email', ma_tinh_thanh: 'Tỉnh/thành', ma_phuong_xa: 'Xã/phường', quoc_gia: 'Quốc gia', vi_do: 'Vĩ độ', kinh_do: 'Kinh độ', quan_ly_thanh_vien_id: 'Quản lý chi nhánh', cho_nhan_tai_quay: 'Nhận tại quầy', cho_ban_truc_tuyen: 'Bán trực tuyến' };
+    const batBuoc = ['ten_chi_nhanh', 'loai_chi_nhanh', 'dia_chi_chi_tiet', 'so_dien_thoai', 'email'];
+    if (taoMoi) batBuoc.push('ma_chi_nhanh');
+    const loiTruong = [];
+    for (const ten of batBuoc) if (!(ten in body)) loiTruong.push({ field: ten, message: `${nhan[ten]} là bắt buộc` });
     const ketQua = {};
     for (const [ten, giaTri] of Object.entries(body)) {
-        if (giaTri === null && TRUONG_CO_THE_XOA.has(ten)) {
-            ketQua[ten] = null;
-            continue;
+        try {
+            if (batBuoc.includes(ten) && (giaTri == null || typeof giaTri !== 'string' || !giaTri.trim())) throw loiDuLieu(`${nhan[ten]} là bắt buộc`);
+            if (giaTri === null && TRUONG_CO_THE_XOA.has(ten)) {
+                ketQua[ten] = null;
+                continue;
+            }
+            if (ten === 'quan_ly_thanh_vien_id') {
+                ketQua[ten] = idHopLe(giaTri, 'Quản lý chi nhánh');
+                continue;
+            }
+            if (ten === 'cho_nhan_tai_quay' || ten === 'cho_ban_truc_tuyen') {
+                if (typeof giaTri !== 'boolean') throw loiDuLieu(`${nhan[ten] || ten} phải là boolean`);
+                ketQua[ten] = giaTri;
+                continue;
+            }
+            if (ten === 'trang_thai') {
+                if (!['DANG_DUNG', 'TAM_KHOA'].includes(giaTri)) throw loiDuLieu('Trạng thái chi nhánh không hợp lệ');
+                ketQua[ten] = giaTri;
+                continue;
+            }
+            if (ten === 'vi_do' || ten === 'kinh_do') {
+                const gioiHan = ten === 'vi_do' ? 90 : 180;
+                if (typeof giaTri !== 'number' || !Number.isFinite(giaTri) || Math.abs(giaTri) > gioiHan) throw loiDuLieu(`${nhan[ten]} không hợp lệ`);
+                ketQua[ten] = giaTri;
+                continue;
+            }
+            if (typeof giaTri !== 'string' || !giaTri.trim()) throw loiDuLieu(`${nhan[ten] || ten} không hợp lệ`);
+            let value = giaTri.trim();
+            if (GIOI_HAN[ten] && value.length > GIOI_HAN[ten]) throw loiDuLieu(`${nhan[ten] || ten} vượt quá ${GIOI_HAN[ten]} ký tự`);
+            if (ten === 'ma_chi_nhanh') {
+                value = value.toUpperCase();
+                if (!/^[A-Z0-9][A-Z0-9_-]{1,39}$/.test(value)) throw loiDuLieu('Mã chi nhánh không hợp lệ');
+            }
+            if (ten === 'ten_chi_nhanh' && value.length < 2) throw loiDuLieu('Tên chi nhánh phải có ít nhất 2 ký tự');
+            if (ten === 'loai_chi_nhanh' && !['NHA_SACH', 'THU_VIEN', 'KET_HOP'].includes(value)) throw loiDuLieu('Loại chi nhánh không hợp lệ');
+            if (ten === 'quoc_gia') {
+                value = value.toUpperCase();
+                if (!/^[A-Z]{2}$/.test(value)) throw loiDuLieu('Mã quốc gia không hợp lệ');
+            }
+            if (ten === 'so_dien_thoai' && !/^[0-9+(). -]{9,30}$/.test(value)) throw loiDuLieu('Số điện thoại không hợp lệ');
+            if (ten === 'email') {
+                value = value.toLowerCase();
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) throw loiDuLieu('Email không hợp lệ');
+            }
+            ketQua[ten] = value;
+        } catch (error) {
+            loiTruong.push({ field: ten, message: error.message || `${nhan[ten] || ten} không hợp lệ` });
         }
-        if (ten === 'quan_ly_thanh_vien_id') {
-            ketQua[ten] = idHopLe(giaTri, 'Quản lý chi nhánh');
-            continue;
-        }
-        if (ten === 'cho_nhan_tai_quay' || ten === 'cho_ban_truc_tuyen') {
-            if (typeof giaTri !== 'boolean') throw loiDuLieu(`${ten} phải là boolean`);
-            ketQua[ten] = giaTri;
-            continue;
-        }
-        if (ten === 'trang_thai') {
-            if (!['DANG_DUNG', 'TAM_KHOA'].includes(giaTri)) throw loiDuLieu('Trạng thái chi nhánh không hợp lệ');
-            ketQua[ten] = giaTri;
-            continue;
-        }
-        if (ten === 'vi_do' || ten === 'kinh_do') {
-            const gioiHan = ten === 'vi_do' ? 90 : 180;
-            if (typeof giaTri !== 'number' || !Number.isFinite(giaTri) || Math.abs(giaTri) > gioiHan) throw loiDuLieu(`${ten} không hợp lệ`);
-            ketQua[ten] = giaTri;
-            continue;
-        }
-        if (typeof giaTri !== 'string' || !giaTri.trim()) throw loiDuLieu(`${ten} không hợp lệ`);
-        let value = giaTri.trim();
-        if (GIOI_HAN[ten] && value.length > GIOI_HAN[ten]) throw loiDuLieu(`${ten} vượt quá độ dài cho phép`);
-        if (ten === 'ma_chi_nhanh') {
-            value = value.toUpperCase();
-            if (!/^[A-Z0-9][A-Z0-9_-]{1,39}$/.test(value)) throw loiDuLieu('Mã chi nhánh không hợp lệ');
-        }
-        if (ten === 'ten_chi_nhanh' && value.length < 2) throw loiDuLieu('Tên chi nhánh phải có ít nhất 2 ký tự');
-        if (ten === 'loai_chi_nhanh' && !['NHA_SACH', 'THU_VIEN', 'KET_HOP'].includes(value)) throw loiDuLieu('Loại chi nhánh không hợp lệ');
-        if (ten === 'quoc_gia') {
-            value = value.toUpperCase();
-            if (!/^[A-Z]{2}$/.test(value)) throw loiDuLieu('Mã quốc gia không hợp lệ');
-        }
-        if (ten === 'so_dien_thoai' && !/^[0-9+(). -]{9,30}$/.test(value)) throw loiDuLieu('Số điện thoại không hợp lệ');
-        if (ten === 'email') {
-            value = value.toLowerCase();
-            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) throw loiDuLieu('Email không hợp lệ');
-        }
-        ketQua[ten] = value;
+    }
+    if (loiTruong.length) {
+        const unique = [...new Map(loiTruong.map(item => [`${item.field}:${item.message}`, item])).values()];
+        throw new AppError({ code: 'INVALID_INPUT', message: unique.map(item => item.message).join('. '), status: 422, details: unique });
     }
     return ketQua;
 }

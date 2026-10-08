@@ -1,4 +1,5 @@
 import bookService from '../services/book.service.js';
+import config from '../config/index.js';
 
 function presentBook(item = {}, authenticated = false) {
   const title = item.tenHienThi || item.tenSach || 'Sách chưa có tên';
@@ -17,15 +18,15 @@ const publicController = {
       const result = await bookService.publicList({ page: 1, pageSize: 8 });
       const books = pageData(result, Boolean(req.user)).books;
       return res.render('pages/public/trang-chu', {
-        title: 'BookFlow',
+        title: config.app.name,
         featuredBooks: books.slice(0, 4),
         newBooks: books.slice(4, 8),
         hero: { eyebrow: 'Không gian dành cho người yêu sách', title: 'Mỗi cuốn sách mở ra một hành trình mới', description: 'Khám phá sách, tìm chi nhánh phù hợp và lựa chọn cách đọc theo nhịp sống của bạn.' },
-        introduction: { eyebrow: 'Đọc theo cách của bạn', title: 'Một thư viện, nhiều cách khám phá', description: 'Duyệt danh mục công khai trước khi đăng nhập. Khi bạn muốn mua, mượn hoặc đặt trước, BookFlow sẽ hướng dẫn đăng nhập để tiếp tục.', href: '/sach', linkLabel: 'Khám phá danh mục' }
+        introduction: { eyebrow: 'Đọc theo cách của bạn', title: 'Một thư viện, nhiều cách khám phá', description: `Duyệt danh mục công khai trước khi đăng nhập. Khi bạn muốn mua, mượn hoặc đặt trước, ${config.app.name} sẽ hướng dẫn đăng nhập để tiếp tục.`, href: '/sach', linkLabel: 'Khám phá danh mục' }
       });
     } catch (error) {
       return res.render('pages/public/trang-chu', {
-        title: 'BookFlow',
+        title: config.app.name,
         featuredBooks: [],
         newBooks: [],
         catalogUnavailable: true
@@ -81,7 +82,7 @@ const publicController = {
   },
   async about(req, res) {
     return res.render('pages/public/gioi-thieu', {
-      title: 'Giới thiệu BookFlow'
+      title: `Giới thiệu ${config.app.name}`
     });
   }
 };

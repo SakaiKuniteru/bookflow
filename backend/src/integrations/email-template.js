@@ -1,6 +1,19 @@
+const { docCauHinhThuongHieu } = require('../config/environment.js');
+
+function thuongHieuHopLe(thuongHieu) {
+    const macDinh = docCauHinhThuongHieu();
+    return { name: String(thuongHieu?.name || macDinh.name).trim() || macDinh.name, logoUrl: String(thuongHieu?.logoUrl || macDinh.logoUrl).trim() || macDinh.logoUrl };
+}
+
+function dinhThuongHieu(email, thuongHieu) {
+    const thayTen = value => String(value ?? '').replace(/\{\{APP_NAME\}\}|BookFlow(?:\s+AI)?/g, thuongHieu.name);
+    const thayTenHtml = value => String(value ?? '').replace(/\{\{APP_NAME\}\}|BookFlow(?:\s+AI)?/g, escapeHtml(thuongHieu.name));
+    return { ...email, tieuDe: thayTen(email.tieuDe), noiDung: thayTen(email.noiDung), html: thayTenHtml(email.html), tenNguoiGui: thuongHieu.name };
+}
+
 const MUC_DICH_OTP = {
     DANG_KY: {
-        tieuDe: 'Xác minh tài khoản BookFlow',
+        tieuDe: 'Xác minh tài khoản {{APP_NAME}}',
         moTa: 'Sử dụng mã dưới đây để xác minh địa chỉ email và hoàn tất đăng ký.'
     },
     KICH_HOAT_NHAN_VIEN: {
@@ -8,7 +21,7 @@ const MUC_DICH_OTP = {
         moTa: 'Sử dụng mã dưới đây để xác minh tài khoản nhân viên của bạn.'
     },
     DAT_LAI_MAT_KHAU: {
-        tieuDe: 'Đặt lại mật khẩu BookFlow',
+        tieuDe: 'Đặt lại mật khẩu {{APP_NAME}}',
         moTa: 'Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.'
     },
     DOI_MAT_KHAU: {
@@ -20,7 +33,7 @@ const MUC_DICH_OTP = {
         moTa: 'Sử dụng mã dưới đây để xác nhận địa chỉ email mới.'
     },
     XAC_MINH_SDT: {
-        tieuDe: 'Xác minh tài khoản BookFlow',
+        tieuDe: 'Xác minh tài khoản {{APP_NAME}}',
         moTa: 'Sử dụng mã dưới đây để xác minh yêu cầu của bạn.'
     }
 };
@@ -43,8 +56,10 @@ function khungEmail({
     tieuDe,
     moTa,
     noiDungHtml,
-    chuThich
+    chuThich,
+    thuongHieu
 }) {
+    const thuongHieuEmail = thuongHieuHopLe(thuongHieu);
     const ten = escapeHtml(tenNguoiNhan?.trim() || 'bạn');
 
     return `<!doctype html>
@@ -56,22 +71,19 @@ function khungEmail({
 </head>
 <body style="margin:0;padding:0;background:#f3f6fb;font-family:Arial,Helvetica,sans-serif;color:#172033;">
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"
-        style="background:#f3f6fb;padding:32px 12px;">
+        style="background:#faf8f3;padding:32px 12px;">
         <tr>
             <td align="center">
                 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="560"
-                    style="width:100%;max-width:560px;background:#ffffff;border:1px solid #e5eaf1;border-radius:16px;overflow:hidden;">
+                    style="width:100%;max-width:560px;background:#fffefa;border:1px solid #e6e5dc;border-radius:16px;overflow:hidden;">
                     <tr>
-                        <td style="padding:26px 32px;background:#173b65;color:#ffffff;">
-                            <div style="font-size:24px;font-weight:700;letter-spacing:.3px;">BookFlow</div>
-                            <div style="margin-top:7px;font-size:13px;color:#dce9f7;">
-                                Nền tảng quản lý sách và thư viện
-                            </div>
+                        <td style="padding:26px 32px;background:#173e37;color:#ffffff;">
+                            <div style="display:flex;align-items:center;font-size:24px;font-weight:700;letter-spacing:.3px;"><img src="${escapeHtml(thuongHieuEmail.logoUrl)}" alt="" width="32" height="32" style="display:inline-block;width:32px;height:32px;margin-right:10px;object-fit:contain;vertical-align:middle;">${escapeHtml(thuongHieuEmail.name)}</div>
                         </td>
                     </tr>
                     <tr>
                         <td style="padding:32px;">
-                            <h1 style="margin:0 0 18px;font-size:23px;line-height:1.35;color:#172033;">
+                            <h1 style="margin:0 0 18px;font-size:23px;line-height:1.35;color:#20332e;">
                                 ${escapeHtml(tieuDe)}
                             </h1>
 
@@ -91,9 +103,9 @@ function khungEmail({
                         </td>
                     </tr>
                     <tr>
-                        <td style="padding:19px 32px;background:#f8fafc;border-top:1px solid #e5eaf1;">
+                        <td style="padding:19px 32px;background:#f4f6f0;border-top:1px solid #e6e5dc;">
                             <p style="margin:0;color:#64748b;font-size:12px;line-height:1.6;">
-                                Đây là email tự động từ BookFlow. Vui lòng không trả lời email này.
+                                Đây là email tự động từ ${escapeHtml(thuongHieuEmail.name)}. Vui lòng không trả lời email này.
                             </p>
                         </td>
                     </tr>
@@ -108,8 +120,10 @@ function khungEmail({
 function taoEmailOtp({
     tenNguoiNhan,
     otp,
-    mucDich
+    mucDich,
+    thuongHieu: cauHinhThuongHieu
 }) {
+    const thuongHieu = thuongHieuHopLe(cauHinhThuongHieu);
     const noiDung = MUC_DICH_OTP[mucDich];
 
     if (!noiDung || !/^\d{6}$/.test(String(otp))) {
@@ -138,8 +152,8 @@ function taoEmailOtp({
             </tr>
         </table>`;
 
-    return {
-        tieuDe: `BookFlow | ${noiDung.tieuDe}`,
+    return dinhThuongHieu({
+        tieuDe: `{{APP_NAME}} | ${noiDung.tieuDe}`,
         noiDung: [
             `Xin chào ${tenNguoiNhan?.trim() || 'bạn'},`,
             '',
@@ -149,16 +163,17 @@ function taoEmailOtp({
             '',
             chuThich,
             '',
-            'BookFlow'
+            '{{APP_NAME}}'
         ].join('\n'),
         html: khungEmail({
             tenNguoiNhan,
             tieuDe: noiDung.tieuDe,
             moTa: noiDung.moTa,
             noiDungHtml,
-            chuThich
+            chuThich,
+            thuongHieu
         })
-    };
+    }, thuongHieu);
 }
 
 function taoEmailMoiNhanVien({
@@ -166,18 +181,19 @@ function taoEmailMoiNhanVien({
     tenDangNhap,
     matKhauTam,
     linkDangNhap,
-    guiLai = false
+    guiLai = false,
+    khongCanOtp = false,
+    thuongHieu: cauHinhThuongHieu
 }) {
-    const tieuDe = guiLai
-        ? 'Thông tin đăng nhập nhân viên mới'
-        : 'Lời mời tham gia BookFlow';
-
-    const moTa = guiLai
-        ? 'Thông tin đăng nhập tạm thời của bạn đã được cấp lại.'
-        : 'Bạn đã được mời tham gia BookFlow với tài khoản nhân viên.';
-
-    const chuThich = 'Mật khẩu tạm có hiệu lực trong 24 giờ. Khi đăng nhập, bạn cần xác minh OTP và đặt mật khẩu mới. Không chia sẻ thông tin đăng nhập.';
-
+    const thuongHieu = thuongHieuHopLe(cauHinhThuongHieu);
+    const tieuDe = khongCanOtp
+        ? 'Mật khẩu tạm thời nhân viên' : guiLai
+        ? 'Thông tin đăng nhập nhân viên mới' : 'Lời mời tham gia {{APP_NAME}}';
+    const moTa = khongCanOtp
+        ? 'Quản trị viên đã cấp mật khẩu tạm thời cho tài khoản nhân viên.' : guiLai
+        ? 'Thông tin đăng nhập tạm thời của bạn đã được cấp lại.' : 'Bạn đã được mời tham gia {{APP_NAME}} với tài khoản nhân viên.';
+    const chuThich = khongCanOtp
+        ? 'Mật khẩu tạm có hiệu lực trong 24 giờ. Khi đăng nhập, bạn cần tạo mật khẩu mới. Không cần mã OTP. Không chia sẻ thông tin đăng nhập.' : 'Mật khẩu tạm có hiệu lực trong 24 giờ. Khi đăng nhập, bạn cần xác minh OTP và đặt mật khẩu mới. Không chia sẻ thông tin đăng nhập.';
     const noiDungHtml = `
         <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"
             style="background:#edf5ff;border:1px solid #c8dff9;border-radius:12px;">
@@ -199,12 +215,12 @@ function taoEmailMoiNhanVien({
         <div style="margin-top:26px;text-align:center;">
             <a href="${escapeHtml(linkDangNhap)}"
                 style="display:inline-block;padding:13px 24px;border-radius:9px;background:#173b65;color:#ffffff;text-decoration:none;font-size:14px;font-weight:700;">
-                Đăng nhập BookFlow
+                Đăng nhập {{APP_NAME}}
             </a>
         </div>`;
 
-    return {
-        tieuDe: `BookFlow | ${tieuDe}`,
+    return dinhThuongHieu({
+        tieuDe: `{{APP_NAME}} | ${tieuDe}`,
         noiDung: [
             `Xin chào ${tenNguoiNhan?.trim() || 'bạn'},`,
             '',
@@ -216,22 +232,23 @@ function taoEmailMoiNhanVien({
             '',
             chuThich,
             '',
-            'BookFlow'
+            '{{APP_NAME}}'
         ].join('\n'),
         html: khungEmail({
             tenNguoiNhan,
             tieuDe,
             moTa,
             noiDungHtml,
-            chuThich
+            chuThich,
+            thuongHieu
         })
-    };
+    }, thuongHieu);
 }
 
 const THONG_BAO_THEO_LOAI = {
     DON_HANG_TAO: {
         tieuDe: 'Đơn hàng đã được tạo',
-        moTa: 'Đơn hàng của bạn đã được tiếp nhận trên BookFlow.',
+        moTa: 'Đơn hàng của bạn đã được tiếp nhận trên {{APP_NAME}}.',
         bieuTuong: '🛒',
         mauNen: '#edf5ff',
         mauVien: '#c8dff9',
@@ -287,7 +304,7 @@ const THONG_BAO_THEO_LOAI = {
     },
     DON_HANG_HUY: {
         tieuDe: 'Đơn hàng đã được hủy',
-        moTa: 'Đơn hàng của bạn đã được hủy trên BookFlow.',
+        moTa: 'Đơn hàng của bạn đã được hủy trên {{APP_NAME}}.',
         bieuTuong: '!',
         mauNen: '#fff7ed',
         mauVien: '#fed7aa',
@@ -344,7 +361,7 @@ const THONG_BAO_THEO_LOAI = {
     },
     THANH_TOAN_THAT_BAI: {
         tieuDe: 'Thanh toán chưa thành công',
-        moTa: 'BookFlow chưa ghi nhận được khoản thanh toán của bạn.',
+        moTa: '{{APP_NAME}} chưa ghi nhận được khoản thanh toán của bạn.',
         bieuTuong: '!',
         mauNen: '#fff7ed',
         mauVien: '#fed7aa',
@@ -364,7 +381,7 @@ const THONG_BAO_THEO_LOAI = {
     },
     HOAN_TIEN_THANH_CONG: {
         tieuDe: 'Hoàn tiền thành công',
-        moTa: 'Khoản tiền hoàn của bạn đã được ghi nhận trên BookFlow.',
+        moTa: 'Khoản tiền hoàn của bạn đã được ghi nhận trên {{APP_NAME}}.',
         bieuTuong: '↩',
         mauNen: '#edf5ff',
         mauVien: '#c8dff9',
@@ -784,13 +801,15 @@ function taoEmailThongBao({
     tieuDe,
     noiDung,
     duLieu = {},
-    linkChiTiet = null
+    linkChiTiet = null,
+    thuongHieu: cauHinhThuongHieu
 }) {
+    const thuongHieu = thuongHieuHopLe(cauHinhThuongHieu);
     const loai = BIET_DANH_LOAI_THONG_BAO[loaiSuKien] || loaiSuKien;
     const mau = THONG_BAO_THEO_LOAI[loai];
 
-    const tieuDeCuoi = String(tieuDe ?? '').trim() || mau?.tieuDe || 'Thông báo BookFlow';
-    const moTa = mau?.moTa || 'Bạn có một thông báo mới liên quan đến hoạt động trên BookFlow.';
+    const tieuDeCuoi = String(tieuDe ?? '').trim() || mau?.tieuDe || 'Thông báo {{APP_NAME}}';
+    const moTa = mau?.moTa || 'Bạn có một thông báo mới liên quan đến hoạt động trên {{APP_NAME}}.';
     const noiDungGiaoDich = mau
         ? mau.taoNoiDung(duLieu)
         : `
@@ -799,7 +818,7 @@ function taoEmailThongBao({
                 <tr>
                     <td style="padding:22px;">
                         <div style="font-size:14px;line-height:1.8;color:#536477;">
-                            ${escapeHtml(String(noiDung ?? '').trim() || 'Bạn có một thông báo mới trên BookFlow.').replace(/\n/g, '<br>')}
+                            ${escapeHtml(String(noiDung ?? '').trim() || 'Bạn có một thông báo mới trên {{APP_NAME}}.').replace(/\n/g, '<br>')}
                         </div>
                     </td>
                 </tr>
@@ -813,10 +832,10 @@ function taoEmailThongBao({
             </a>
         </div>` : '';
 
-    const chuThich = 'Đây là email tự động từ BookFlow. Vui lòng không trả lời email này.';
+    const chuThich = 'Đây là email tự động từ {{APP_NAME}}. Vui lòng không trả lời email này.';
 
-    return {
-        tieuDe: `BookFlow | ${tieuDeCuoi}`,
+    return dinhThuongHieu({
+        tieuDe: `{{APP_NAME}} | ${tieuDeCuoi}`,
         noiDung: [
             `Xin chào ${tenNguoiNhan?.trim() || 'bạn'},`,
             '',
@@ -826,20 +845,41 @@ function taoEmailThongBao({
             '',
             chuThich,
             '',
-            'BookFlow'
+            '{{APP_NAME}}'
         ].filter((dong, index, danhSach) => !(dong === '' && danhSach[index - 1] === '')).join('\n'),
         html: khungEmail({
             tenNguoiNhan,
             tieuDe: tieuDeCuoi,
             moTa,
             noiDungHtml: `${noiDungGiaoDich}${htmlCta}`,
-            chuThich
+            chuThich,
+            thuongHieu
         })
-    };
+    }, thuongHieu);
+}
+
+function taoEmailSuKienNhanVien({ tenNguoiNhan, loaiSuKien, tieuDe, duLieu = {}, thuongHieu: cauHinhThuongHieu }) {
+    const thuongHieu = thuongHieuHopLe(cauHinhThuongHieu);
+    const laSinhNhat = loaiSuKien === 'NHAN_VIEN_SINH_NHAT';
+    if (!laSinhNhat && loaiSuKien !== 'NHAN_VIEN_KY_NIEM') throw new Error('Loại email sự kiện nhân viên không hợp lệ');
+    const ten = tenNguoiNhan?.trim() || 'bạn';
+    const soNam = Number(duLieu.soNam ?? duLieu.so_nam);
+    if (!laSinhNhat && (!Number.isInteger(soNam) || soNam < 1)) throw new Error('Số năm kỷ niệm không hợp lệ');
+    const tieuDeHienThi = laSinhNhat ? 'Chúc mừng sinh nhật!' : `Chúc mừng ${soNam} năm đồng hành`;
+    const moTa = laSinhNhat
+        ? `Hôm nay là ngày đặc biệt của ${ten}. Tập thể {{APP_NAME}} gửi bạn những lời chúc tốt đẹp nhất.`
+        : `Hôm nay đánh dấu ${soNam} năm kể từ ngày ${ten} bắt đầu đồng hành cùng {{APP_NAME}}.`;
+    const loiChuc = laSinhNhat
+        ? 'Chúc bạn tuổi mới thật nhiều sức khỏe, niềm vui và những điều đáng nhớ. Mong mỗi ngày làm việc đều mang đến cảm hứng mới, những thành quả đáng tự hào và thật nhiều khoảnh khắc ấm áp bên gia đình, bạn bè.'
+        : `Cảm ơn bạn đã dành ${soNam} năm tâm huyết, trách nhiệm và năng lượng tích cực cho {{APP_NAME}}. Những đóng góp của bạn có ý nghĩa với tập thể và hành trình phục vụ cộng đồng của chúng ta. Chúc bạn tiếp tục phát triển, thành công và có thêm nhiều dấu mốc đáng tự hào cùng {{APP_NAME}}.`;
+    const chuThich = 'Email tự động từ {{APP_NAME}}. Chúc bạn một ngày thật nhiều niềm vui!';
+    const noiDungHtml = `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td align="center" style="padding:28px 20px;background:#e8f3ed;border:1px solid #d4e7dc;border-radius:14px;"><div style="font-size:13px;font-weight:700;letter-spacing:1.5px;color:#507067;">${laSinhNhat ? 'HÔM NAY LÀ NGÀY CỦA BẠN' : 'DẤU MỐC ĐÁNG TỰ HÀO'}</div><div style="margin:12px 0;font-size:38px;line-height:1.2;">${laSinhNhat ? '🎂' : '🌿'}</div><div style="font-size:23px;font-weight:700;line-height:1.35;color:#173e37;">${escapeHtml(tieuDeHienThi)}</div><div style="margin-top:8px;font-size:15px;color:#507067;">${escapeHtml(ten)}</div></td></tr><tr><td style="padding:22px 4px 0;color:#43554f;font-size:15px;line-height:1.8;">${escapeHtml(loiChuc)}</td></tr></table>`;
+    return dinhThuongHieu({ tieuDe: `{{APP_NAME}} | ${tieuDe || tieuDeHienThi}`, noiDung: [`Xin chào ${ten},`, '', moTa, '', loiChuc, '', 'Thân mến,', '{{APP_NAME}}'].join('\n'), html: khungEmail({ tenNguoiNhan: ten, tieuDe: tieuDe || tieuDeHienThi, moTa, noiDungHtml, chuThich, thuongHieu }) }, thuongHieu);
 }
 
 module.exports = {
     taoEmailOtp,
     taoEmailMoiNhanVien,
-    taoEmailThongBao
+    taoEmailThongBao,
+    taoEmailSuKienNhanVien
 };

@@ -19,6 +19,10 @@ async function layFile(id) {
     const { rows } = await query(`SELECT id, don_vi_so_huu_id, tai_khoan_so_huu_id, nguoi_tai_len_id, ma_tep, ten_tep_goc, duong_dan_luu_tru, bucket, mime_type_xac_minh, duoi_tep, kich_thuoc_byte, loai_tep, pham_vi_truy_cap, trang_thai_quet_virus, trang_thai, chieu_rong_px, chieu_cao_px, ngay_tao, ngay_cap_nhat FROM tep_dinh_kem WHERE id = $1`, [id]);
     return rows[0] ?? null;
 }
+async function layLogoCongKhai(donViId) {
+    const { rows } = await query(`SELECT t.id, t.duong_dan_luu_tru, t.bucket, t.mime_type_xac_minh, t.duoi_tep FROM don_vi d JOIN tep_dinh_kem t ON t.id = d.logo_tep_id AND t.don_vi_so_huu_id = d.id WHERE d.id = $1 AND d.trang_thai = 'DANG_DUNG' AND t.loai_tep = 'LOGO' AND t.trang_thai = 'SAN_SANG' AND t.trang_thai_quet_virus = 'SACH' AND t.mime_type_xac_minh LIKE 'image/%' LIMIT 1`, [donViId]);
+    return rows[0] ?? null;
+}
 async function danhSach(donViId, taiKhoanId, xemTatCa, trang, kichThuoc) {
     const thamSo = [donViId, taiKhoanId, xemTatCa, kichThuoc, (trang - 1) * kichThuoc];
     const dieuKien = `trang_thai <> 'DA_XOA' AND ((don_vi_so_huu_id = $1 AND ($3::boolean OR nguoi_tai_len_id = $2)) OR (don_vi_so_huu_id IS NULL AND tai_khoan_so_huu_id = $2))`;
@@ -49,4 +53,4 @@ async function danhDauXoa(id, actorId) {
     const { rows } = await query(`UPDATE tep_dinh_kem SET trang_thai = 'DA_XOA', ngay_xoa = now() WHERE id = $1 AND trang_thai <> 'DA_XOA' RETURNING id, bucket, duong_dan_luu_tru`, [id]);
     return rows[0] ?? null;
 }
-module.exports = { taoLo, taoFile, ghiKetQua, chotLo, layFile, danhSach, dangDuocSuDung, danhDauXoa };
+module.exports = { taoLo, taoFile, ghiKetQua, chotLo, layFile, layLogoCongKhai, danhSach, dangDuocSuDung, danhDauXoa };

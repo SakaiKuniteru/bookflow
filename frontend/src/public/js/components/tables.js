@@ -8,6 +8,9 @@ function getRows(table) {
     return [...table.querySelectorAll("[data-table-row]")];
 }
 function applyColumnAlignment(table) {
+    const actionColumn = table.querySelector("colgroup col[data-column-key='actions']");
+    if (actionColumn) actionColumn.parentElement.appendChild(actionColumn);
+    table.querySelectorAll("tr").forEach(row => { const actionCell = row.querySelector("[data-column-key='actions']"); if (actionCell) row.appendChild(actionCell); });
     const alignments = new Map([...table.querySelectorAll("thead [data-column-key]")].map(header => [header.dataset.columnKey, header.dataset.columnAlign || ""]));
     getRows(table).forEach(row => row.querySelectorAll("[data-column-key]").forEach(cell => {
         const key = cell.dataset.columnKey;

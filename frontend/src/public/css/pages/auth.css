@@ -80,15 +80,28 @@
 
 .bf-auth-brand {
     display: inline-flex;
+    min-width: 0;
+    max-width: 100%;
     align-items: center;
     gap: 10px;
     color: #10483e;
-    font-size: 28px;
+    font-size: clamp(16px, 2vw, 28px);
     font-weight: 750;
     letter-spacing: -.04em;
     text-decoration: none;
 }
+.bf-auth-brand-image {
+    display: block;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 auto;
+    border-radius: 11px;
+    object-fit: contain;
+}
 
+.bf-auth-brand .bf-nav-brand-name {
+    max-width: 100%;
+}
 .bf-auth-brand-mark {
     position: relative;
     display: inline-block;
@@ -828,6 +841,10 @@
     }
     .bf-auth-email-summary a {
         font-size: 12px;
+    }
+    .bf-auth-brand-image {
+        width: 34px;
+        height: 34px;
     }
 }
 

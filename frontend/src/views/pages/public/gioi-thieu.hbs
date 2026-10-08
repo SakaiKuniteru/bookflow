@@ -1,7 +1,7 @@
 <section class="bf-public-about">
     <section class="bf-public-about-hero">
         <div class="bf-public-container">
-            <p class="bf-public-eyebrow">{{#if hero.eyebrow}}{{hero.eyebrow}}{{else}}Về BookFlow{{/if}}</p>
+            <p class="bf-public-eyebrow">{{#if hero.eyebrow}}{{hero.eyebrow}}{{else}}Về {{app.name}}{{/if}}</p>
             <h1>{{#if hero.title}}{{hero.title}}{{else}}Kết nối bạn đọc với những cuốn sách phù hợp{{/if}}</h1>
             {{#if hero.description}}<p>{{hero.description}}</p>{{/if}}
         </div>
@@ -46,7 +46,7 @@
         {{#if contact}}
             <section class="bf-public-contact">
                 <div>
-                    <h2>{{#if contact.title}}{{contact.title}}{{else}}Liên hệ với BookFlow{{/if}}</h2>
+                    <h2>{{#if contact.title}}{{contact.title}}{{else}}Liên hệ với {{app.name}}{{/if}}</h2>
                     {{#if contact.description}}<p>{{contact.description}}</p>{{/if}}
                 </div>
                 {{#if contact.email}}<a href="mailto:{{contact.email}}">{{contact.email}}</a>{{/if}}

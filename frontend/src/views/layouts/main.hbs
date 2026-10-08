@@ -7,18 +7,18 @@
     {{#if authenticated}}<meta name="bf-access-token" content="{{bfAccessToken}}">{{/if}}<script src="/js/common/bearer-fetch.js?v=20261006-1"></script>
     {{#if description}}<meta name="description" content="{{description}}">{{/if}}
     <title>{{#if title}}{{title}} | {{/if}}{{app.name}}</title>
-    <link rel="icon" href="/brand/logo-symbol.svg" type="image/svg+xml">
+    <link rel="icon" href="{{app.logoUrl}}">
     <link rel="stylesheet" href="/css/components.css">
     <link rel="stylesheet" href="/css/components/tables.css">
     <link rel="stylesheet" href="/css/components/forms.css?v=20261001-2">
-    <link rel="stylesheet" href="/css/components/navigation.css?v=20261008-1">
-    <link rel="stylesheet" href="/css/theme.css">
-    <link rel="stylesheet" href="/css/pages/public.css?v=20261001-2">
+    <link rel="stylesheet" href="/css/components/navigation.css?v=20261009-responsive-brand-1">
+    <link rel="stylesheet" href="/css/theme.css?v=20261009-responsive-brand-1">
+    <link rel="stylesheet" href="/css/pages/public.css?v=20261009-responsive-brand-1">
     {{#each stylesheets}}
         <link rel="stylesheet" href="{{this}}">
     {{/each}}
 </head>
-<body class="bf-layout bf-layout-public {{bodyClass}}" data-bf-theme="default">
+<body class="bf-layout bf-layout-public {{bodyClass}}" data-bf-theme="default" data-bf-app-name="{{app.name}}" data-bf-app-logo="{{app.logoUrl}}">
     {{> navigation/header
         publicNav=true
         brandName=app.name
@@ -44,11 +44,10 @@
     </main>
     <footer class="bf-demo-footer">
         <a class="bf-nav-brand bf-demo-brand" href="/">
-            <span class="bf-demo-mark" aria-hidden="true"><i></i></span>
-            <span>{{app.name}}</span>
-            <small>AI</small>
+            <img class="bf-nav-brand-logo" src="{{app.logoUrl}}" alt="">
+            <span class="bf-nav-brand-name" title="{{app.name}}">{{app.name}}</span>
         </a>
-        <span>BookFlow AI · Bán sách · Mượn miễn phí · Thuê có phí · Hội viên</span>
+        <span class="bf-demo-footer-summary">{{app.name}} · Bán sách · Mượn miễn phí · Thuê có phí · Hội viên</span>
     </footer>
     <script type="module" src="/js/components/forms.js?v=20261001-7"></script>
     <script type="module" src="/js/page/auth.js?v=20261001-5"></script>

@@ -49,6 +49,11 @@ class XacThucRepository {
         return rows[0] ?? null;
     }
 
+    async timThanhVienTheoMaNhanVien(donViId, maNhanVien, client) {
+        const { rows } = await query('SELECT id FROM thanh_vien_don_vi WHERE don_vi_id = $1 AND lower(ma_nhan_vien) = lower($2) LIMIT 1', [donViId, maNhanVien], client);
+        return rows[0] ?? null;
+    }
+
     async timTaiKhoanTheoSoDienThoai(soDienThoai, client) {
         const { rows } = await query('SELECT id FROM tai_khoan WHERE so_dien_thoai=$1 LIMIT 1', [soDienThoai], client);
         return rows[0] ?? null;
@@ -417,15 +422,24 @@ class XacThucRepository {
         );
         return rows[0];
     }
-    async taoThanhVien({ donViId, taiKhoanId, maNhanVien, email, nguoiTaoId, trangThai }, client) {
+    async taoThanhVien({ donViId, taiKhoanId, maNhanVien, email, chucDanh, emailCongViec, soDienThoaiCongViec, nguoiTaoId, trangThai, ngayVaoLam }, client) {
         const { rows } = await query(
-            `INSERT INTO thanh_vien_don_vi (don_vi_id, tai_khoan_id, ma_nhan_vien, email_cong_viec, nguoi_tao_id, ngay_moi, trang_thai)
-            VALUES ($1, $2, $3, $4, $5, now(), $6)
+            `INSERT INTO thanh_vien_don_vi (don_vi_id, tai_khoan_id, ma_nhan_vien, chuc_danh, email_cong_viec, so_dien_thoai_cong_viec, nguoi_tao_id, ngay_moi, trang_thai, ngay_vao_lam)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, now(), $8, $9)
             RETURNING id`,
-            [donViId, taiKhoanId, maNhanVien, email, nguoiTaoId, trangThai],
+            [donViId, taiKhoanId, maNhanVien, chucDanh ?? null, emailCongViec ?? email, soDienThoaiCongViec ?? null, nguoiTaoId, trangThai, ngayVaoLam ?? null],
             client
         );
         return rows[0];
+    }
+    async taoHoSoNhanVien({ donViId, thanhVienId, actorId, duLieu }, client) {
+        const fields = [['cccdSo', 'cccd_so'], ['cccdNgayCap', 'cccd_ngay_cap'], ['cccdNoiCap', 'cccd_noi_cap'], ['lienHeKhanCapHoTen', 'lien_he_khan_cap_ho_ten'], ['lienHeKhanCapQuanHe', 'lien_he_khan_cap_quan_he'], ['lienHeKhanCapSoDienThoai', 'lien_he_khan_cap_so_dien_thoai'], ['lienHeKhanCapDiaChi', 'lien_he_khan_cap_dia_chi'], ['trinhDoHocVan', 'trinh_do_hoc_van'], ['chuyenNganh', 'chuyen_nganh'], ['truong', 'truong'], ['chungChi', 'chung_chi'], ['ngoaiNgu', 'ngoai_ngu'], ['kyNang', 'ky_nang']].filter(([key]) => duLieu[key] !== undefined);
+        if (!fields.length) return;
+        const columns = fields.map(([, column]) => column);
+        const values = fields.map(([key]) => duLieu[key]);
+        const placeholders = values.map((_, index) => `$${index + 4}`);
+        const updates = columns.map(column => `${column} = EXCLUDED.${column}`).join(', ');
+        await query(`INSERT INTO ho_so_nhan_vien (don_vi_id, thanh_vien_don_vi_id, nguoi_tao_id, ${columns.join(', ')}) VALUES ($1, $2, $3, ${placeholders.join(', ')}) ON CONFLICT (don_vi_id, thanh_vien_don_vi_id) DO UPDATE SET ${updates}, nguoi_cap_nhat_id = EXCLUDED.nguoi_tao_id`, [donViId, thanhVienId, actorId, ...values], client);
     }
     async chiNhanhDangHoatDong(donViId, chiNhanhId, client) {
         const { rowCount } = await query(`SELECT id FROM chi_nhanh WHERE don_vi_id = $1 AND id = $2 AND trang_thai = 'DANG_DUNG'`, [donViId, chiNhanhId], client);
@@ -474,7 +488,14 @@ class XacThucRepository {
             [taiKhoanId, matKhauBam], client
         );
     }
-
+    async layNhanVienDangLam(thanhVienId, donViId, client) {
+        const { rows } = await query(`SELECT tk.id, tk.email, tk.ho_ten, tk.ten_dang_nhap FROM tai_khoan tk JOIN thanh_vien_don_vi tv ON tv.tai_khoan_id = tk.id WHERE tv.id = $1 AND tv.don_vi_id = $2 AND tv.trang_thai = 'DANG_LAM' AND tk.trang_thai = 'DANG_DUNG' AND tk.email_da_xac_minh = TRUE FOR UPDATE OF tv, tk`, [thanhVienId, donViId], client);
+        return rows[0] ?? null;
+    }
+    async datMatKhauTamNhanVienDangHoatDong(taiKhoanId, matKhauBam, client) {
+        const { rows } = await query(`UPDATE tai_khoan SET mat_khau_bam = $2, phien_ban_xac_thuc = phien_ban_xac_thuc + 1, bat_buoc_doi_mat_khau = TRUE, mat_khau_tam_het_han = now() + interval '24 hours', don_vi_kich_hoat_id = NULL, so_lan_dang_nhap_sai = 0, khoa_den = NULL WHERE id = $1 AND trang_thai = 'DANG_DUNG' AND email_da_xac_minh = TRUE RETURNING id`, [taiKhoanId, matKhauBam], client);
+        return rows[0] ?? null;
+    }
     async ghiAuditNhanVien({ donViId, actorId, targetId, requestId, hanhDong }, client) {
         await query(
             `INSERT INTO nhat_ky_he_thong (don_vi_id, tai_khoan_id, hanh_dong, doi_tuong_loai,
@@ -482,6 +503,16 @@ class XacThucRepository {
              VALUES ($1, $2, $3, 'tai_khoan', $4, 'THANH_CONG', 'Quản lý tài khoản nhân viên', $5, 'API')`,
             [donViId, actorId, hanhDong, targetId, requestId], client
         );
+    }
+
+    async layThuongHieuDonVi(donViId, client) {
+        const { rows } = await query(`SELECT id, ten_hien_thi, logo_tep_id FROM don_vi WHERE id = $1`, [donViId], client);
+        return rows[0] ?? null;
+    }
+
+    async layThuongHieuDonViTaiKhoan(taiKhoanId, client) {
+        const { rows } = await query(`SELECT d.id, d.ten_hien_thi, d.logo_tep_id FROM thanh_vien_don_vi tv JOIN don_vi d ON d.id = tv.don_vi_id WHERE tv.tai_khoan_id = $1 AND tv.trang_thai = 'DANG_LAM' AND d.trang_thai = 'DANG_DUNG' ORDER BY tv.id LIMIT 2`, [taiKhoanId], client);
+        return rows.length === 1 ? rows[0] : null;
     }
 
     async layTaiKhoanAnToan(taiKhoanId, client) {

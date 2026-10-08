@@ -2,6 +2,9 @@ const { AppError } = require('../../common/errors/AppError.js');
 const { trongGiaoDich } = require('../../database/transaction.js');
 const emailClient = require('../../integrations/email-client.js');
 const emailTemplate = require('../../integrations/email-template.js');
+const { docCauHinhThuongHieu } = require('../../config/environment.js');
+const { ngayISO } = require('../../common/utils/ngay-lich.js');
+const { xacDinhSuKienNhanVien } = require('./nhan-vien-su-kien.js');
 const repo = require('./thong-bao.repository.js');
 const v = require('./thong-bao.validation.js');
 
@@ -98,6 +101,28 @@ class ThongBaoService {
         return { so_luong_da_doc: soLuong };
     }
 
+    async xuLySuKienNhanVien({ ngayHienTai = null, emailKiemThu = null } = {}) {
+        if (ngayHienTai !== null && (!/^\d{4}-\d{2}-\d{2}$/.test(ngayHienTai) || ngayISO(ngayHienTai) !== ngayHienTai)) throw loi('Ngày chạy job không hợp lệ');
+        if (emailKiemThu !== null && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailKiemThu)) throw loi('Email kiểm thử không hợp lệ');
+        const danhSach = await repo.layNhanVienDenNgayKyNiem({ email: emailKiemThu, ngayHienTai });
+        let soSinhNhat = 0;
+        let soKyNiem = 0;
+        for (const employee of danhSach) {
+            const homNay = ngayHienTai || employee.ngay_hom_nay;
+            const tenDonVi = docCauHinhThuongHieu({ id: employee.don_vi_thuong_hieu_id, ten_hien_thi: employee.ten_don_vi, logo_tep_id: employee.logo_tep_id }).name;
+            for (const event of xacDinhSuKienNhanVien(employee, homNay)) {
+                if (event.loai === 'SINH_NHAT') {
+                    await trongGiaoDich(client => this.taoSuKienGiaoDich({ donViId: employee.don_vi_id, maSuKien: `nhan-vien:sinh-nhat:${employee.thanh_vien_id}:${event.nam}`, loaiSuKien: 'NHAN_VIEN_SINH_NHAT', doiTuongLoai: 'THANH_VIEN_DON_VI', doiTuongId: employee.thanh_vien_id, tieuDe: `Chúc mừng sinh nhật ${employee.ho_ten}`, noiDung: `Chúc mừng sinh nhật ${employee.ho_ten}! ${tenDonVi} chúc bạn tuổi mới nhiều sức khỏe, niềm vui và thành công. Cảm ơn bạn đã đồng hành cùng tập thể.`, duLieu: { tenNhanVien: employee.ho_ten, ngaySinh: event.ngaySinh.slice(5), nam: event.nam }, taiKhoanId: employee.tai_khoan_id, email: employee.email, client }));
+                    soSinhNhat += 1;
+                } else {
+                    await trongGiaoDich(client => this.taoSuKienGiaoDich({ donViId: employee.don_vi_id, maSuKien: `nhan-vien:ky-niem:${employee.thanh_vien_id}:${event.soNam}`, loaiSuKien: 'NHAN_VIEN_KY_NIEM', doiTuongLoai: 'THANH_VIEN_DON_VI', doiTuongId: employee.thanh_vien_id, tieuDe: `Chúc mừng ${event.soNam} năm đồng hành cùng ${tenDonVi}`, noiDung: `Cảm ơn ${employee.ho_ten} đã đồng hành cùng ${tenDonVi} suốt ${event.soNam} năm. Sự tận tâm và đóng góp của bạn góp phần tạo nên những giá trị tốt đẹp cho tập thể. Chúc chúng ta tiếp tục có nhiều dấu mốc đáng nhớ phía trước!`, duLieu: { tenNhanVien: employee.ho_ten, soNam: event.soNam, ngayVaoLam: event.ngayVaoLam }, taiKhoanId: employee.tai_khoan_id, email: employee.email, client }));
+                    soKyNiem += 1;
+                }
+            }
+        }
+        return { sinhNhat: soSinhNhat, kyNiem: soKyNiem };
+    }
+
     async xuLyLichDenHan(limit = 50) {
         let tong = 0;
         await trongGiaoDich(async client => {
@@ -120,29 +145,39 @@ class ThongBaoService {
         return tong;
     }
 
-    async xuLyEmailDangCho(limit = 50) {
+    async xuLyEmailDangCho(limit = 50, diaChiChiDinh = null, loaiSuKienChiDinh = null) {
         const danhSach = await trongGiaoDich(async client => {
-            const rows = await repo.layEmailChoGui(limit, client);
+            const rows = await repo.layEmailChoGui(limit, client, diaChiChiDinh, loaiSuKienChiDinh);
             for (const row of rows) await repo.danhDauEmailDangGui(row.id, row.so_lan_thu + 1, client);
             return rows.map(row => ({ ...row, lan_thu: row.so_lan_thu + 1 }));
         });
         let tong = 0;
         for (const row of danhSach) {
             try {
-                const email = emailTemplate.taoEmailThongBao({
+                const thuongHieu = docCauHinhThuongHieu({ id: row.don_vi_thuong_hieu_id, ten_hien_thi: row.ten_don_vi, logo_tep_id: row.logo_tep_id });
+                const thayTenDonViCu = value => {
+                    const tenCu = String(row.ten_don_vi ?? '').trim();
+                    const noiDung = String(value ?? '');
+                    return tenCu && tenCu !== thuongHieu.name ? noiDung.split(tenCu).join(thuongHieu.name) : noiDung;
+                };
+                const email = ['NHAN_VIEN_SINH_NHAT', 'NHAN_VIEN_KY_NIEM'].includes(row.loai_su_kien)
+                    ? emailTemplate.taoEmailSuKienNhanVien({ tenNguoiNhan: row.ho_ten, loaiSuKien: row.loai_su_kien, tieuDe: thayTenDonViCu(row.tieu_de), duLieu: row.du_lieu ?? {}, thuongHieu })
+                    : emailTemplate.taoEmailThongBao({
                     tenNguoiNhan: row.ho_ten,
                     loaiSuKien: row.loai_su_kien,
-                    tieuDe: row.tieu_de,
-                    noiDung: row.noi_dung,
+                    tieuDe: thayTenDonViCu(row.tieu_de),
+                    noiDung: thayTenDonViCu(row.noi_dung),
                     duLieu: row.du_lieu ?? {},
-                    linkChiTiet: row.link_chi_tiet ?? null
+                    linkChiTiet: row.link_chi_tiet ?? null,
+                    thuongHieu
                 });
                 await emailClient.guiEmail({
                     den: row.dia_chi,
                     tenNguoiNhan: row.ho_ten,
                     tieuDe: email.tieuDe,
                     noiDung: email.noiDung,
-                    html: email.html
+                    html: email.html,
+                    tenNguoiGui: email.tenNguoiGui
                 });
                 await trongGiaoDich(async client => {
                     await repo.danhDauEmailThanhCong(row.id, client);
@@ -176,11 +211,12 @@ class ThongBaoService {
     async chayScheduler() {
         try {
             const lich = await this.xuLyLichDenHan(50);
+            const nhanVien = await this.xuLySuKienNhanVien();
             const email = await this.xuLyEmailDangCho(50);
-            return { lich, email };
+            return { lich, nhanVien, email };
         } catch (error) {
             console.error(JSON.stringify({ event: 'THONG_BAO_SCHEDULER_ERROR', name: error?.name ?? null, message: error?.message ?? null }));
-            return { lich: 0, email: 0 };
+            return { lich: 0, nhanVien: { sinhNhat: 0, kyNiem: 0 }, email: 0 };
         }
     }
 

@@ -1,7 +1,7 @@
 import { closeModal, openModal } from "/js/components/modals.js";
 import { hideLoading, showLoading } from "/js/components/feedback.js";
 import { setSelectDisabled, syncSelect } from "/js/components/forms/select.js";
-import { bindInlineValidation, validateForm } from "/js/components/forms/validation.js";
+import { applyServerFieldErrors, bindInlineValidation, validateForm } from "/js/components/forms/validation.js";
 const table = document.querySelector(".bf-branch-page [data-bf-table]");
 if (table) {
     const body = table.querySelector("[data-bf-table-body]");
@@ -24,9 +24,19 @@ if (table) {
     const form = document.querySelector("[data-branch-create-form]");
     bindInlineValidation(form);
     const formError = document.querySelector("[data-branch-create-error]");
+    const showBranchErrors = fallback => {
+        if (formError) {
+            formError.textContent = fallback || "";
+            formError.hidden = !fallback;
+        } else if (fallback) window.BookFlowFeedback?.toast({ type: "error", message: fallback });
+    };
     const empty = table.querySelector("[data-bf-table-empty]");
     let busy = false;
-    const fail = message => { throw new Error(message); };
+    const fail = (message, details = []) => {
+        const error = new Error(message);
+        error.details = details;
+        throw error;
+    };
     const setEmpty = (title, description) => {
         if (!empty) return;
         const heading = empty.querySelector("strong");
@@ -113,7 +123,7 @@ if (table) {
         form.reset();
         form.querySelectorAll("input,select,textarea").forEach(field => field.disabled = false);
         form.querySelectorAll("[data-bf-select]").forEach(select => setSelectDisabled(select, select.id === "branch-country"));
-        const submitButton = form.querySelector("[data-bf-modal-submit]");
+        const submitButton = modal.querySelector("[data-bf-modal-submit]");
         if (submitButton) submitButton.hidden = false;
         form.dataset.mode = editing ? "edit" : "create";
         form.dataset.branchId = editing ? String(branch.id) : "";
@@ -122,7 +132,7 @@ if (table) {
         code.readOnly = editing;
         const title = modal.querySelector(".bf-modal-title");
         const description = modal.querySelector(".bf-modal-description");
-        const submit = form.querySelector("[data-bf-modal-submit]");
+        const submit = modal.querySelector("[data-bf-modal-submit]");
         if (title) title.textContent = editing ? "Sửa chi nhánh" : "Thêm mới chi nhánh";
         if (description) description.textContent = editing ? "Cập nhật đầy đủ thông tin chi nhánh." : "Nhập thông tin chi nhánh mới.";
         if (submit) submit.textContent = editing ? "Lưu thay đổi" : "Thêm mới";
@@ -153,7 +163,7 @@ if (table) {
         const container = viewModal.querySelector("[data-branch-view-details]");
         const typeLabels = { NHA_SACH: "Nhà sách", THU_VIEN: "Thư viện", KET_HOP: "Kết hợp" };
         const statusLabels = { DANG_DUNG: "Đang hoạt động", TAM_KHOA: "Tạm khóa" };
-        const show = value => value === null || value === undefined || value === "" ? "—" : String(value);
+        const show = value => value === null || value === undefined || value === "" ? "" : String(value);
         const rows = [
             ["Mã chi nhánh", branch.maChiNhanh],
             ["Tên chi nhánh", branch.tenChiNhanh],
@@ -186,15 +196,22 @@ if (table) {
         }));
     };
     const renderBranch = (branch, stt) => {
-        const type = ({ NHA_SACH: "Nhà sách", THU_VIEN: "Thư viện", KET_HOP: "Kết hợp" })[branch.loaiChiNhanh] || branch.loaiChiNhanh || "—";
+        const type = ({ NHA_SACH: "Nhà sách", THU_VIEN: "Thư viện", KET_HOP: "Kết hợp" })[branch.loaiChiNhanh] || branch.loaiChiNhanh || "";
         const address = [branch.diaChiChiTiet, branch.tenPhuongXa, branch.tenTinhThanh].filter(Boolean).join(", ");
+        const status = ({ DANG_DUNG: "Đang hoạt động", TAM_KHOA: "Tạm khóa" })[branch.trangThai] || branch.trangThai || "";
         const values = [
             ["stt", stt],
             ["maChiNhanh", branch.maChiNhanh],
             ["tenChiNhanh", branch.tenChiNhanh],
             ["loaiChiNhanh", type],
-            ["diaChiChiTiet", address],
-            ["maTinhThanh", branch.maTinhThanh]
+            ["soDienThoai", branch.soDienThoai],
+            ["email", branch.email],
+            ["tenTinhThanh", branch.tenTinhThanh],
+            ["tenPhuongXa", branch.tenPhuongXa],
+            ["diaChiChiTiet", branch.diaChiChiTiet],
+            ["choNhanTaiQuay", branch.choNhanTaiQuay ? "Có" : "Không"],
+            ["choBanTrucTuyen", branch.choBanTrucTuyen ? "Có" : "Không"],
+            ["trangThai", status]
         ];
         const row = document.createElement("tr");
         row.dataset.tableRow = "true";
@@ -204,7 +221,7 @@ if (table) {
         values.forEach(([key, raw]) => {
             const cell = document.createElement("td");
             cell.dataset.columnKey = key;
-            cell.dataset.searchValue = String(raw ?? "—");
+            cell.dataset.searchValue = String(raw ?? "");
             cell.dataset.sortValue = String(raw ?? "");
             if (key === "loaiChiNhanh") {
                 const badge = document.createElement("span");
@@ -212,7 +229,7 @@ if (table) {
                 badge.textContent = raw;
                 cell.appendChild(badge);
             } else {
-                cell.textContent = raw ?? "—";
+                cell.textContent = raw ?? "";
             }
             row.appendChild(cell);
         });
@@ -226,7 +243,7 @@ if (table) {
     const request = async (url, options = {}) => {
         const response = await fetch(url, { credentials: "same-origin", headers: { Accept: "application/json", ...(options.body ? { "Content-Type": "application/json" } : {}) }, signal: AbortSignal.timeout(20000), ...options });
         const result = await response.json();
-        if (!response.ok || result?.success === false) fail(result?.error?.message || "Yêu cầu không thành công.");
+        if (!response.ok || result?.success === false) fail(result?.error?.message || "Yêu cầu không thành công.", result?.error?.details || []);
         return result;
     };
     const loadBranches = async () => {
@@ -300,7 +317,8 @@ if (table) {
     });
     form?.addEventListener("submit", async event => {
         event.preventDefault();
-        if (busy || !validateForm(form)) return;
+        if (busy) return;
+        const formValid = validateForm(form);
         busy = true;
         if (formError) formError.hidden = true;
         const values = Object.fromEntries(new FormData(form).entries());
@@ -329,8 +347,21 @@ if (table) {
             payload.quanLyThanhVienId = numberOrNull("quanLyThanhVienId");
             payload.trangThai = form.elements.namedItem("active").checked ? "DANG_DUNG" : "TAM_KHOA";
         }
-        const submit = form.querySelector("[data-bf-modal-submit]");
+        const submit = modal.querySelector("[data-bf-modal-submit]");
         if (submit) submit.disabled = true;
+        if (!formValid) {
+            try {
+                await request(editing ? `/api/chi-nhanh/${branchId}` : "/api/chi-nhanh", { method: editing ? "PATCH" : "POST", body: JSON.stringify({ ...payload, kiemTra: true }) });
+                showBranchErrors("");
+            } catch (error) {
+                const hasFieldErrors = applyServerFieldErrors(form, error);
+                showBranchErrors(hasFieldErrors ? "" : error.message || "Không thể kiểm tra chi nhánh.");
+            } finally {
+                busy = false;
+                if (submit) submit.disabled = false;
+            }
+            return;
+        }
         showLoading(document.body, { fullscreen: true, text: editing ? "Đang lưu chi nhánh..." : "Đang thêm chi nhánh..." });
         try {
             await request(editing ? `/api/chi-nhanh/${branchId}` : "/api/chi-nhanh", { method: editing ? "PATCH" : "POST", body: JSON.stringify(payload) });
@@ -339,10 +370,8 @@ if (table) {
             window.BookFlowFeedback?.toast({ type: "success", message: editing ? "Đã cập nhật chi nhánh." : "Đã thêm mới chi nhánh." });
             await loadBranches();
         } catch (error) {
-            if (formError) {
-                formError.textContent = error.message || "Không lưu được chi nhánh.";
-                formError.hidden = false;
-            }
+            const hasFieldErrors = applyServerFieldErrors(form, error);
+            showBranchErrors(hasFieldErrors ? "" : error.message || "Không lưu được chi nhánh.");
         } finally {
             busy = false;
             hideLoading(document.body);

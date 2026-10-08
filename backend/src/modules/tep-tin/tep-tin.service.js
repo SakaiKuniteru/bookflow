@@ -122,6 +122,11 @@ class TepTinService {
         if (tep.trang_thai !== 'SAN_SANG' || tep.trang_thai_quet_virus !== 'SACH') throw loi('File chưa sẵn sàng để truy cập', 409, 'FILE_NOT_READY');
         return { id: tep.id, url: await storage.taoUrlDoc(tep.duong_dan_luu_tru, tep.bucket, tep.mime_type_xac_minh, tep.id, tep.duoi_tep, 60), expires_in: 60 };
     }
+    async logoDonViCongKhai(donViId) {
+        const logo = await repo.layLogoCongKhai(v.idHopLe(donViId));
+        if (!logo) throw loi('Không tìm thấy logo đơn vị', 404, 'NOT_FOUND');
+        return { id: logo.id, duoi_tep: logo.duoi_tep, mime_type: logo.mime_type_xac_minh, body: await storage.layNoiDung(logo.duong_dan_luu_tru, logo.bucket) };
+    }
     async noiDungAnh(auth, tepId) {
         const tep = await repo.layFile(v.idHopLe(tepId));
         if (!tep || tep.trang_thai === 'DA_XOA') throw loi('Không tìm thấy file', 404, 'NOT_FOUND');

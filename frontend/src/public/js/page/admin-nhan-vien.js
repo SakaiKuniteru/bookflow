@@ -5,13 +5,19 @@ import { initDataTables } from "/js/components/tables.js";
 const table = document.querySelector(".bf-employee-page [data-bf-table]");
 if (table) {
     const tableBody = table.querySelector("[data-bf-table-body]");
+    const hienThiNhanVienDaNghi = new URLSearchParams(window.location.search).get("trangThai") === "DA_ROI";
     const emptyState = table.querySelector("[data-bf-table-empty]");
     const modal = document.querySelector("#employee-create-modal");
     const form = document.querySelector("[data-employee-form]");
     const viewModal = document.querySelector("#employee-view-modal");
     const deleteModal = document.querySelector("#employee-delete-modal");
     const deleteForm = document.querySelector("[data-employee-delete-form]");
+    const rehireModal = document.querySelector("#employee-rehire-modal");
+    const rehireForm = document.querySelector("#employee-rehire-form");
+    const resetPasswordModal = document.querySelector("#employee-reset-password-modal");
+    let employeePendingPasswordReset = null;
     let employeePendingDelete = null;
+    let employeePendingRehire = null;
     let employees = [];
     let branches = [];
     let countries = [];
@@ -34,7 +40,9 @@ if (table) {
         const config = {
             view: { label: "Xem nhân viên", svg: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path><circle cx="12" cy="12" r="3"></circle></svg>' },
             edit: { label: "Sửa nhân viên", svg: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"></path><path d="m16.5 3.5 4 4L8 20l-5 1 1-5Z"></path></svg>' },
-            delete: { label: "Xóa nhân viên", svg: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="m19 6-1 14H6L5 6"></path><path d="M10 11v5M14 11v5"></path></svg>' }
+            delete: { label: "Xóa nhân viên", svg: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="m19 6-1 14H6L5 6"></path><path d="M10 11v5M14 11v5"></path></svg>' },
+            rehire: { label: "Quay lại làm", svg: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"></path><path d="M4 9h10a6 6 0 0 1 0 12h-2"></path></svg>' },
+            "reset-password": { label: "Gửi mật khẩu mới", svg: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>' }
         };
         const button = document.createElement("button");
         button.type = "button";
@@ -46,31 +54,56 @@ if (table) {
         button.innerHTML = config[type].svg;
         return button;
     };
-    const displayName = (items, code) => items.find(item => String(item.code) === String(code ?? ""))?.name || code || "—";
-    const genderName = value => ({ NAM: "Nam", NU: "Nữ", KHAC: "Khác", KHONG_TIET_LO: "Không tiết lộ" })[value] || value || "—";
+    const displayName = (items, code) => items.find(item => String(item.code) === String(code ?? ""))?.name || code || "";
+    const genderName = value => ({ NAM: "Nam", NU: "Nữ", KHAC: "Khác", KHONG_TIET_LO: "Không tiết lộ" })[value] || value || "";
+    const formatDate = value => {
+        if (value == null || value === "") return "";
+        const text = String(value ?? "");
+        const match = text.match(/^(\d{4})-(\d{2})-(\d{2})$/) || text.match(/^(\d{4})-(\d{2})-(\d{2})T00:00:00(?:\.000)?Z$/);
+        if (match) return `${match[3]}/${match[2]}/${match[1]}`;
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return "";
+        const parts = Object.fromEntries(new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" }).formatToParts(date).filter(part => part.type !== "literal").map(part => [part.type, part.value]));
+        return `${parts.day}/${parts.month}/${parts.year}`;
+    };
+    const dateInput = value => value ? formatDate(value) : "";
     const renderEmployeeDetails = detail => {
         const container = viewModal.querySelector("[data-employee-view-details]");
         const account = detail.taiKhoan || {};
         const member = detail.thanhVien || {};
+        const profile = detail.hoSo || {};
         const statusLabels = { CHO_MOI: "Chờ kích hoạt", CHO_XAC_MINH: "Chờ xác minh", DANG_LAM: "Đang làm", TAM_KHOA: "Đã khóa", DA_ROI: "Đã nghỉ" };
-        const branchNames = (detail.chiNhanh || []).map(branch => branch.tenChiNhanh).filter(Boolean).join(", ") || "—";
-        const roleNames = (detail.vaiTro || []).map(role => role.tenVaiTro).filter(Boolean).join(", ") || "—";
-        const rows = [["Họ và tên", account.hoTen], ["Mã nhân viên", member.maNhanVien], ["Tên đăng nhập", account.tenDangNhap], ["Email", account.email], ["Chức danh", member.chucDanh], ["Email công việc", member.emailCongViec], ["Điện thoại công việc", member.soDienThoaiCongViec], ["Vai trò", roleNames], ["Chi nhánh", branchNames], ["Ngày sinh", account.ngaySinh], ["Giới tính", genderName(account.gioiTinh)], ["Quốc tịch", displayName(countries, account.quocTich)], ["Dân tộc", displayName(ethnicities, account.danToc)], ["Quốc gia", displayName(countries, account.quocGia)], ["Tỉnh/thành", displayName(provinces, account.tinhThanhPho)], ["Xã/phường", displayName(wards, account.phuongXa)], ["Địa chỉ", account.diaChiChiTiet], ["Trạng thái", statusLabels[member.trangThai] || member.trangThai]];
-        container.replaceChildren(...rows.map(([label, value]) => {
-            const field = document.createElement("div");
-            field.className = "bf-form-field";
-            const labelNode = document.createElement("span");
-            labelNode.className = "bf-form-label";
-            labelNode.textContent = label;
-            const valueNode = document.createElement("p");
-            valueNode.className = "bf-form-help";
-            valueNode.textContent = String(value ?? "—");
-            field.append(labelNode, valueNode);
-            return field;
-        }));
+        const branchNames = (detail.chiNhanh || []).map(branch => branch.tenChiNhanh).filter(Boolean).join(", ");
+        const roleNames = (detail.vaiTro || []).map(role => role.tenVaiTro).filter(Boolean).join(", ");
+        const sections = [
+            ["Thông tin tài khoản", [["Họ và tên", account.hoTen], ["Mã nhân viên", member.maNhanVien], ["Tên đăng nhập", account.tenDangNhap], ["Email", account.email], ["Số điện thoại", account.soDienThoai], ["Vai trò", roleNames], ["Chi nhánh", branchNames], ["Trạng thái", statusLabels[member.trangThai] || member.trangThai]]],
+            ["Thông tin công việc", [["Chức danh", member.chucDanh], ["Email công việc", member.emailCongViec], ["Điện thoại công việc", member.soDienThoaiCongViec], ["Ngày vào làm", formatDate(member.ngayVaoLam)], ["Ngày nghỉ việc", formatDate(member.ngayNghiViec)], ["Số ngày làm việc", member.soNgayLamViec == null ? "" : `${member.soNgayLamViec} ngày`]]],
+            ["Thông tin cá nhân", [["Ngày sinh", formatDate(account.ngaySinh)], ["Giới tính", genderName(account.gioiTinh)], ["Quốc tịch", displayName(countries, account.quocTich)], ["Dân tộc", displayName(ethnicities, account.danToc)], ["Quốc gia", displayName(countries, account.quocGia)], ["Tỉnh/thành", displayName(provinces, account.tinhThanhPho)], ["Xã/phường", displayName(wards, account.phuongXa)], ["Địa chỉ", account.diaChiChiTiet], ["Mô tả", account.moTa]]],
+            ["CCCD/CMND", [["Số CCCD/CMND", profile.cccdSo], ["Ngày cấp", formatDate(profile.cccdNgayCap)], ["Nơi cấp", profile.cccdNoiCap]]],
+            ["Người liên hệ khẩn cấp", [["Họ tên", profile.lienHeKhanCapHoTen], ["Quan hệ", profile.lienHeKhanCapQuanHe], ["Số điện thoại", profile.lienHeKhanCapSoDienThoai], ["Địa chỉ", profile.lienHeKhanCapDiaChi]]],
+            ["Trình độ và chuyên môn", [["Trình độ học vấn", profile.trinhDoHocVan], ["Chuyên ngành", profile.chuyenNganh], ["Trường", profile.truong], ["Chứng chỉ", profile.chungChi], ["Ngoại ngữ", profile.ngoaiNgu], ["Kỹ năng", profile.kyNang]]]
+        ];
+        const renderSection = ([title, rows]) => {
+            const heading = document.createElement("h3");
+            heading.className = "bf-employee-section-title bf-form-grid-full";
+            heading.textContent = title;
+            return [heading, ...rows.map(([label, value]) => {
+                const field = document.createElement("div");
+                field.className = "bf-form-field";
+                const labelNode = document.createElement("span");
+                labelNode.className = "bf-form-label";
+                labelNode.textContent = label;
+                const valueNode = document.createElement("p");
+                valueNode.className = "bf-form-help";
+                valueNode.textContent = value == null ? "" : String(value);
+                field.append(labelNode, valueNode);
+                return field;
+            })];
+        };
+        container.replaceChildren(...sections.flatMap(renderSection));
     };
-    const setOptions = (selectId, rows) => {
-        const select = form.querySelector(`#${selectId}`);
+    const setOptions = (selectId, rows, root = form) => {
+        const select = root.querySelector(`#${selectId}`);
         const optionsBox = select?.querySelector(".bf-select-options");
         if (!select || !optionsBox) return;
         optionsBox.replaceChildren(...rows.map(row => {
@@ -93,7 +126,8 @@ if (table) {
         }));
         syncSelect(select);
     };
-    const getSelectValue = selectId => form.querySelector(`#${selectId} .bf-select-option.is-selected`)?.dataset.value || "";
+    const getSelectValue = (selectId, root = form) => root.querySelector(`#${selectId} .bf-select-option.is-selected`)?.dataset.value || "";
+
     const setSelectValue = (selectId, value) => {
         const select = form.querySelector(`#${selectId}`);
         if (!select) return;
@@ -113,6 +147,7 @@ if (table) {
             fetch("/data/dia-chi/dan-toc.json").then(response => response.json())
         ]);
         branches = branchResult.chiNhanh || [];
+        setOptions("employee-rehire-branch", branches.map(branch => ({ value: branch.id, label: `${branch.maChiNhanh} — ${branch.tenChiNhanh}` })), rehireForm);
         countries = countryResult.data || [];
         provinces = provinceResult.data || [];
         wards = wardResult.data || [];
@@ -157,6 +192,8 @@ if (table) {
     const resetEmployeeForm = () => {
         form.reset();
         form.querySelectorAll("[data-bf-field-error]").forEach(error => error.remove());
+        form.querySelectorAll(".bf-email-error, .bf-phone-error").forEach(error => { error.hidden = true; });
+        form.dataset.memberStatus = "";
         form.querySelectorAll(".is-invalid").forEach(field => field.classList.remove("is-invalid"));
         form.querySelectorAll("[aria-invalid]").forEach(field => field.removeAttribute("aria-invalid"));
         ["employee-branch", "employee-account-type", "employee-nationality", "employee-ethnicity", "employee-country", "employee-province", "employee-ward", "employee-gender"].forEach(id => setSelectValue(id, ""));
@@ -171,6 +208,7 @@ if (table) {
         resetEmployeeForm();
         const account = detail.taiKhoan || {};
         const member = detail.thanhVien || {};
+        const profile = detail.hoSo || {};
         const branch = (detail.chiNhanh || []).find(item => item.trangThai === "HIEU_LUC" && !item.ngayKetThuc);
         const role = (detail.vaiTro || []).find(item => item.maVaiTro === "QUAN_TRI" || item.maVaiTro === "NHAN_VIEN");
         form.elements.namedItem("hoTen").value = account.hoTen || "";
@@ -178,7 +216,26 @@ if (table) {
         form.elements.namedItem("maNhanVien").value = member.maNhanVien || "";
         form.elements.namedItem("email").value = account.email || "";
         form.querySelector("#employee-phone").value = account.soDienThoai || "";
-        form.elements.namedItem("ngaySinh").value = account.ngaySinh ? `${String(account.ngaySinh).slice(8, 10)}/${String(account.ngaySinh).slice(5, 7)}/${String(account.ngaySinh).slice(0, 4)}` : "";
+        form.elements.namedItem("ngaySinh").value = dateInput(account.ngaySinh);
+        form.elements.namedItem("chucDanh").value = member.chucDanh || "";
+        form.elements.namedItem("emailCongViec").value = member.emailCongViec || "";
+        form.elements.namedItem("soDienThoaiCongViec").value = member.soDienThoaiCongViec || "";
+        form.elements.namedItem("ngayVaoLam").value = dateInput(member.ngayVaoLam);
+        form.elements.namedItem("ngayNghiViec").value = dateInput(member.ngayNghiViec);
+        form.elements.namedItem("cccdSo").value = profile.cccdSo || "";
+        form.elements.namedItem("cccdNgayCap").value = dateInput(profile.cccdNgayCap);
+        form.elements.namedItem("cccdNoiCap").value = profile.cccdNoiCap || "";
+        form.elements.namedItem("lienHeKhanCapHoTen").value = profile.lienHeKhanCapHoTen || "";
+        form.elements.namedItem("lienHeKhanCapQuanHe").value = profile.lienHeKhanCapQuanHe || "";
+        form.elements.namedItem("lienHeKhanCapSoDienThoai").value = profile.lienHeKhanCapSoDienThoai || "";
+        form.elements.namedItem("lienHeKhanCapDiaChi").value = profile.lienHeKhanCapDiaChi || "";
+        form.elements.namedItem("trinhDoHocVan").value = profile.trinhDoHocVan || "";
+        form.elements.namedItem("chuyenNganh").value = profile.chuyenNganh || "";
+        form.elements.namedItem("truong").value = profile.truong || "";
+        form.elements.namedItem("chungChi").value = profile.chungChi || "";
+        form.elements.namedItem("ngoaiNgu").value = profile.ngoaiNgu || "";
+        form.elements.namedItem("kyNang").value = profile.kyNang || "";
+        form.querySelector("[data-employee-work-days]").value = member.soNgayLamViec == null ? "" : `${member.soNgayLamViec} ngày`;
         form.elements.namedItem("moTa").value = account.moTa || "";
         form.elements.namedItem("diaChi").value = account.diaChiChiTiet || "";
         setSelectValue("employee-branch", branch?.chiNhanhId || "");
@@ -195,6 +252,7 @@ if (table) {
         setSelectDisabled(form.querySelector("#employee-ward"), !provinceCode);
         setSelectValue("employee-ward", isVietnam ? account.phuongXa || "" : "");
         form.elements.namedItem("active").checked = !["TAM_KHOA", "DA_ROI"].includes(member.trangThai);
+        form.dataset.memberStatus = member.trangThai || "";
         setEmployeeEditLocks(false);
         setEmployeeFormMode("edit", employeeId);
     };
@@ -203,26 +261,31 @@ if (table) {
         employees.forEach((employee, index) => {
             const row = document.createElement("tr");
             row.dataset.tableRow = "true";
-            const accountRole = (employee.vaiTro || []).some(role => role.maVaiTro === "QUAN_TRI") ? "Quản trị viên" : "Nhân viên";
-            const branchName = (employee.chiNhanh || []).map(branch => branch.tenChiNhanh).filter(Boolean).join(", ") || "—";
+            const roles = employee.vaiTro || [];
+            const accountRole = roles.some(role => role.maVaiTro === "QUAN_TRI") ? "Quản trị viên" : roles.some(role => role.maVaiTro === "NHAN_VIEN") ? "Nhân viên" : "";
+            const branchName = (employee.chiNhanh || []).map(branch => branch.tenChiNhanh).filter(Boolean).join(", ");
             const statusLabels = { CHO_MOI: "Chờ kích hoạt", CHO_XAC_MINH: "Chờ xác minh", DANG_LAM: "Đang làm", TAM_KHOA: "Đã khóa", DA_ROI: "Đã nghỉ" };
-            const status = statusLabels[employee.trangThai] || employee.trangThai || "—";
-            const values = [["stt", index + 1], ["hoTen", employee.hoTen], ["tenDangNhap", employee.tenDangNhap], ["email", employee.email], ["loaiTaiKhoan", accountRole], ["chiNhanh", branchName], ["trangThai", status], ["actions", null]];
-            row.dataset.searchText = [employee.maNhanVien, employee.hoTen, employee.tenDangNhap, employee.email, accountRole, branchName, status].filter(Boolean).join(" ");
+            const status = statusLabels[employee.trangThai] || employee.trangThai || "";
+            const ngayVaoLam = formatDate(employee.ngayVaoLam);
+            const ngayNghi = formatDate(employee.ngayNghiViec);
+            const soNgayLamViec = employee.soNgayLamViec == null ? "" : `${employee.soNgayLamViec} ngày`;
+            const values = [["stt", index + 1], ["maNhanVien", employee.maNhanVien], ["hoTen", employee.hoTen], ["tenDangNhap", employee.tenDangNhap], ["email", employee.email], ["soDienThoai", employee.soDienThoai], ["loaiTaiKhoan", accountRole], ["chucDanh", employee.chucDanh], ["chiNhanh", branchName], ["ngayVaoLam", ngayVaoLam], ["soNgayLamViec", soNgayLamViec], ...(hienThiNhanVienDaNghi ? [["ngayNghiViec", ngayNghi], ["lyDoNghiViec", employee.lyDoNghiViec || ""]] : []), ["trangThai", status], ["actions", null]];
+            row.dataset.searchText = [employee.maNhanVien, employee.hoTen, employee.tenDangNhap, employee.email, employee.soDienThoai, employee.chucDanh, accountRole, branchName, ngayVaoLam, ngayNghi, employee.lyDoNghiViec, status].filter(Boolean).join(" ");
             row.dataset.filterValues = "{}";
             values.forEach(([key, value]) => {
                 const cell = document.createElement("td");
                 cell.dataset.columnKey = key;
-                cell.dataset.searchValue = String(value ?? "—");
-                cell.dataset.sortValue = String(value ?? "");
+                cell.dataset.searchValue = String(value ?? "");
+                cell.dataset.sortValue = key === "ngayVaoLam" ? String(employee.ngayVaoLam ?? "") : key === "ngayNghiViec" ? String(employee.ngayNghiViec ?? "") : key === "soNgayLamViec" ? String(employee.soNgayLamViec ?? "") : String(value ?? "");
                 if (key === "actions") {
                     const actions = document.createElement("div");
                     actions.className = "bf-branch-row-actions";
-                    actions.append(createEmployeeAction("view", employee.id));
-                    if (employee.trangThai !== "DA_ROI") actions.append(createEmployeeAction("edit", employee.id), createEmployeeAction("delete", employee.id));
+                    actions.append(createEmployeeAction("view", employee.id), createEmployeeAction("edit", employee.id));
+                    if (hienThiNhanVienDaNghi) actions.append(createEmployeeAction("rehire", employee.id));
+                    else if (employee.trangThai === "DANG_LAM") actions.append(createEmployeeAction("delete", employee.id), createEmployeeAction("reset-password", employee.id));
                     cell.appendChild(actions);
                 } else {
-                    cell.textContent = value ?? "—";
+                    cell.textContent = value ?? "";
                 }
                 row.appendChild(cell);
             });
@@ -234,7 +297,6 @@ if (table) {
     };
     const loadEmployees = async () => {
         try {
-            const hienThiNhanVienDaNghi = new URLSearchParams(window.location.search).get("trangThai") === "DA_ROI";
             const boLocTrangThai = hienThiNhanVienDaNghi ? "&trangThai=DA_ROI" : "";
             const tieuDe = document.querySelector(".bf-employee-page .bf-admin-page-heading h1");
             const moTa = document.querySelector(".bf-employee-page .bf-admin-page-heading p");
@@ -276,6 +338,19 @@ if (table) {
             deleteForm.reset();
             deleteModal.querySelector("[data-employee-delete-message]").textContent = `Xác nhận cho nhân viên "${employee.hoTen}" nghỉ việc.`;
             openModal(deleteModal, button);
+            return;
+        }
+        if (button.dataset.employeeAction === "rehire") {
+            employeePendingRehire = employee;
+            rehireForm.reset();
+            rehireModal.querySelector("[data-employee-rehire-message]").textContent = `Bạn đang khôi phục quyền làm việc cho "${employee.hoTen}".`;
+            openModal(rehireModal, button);
+            return;
+        }
+        if (button.dataset.employeeAction === "reset-password") {
+            employeePendingPasswordReset = employee;
+                        resetPasswordModal.querySelector("[data-employee-reset-password-message]").textContent = `Gửi mật khẩu tạm mới tới ${employee.email || "email nhân viên"} của ${employee.hoTen}?`;
+            openModal(resetPasswordModal, button);
             return;
         }
         busy = true;
@@ -342,11 +417,31 @@ if (table) {
     });
     form.addEventListener("submit", async event => {
         event.preventDefault();
-        if (busy || !validateForm(form)) return;
+        if (busy) return;
+        const formValid = validateForm(form);
         busy = true;
         const submit = modal.querySelector("[data-bf-modal-submit]");
         if (submit) submit.disabled = true;
         const isEdit = form.dataset.mode === "edit";
+        const employeeProfilePayload = {
+            ngayVaoLam: isoDate(form.elements.namedItem("ngayVaoLam").value),
+            chucDanh: form.elements.namedItem("chucDanh").value.trim() || null,
+            emailCongViec: form.elements.namedItem("emailCongViec").value.trim() || null,
+            soDienThoaiCongViec: form.elements.namedItem("soDienThoaiCongViec").value.trim() || null,
+            cccdSo: form.elements.namedItem("cccdSo").value.trim() || null,
+            cccdNgayCap: isoDate(form.elements.namedItem("cccdNgayCap").value),
+            cccdNoiCap: form.elements.namedItem("cccdNoiCap").value.trim() || null,
+            lienHeKhanCapHoTen: form.elements.namedItem("lienHeKhanCapHoTen").value.trim() || null,
+            lienHeKhanCapQuanHe: form.elements.namedItem("lienHeKhanCapQuanHe").value.trim() || null,
+            lienHeKhanCapSoDienThoai: form.elements.namedItem("lienHeKhanCapSoDienThoai").value.trim() || null,
+            lienHeKhanCapDiaChi: form.elements.namedItem("lienHeKhanCapDiaChi").value.trim() || null,
+            trinhDoHocVan: form.elements.namedItem("trinhDoHocVan").value.trim() || null,
+            chuyenNganh: form.elements.namedItem("chuyenNganh").value.trim() || null,
+            truong: form.elements.namedItem("truong").value.trim() || null,
+            chungChi: form.elements.namedItem("chungChi").value.trim() || null,
+            ngoaiNgu: form.elements.namedItem("ngoaiNgu").value.trim() || null,
+            kyNang: form.elements.namedItem("kyNang").value.trim() || null
+        };
         const createPayload = {
             hoTen: form.elements.namedItem("hoTen").value.trim(),
             maNhanVien: form.elements.namedItem("maNhanVien").value.trim(),
@@ -363,7 +458,8 @@ if (table) {
             xaPhuong: getSelectValue("employee-ward") || null,
             moTa: form.elements.namedItem("moTa").value.trim() || null,
             diaChi: form.elements.namedItem("diaChi").value.trim() || null,
-            active: form.elements.namedItem("active").checked
+            active: form.elements.namedItem("active").checked,
+            ...employeeProfilePayload
         };
         const updatePayload = {
             hoTen: form.elements.namedItem("hoTen").value.trim(),
@@ -371,9 +467,6 @@ if (table) {
             maNhanVien: form.elements.namedItem("maNhanVien").value.trim(),
             email: form.elements.namedItem("email").value.trim(),
             soDienThoai: form.elements.namedItem("soDienThoai").value.trim() || null,
-            chiNhanhId: Number(getSelectValue("employee-branch")),
-            loaiTaiKhoan: getSelectValue("employee-account-type"),
-            active: form.elements.namedItem("active").checked,
             ngaySinh: isoDate(form.elements.namedItem("ngaySinh").value),
             gioiTinh: getSelectValue("employee-gender") || null,
             quocTich: getSelectValue("employee-nationality") || null,
@@ -382,8 +475,22 @@ if (table) {
             tinhThanh: getSelectValue("employee-province") || null,
             xaPhuong: getSelectValue("employee-ward") || null,
             moTa: form.elements.namedItem("moTa").value.trim() || null,
-            diaChi: form.elements.namedItem("diaChi").value.trim() || null
+            diaChi: form.elements.namedItem("diaChi").value.trim() || null,
+            ...employeeProfilePayload
         };
+        if (form.dataset.memberStatus !== "DA_ROI") Object.assign(updatePayload, { chiNhanhId: Number(getSelectValue("employee-branch")), loaiTaiKhoan: getSelectValue("employee-account-type"), active: form.elements.namedItem("active").checked });
+        if (!formValid) {
+            try {
+                if (isEdit) await request(`/api/nhan-vien/${form.dataset.employeeId}`, { method: "PATCH", body: JSON.stringify({ ...updatePayload, kiemTra: true }) });
+                else await request("/api/nhan-vien/kiem-tra-tao-moi", { method: "POST", body: JSON.stringify(createPayload) });
+            } catch (error) {
+                if (!applyServerFieldErrors(form, error)) window.BookFlowFeedback?.toast({ type: "error", message: error.message || "Không thể kiểm tra thông tin nhân viên." });
+            } finally {
+                busy = false;
+                if (submit) submit.disabled = false;
+            }
+            return;
+        }
         try {
             if (isEdit) await request(`/api/nhan-vien/${form.dataset.employeeId}`, { method: "PATCH", body: JSON.stringify(updatePayload) });
             else await request("/api/nhan-vien/moi", { method: "POST", body: JSON.stringify(createPayload) });
@@ -417,6 +524,41 @@ if (table) {
         } finally {
             busy = false;
             if (submit) submit.disabled = false;
+        }
+    });
+    bindInlineValidation(rehireForm);
+    rehireForm.addEventListener("submit", async event => {
+        event.preventDefault();
+        if (!employeePendingRehire || busy || !validateForm(rehireForm)) return;
+        busy = true;
+        const submit = rehireModal.querySelector("[data-bf-modal-submit]");
+        if (submit) submit.disabled = true;
+        try {
+            await request(`/api/nhan-vien/${employeePendingRehire.id}/quay-lai-lam`, { method: "POST", body: JSON.stringify({ chiNhanhId: Number(getSelectValue("employee-rehire-branch", rehireForm)) }) });
+            closeModal(rehireModal);
+            employeePendingRehire = null;
+            window.BookFlowFeedback?.toast({ type: "success", message: "Đã cho nhân viên quay lại làm và gửi mật khẩu tạm." });
+            await loadEmployees();
+        } catch (error) {
+            window.BookFlowFeedback?.toast({ type: "error", message: error.message || "Không thể cho nhân viên quay lại làm." });
+        } finally {
+            busy = false;
+            if (submit) submit.disabled = false;
+        }
+    });
+    resetPasswordModal.addEventListener("bookflow:modal:confirm", async event => {
+        if (event.detail.action !== "reset-password" || !employeePendingPasswordReset || busy) return;
+        busy = true;
+        try {
+            await request(`/api/nhan-vien/${employeePendingPasswordReset.id}/reset-mat-khau`, { method: "POST" });
+            closeModal(resetPasswordModal);
+            employeePendingPasswordReset = null;
+            window.BookFlowFeedback?.toast({ type: "success", message: "Đã gửi mật khẩu tạm mới tới email nhân viên." });
+        } catch (error) {
+            window.BookFlowFeedback?.toast({ type: "error", message: error.message || "Không gửi được mật khẩu mới." });
+        } finally {
+            busy = false;
+            setModalLoading(resetPasswordModal, false);
         }
     });
     initDataTables(document);

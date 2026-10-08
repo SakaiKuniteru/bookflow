@@ -8,10 +8,10 @@ require.cache[transactionPath] = { id: transactionPath, filename: transactionPat
 delete require.cache[servicePath];
 const taiKhoanService = require(servicePath);
 test('API hồ sơ chỉ cập nhật họ tên rồi trả dữ liệu mới', async () => {
-    const original = taiKhoanRepository.capNhatHoTen;
-    taiKhoanRepository.capNhatHoTen = async (id, hoTen) => ({ id, ho_ten: hoTen });
-    try { assert.deepEqual(await taiKhoanService.capNhatHoSoTaiKhoan(8, { ho_ten: '  Hà   An ' }), { id: 8, ho_ten: 'Hà An' }); }
-    finally { taiKhoanRepository.capNhatHoTen = original; }
+    const original = taiKhoanRepository.capNhatHoSo;
+    taiKhoanRepository.capNhatHoSo = async (id, hoSo) => ({ id, ho_ten: hoSo.ho_ten });
+    try { assert.deepEqual(await taiKhoanService.capNhatHoSoTaiKhoan(8, { ho_ten: '  Hà   An ' }), { id: 8, hoTen: 'Hà An' }); }
+    finally { taiKhoanRepository.capNhatHoSo = original; }
 });
 test('API Avatar từ chối file không thuộc tài khoản và không cập nhật liên kết', async () => {
     const originalCheck = taiKhoanRepository.anhDaiDienThuocTaiKhoan;
@@ -32,7 +32,7 @@ test('API Avatar chỉ gắn file riêng đã xác minh của chính tài khoả
     const originalUpdate = taiKhoanRepository.capNhatAnhDaiDien;
     taiKhoanRepository.anhDaiDienThuocTaiKhoan = async (accountId, fileId) => accountId === 8 && fileId === 99;
     taiKhoanRepository.capNhatAnhDaiDien = async (accountId, fileId) => ({ id: accountId, anh_dai_dien_tep_id: fileId });
-    try { assert.deepEqual(await taiKhoanService.capNhatAnhDaiDien(8, { anh_dai_dien_tep_id: 99 }), { id: 8, anh_dai_dien_tep_id: 99 }); }
+    try { assert.deepEqual(await taiKhoanService.capNhatAnhDaiDien(8, { anh_dai_dien_tep_id: 99 }), { id: 8, anhDaiDienTepId: 99 }); }
     finally {
         taiKhoanRepository.anhDaiDienThuocTaiKhoan = originalCheck;
         taiKhoanRepository.capNhatAnhDaiDien = originalUpdate;

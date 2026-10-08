@@ -14,6 +14,8 @@ router.post('/xac-minh-dang-ky', authController.verifyRegistration);
 router.post('/gui-lai-otp-dang-ky', authController.resendRegistrationOtp);
 router.get('/kich-hoat-nhan-vien', authController.employeeActivationPage);
 router.post('/kich-hoat-nhan-vien', authController.completeEmployeeActivation);
+router.get('/doi-mat-khau-tam', authController.temporaryEmployeePasswordPage);
+router.post('/doi-mat-khau-tam', authController.completeTemporaryEmployeePasswordChange);
 router.get('/thiet-lap-phien', authMiddleware, authController.workspaceSetupPage);
 router.post('/thiet-lap-phien', authMiddleware, authController.confirmWorkspaceSetup);
 router.get('/chon-don-vi', authMiddleware, authController.organizationPage);

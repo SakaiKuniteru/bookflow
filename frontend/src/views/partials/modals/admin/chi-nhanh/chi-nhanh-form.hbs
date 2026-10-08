@@ -3,12 +3,11 @@
     title="Thêm mới chi nhánh"
     description="Nhập thông tin chi nhánh mới."
     size="xl"
-    className="bf-modal-sticky-footer"
+    className="bf-modal-sticky-footer bf-branch-modal"
     closeOnBackdrop=false
     loading=false
 }}
     <form id="branch-create-form" class="bf-modal-form bf-modal-form-grid" data-branch-create-form novalidate>
-        <p class="bf-form-error" data-branch-create-error role="alert" hidden></p>
         {{> forms/input
             id="branch-code"
             name="maChiNhanh"
@@ -92,7 +91,7 @@
             label="Địa chỉ chi tiết"
             placeholder="Nhập địa chỉ chi tiết"
             required=true
-            maxlength=500
+            maxlength=300
             rows=4
             icon="map-marked"
         }}

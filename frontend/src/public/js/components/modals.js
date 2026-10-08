@@ -19,7 +19,19 @@ function syncBodyLock(doc) {
         delete doc.body.dataset.modalLocked;
     }
 }
-
+function clearModalErrors(modal) {
+    if (!modal) return;
+    modal.querySelectorAll("[data-bf-field-error]").forEach(error => error.remove());
+    modal.querySelectorAll(".bf-form-error").forEach(error => {
+        error.hidden = true;
+        if (!error.matches(".bf-email-error, .bf-phone-error, .bf-date-error")) error.textContent = "";
+    });
+    modal.querySelectorAll("[aria-invalid='true']").forEach(field => {
+        field.classList.remove("is-invalid");
+        field.removeAttribute("aria-invalid");
+    });
+    modal.querySelectorAll("input, textarea, select").forEach(field => field.setCustomValidity(""));
+}
 function setModalLoading(modal, loading) {
     if (!modal) return;
     modal.dataset.loading = String(Boolean(loading));
@@ -39,6 +51,7 @@ function setModalLoading(modal, loading) {
 
 function openModal(modal, trigger) {
     if (!modal || modal.classList.contains("is-open")) return;
+    clearModalErrors(modal);
     previousFocus = trigger || document.activeElement;
     modal.hidden = false;
     modal.classList.add("is-open");
@@ -51,6 +64,7 @@ function openModal(modal, trigger) {
 
 function closeModal(modal) {
     if (!modal || modal.dataset.loading === "true") return;
+    clearModalErrors(modal);
     modal.classList.remove("is-open");
     modal.setAttribute("aria-hidden", "true");
     modal.hidden = true;

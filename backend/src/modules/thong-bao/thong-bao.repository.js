@@ -82,6 +82,11 @@ class ThongBaoRepository {
         return rowCount;
     }
 
+    async layNhanVienDenNgayKyNiem({ email, ngayHienTai }, client) {
+        const { rows } = await query(`SELECT tv.don_vi_id, dv.id AS don_vi_thuong_hieu_id, dv.ten_hien_thi AS ten_don_vi, dv.logo_tep_id, tv.id AS thanh_vien_id, tv.tai_khoan_id, tk.ho_ten, tk.email, to_char(tk.ngay_sinh, 'YYYY-MM-DD') AS ngay_sinh, to_char(COALESCE(tv.ngay_vao_lam, (tv.ngay_gia_nhap AT TIME ZONE dv.mui_gio)::date), 'YYYY-MM-DD') AS ngay_vao_lam, to_char((now() AT TIME ZONE dv.mui_gio)::date, 'YYYY-MM-DD') AS ngay_hom_nay FROM thanh_vien_don_vi tv JOIN tai_khoan tk ON tk.id = tv.tai_khoan_id JOIN don_vi dv ON dv.id = tv.don_vi_id WHERE tv.trang_thai = 'DANG_LAM' AND tk.trang_thai = 'DANG_DUNG' AND tk.email IS NOT NULL AND ($1::varchar IS NULL OR lower(tk.email) = lower($1)) AND ((tk.ngay_sinh IS NOT NULL AND to_char(tk.ngay_sinh, 'MM-DD') = to_char(COALESCE($2::date, (now() AT TIME ZONE dv.mui_gio)::date), 'MM-DD')) OR (COALESCE(tv.ngay_vao_lam, (tv.ngay_gia_nhap AT TIME ZONE dv.mui_gio)::date) IS NOT NULL AND EXTRACT(YEAR FROM COALESCE($2::date, (now() AT TIME ZONE dv.mui_gio)::date)) - EXTRACT(YEAR FROM COALESCE(tv.ngay_vao_lam, (tv.ngay_gia_nhap AT TIME ZONE dv.mui_gio)::date)) >= 1 AND to_char(COALESCE(tv.ngay_vao_lam, (tv.ngay_gia_nhap AT TIME ZONE dv.mui_gio)::date), 'MM-DD') = to_char(COALESCE($2::date, (now() AT TIME ZONE dv.mui_gio)::date), 'MM-DD'))) ORDER BY tv.don_vi_id, tv.id`, [email ?? null, ngayHienTai ?? null], client);
+        return rows;
+    }
+
     async layLichDenHan(limit = 50, client) {
         const { rows } = await query(`SELECT * FROM lich_thong_bao WHERE trang_thai = 'HOAT_DONG' AND thoi_diem_gui_tiep <= now() AND (thoi_diem_ket_thuc IS NULL OR thoi_diem_gui_tiep <= thoi_diem_ket_thuc) ORDER BY thoi_diem_gui_tiep ASC, id ASC LIMIT $1 FOR UPDATE SKIP LOCKED`, [limit], client);
         return rows;
@@ -96,8 +101,8 @@ class ThongBaoRepository {
         await query(`INSERT INTO thong_bao_kenh_log (thong_bao_kenh_id, lan_thu, trang_thai, loi) VALUES ($1,$2,$3,$4)`, [thongBaoKenhId, lanThu, trangThai, loi], client);
     }
 
-    async layEmailChoGui(limit = 50, client) {
-        const { rows } = await query(`SELECT tbk.id, tbk.thong_bao_id, tbk.dia_chi, tbk.so_lan_thu, tb.tieu_de, tb.noi_dung, tk.ho_ten FROM thong_bao_kenh tbk JOIN thong_bao tb ON tb.id = tbk.thong_bao_id JOIN tai_khoan tk ON tk.id = tb.tai_khoan_id WHERE tbk.kenh = 'EMAIL' AND tbk.trang_thai IN ('CHO_GUI','THAT_BAI') AND COALESCE(tbk.ngay_gui_tiep, now()) <= now() AND tk.trang_thai <> 'DA_DONG' ORDER BY COALESCE(tbk.ngay_gui_tiep, now()), tbk.id LIMIT $1 FOR UPDATE OF tbk SKIP LOCKED`, [limit], client);
+    async layEmailChoGui(limit = 50, client, diaChiChiDinh = null, loaiSuKienChiDinh = null) {
+        const { rows } = await query(`SELECT tbk.id, tbk.thong_bao_id, tbk.dia_chi, tbk.so_lan_thu, tb.tieu_de, tb.noi_dung, tb.du_lieu, sk.loai_su_kien, tk.ho_ten, dv.id AS don_vi_thuong_hieu_id, dv.ten_hien_thi AS ten_don_vi, dv.logo_tep_id FROM thong_bao_kenh tbk JOIN thong_bao tb ON tb.id = tbk.thong_bao_id JOIN thong_bao_su_kien sk ON sk.id = tb.su_kien_id JOIN tai_khoan tk ON tk.id = tb.tai_khoan_id JOIN don_vi dv ON dv.id = tb.don_vi_id WHERE tbk.kenh = 'EMAIL' AND tbk.trang_thai IN ('CHO_GUI','THAT_BAI') AND COALESCE(tbk.ngay_gui_tiep, now()) <= now() AND tk.trang_thai <> 'DA_DONG' AND ($2::varchar IS NULL OR lower(tbk.dia_chi) = lower($2)) AND ($3::varchar IS NULL OR sk.loai_su_kien = $3) ORDER BY COALESCE(tbk.ngay_gui_tiep, now()), tbk.id LIMIT $1 FOR UPDATE OF tbk SKIP LOCKED`, [limit, diaChiChiDinh, loaiSuKienChiDinh], client);
         return rows;
     }
 

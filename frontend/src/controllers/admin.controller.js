@@ -18,12 +18,18 @@ const adminController = {
   profile(req, res, next) { return profileController.render(req, res, next, 'admin'); },
 async branches(req, res) {
   const columns = [
-      { key: 'stt', label: 'STT', sortable: false, sortType: 'number', width: '40px' },
-      { key: 'maChiNhanh', label: 'Mã chi nhánh', sortable: true, sortType: 'text', width: '100px' },
+      { key: 'stt', label: 'STT', sortable: false, sortType: 'number', width: '56px' },
+      { key: 'maChiNhanh', label: 'Mã chi nhánh', sortable: true, sortType: 'text', width: '120px' },
       { key: 'tenChiNhanh', label: 'Tên chi nhánh', sortable: true, sortType: 'text', width: '200px' },
-      { key: 'loaiChiNhanh', label: 'Loại', align: 'center', sortable: true, sortType: 'text', width: '100px' },
-      { key: 'diaChiChiTiet', label: 'Địa chỉ chi tiết', sortable: true, sortType: 'text', width: '200px' },
-      { key: 'maTinhThanh', label: 'Mã tỉnh/thành', sortable: true, sortType: 'text', width: '100px' },
+      { key: 'loaiChiNhanh', label: 'Loại', align: 'center', sortable: true, sortType: 'text', width: '110px' },
+      { key: 'soDienThoai', label: 'Hotline', sortable: true, sortType: 'text', width: '150px' },
+      { key: 'email', label: 'Email', sortable: true, sortType: 'text', width: '220px' },
+      { key: 'tenTinhThanh', label: 'Tỉnh/thành', sortable: true, sortType: 'text', width: '160px' },
+      { key: 'tenPhuongXa', label: 'Xã/phường', sortable: true, sortType: 'text', width: '160px' },
+      { key: 'diaChiChiTiet', label: 'Địa chỉ chi tiết', sortable: true, sortType: 'text', width: '260px' },
+      { key: 'choNhanTaiQuay', label: 'Tại quầy', align: 'center', sortable: true, sortType: 'text', width: '100px' },
+      { key: 'choBanTrucTuyen', label: 'Trực tuyến', align: 'center', sortable: true, sortType: 'text', width: '120px' },
+      { key: 'trangThai', label: 'Trạng thái', align: 'center', sortable: true, sortType: 'text', width: '140px' },
       { key: 'actions', label: 'Thao tác', sortable: false, width: '120px' }
   ];
   return res.render('admin/chi-nhanh', {
@@ -32,7 +38,7 @@ async branches(req, res) {
     mode: 'client',
     action: '/admin/chi-nhanh',
     ariaLabel: 'Danh sách chi nhánh',
-    minWidth: '1050',
+    minWidth: '1990',
     columns,
     rows: [],
     hasRows: false,
@@ -54,14 +60,20 @@ async branches(req, res) {
 async employees(req, res) {
   const nhanVienDaNghi = req.query.trangThai === 'DA_ROI';
   const columns = [
-      { key: 'stt', label: 'STT', sortable: false, sortType: 'number', width: '40px' },
-      { key: 'hoTen', label: 'Họ và tên', sortable: true, sortType: 'text', width: '100px' },
-      { key: 'tenDangNhap', label: 'Tên đăng nhập', sortable: true, sortType: 'text', width: '100px' },
-      { key: 'email', label: 'Email', sortable: true, sortType: 'text', width: '200px' },
-      { key: 'loaiTaiKhoan', label: 'Loại tài khoản', sortable: true, sortType: 'text', width: '100px' },
-      { key: 'chiNhanh', label: 'Chi nhánh', sortable: false, width: '150px' },
-      { key: 'trangThai', label: 'Trạng thái', sortable: true, sortType: 'text', width: '100px' },
-      { key: 'actions', label: 'Thao tác', sortable: false, width: '120px' }
+      { key: 'stt', label: 'STT', sortable: false, sortType: 'number', width: '56px' },
+      { key: 'maNhanVien', label: 'Mã nhân viên', sortable: true, sortType: 'text', width: '120px' },
+      { key: 'hoTen', label: 'Họ và tên', sortable: true, sortType: 'text', width: '180px' },
+      { key: 'tenDangNhap', label: 'Tên đăng nhập', sortable: true, sortType: 'text', width: '140px' },
+      { key: 'email', label: 'Email', sortable: true, sortType: 'text', width: '210px' },
+      { key: 'soDienThoai', label: 'Số điện thoại', sortable: true, sortType: 'text', width: '140px' },
+      { key: 'loaiTaiKhoan', label: 'Loại tài khoản', sortable: true, sortType: 'text', width: '140px' },
+      { key: 'chucDanh', label: 'Chức danh', sortable: true, sortType: 'text', width: '160px' },
+      { key: 'chiNhanh', label: 'Chi nhánh', sortable: false, width: '180px' },
+      { key: 'ngayVaoLam', label: 'Ngày vào làm', sortable: true, sortType: 'date', width: '130px' },
+      { key: 'soNgayLamViec', label: 'Số ngày làm việc', sortable: true, sortType: 'number', width: '150px' },
+      ...(nhanVienDaNghi ? [{ key: 'ngayNghiViec', label: 'Ngày nghỉ việc', sortable: true, sortType: 'date', width: '140px' }, { key: 'lyDoNghiViec', label: 'Lý do nghỉ', sortable: false, width: '220px' }] : []),
+      { key: 'trangThai', label: 'Trạng thái', sortable: true, sortType: 'text', width: '110px' },
+      { key: 'actions', label: 'Thao tác', sortable: false, width: '160px' }
   ];
   return res.render('admin/nhan-vien', {
     title: nhanVienDaNghi ? 'Nhân viên đã nghỉ' : 'Nhân viên',
@@ -87,7 +99,7 @@ async employees(req, res) {
     pagination: { enabled: true, page: 1, pageSize: 20, total: 0, pages: 1, from: 0, to: 0 },
     emptyTitle: nhanVienDaNghi ? 'Chưa có nhân viên đã nghỉ' : 'Chưa có nhân viên để hiển thị',
     emptyDescription: nhanVienDaNghi ? 'Nhân viên đã nghỉ việc sẽ hiển thị tại đây.' : 'Thêm nhân viên vào đơn vị để hiển thị trong danh sách.',
-    scripts: ['/js/page/admin-nhan-vien.js?v=20261008-3']
+    scripts: ['/js/page/admin-nhan-vien.js?v=20261008-4']
   });
 },
 async customers(req, res) {

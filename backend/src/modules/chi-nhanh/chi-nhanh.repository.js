@@ -35,6 +35,11 @@ class ChiNhanhRepository {
         return rows[0] ?? null;
     }
 
+    async maChiNhanhDaTonTai(donViId, maChiNhanh, boQuaId = null, client) {
+        const { rowCount } = await query('SELECT id FROM chi_nhanh WHERE don_vi_id = $1 AND upper(ma_chi_nhanh) = upper($2) AND ($3::integer IS NULL OR id <> $3) LIMIT 1', [donViId, maChiNhanh, boQuaId], client);
+        return rowCount > 0;
+    }
+
     async taoChiNhanhDb(donViId, actorId, duLieu, client) {
         const cacTruong = Object.keys(duLieu);
         if (cacTruong.some(ten => !TRUONG_GHI.has(ten) || ten === 'quan_ly_thanh_vien_id')) throw new Error('Trường tạo chi nhánh không hợp lệ');

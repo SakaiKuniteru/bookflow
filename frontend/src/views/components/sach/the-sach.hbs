@@ -10,9 +10,9 @@
         {{/if}}
     </a>
     <div class="bf-demo-book-info">
-        <small>{{#if book.categoryName}}{{book.categoryName}}{{else}}Sách BookFlow{{/if}} · {{#if book.statusLabel}}{{book.statusLabel}}{{else}}Còn sách{{/if}}</small>
+        <small>{{#if book.categoryName}}{{book.categoryName}}{{else}}Sách{{/if}} · {{#if book.statusLabel}}{{book.statusLabel}}{{else}}Còn sách{{/if}}</small>
         <a href="{{#if book.href}}{{book.href}}{{else}}/sach{{/if}}"><strong>{{book.title}}</strong></a>
-        <span class="bf-demo-author">{{#if book.authorsDisplay}}{{book.authorsDisplay}}{{else}}BookFlow{{/if}}</span>
+        <span class="bf-demo-author">{{#if book.authorsDisplay}}{{book.authorsDisplay}}{{else}}Tác giả chưa cập nhật{{/if}}</span>
         <div class="bf-demo-price">
             <b>{{#if book.priceDisplay}}{{book.priceDisplay}}{{else}}Đang cập nhật{{/if}}</b>
             <small>{{#if book.rentalPriceDisplay}}Thuê {{book.rentalPriceDisplay}}{{else}}Xem tại chi nhánh{{/if}}</small>

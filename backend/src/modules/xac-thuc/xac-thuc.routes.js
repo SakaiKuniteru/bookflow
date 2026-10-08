@@ -19,6 +19,7 @@ router.post('/doi-email-dang-ky', gioiHan(5, 3600000), controller.doiEmailDangKy
 router.post('/xac-nhan-dang-ky', gioiHan(10), controller.xacNhanDangKy);
 router.post('/gui-lai-otp-dang-ky', gioiHan(5, 3600000), controller.guiLaiOtpDangKy);
 router.post('/dang-nhap', gioiHan(10), controller.dangNhap);
+router.post('/doi-mat-khau-tam', gioiHan(10), controller.doiMatKhauTamNhanVien);
 router.post('/hoan-tat-nhan-vien', gioiHan(10), controller.hoanTatNhanVien);
 router.post('/quen-mat-khau', gioiHan(5, 3600000), controller.quenMatKhau);
 router.post('/dat-lai-mat-khau', gioiHan(10), controller.datLaiMatKhau);
