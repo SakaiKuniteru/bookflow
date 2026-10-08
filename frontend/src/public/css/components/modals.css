@@ -155,24 +155,32 @@
     color: var(--bf-form-text, #1f2937);
 }
 
+.bf-modal-dialog {
+    min-height: 0;
+}
+.bf-modal-header {
+    flex: 0 0 auto;
+}
 .bf-modal-body {
     min-height: 0;
+    flex: 1 1 auto;
     padding: 20px;
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
 }
-
 .bf-modal-footer {
     flex: 0 0 auto;
     border-top: 1px solid var(--bf-form-border, #d9dee7);
     background: #fff;
 }
 .bf-modal-sticky-footer .bf-modal-body {
-    display: flex;
-    flex-direction: column;
+    display: block;
     padding-bottom: 0;
+    overflow-anchor: none;
 }
 .bf-modal-sticky-footer .bf-modal-body > .bf-modal-form {
-    flex: 0 0 auto;
+    flex: none;
 }
 .bf-modal-sticky-footer .bf-modal-body > .bf-modal-footer {
     position: sticky;

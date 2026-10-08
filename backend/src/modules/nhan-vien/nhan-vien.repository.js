@@ -1,20 +1,21 @@
 const { query } = require('../../database/query.js');
 
-const TRUONG_THANH_VIEN = new Set(['chuc_danh', 'email_cong_viec', 'so_dien_thoai_cong_viec']);
-const TRUONG_HO_SO = new Set(['loai_nhan_su', 'hinh_thuc_lam_viec', 'ngay_bat_dau_thu_viec', 'ngay_ket_thuc_thu_viec', 'ngay_chinh_thuc', 'ngay_nghi_viec_du_kien', 'ma_cham_cong', 'so_may_le', 'email_noi_bo', 'ghi_chu_cong_viec', 'vi_tri_chinh_id', 'nguoi_quan_ly_id']);
+const TRUONG_THANH_VIEN = new Map([['maNhanVien', 'ma_nhan_vien'], ['chucDanh', 'chuc_danh'], ['emailCongViec', 'email_cong_viec'], ['soDienThoaiCongViec', 'so_dien_thoai_cong_viec']]);
+const TRUONG_HO_SO = new Map([['loaiNhanSu', 'loai_nhan_su'], ['hinhThucLamViec', 'hinh_thuc_lam_viec'], ['ngayBatDauThuViec', 'ngay_bat_dau_thu_viec'], ['ngayKetThucThuViec', 'ngay_ket_thuc_thu_viec'], ['ngayChinhThuc', 'ngay_chinh_thuc'], ['ngayNghiViecDuKien', 'ngay_nghi_viec_du_kien'], ['maChamCong', 'ma_cham_cong'], ['soMayLe', 'so_may_le'], ['emailNoiBo', 'email_noi_bo'], ['ghiChuCongViec', 'ghi_chu_cong_viec'], ['viTriChinhId', 'vi_tri_chinh_id'], ['nguoiQuanLyId', 'nguoi_quan_ly_id']]);
+const TRUONG_TAI_KHOAN = new Map([['hoTen', 'ho_ten'], ['tenDangNhap', 'ten_dang_nhap'], ['email', 'email'], ['soDienThoai', 'so_dien_thoai'], ['ngaySinh', 'ngay_sinh'], ['gioiTinh', 'gioi_tinh'], ['quocTich', 'quoc_tich'], ['danToc', 'dan_toc'], ['moTa', 'mo_ta'], ['diaChi', 'dia_chi_chi_tiet'], ['quocGia', 'quoc_gia'], ['tinhThanh', 'tinh_thanh_pho'], ['xaPhuong', 'phuong_xa']]);
 
 async function danhSach(donViId, boLoc, client) {
     const thamSo = [donViId, `%${boLoc.tuKhoa}%`, boLoc.trangThai, boLoc.chiNhanhId];
     const dieuKien = `tv.don_vi_id = $1 AND ($2 = '%%' OR tk.ho_ten ILIKE $2 OR tk.email ILIKE $2 OR tk.ten_dang_nhap ILIKE $2 OR tv.ma_nhan_vien ILIKE $2) AND ($3::varchar IS NULL OR tv.trang_thai = $3) AND ($4::integer IS NULL OR EXISTS (SELECT 1 FROM thanh_vien_chi_nhanh pc WHERE pc.don_vi_id = tv.don_vi_id AND pc.thanh_vien_don_vi_id = tv.id AND pc.chi_nhanh_id = $4 AND pc.trang_thai = 'HIEU_LUC' AND pc.ngay_bat_dau <= CURRENT_DATE AND (pc.ngay_ket_thuc IS NULL OR pc.ngay_ket_thuc >= CURRENT_DATE)))`;
     const { rows: [tong] } = await query(`SELECT COUNT(*)::integer AS so_luong FROM thanh_vien_don_vi tv JOIN tai_khoan tk ON tk.id = tv.tai_khoan_id WHERE ${dieuKien}`, thamSo, client);
-    const { rows } = await query(`SELECT tv.id, tv.don_vi_id, tv.tai_khoan_id, tv.ma_nhan_vien, tv.chuc_danh, tv.email_cong_viec, tv.so_dien_thoai_cong_viec, tv.ngay_moi, tv.ngay_gia_nhap, tv.ngay_nghi_viec, tv.trang_thai, tv.ngay_tao, tv.ngay_cap_nhat, tk.ten_dang_nhap, tk.ho_ten, tk.email, tk.so_dien_thoai, tk.anh_dai_dien_tep_id, tk.trang_thai AS trang_thai_tai_khoan, tk.email_da_xac_minh, hs.vi_tri_chinh_id, vt.ten_vi_tri AS ten_vi_tri_chinh,
+    const { rows } = await query(`SELECT tv.id, tv.don_vi_id, tv.tai_khoan_id, tv.ma_nhan_vien, tv.chuc_danh, tv.email_cong_viec, tv.so_dien_thoai_cong_viec, tv.ngay_moi, tv.ngay_gia_nhap, tv.ngay_nghi_viec, tv.trang_thai, tv.ngay_tao, tv.ngay_cap_nhat, tk.ten_dang_nhap, tk.ho_ten, tk.email, tk.so_dien_thoai, tk.anh_dai_dien_tep_id, tk.trang_thai AS trang_thai_tai_khoan, tk.email_da_xac_minh, tk.ngay_sinh AS "ngaySinh", tk.gioi_tinh AS "gioiTinh", tk.quoc_tich AS "quocTich", tk.dan_toc AS "danToc", tk.mo_ta AS "moTa", tk.dia_chi_chi_tiet AS "diaChi", tk.quoc_gia AS "quocGia", tk.tinh_thanh_pho AS "tinhThanh", tk.phuong_xa AS "xaPhuong", (tv.trang_thai NOT IN ('TAM_KHOA', 'DA_ROI')) AS active, hs.vi_tri_chinh_id, vt.ten_vi_tri AS ten_vi_tri_chinh,
         COALESCE((SELECT json_agg(json_build_object('id', cn.id, 'ma_chi_nhanh', cn.ma_chi_nhanh, 'ten_chi_nhanh', cn.ten_chi_nhanh, 'la_chi_nhanh_chinh', pc.la_chi_nhanh_chinh) ORDER BY pc.la_chi_nhanh_chinh DESC, cn.ten_chi_nhanh) FROM thanh_vien_chi_nhanh pc JOIN chi_nhanh cn ON cn.id = pc.chi_nhanh_id AND cn.don_vi_id = pc.don_vi_id WHERE pc.don_vi_id = tv.don_vi_id AND pc.thanh_vien_don_vi_id = tv.id AND pc.trang_thai = 'HIEU_LUC' AND pc.ngay_bat_dau <= CURRENT_DATE AND (pc.ngay_ket_thuc IS NULL OR pc.ngay_ket_thuc >= CURRENT_DATE)), '[]'::json) AS chi_nhanh,
         COALESCE((SELECT json_agg(json_build_object('id', v.id, 'ma_vai_tro', v.ma_vai_tro, 'ten_vai_tro', v.ten_vai_tro, 'chi_nhanh_id', g.chi_nhanh_id)) FROM thanh_vien_vai_tro g JOIN vai_tro v ON v.id = g.vai_tro_id AND v.don_vi_id = g.don_vi_id WHERE g.don_vi_id = tv.don_vi_id AND g.thanh_vien_don_vi_id = tv.id AND g.ngay_bat_dau <= now() AND (g.ngay_ket_thuc IS NULL OR g.ngay_ket_thuc > now()) AND v.trang_thai = 'DANG_DUNG'), '[]'::json) AS vai_tro
         FROM thanh_vien_don_vi tv JOIN tai_khoan tk ON tk.id = tv.tai_khoan_id LEFT JOIN ho_so_nhan_vien hs ON hs.don_vi_id = tv.don_vi_id AND hs.thanh_vien_don_vi_id = tv.id LEFT JOIN vi_tri_cong_viec vt ON vt.id = hs.vi_tri_chinh_id AND vt.don_vi_id = hs.don_vi_id WHERE ${dieuKien} ORDER BY tv.ngay_tao DESC, tv.id DESC LIMIT $5 OFFSET $6`, [...thamSo, boLoc.kichThuoc, (boLoc.trang - 1) * boLoc.kichThuoc], client);
     return { nhan_vien: rows, phan_trang: { trang: boLoc.trang, kich_thuoc: boLoc.kichThuoc, tong_so: tong.so_luong, tong_trang: Math.ceil(tong.so_luong / boLoc.kichThuoc) } };
 }
 async function layCoBan(donViId, thanhVienId, client) {
-    const { rows } = await query(`SELECT jsonb_build_object('id', tk.id, 'ten_dang_nhap', tk.ten_dang_nhap, 'email', tk.email, 'so_dien_thoai', tk.so_dien_thoai, 'ho_ten', tk.ho_ten, 'anh_dai_dien_tep_id', tk.anh_dai_dien_tep_id, 'email_da_xac_minh', tk.email_da_xac_minh, 'so_dien_thoai_da_xac_minh', tk.so_dien_thoai_da_xac_minh, 'trang_thai', tk.trang_thai, 'ngay_tao', tk.ngay_tao, 'ngay_cap_nhat', tk.ngay_cap_nhat, 'ngay_dang_nhap_cuoi', tk.ngay_dang_nhap_cuoi) AS tai_khoan, to_jsonb(tv) AS thanh_vien, to_jsonb(hs) AS ho_so FROM thanh_vien_don_vi tv JOIN tai_khoan tk ON tk.id = tv.tai_khoan_id LEFT JOIN ho_so_nhan_vien hs ON hs.don_vi_id = tv.don_vi_id AND hs.thanh_vien_don_vi_id = tv.id WHERE tv.don_vi_id = $1 AND tv.id = $2`, [donViId, thanhVienId], client);
+    const { rows } = await query(`SELECT jsonb_build_object('id', tk.id, 'ten_dang_nhap', tk.ten_dang_nhap, 'email', tk.email, 'so_dien_thoai', tk.so_dien_thoai, 'ho_ten', tk.ho_ten, 'anh_dai_dien_tep_id', tk.anh_dai_dien_tep_id, 'email_da_xac_minh', tk.email_da_xac_minh, 'so_dien_thoai_da_xac_minh', tk.so_dien_thoai_da_xac_minh, 'ngay_sinh', tk.ngay_sinh, 'gioi_tinh', tk.gioi_tinh, 'quoc_tich', tk.quoc_tich, 'dan_toc', tk.dan_toc, 'mo_ta', tk.mo_ta, 'dia_chi_chi_tiet', tk.dia_chi_chi_tiet, 'quoc_gia', tk.quoc_gia, 'tinh_thanh_pho', tk.tinh_thanh_pho, 'phuong_xa', tk.phuong_xa, 'trang_thai', tk.trang_thai, 'ngay_tao', tk.ngay_tao, 'ngay_cap_nhat', tk.ngay_cap_nhat, 'ngay_dang_nhap_cuoi', tk.ngay_dang_nhap_cuoi) AS tai_khoan, to_jsonb(tv) AS thanh_vien, to_jsonb(hs) AS ho_so FROM thanh_vien_don_vi tv JOIN tai_khoan tk ON tk.id = tv.tai_khoan_id LEFT JOIN ho_so_nhan_vien hs ON hs.don_vi_id = tv.don_vi_id AND hs.thanh_vien_don_vi_id = tv.id WHERE tv.don_vi_id = $1 AND tv.id = $2`, [donViId, thanhVienId], client);
     return rows[0] ?? null;
 }
 async function layThanhVienCuaToi(donViId, taiKhoanId, client) {
@@ -53,14 +54,23 @@ async function coVaiTroQuanTri(donViId, thanhVienId, client) {
 async function capNhatHoSo(donViId, thanhVienId, actorId, duLieu, client) {
     const duLieuTv = Object.entries(duLieu).filter(([ten]) => TRUONG_THANH_VIEN.has(ten));
     const duLieuHs = Object.entries(duLieu).filter(([ten]) => TRUONG_HO_SO.has(ten));
+    const duLieuTk = Object.entries(duLieu).filter(([ten]) => TRUONG_TAI_KHOAN.has(ten));
+    const emailMoi = duLieuTk.find(([ten]) => ten === 'email')?.[1];
+    const soDienThoaiMoi = duLieuTk.find(([ten]) => ten === 'soDienThoai')?.[1];
+    if (emailMoi !== undefined) await query(`UPDATE tai_khoan tk SET email_da_xac_minh = FALSE FROM thanh_vien_don_vi tv WHERE tv.don_vi_id = $1 AND tv.id = $2 AND tk.id = tv.tai_khoan_id AND tk.email IS DISTINCT FROM $3`, [donViId, thanhVienId, emailMoi], client);
+    if (soDienThoaiMoi !== undefined) await query(`UPDATE tai_khoan tk SET so_dien_thoai_da_xac_minh = FALSE FROM thanh_vien_don_vi tv WHERE tv.don_vi_id = $1 AND tv.id = $2 AND tk.id = tv.tai_khoan_id AND tk.so_dien_thoai IS DISTINCT FROM $3`, [donViId, thanhVienId, soDienThoaiMoi], client);
     if (duLieuTv.length) {
-        const set = duLieuTv.map(([ten], i) => `${ten} = $${i + 4}`).join(', ');
+        const set = duLieuTv.map(([ten], index) => `${TRUONG_THANH_VIEN.get(ten)} = $${index + 4}`).join(', ');
         await query(`UPDATE thanh_vien_don_vi SET ${set}, nguoi_cap_nhat_id = $3 WHERE don_vi_id = $1 AND id = $2`, [donViId, thanhVienId, actorId, ...duLieuTv.map(([, value]) => value)], client);
     }
+    if (duLieuTk.length) {
+        const set = duLieuTk.map(([ten], index) => `${TRUONG_TAI_KHOAN.get(ten)} = $${index + 3}`).join(', ');
+        await query(`UPDATE tai_khoan tk SET ${set}, ngay_cap_nhat = now() FROM thanh_vien_don_vi tv WHERE tv.don_vi_id = $1 AND tv.id = $2 AND tk.id = tv.tai_khoan_id`, [donViId, thanhVienId, ...duLieuTk.map(([, value]) => value)], client);
+    }
     if (duLieuHs.length) {
-        const cot = duLieuHs.map(([ten]) => ten);
+        const cot = duLieuHs.map(([ten]) => TRUONG_HO_SO.get(ten));
         const values = duLieuHs.map(([, value]) => value);
-        const placeholders = values.map((_, i) => `$${i + 4}`);
+        const placeholders = values.map((_, index) => `$${index + 4}`);
         const set = cot.map(ten => `${ten} = EXCLUDED.${ten}`).join(', ');
         await query(`INSERT INTO ho_so_nhan_vien (don_vi_id, thanh_vien_don_vi_id, nguoi_tao_id, ${cot.join(', ')}) VALUES ($1, $2, $3, ${placeholders.join(', ')}) ON CONFLICT (don_vi_id, thanh_vien_don_vi_id) DO UPDATE SET ${set}, nguoi_cap_nhat_id = EXCLUDED.nguoi_tao_id`, [donViId, thanhVienId, actorId, ...values], client);
     }

@@ -46,28 +46,80 @@ class NhanVienService {
     async moiNhanVien(auth, body, requestId) {
         await yeuCauQuanLy(auth);
         const ketQua = await xacThucService.taoNhanVienBoiAdmin(auth, body, requestId);
-        return this.chiTiet(auth, ketQua.thanh_vien_id);
+        return this.chiTiet(auth, ketQua.thanhVienId);
     }
     async capNhat(auth, thanhVienId, body, requestId) {
         const id = v.idHopLe(thanhVienId, 'Nhân viên');
         const duLieu = v.capNhatHopLe(body);
+        const loiTruong = (field, message, status = 422, code = 'INVALID_INPUT') => new AppError({ code, message, status, details: [{ field, message }] });
         await trongGiaoDich(async client => {
             await yeuCauQuanLy(auth, client);
             const tv = await yeuCauThanhVien(auth.donViId, id, client);
             if (tv.trang_thai === 'DA_ROI') throw loi('Nhân viên đã nghỉ việc', 409, 'MEMBER_INACTIVE');
-            if (duLieu.vi_tri_chinh_id != null) {
-                const { rowCount } = await query(`SELECT id FROM vi_tri_cong_viec WHERE don_vi_id = $1 AND id = $2 AND trang_thai = 'DANG_DUNG'`, [auth.donViId, duLieu.vi_tri_chinh_id], client);
-                if (!rowCount) throw loi('Vị trí công việc không hợp lệ', 422, 'INVALID_POSITION');
+            if (duLieu.email !== undefined) {
+                const { rowCount } = await query('SELECT id FROM tai_khoan WHERE lower(email) = lower($1) AND id <> $2', [duLieu.email, tv.tai_khoan_id], client);
+                if (rowCount) throw loiTruong('email', 'Email này đã được sử dụng', 409, 'EMAIL_EXISTS');
             }
-            if (duLieu.nguoi_quan_ly_id != null) {
-                if (duLieu.nguoi_quan_ly_id === id) throw loi('Nhân viên không thể tự quản lý chính mình', 422, 'INVALID_MANAGER');
-                const { rowCount } = await query(`SELECT id FROM thanh_vien_don_vi WHERE don_vi_id = $1 AND id = $2 AND trang_thai = 'DANG_LAM'`, [auth.donViId, duLieu.nguoi_quan_ly_id], client);
-                if (!rowCount) throw loi('Người quản lý không hợp lệ', 422, 'INVALID_MANAGER');
+            if (duLieu.tenDangNhap !== undefined) {
+                const { rowCount } = await query('SELECT id FROM tai_khoan WHERE lower(ten_dang_nhap) = lower($1) AND id <> $2', [duLieu.tenDangNhap, tv.tai_khoan_id], client);
+                if (rowCount) throw loiTruong('tenDangNhap', 'Tên đăng nhập này đã được sử dụng', 409, 'USERNAME_EXISTS');
+            }
+            if (duLieu.maNhanVien !== undefined) {
+                const { rowCount } = await query('SELECT id FROM thanh_vien_don_vi WHERE don_vi_id = $1 AND lower(ma_nhan_vien) = lower($2) AND id <> $3', [auth.donViId, duLieu.maNhanVien, id], client);
+                if (rowCount) throw loiTruong('maNhanVien', 'Mã nhân viên đã tồn tại trong đơn vị', 409, 'EMPLOYEE_CODE_EXISTS');
+            }
+            const { rows: vaiTroHienTai } = await query(`SELECT vt.ma_vai_tro FROM thanh_vien_vai_tro g JOIN vai_tro vt ON vt.id = g.vai_tro_id AND vt.don_vi_id = g.don_vi_id WHERE g.don_vi_id = $1 AND g.thanh_vien_don_vi_id = $2 AND vt.ma_vai_tro IN ('NHAN_VIEN','QUAN_TRI') AND vt.trang_thai = 'DANG_DUNG' AND g.ngay_bat_dau <= now() AND (g.ngay_ket_thuc IS NULL OR g.ngay_ket_thuc > now())`, [auth.donViId, id], client);
+            const laQuanTriHienTai = vaiTroHienTai.some(item => item.ma_vai_tro === 'QUAN_TRI');
+            if (duLieu.loaiTaiKhoan === 'QUAN_TRI' && !laQuanTriHienTai && !await phanQuyenService.kiemTraQuyen(auth, 'roles.manage', {}, client)) throw loiTruong('loaiTaiKhoan', 'Không có quyền cấp loại tài khoản quản trị viên', 403, 'FORBIDDEN');
+            if (duLieu.loaiTaiKhoan && !vaiTroHienTai.some(item => item.ma_vai_tro === duLieu.loaiTaiKhoan)) {
+                if (laQuanTriHienTai && duLieu.loaiTaiKhoan === 'NHAN_VIEN') {
+                    const { rows: [soQuanTri] } = await query(`SELECT COUNT(DISTINCT tv.id)::integer AS so_luong FROM thanh_vien_don_vi tv JOIN thanh_vien_vai_tro g ON g.don_vi_id = tv.don_vi_id AND g.thanh_vien_don_vi_id = tv.id JOIN vai_tro vt ON vt.id = g.vai_tro_id AND vt.don_vi_id = g.don_vi_id WHERE tv.don_vi_id = $1 AND tv.trang_thai NOT IN ('TAM_KHOA','DA_ROI') AND vt.ma_vai_tro = 'QUAN_TRI' AND vt.trang_thai = 'DANG_DUNG' AND g.ngay_bat_dau <= now() AND (g.ngay_ket_thuc IS NULL OR g.ngay_ket_thuc > now())`, [auth.donViId], client);
+                    if (Number(soQuanTri.so_luong) <= 1) throw loiTruong('loaiTaiKhoan', 'Không thể hạ quyền quản trị viên cuối cùng', 409, 'LAST_ADMIN');
+                }
+                const { rows: [vaiTroMoi] } = await query(`SELECT id FROM vai_tro WHERE don_vi_id = $1 AND ma_vai_tro = $2 AND trang_thai = 'DANG_DUNG'`, [auth.donViId, duLieu.loaiTaiKhoan], client);
+                if (!vaiTroMoi) throw loiTruong('loaiTaiKhoan', 'Vai trò này chưa được cấu hình trong đơn vị', 409, 'ROLE_NOT_READY');
+            }
+            if (duLieu.chiNhanhId !== undefined) {
+                const { rowCount } = await query(`SELECT id FROM chi_nhanh WHERE don_vi_id = $1 AND id = $2 AND trang_thai = 'DANG_DUNG'`, [auth.donViId, duLieu.chiNhanhId], client);
+                if (!rowCount) throw loiTruong('chiNhanhId', 'Chi nhánh không tồn tại hoặc không hoạt động', 422, 'BRANCH_NOT_FOUND');
             }
             try { await repo.capNhatHoSo(auth.donViId, id, auth.taiKhoanId, duLieu, client); }
             catch (error) {
-                if (error.code === '23505') throw loi('Mã chấm công hoặc dữ liệu nhân viên đã tồn tại', 409, 'EMPLOYEE_EXISTS');
+                if (error.code === '23505') {
+                    const field = error.constraint === 'uq_tai_khoan_email' ? 'email' : error.constraint === 'uq_tai_khoan_ten_dang_nhap' ? 'tenDangNhap' : 'maNhanVien';
+                    const message = field === 'email' ? 'Email này đã được sử dụng' : field === 'tenDangNhap' ? 'Tên đăng nhập này đã được sử dụng' : 'Mã nhân viên đã tồn tại trong đơn vị';
+                    throw loiTruong(field, message, 409, 'DUPLICATE');
+                }
                 throw error;
+            }
+            if (duLieu.chiNhanhId !== undefined) {
+                const { rows: [chiNhanhCu] } = await query(`SELECT id, chi_nhanh_id FROM thanh_vien_chi_nhanh WHERE don_vi_id = $1 AND thanh_vien_don_vi_id = $2 AND la_chi_nhanh_chinh = TRUE AND trang_thai = 'HIEU_LUC' AND ngay_ket_thuc IS NULL FOR UPDATE`, [auth.donViId, id], client);
+                if (chiNhanhCu && Number(chiNhanhCu.chi_nhanh_id) !== duLieu.chiNhanhId) {
+                    await query(`UPDATE thanh_vien_chi_nhanh SET trang_thai = 'KET_THUC', ngay_ket_thuc = GREATEST(ngay_bat_dau, CURRENT_DATE), la_chi_nhanh_chinh = FALSE, nguoi_cap_nhat_id = $3 WHERE id = $1 AND don_vi_id = $2`, [chiNhanhCu.id, auth.donViId, auth.taiKhoanId], client);
+                    await query(`UPDATE thanh_vien_vai_tro SET ngay_ket_thuc = now(), nguoi_cap_nhat_id = $3 WHERE don_vi_id = $1 AND thanh_vien_don_vi_id = $2 AND chi_nhanh_id = $4 AND (ngay_ket_thuc IS NULL OR ngay_ket_thuc > now())`, [auth.donViId, id, auth.taiKhoanId, chiNhanhCu.chi_nhanh_id], client);
+                    await query(`UPDATE phan_cong_vi_tri SET trang_thai = 'KET_THUC', ngay_ket_thuc = GREATEST(ngay_bat_dau, CURRENT_DATE), la_vi_tri_chinh = FALSE, nguoi_cap_nhat_id = $3 WHERE don_vi_id = $1 AND thanh_vien_don_vi_id = $2 AND chi_nhanh_id = $4 AND trang_thai = 'HIEU_LUC'`, [auth.donViId, id, auth.taiKhoanId, chiNhanhCu.chi_nhanh_id], client);
+                    await query('UPDATE phien_dang_nhap SET chi_nhanh_dang_chon_id = NULL WHERE tai_khoan_id = $1 AND don_vi_dang_chon_id = $2 AND chi_nhanh_dang_chon_id = $3', [tv.tai_khoan_id, auth.donViId, chiNhanhCu.chi_nhanh_id], client);
+                }
+                await query(`UPDATE thanh_vien_chi_nhanh SET la_chi_nhanh_chinh = FALSE, nguoi_cap_nhat_id = $3 WHERE don_vi_id = $1 AND thanh_vien_don_vi_id = $2 AND trang_thai = 'HIEU_LUC' AND ngay_ket_thuc IS NULL`, [auth.donViId, id, auth.taiKhoanId], client);
+                const { rows: [phanCongMoi] } = await query(`SELECT id FROM thanh_vien_chi_nhanh WHERE don_vi_id = $1 AND thanh_vien_don_vi_id = $2 AND chi_nhanh_id = $3 AND ngay_ket_thuc IS NULL AND trang_thai IN ('HIEU_LUC','TAM_DUNG') FOR UPDATE`, [auth.donViId, id, duLieu.chiNhanhId], client);
+                if (phanCongMoi) await query(`UPDATE thanh_vien_chi_nhanh SET trang_thai = 'HIEU_LUC', la_chi_nhanh_chinh = TRUE, nguoi_cap_nhat_id = $3 WHERE id = $1 AND don_vi_id = $2`, [phanCongMoi.id, auth.donViId, auth.taiKhoanId], client);
+                else await query(`INSERT INTO thanh_vien_chi_nhanh (don_vi_id, thanh_vien_don_vi_id, chi_nhanh_id, la_chi_nhanh_chinh, ngay_bat_dau, trang_thai, nguoi_tao_id) VALUES ($1,$2,$3,TRUE,CURRENT_DATE,'HIEU_LUC',$4)`, [auth.donViId, id, duLieu.chiNhanhId, auth.taiKhoanId], client);
+            }
+            if (duLieu.loaiTaiKhoan && !vaiTroHienTai.some(item => item.ma_vai_tro === duLieu.loaiTaiKhoan)) {
+                await query(`UPDATE thanh_vien_vai_tro g SET ngay_ket_thuc = now(), nguoi_cap_nhat_id = $3 FROM vai_tro vt WHERE g.don_vi_id = $1 AND g.thanh_vien_don_vi_id = $2 AND vt.id = g.vai_tro_id AND vt.don_vi_id = g.don_vi_id AND vt.ma_vai_tro IN ('NHAN_VIEN','QUAN_TRI') AND (g.ngay_ket_thuc IS NULL OR g.ngay_ket_thuc > now())`, [auth.donViId, id, auth.taiKhoanId], client);
+                const { rowCount } = await query(`INSERT INTO thanh_vien_vai_tro (don_vi_id, thanh_vien_don_vi_id, vai_tro_id) SELECT $1,$2,id FROM vai_tro WHERE don_vi_id = $1 AND ma_vai_tro = $3 AND trang_thai = 'DANG_DUNG'`, [auth.donViId, id, duLieu.loaiTaiKhoan], client);
+                if (!rowCount) throw loiTruong('loaiTaiKhoan', 'Không thể gán vai trò cho nhân viên', 409, 'ROLE_NOT_READY');
+            }
+            const laQuanTriSauCapNhat = duLieu.loaiTaiKhoan ? duLieu.loaiTaiKhoan === 'QUAN_TRI' : laQuanTriHienTai;
+            if (duLieu.active === false && tv.trang_thai !== 'TAM_KHOA') {
+                if (laQuanTriSauCapNhat) {
+                    const { rows: [soQuanTri] } = await query(`SELECT COUNT(DISTINCT tv.id)::integer AS so_luong FROM thanh_vien_don_vi tv JOIN thanh_vien_vai_tro g ON g.don_vi_id = tv.don_vi_id AND g.thanh_vien_don_vi_id = tv.id JOIN vai_tro vt ON vt.id = g.vai_tro_id AND vt.don_vi_id = g.don_vi_id WHERE tv.don_vi_id = $1 AND tv.trang_thai NOT IN ('TAM_KHOA','DA_ROI') AND vt.ma_vai_tro = 'QUAN_TRI' AND vt.trang_thai = 'DANG_DUNG' AND g.ngay_bat_dau <= now() AND (g.ngay_ket_thuc IS NULL OR g.ngay_ket_thuc > now())`, [auth.donViId], client);
+                    if (Number(soQuanTri.so_luong) <= 1) throw loiTruong('active', 'Không thể khóa quản trị viên cuối cùng', 409, 'LAST_ADMIN');
+                }
+                await query(`UPDATE thanh_vien_don_vi SET trang_thai = 'TAM_KHOA', nguoi_cap_nhat_id = $3 WHERE don_vi_id = $1 AND id = $2`, [auth.donViId, id, auth.taiKhoanId], client);
+                await query('UPDATE phien_dang_nhap SET don_vi_dang_chon_id = NULL, chi_nhanh_dang_chon_id = NULL WHERE tai_khoan_id = $1 AND don_vi_dang_chon_id = $2', [tv.tai_khoan_id, auth.donViId], client);
+            } else if (duLieu.active === true && tv.trang_thai === 'TAM_KHOA') {
+                await query(`UPDATE thanh_vien_don_vi SET trang_thai = 'DANG_LAM', nguoi_cap_nhat_id = $3 WHERE don_vi_id = $1 AND id = $2`, [auth.donViId, id, auth.taiKhoanId], client);
             }
             await repo.ghiLichSu({ donViId: auth.donViId, thanhVienId: id, actorId: auth.taiKhoanId, loai: 'CAP_NHAT_HO_SO' }, client);
             await repo.ghiAudit(auth.donViId, auth.taiKhoanId, id, 'employee.profile.update', requestId, client);
@@ -81,7 +133,12 @@ class NhanVienService {
             await yeuCauQuanLy(auth, client);
             const tv = await yeuCauThanhVien(auth.donViId, id, client);
             if (tv.tai_khoan_id === auth.taiKhoanId) throw loi('Không thể tự thay đổi trạng thái công tác của mình');
-            if (await repo.coVaiTroQuanTri(auth.donViId, id, client)) throw loi('Phải xử lý vai trò quản trị trước khi thay đổi trạng thái nhân viên', 409, 'ADMIN_ROLE_ACTIVE');
+            const laQuanTri = await repo.coVaiTroQuanTri(auth.donViId, id, client);
+            if (laQuanTri && trangThai !== 'DA_ROI') throw loi('Chỉ được cho quản trị viên nghỉ việc; không thể đổi trạng thái khác', 409, 'ADMIN_ROLE_ACTIVE');
+            if (laQuanTri && trangThai === 'DA_ROI') {
+                const { rows: [soQuanTri] } = await query(`SELECT COUNT(DISTINCT tv.id)::integer AS so_luong FROM thanh_vien_don_vi tv JOIN thanh_vien_vai_tro g ON g.don_vi_id = tv.don_vi_id AND g.thanh_vien_don_vi_id = tv.id JOIN vai_tro vt ON vt.don_vi_id = g.don_vi_id AND vt.id = g.vai_tro_id WHERE tv.don_vi_id = $1 AND tv.trang_thai = 'DANG_LAM' AND vt.ma_vai_tro = 'QUAN_TRI' AND vt.trang_thai = 'DANG_DUNG' AND g.ngay_bat_dau <= now() AND (g.ngay_ket_thuc IS NULL OR g.ngay_ket_thuc > now())`, [auth.donViId], client);
+                if (Number(soQuanTri.so_luong) <= 1) throw loi('Không thể cho quản trị viên cuối cùng nghỉ việc', 409, 'LAST_ADMIN');
+            }
             if (tv.trang_thai === 'DA_ROI') throw loi('Nhân viên đã nghỉ việc; cần quy trình mời lại', 409, 'MEMBER_LEFT');
             if (tv.trang_thai === trangThai) return;
             if (trangThai === 'DANG_LAM' && tv.trang_thai !== 'TAM_KHOA') throw loi('Chỉ được mở khóa nhân viên đang tạm khóa', 409, 'INVALID_STATE');

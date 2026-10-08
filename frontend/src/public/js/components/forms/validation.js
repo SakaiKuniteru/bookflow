@@ -6,19 +6,40 @@ function valueOf(field) {
 function fieldError(field, message) {
     const container = field.closest("[data-form-field]");
     if (!container) return;
-    let error = container.querySelector("[data-bf-field-error]");
-    if (!error) {
-        error = document.createElement("div");
+    const specificError = field.matches(".bf-email-input") ? container.querySelector(".bf-email-error") : field.matches(".bf-phone-input") ? container.querySelector(".bf-phone-error") : null;
+    const error = specificError || container.querySelector("[data-bf-field-error]") || document.createElement("div");
+    if (specificError) container.querySelectorAll("[data-bf-field-error]").forEach(item => item.remove());
+    if (!specificError && !error.isConnected) {
         error.className = "bf-form-error";
         error.dataset.bfFieldError = "";
         error.setAttribute("role", "alert");
-        container.appendChild(error);
+        const anchor = field.matches("[data-bf-select]") ? field : field.closest(".bf-input-icon-wrap, .bf-phone-control") || field;
+        anchor.insertAdjacentElement("afterend", error);
     }
     field.classList.toggle("is-invalid", Boolean(message));
     field.setAttribute("aria-invalid", String(Boolean(message)));
     if (field.matches("[data-bf-select]")) field.querySelector(".bf-select-control")?.setAttribute("aria-invalid", String(Boolean(message)));
     error.textContent = message || "";
     error.hidden = !message;
+}
+function fieldByName(form, name) {
+    const camelName = name.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+    let field = form.elements.namedItem(name) || form.elements.namedItem(camelName);
+    if (field && typeof field.length === "number" && !field.nodeType) field = field[0];
+    if (!field) field = form.querySelector(`[data-name="${CSS.escape(camelName)}"]`);
+    if (field?.matches('input[type="hidden"].bf-phone-value')) field = field.closest("[data-form-field]")?.querySelector(".bf-phone-input");
+    return field;
+}
+export function applyServerFieldErrors(form, error) {
+    const details = error?.details || error?.error?.details || [];
+    let applied = false;
+    details.forEach(detail => {
+        const field = fieldByName(form, detail.field || "");
+        if (!field || !detail.message) return;
+        fieldError(field, detail.message);
+        applied = true;
+    });
+    return applied;
 }
 function messageFor(field) {
     const value = valueOf(field);

@@ -13,12 +13,12 @@ const xuLy = (fn, status = 200) => async (req, res, next) => {
     catch (error) { next(error); }
 };
 module.exports = {
-    danhSach: xuLy(req => service.danhSach(req.auth, req.query)),
+    danhSach: xuLy(req => service.danhSach(req.auth, camel(req.query))),
     cuaToi: xuLy(req => service.cuaToi(req.auth)),
     chiTiet: xuLy(req => service.chiTiet(req.auth, req.params.thanhVienId)),
-    moiNhanVien: xuLy(req => service.moiNhanVien(req.auth, req.body, req.requestId), 201),
-    capNhat: xuLy(req => service.capNhat(req.auth, req.params.thanhVienId, req.body, req.requestId)),
-    doiTrangThai: xuLy(req => service.doiTrangThai(req.auth, req.params.thanhVienId, req.body, req.requestId)),
+    moiNhanVien: xuLy(req => service.moiNhanVien(req.auth, camel(req.body), req.requestId), 201),
+    capNhat: xuLy(req => service.capNhat(req.auth, req.params.thanhVienId, camel(req.body), req.requestId)),
+    doiTrangThai: xuLy(req => service.doiTrangThai(req.auth, req.params.thanhVienId, camel(req.body), req.requestId)),
     chuyenChiNhanh: xuLy(req => service.chuyenChiNhanh(req.auth, req.params.thanhVienId, req.body, req.requestId)),
     danhSachViTri: xuLy(req => service.danhSachViTri(req.auth)),
     taoViTri: xuLy(req => service.taoViTri(req.auth, req.body), 201),

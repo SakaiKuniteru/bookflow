@@ -101,26 +101,50 @@
 }
 
 .bf-table-viewport {
+    display: block;
     width: 100%;
+    min-width: 0;
+    max-width: 100%;
     max-height: 65vh;
     min-height: 240px;
-    overflow: auto;
+    box-sizing: border-box;
+    overflow-x: auto;
+    overflow-y: auto;
     border: 1px solid var(--bf-form-border);
     border-radius: var(--bf-form-radius);
     background: var(--bf-form-bg);
     overscroll-behavior: contain;
+    scrollbar-width: auto;
+    scrollbar-color: #91b9ad #edf4f1;
+}
+.bf-table-viewport::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+.bf-table-viewport::-webkit-scrollbar-track {
+    background: #edf4f1;
+    border-radius: 999px;
+}
+.bf-table-viewport::-webkit-scrollbar-thumb {
+    border: 3px solid #edf4f1;
+    border-radius: 999px;
+    background: #91b9ad;
 }
 
 .bf-data-table {
-    width: 100%;
+    width: max-content;
+    min-width: 100%;
+    max-width: none;
     border-collapse: separate;
     border-spacing: 0;
-    table-layout: fixed;
+    table-layout: auto;
 }
 
 .bf-data-table th,
 .bf-data-table td {
-    min-width: 100px;
+    min-width: 0;
+    white-space: nowrap;
+    overflow-wrap: normal;
     padding: 10px 12px;
     border-bottom: 1px solid var(--bf-form-border);
     color: var(--bf-form-text);
@@ -128,6 +152,8 @@
     text-align: left;
     vertical-align: middle;
     overflow-wrap: anywhere;
+    white-space: nowrap;
+    overflow-wrap: normal;
 }
 
 .bf-data-table thead {
@@ -433,9 +459,10 @@
 }
 
 .bf-admin-page-shell .bf-data-table {
-    width: 100% !important;
-    min-width: 100% !important;
-    table-layout: fixed;
+    width: max-content;
+    min-width: 100%;
+    max-width: none;
+    table-layout: auto;
 }
 
 .bf-admin-page-shell .bf-data-table th,
@@ -612,10 +639,14 @@ body.bf-layout-admin .bf-admin-page-shell .bf-table-toolbar {
 }
 
 body.bf-layout-admin .bf-admin-page-shell .bf-table-viewport {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
     min-height: 0;
     max-height: none;
-    flex: 1 1 auto;
-    overflow: auto;
+    flex: 1 1 0;
+    overflow-x: auto;
+    overflow-y: auto;
 }
 
 body.bf-layout-admin .bf-admin-page-shell .bf-table-pagination {
@@ -638,9 +669,6 @@ body.bf-layout-admin .bf-admin-page-shell .bf-table-pagination {
     }
     .bf-admin-page-shell .bf-table-viewport {
         max-height: 65vh;
-    }
-    .bf-admin-page-shell .bf-data-table {
-        min-width: 900px !important;
     }
 }
 
@@ -719,18 +747,24 @@ body.bf-layout-admin .bf-app-main {
 
 body.bf-layout-admin .bf-app-main > .bf-layout-content {
     display: flex;
+    width: 100%;
+    max-width: none;
     height: 100%;
+    min-width: 0;
     min-height: 0;
     flex: 1 1 0;
+    margin: 0;
     overflow: hidden;
     box-sizing: border-box;
 }
 
-body.bf-layout-admin .bf-branch-page {
+body.bf-layout-admin .bf-branch-page,
+body.bf-layout-admin .bf-employee-page {
     display: flex;
+    width: 100%;
     min-width: 0;
     min-height: 0;
-    flex: 1 1 auto;
+    flex: 1 1 0;
     overflow: hidden;
 }
 

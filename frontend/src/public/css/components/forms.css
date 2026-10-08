@@ -134,6 +134,7 @@
 
 .bf-check,
 .bf-radio {
+    position: relative;
     display: inline-flex;
     align-items: center;
     gap: 9px;
@@ -142,14 +143,22 @@
     line-height: 20px;
     cursor: pointer;
 }
-
 .bf-check input,
 .bf-radio input {
     position: absolute;
-    width: 1px;
-    height: 1px;
+    top: 50%;
+    left: 0;
+    width: 18px;
+    height: 18px;
+    margin: 0;
     opacity: 0;
     pointer-events: none;
+    transform: translateY(-50%);
+}
+.bf-check input:focus-visible + .bf-check-box,
+.bf-radio input:focus-visible + .bf-radio-circle {
+    outline: 2px solid var(--bf-form-primary);
+    outline-offset: 2px;
 }
 
 .bf-check-box,

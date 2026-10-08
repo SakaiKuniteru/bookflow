@@ -6,6 +6,7 @@ const table = document.querySelector(".bf-branch-page [data-bf-table]");
 if (table) {
     const body = table.querySelector("[data-bf-table-body]");
     const modal = document.querySelector("#branch-create-modal");
+    const viewModal = document.querySelector("#branch-view-modal");
     const deleteModal = document.createElement("div");
     deleteModal.className = "bf-modal";
     deleteModal.dataset.bfModal = "";
@@ -148,6 +149,42 @@ if (table) {
         setField("choBanTrucTuyen", branch.choBanTrucTuyen);
         setField("active", branch.trangThai === "DANG_DUNG");
     };
+    const renderBranchDetails = branch => {
+        const container = viewModal.querySelector("[data-branch-view-details]");
+        const typeLabels = { NHA_SACH: "Nhà sách", THU_VIEN: "Thư viện", KET_HOP: "Kết hợp" };
+        const statusLabels = { DANG_DUNG: "Đang hoạt động", TAM_KHOA: "Tạm khóa" };
+        const show = value => value === null || value === undefined || value === "" ? "—" : String(value);
+        const rows = [
+            ["Mã chi nhánh", branch.maChiNhanh],
+            ["Tên chi nhánh", branch.tenChiNhanh],
+            ["Loại chi nhánh", typeLabels[branch.loaiChiNhanh] || branch.loaiChiNhanh],
+            ["Hotline", branch.soDienThoai],
+            ["Email", branch.email],
+            ["Quốc gia", branch.quocGia === "VN" ? "Việt Nam" : branch.quocGia],
+            ["Mã tỉnh/thành", branch.maTinhThanh],
+            ["Tỉnh/thành", branch.tenTinhThanh],
+            ["Mã xã/phường", branch.maPhuongXa],
+            ["Xã/phường", branch.tenPhuongXa],
+            ["Địa chỉ chi tiết", branch.diaChiChiTiet],
+            ["Kinh độ", branch.kinhDo],
+            ["Vĩ độ", branch.viDo],
+            ["Nhận tại quầy", branch.choNhanTaiQuay ? "Có" : "Không"],
+            ["Bán trực tuyến", branch.choBanTrucTuyen ? "Có" : "Không"],
+            ["Trạng thái", statusLabels[branch.trangThai] || branch.trangThai]
+        ];
+        container.replaceChildren(...rows.map(([label, value]) => {
+            const field = document.createElement("div");
+            field.className = "bf-form-field";
+            const labelNode = document.createElement("span");
+            labelNode.className = "bf-form-label";
+            labelNode.textContent = label;
+            const valueNode = document.createElement("p");
+            valueNode.className = "bf-form-help";
+            valueNode.textContent = show(value);
+            field.append(labelNode, valueNode);
+            return field;
+        }));
+    };
     const renderBranch = (branch, stt) => {
         const type = ({ NHA_SACH: "Nhà sách", THU_VIEN: "Thư viện", KET_HOP: "Kết hợp" })[branch.loaiChiNhanh] || branch.loaiChiNhanh || "—";
         const address = [branch.diaChiChiTiet, branch.tenPhuongXa, branch.tenTinhThanh].filter(Boolean).join(", ");
@@ -236,18 +273,20 @@ if (table) {
     table.addEventListener("click", async event => {
         const button = event.target.closest("[data-branch-action]");
         if (!button || busy) return;
-        if (button.dataset.branchAction !== "delete" && !await locationDataReady) return;
+        if (button.dataset.branchAction === "edit" && !await locationDataReady) return;
         const row = button.closest("[data-table-row]");
         const branch = JSON.parse(row.dataset.branch);
         if (button.dataset.branchAction === "view") {
-            setMode(true, branch);
-            form.querySelectorAll("input,select,textarea").forEach(field => field.disabled = true);
-            form.querySelectorAll("[data-bf-select]").forEach(select => setSelectDisabled(select, true));
-            const submitButton = form.querySelector("[data-bf-modal-submit]");
-            if (submitButton) submitButton.hidden = true;
-            const title = modal.querySelector(".bf-modal-title");
-            if (title) title.textContent = "Chi tiết chi nhánh";
-            openModal(modal, button);
+            busy = true;
+            try {
+                const result = await request(`/api/chi-nhanh/${branch.id}`);
+                renderBranchDetails(result.data);
+                openModal(viewModal, button);
+            } catch (error) {
+                window.BookFlowFeedback?.toast({ type: "error", message: error.message || "Không tải được thông tin chi nhánh." });
+            } finally {
+                busy = false;
+            }
             return;
         }
         if (button.dataset.branchAction === "edit") {

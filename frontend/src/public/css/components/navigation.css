@@ -115,13 +115,13 @@
 }
 
 .bf-layout-admin .bf-nav-sidebar-account {
-    margin: auto 4px 0;
+    /* margin: auto 4px 0; */
     padding: 10px 10px 0;
     border: 0;
 }
 
 .bf-layout-admin .bf-nav-sidebar-account-info {
-    min-height: 60px;
+    min-height: 50px;
     padding: 8px 10px;
     border: 1px solid rgba(255,255,255,.85);
     border-radius: 14px;

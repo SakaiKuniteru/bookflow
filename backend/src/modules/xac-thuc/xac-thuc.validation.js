@@ -1,7 +1,7 @@
 const { AppError } = require('../../common/errors/AppError.js');
 
-function loiXacThuc(message = 'Dữ liệu không hợp lệ', status = 422, code = 'INVALID_INPUT') {
-    return new AppError({ code, message, status });
+function loiXacThuc(message = 'Dữ liệu không hợp lệ', status = 422, code = 'INVALID_INPUT', details = []) {
+    return new AppError({ code, message, status, details });
 }
 
 function emailHopLe(email) {

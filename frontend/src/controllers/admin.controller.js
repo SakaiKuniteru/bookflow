@@ -18,13 +18,13 @@ const adminController = {
   profile(req, res, next) { return profileController.render(req, res, next, 'admin'); },
 async branches(req, res) {
   const columns = [
-    { key: 'stt', label: 'STT', sortable: false, sortType: 'number', width: '20px' },
-    { key: 'maChiNhanh', label: 'Mã chi nhánh', sortable: true, sortType: 'text', width: '100px' },
-    { key: 'tenChiNhanh', label: 'Tên chi nhánh', sortable: true, sortType: 'text', width: '150px' },
-    { key: 'loaiChiNhanh', label: 'Loại', align: 'center', sortable: true, sortType: 'text', width: '100px' },
-    { key: 'diaChiChiTiet', label: 'Địa chỉ chi tiết', sortable: true, sortType: 'text', width: '250px' },
-    { key: 'maTinhThanh', label: 'Mã tỉnh/thành', sortable: true, sortType: 'text', width: '140px' },
-    { key: 'actions', label: 'Thao tác', sortable: false, width: '100px' }
+      { key: 'stt', label: 'STT', sortable: false, sortType: 'number', width: '40px' },
+      { key: 'maChiNhanh', label: 'Mã chi nhánh', sortable: true, sortType: 'text', width: '100px' },
+      { key: 'tenChiNhanh', label: 'Tên chi nhánh', sortable: true, sortType: 'text', width: '200px' },
+      { key: 'loaiChiNhanh', label: 'Loại', align: 'center', sortable: true, sortType: 'text', width: '100px' },
+      { key: 'diaChiChiTiet', label: 'Địa chỉ chi tiết', sortable: true, sortType: 'text', width: '200px' },
+      { key: 'maTinhThanh', label: 'Mã tỉnh/thành', sortable: true, sortType: 'text', width: '100px' },
+      { key: 'actions', label: 'Thao tác', sortable: false, width: '120px' }
   ];
   return res.render('admin/chi-nhanh', {
     title: 'Chi nhánh',
@@ -48,10 +48,46 @@ async branches(req, res) {
     pagination: { enabled: true, page: 1, pageSize: 20, total: 0, pages: 1, from: 0, to: 0 },
     emptyTitle: 'Chưa có chi nhánh để hiển thị',
     emptyDescription: 'Nếu đơn vị đã có chi nhánh, hãy kiểm tra đơn vị đang chọn hoặc quyền xem chi nhánh của tài khoản.',
-    scripts: ['/js/page/admin-chi-nhanh.js?v=20261007-1']
+    scripts: ['/js/page/admin-chi-nhanh.js?v=20261008-1']
   });
 },
-  employees: render('admin/nhan-vien', 'Nhân viên'),
+  async employees(req, res) {
+  const columns = [
+      { key: 'stt', label: 'STT', sortable: false, sortType: 'number', width: '40px' },
+      { key: 'hoTen', label: 'Họ và tên', sortable: true, sortType: 'text', width: '100px' },
+      { key: 'tenDangNhap', label: 'Tên đăng nhập', sortable: true, sortType: 'text', width: '100px' },
+      { key: 'email', label: 'Email', sortable: true, sortType: 'text', width: '200px' },
+      { key: 'loaiTaiKhoan', label: 'Loại tài khoản', sortable: true, sortType: 'text', width: '100px' },
+      { key: 'chiNhanh', label: 'Chi nhánh', sortable: false, width: '150px' },
+      { key: 'trangThai', label: 'Trạng thái', sortable: true, sortType: 'text', width: '100px' },
+      { key: 'actions', label: 'Thao tác', sortable: false, width: '120px' }
+  ];
+  return res.render('admin/nhan-vien', {
+    title: 'Nhân viên',
+    layout: 'admin',
+    mode: 'client',
+    action: '/admin/nhan-vien',
+    ariaLabel: 'Danh sách nhân viên',
+    columns,
+    rows: [],
+    hasRows: false,
+    tableLoading: true,
+    search: { id: 'employee-search', name: 'q', placeholder: 'Tìm tên, tên đăng nhập hoặc email nhân viên', mode: 'relative', threshold: 100 },
+    actions: [{ label: 'Thêm nhân viên', action: 'create-employee', icon: 'plus', variant: 'primary', size: 'md' }],
+    genderOptions: [{ value: 'NAM', label: 'Nam' }, { value: 'NU', label: 'Nữ' }, { value: 'KHAC', label: 'Khác' }, { value: 'KHONG_TIET_LO', label: 'Không tiết lộ' }],
+    accountTypeOptions: [{ value: 'NHAN_VIEN', label: 'Nhân viên' }, { value: 'QUAN_TRI', label: 'Quản trị viên' }],
+    branchOptions: [],
+    countryOptions: [],
+    ethnicityOptions: [],
+    provinceOptions: [],
+    wardOptions: [],
+    sort: { key: 'hoTen', order: 'asc' },
+    pagination: { enabled: true, page: 1, pageSize: 20, total: 0, pages: 1, from: 0, to: 0 },
+    emptyTitle: 'Chưa có nhân viên để hiển thị',
+    emptyDescription: 'Thêm nhân viên vào đơn vị để hiển thị trong danh sách.',
+    scripts: ['/js/page/admin-nhan-vien.js?v=20261008-1']
+  });
+},
   permissions: render('admin/phan-quyen', 'Phân quyền'),
   books: render('admin/sach', 'Quản lý sách'),
   suppliers: render('admin/nha-cung-cap', 'Nhà cung cấp'),

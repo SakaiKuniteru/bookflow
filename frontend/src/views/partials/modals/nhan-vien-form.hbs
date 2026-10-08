@@ -1,0 +1,171 @@
+{{#> modals/base-modal
+    id="employee-create-modal"
+    title="Thêm nhân viên"
+    description="Nhập thông tin nhân viên mới."
+    size="xl"
+    className="bf-modal-sticky-footer"
+    closeOnBackdrop=false
+    loading=false
+}}
+    <form id="employee-create-form" class="bf-modal-form bf-modal-form-grid" data-employee-form novalidate>
+        {{> forms/input
+            id="employee-name"
+            name="hoTen"
+            type="text"
+            label="Họ và tên"
+            placeholder="Nhập họ và tên"
+            required=true
+            maxlength=200
+            icon="user"
+        }}
+        {{> forms/input
+            id="employee-username"
+            name="tenDangNhap"
+            type="text"
+            label="Tên đăng nhập"
+            placeholder="Nhập tên đăng nhập"
+            required=true
+            minlength=3
+            maxlength=40
+            icon="user"
+        }}
+        {{> forms/input
+            id="employee-code"
+            name="maNhanVien"
+            type="text"
+            label="Mã nhân viên"
+            placeholder="Nhập mã nhân viên"
+            required=true
+            minlength=2
+            maxlength=40
+            icon="building"
+        }}
+        {{> forms/email
+            id="employee-email"
+            name="email"
+            label="Email"
+            placeholder="Nhập email"
+            required=true
+            maxlength=254
+            icon="email"
+        }}
+        {{> forms/phone
+            id="employee-phone"
+            name="soDienThoai"
+            label="Số điện thoại"
+            placeholder="Nhập số điện thoại"
+        }}
+        {{> forms/select
+            id="employee-branch"
+            name="chiNhanhId"
+            label="Chi nhánh"
+            placeholder="Chọn chi nhánh"
+            required=true
+            options=branchOptions
+            search=true
+            icon="store"
+        }}
+        {{> forms/select
+            id="employee-account-type"
+            name="loaiTaiKhoan"
+            label="Loại tài khoản"
+            placeholder="Chọn loại tài khoản"
+            required=true
+            options=accountTypeOptions
+            icon="shield"
+        }}
+        {{> forms/date
+            id="employee-birthday"
+            name="ngaySinh"
+            label="Ngày sinh"
+            placeholder="Ngày sinh"
+        }}
+        {{> forms/select
+            id="employee-gender"
+            name="gioiTinh"
+            label="Giới tính"
+            placeholder="Chọn giới tính"
+            options=genderOptions
+            icon="user"
+        }}
+        {{> forms/select
+            id="employee-nationality"
+            name="quocTich"
+            label="Quốc tịch"
+            placeholder="Chọn quốc tịch"
+            options=countryOptions
+            search=true
+            icon="globe"
+        }}
+        {{> forms/select
+            id="employee-ethnicity"
+            name="danToc"
+            label="Dân tộc"
+            placeholder="Chọn dân tộc"
+            options=ethnicityOptions
+            search=true
+            icon="users"
+        }}
+        {{> forms/select
+            id="employee-country"
+            name="quocGia"
+            label="Quốc gia"
+            placeholder="Chọn quốc gia"
+            options=countryOptions
+            search=true
+            icon="globe"
+        }}
+        {{> forms/select
+            id="employee-province"
+            name="tinhThanh"
+            label="Tỉnh/thành"
+            placeholder="Chọn tỉnh/thành"
+            options=provinceOptions
+            search=true
+            icon="map-pin"
+        }}
+        {{> forms/select
+            id="employee-ward"
+            name="xaPhuong"
+            label="Xã/phường"
+            placeholder="Chọn xã/phường"
+            options=wardOptions
+            search=true
+            icon="map"
+        }}
+        {{> forms/textarea
+            id="employee-description"
+            className="bf-form-grid-full"
+            name="moTa"
+            label="Mô tả"
+            placeholder="Nhập mô tả"
+            maxlength=2000
+            rows=3
+            icon="file"
+        }}
+        {{> forms/textarea
+            id="employee-address"
+            className="bf-form-grid-full"
+            name="diaChi"
+            label="Địa chỉ"
+            placeholder="Nhập địa chỉ chi tiết"
+            maxlength=300
+            rows=3
+            icon="map-marked"
+        }}
+        <div class="bf-form-options bf-form-grid-full">
+            {{> forms/checkbox
+                id="employee-active"
+                name="active"
+                label="Hoạt động"
+                checked=true
+            }}
+        </div>
+    </form>
+    <footer class="bf-modal-footer">
+        <div class="bf-modal-footer-actions">
+            <button type="button" class="bf-btn bf-btn-secondary bf-btn-md" data-bf-modal-close>Hủy</button>
+            <button type="submit" form="employee-create-form" class="bf-btn bf-btn-primary bf-btn-md" data-bf-modal-submit>Thêm nhân viên</button>
+        </div>
+    </footer>
+{{/modals/base-modal}}

@@ -407,34 +407,47 @@ class XacThucRepository {
         return rows[0].duoc_phep;
     }
 
-    async taoTaiKhoanNhanVien({ email, hoTen, tenDangNhap, matKhauBam, donViId }, client) {
+    async taoTaiKhoanNhanVien({ email, hoTen, tenDangNhap, matKhauBam, donViId, ngaySinh, gioiTinh, quocTich, danToc, moTa, diaChi, quocGia, tinhThanh, xaPhuong }, client) {
         const { rows } = await query(
-            `INSERT INTO tai_khoan (email, ho_ten, ten_dang_nhap, mat_khau_bam,
-                bat_buoc_doi_mat_khau, mat_khau_tam_het_han, don_vi_kich_hoat_id)
-             VALUES ($1, $2, $3, $4, TRUE, now() + interval '24 hours', $5)
-             RETURNING id, email, ho_ten, ten_dang_nhap`,
-            [email, hoTen, tenDangNhap, matKhauBam, donViId], client
+            `INSERT INTO tai_khoan (email, ho_ten, ten_dang_nhap, mat_khau_bam, bat_buoc_doi_mat_khau, mat_khau_tam_het_han, don_vi_kich_hoat_id, ngay_sinh, gioi_tinh, quoc_tich, dan_toc, mo_ta, dia_chi_chi_tiet, quoc_gia, tinh_thanh_pho, phuong_xa)
+            VALUES ($1, $2, $3, $4, TRUE, now() + interval '24 hours', $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+            RETURNING id, email, ho_ten, ten_dang_nhap`,
+            [email, hoTen, tenDangNhap, matKhauBam, donViId, ngaySinh, gioiTinh, quocTich, danToc, moTa, diaChi, quocGia, tinhThanh, xaPhuong],
+            client
         );
         return rows[0];
     }
-
-    async taoThanhVien({ donViId, taiKhoanId, maNhanVien, chucDanh, email, soDienThoai, nguoiTaoId }, client) {
+    async taoThanhVien({ donViId, taiKhoanId, maNhanVien, email, nguoiTaoId, trangThai }, client) {
         const { rows } = await query(
-            `INSERT INTO thanh_vien_don_vi (don_vi_id, tai_khoan_id, ma_nhan_vien, chuc_danh,
-                email_cong_viec, so_dien_thoai_cong_viec, nguoi_tao_id, ngay_moi)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, now()) RETURNING id`,
-            [donViId, taiKhoanId, maNhanVien, chucDanh, email, soDienThoai, nguoiTaoId], client
+            `INSERT INTO thanh_vien_don_vi (don_vi_id, tai_khoan_id, ma_nhan_vien, email_cong_viec, nguoi_tao_id, ngay_moi, trang_thai)
+            VALUES ($1, $2, $3, $4, $5, now(), $6)
+            RETURNING id`,
+            [donViId, taiKhoanId, maNhanVien, email, nguoiTaoId, trangThai],
+            client
         );
         return rows[0];
     }
-
-    async ganVaiTroNhanVien(donViId, thanhVienId, client) {
+    async chiNhanhDangHoatDong(donViId, chiNhanhId, client) {
+        const { rowCount } = await query(`SELECT id FROM chi_nhanh WHERE don_vi_id = $1 AND id = $2 AND trang_thai = 'DANG_DUNG'`, [donViId, chiNhanhId], client);
+        return rowCount > 0;
+    }
+    async taoPhanCongChiNhanh(donViId, thanhVienId, chiNhanhId, actorId, client) {
+        const { rows } = await query(
+            `INSERT INTO thanh_vien_chi_nhanh (don_vi_id, thanh_vien_don_vi_id, chi_nhanh_id, la_chi_nhanh_chinh, ngay_bat_dau, trang_thai, nguoi_tao_id)
+            VALUES ($1, $2, $3, TRUE, CURRENT_DATE, 'HIEU_LUC', $4)
+            RETURNING id`,
+            [donViId, thanhVienId, chiNhanhId, actorId],
+            client
+        );
+        return rows[0];
+    }
+    async ganVaiTroNhanVien(donViId, thanhVienId, roleCode, client) {
         const { rows } = await query(
             `INSERT INTO thanh_vien_vai_tro (don_vi_id, thanh_vien_don_vi_id, vai_tro_id)
              SELECT $1, $2, id FROM vai_tro
-             WHERE don_vi_id = $1 AND ma_vai_tro = 'NHAN_VIEN' AND trang_thai = 'DANG_DUNG'
+             WHERE don_vi_id = $1 AND ma_vai_tro = $3 AND trang_thai = 'DANG_DUNG'
              RETURNING id`,
-            [donViId, thanhVienId], client
+            [donViId, thanhVienId, roleCode], client
         );
         return rows[0] ?? null;
     }

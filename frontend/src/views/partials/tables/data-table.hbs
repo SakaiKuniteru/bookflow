@@ -32,7 +32,12 @@
             aria-label="{{#if ariaLabel}}{{ariaLabel}}{{else}}Bảng dữ liệu{{/if}}"
             tabindex="0"
         >
-            <table class="bf-data-table" style="min-width: {{#if minWidth}}{{minWidth}}{{else}}960{{/if}}px">
+            <table class="bf-data-table">
+                <colgroup>
+                    {{#each columns}}
+                        <col data-column-key="{{key}}" style="{{#if width}}width: {{width}};{{/if}}{{#if minWidth}}min-width: {{minWidth}};{{/if}}{{#if maxWidth}}max-width: {{maxWidth}};{{/if}}">
+                    {{/each}}
+                </colgroup>
                 <thead>
                     <tr>
                         {{#each columns}}
@@ -42,7 +47,6 @@
                                 data-column-key="{{key}}"
                                 data-column-align="{{align}}"
                                 data-sort-type="{{sortType}}"
-                                {{#if width}}style="width: {{width}}"{{/if}}
                             >
                                 {{#if sortable}}
                                     <button

@@ -1,0 +1,20 @@
+{{#> modals/base-modal id="employee-view-modal" title="Thông tin nhân viên" description="Thông tin tài khoản, vai trò và phân công." size="md" closeOnBackdrop=true}}
+    <div class="bf-modal-form bf-modal-form-grid" data-employee-view-details></div>
+    <footer class="bf-modal-footer">
+        <div class="bf-modal-footer-actions">
+            <button type="button" class="bf-btn bf-btn-secondary bf-btn-md" data-bf-modal-close>Đóng</button>
+        </div>
+    </footer>
+{{/modals/base-modal}}
+{{#> modals/base-modal id="employee-delete-modal" title="Xóa nhân viên" description="Nhân viên sẽ được chuyển sang trạng thái đã nghỉ; dữ liệu lịch sử vẫn được giữ." size="sm" closeOnBackdrop=false}}
+    <form id="employee-delete-form" class="bf-modal-form" data-employee-delete-form novalidate>
+        <p class="bf-form-help" data-employee-delete-message></p>
+        {{> forms/textarea id="employee-delete-reason" name="lyDo" label="Lý do nghỉ việc" placeholder="Nhập lý do nghỉ việc" required=true maxlength=1000 rows=3}}
+    </form>
+    <footer class="bf-modal-footer">
+        <button type="button" class="bf-btn bf-btn-secondary bf-btn-md" data-bf-modal-close>Hủy</button>
+        <div class="bf-modal-footer-actions">
+            <button type="submit" form="employee-delete-form" class="bf-btn bf-btn-danger bf-btn-md" data-bf-modal-submit>Xóa nhân viên</button>
+        </div>
+    </footer>
+{{/modals/base-modal}}

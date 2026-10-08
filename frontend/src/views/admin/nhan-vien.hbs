@@ -1,10 +1,9 @@
-<section class="bf-branch-page">
-    {{#> admin/page-shell title=title description="Danh sách chi nhánh trong phạm vi đơn vị của bạn." icon="store"}}
+<section class="bf-employee-page">
+    {{#> admin/page-shell title=title description="Danh sách nhân viên trong đơn vị của bạn." icon="user"}}
         {{> tables/data-table
             mode=mode
             action=action
             ariaLabel=ariaLabel
-            minWidth=minWidth
             columns=columns
             rows=rows
             hasRows=hasRows
@@ -19,5 +18,5 @@
         }}
     {{/admin/page-shell}}
 </section>
-{{> modals/chi-nhanh-form branchTypes=branchTypes}}
-{{> modals/chi-nhanh-view}}
+{{> modals/nhan-vien-form branchOptions=branchOptions accountTypeOptions=accountTypeOptions}}
+{{> modals/nhan-vien-actions}}
