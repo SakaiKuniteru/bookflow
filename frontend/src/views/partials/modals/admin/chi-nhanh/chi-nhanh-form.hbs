@@ -1,6 +1,6 @@
 {{#> modals/base-modal
     id="branch-create-modal"
-    title="Thêm chi nhánh"
+    title="Thêm mới chi nhánh"
     description="Nhập thông tin chi nhánh mới."
     size="xl"
     className="bf-modal-sticky-footer"
@@ -112,31 +112,29 @@
             placeholder="Nhập vĩ độ (ví dụ: 21.0285)"
             icon="crosshair"
         }}
-        <div class="bf-form-options bf-form-grid-full">
-            {{> forms/checkbox
-                id="branch-active"
-                name="active"
-                label="Hoạt động"
-                checked=true
-            }}
-            {{> forms/checkbox
-                id="branch-counter"
-                name="choNhanTaiQuay"
-                label="Tại quầy"
-                checked=true
-            }}
-            {{> forms/checkbox
-                id="branch-online"
-                name="choBanTrucTuyen"
-                label="Trực tuyến"
-                checked=true
-            }}
-        </div>
+        {{> forms/checkbox
+            id="branch-counter"
+            name="choNhanTaiQuay"
+            label="Tại quầy"
+            checked=true
+        }}
+        {{> forms/checkbox
+            id="branch-online"
+            name="choBanTrucTuyen"
+            label="Trực tuyến"
+            checked=true
+        }}
+        {{> forms/checkbox
+            id="branch-active"
+            name="active"
+            label="Hoạt động"
+            checked=true
+        }}
     </form>
     <footer class="bf-modal-footer">
         <div class="bf-modal-footer-actions">
             <button type="button" class="bf-btn bf-btn-secondary bf-btn-md" data-bf-modal-close>Hủy</button>
-            <button type="submit" form="branch-create-form" class="bf-btn bf-btn-primary bf-btn-md" data-bf-modal-submit>Thêm chi nhánh</button>
+            <button type="submit" form="branch-create-form" class="bf-btn bf-btn-primary bf-btn-md" data-bf-modal-submit>Thêm mới</button>
         </div>
     </footer>
 {{/modals/base-modal}}

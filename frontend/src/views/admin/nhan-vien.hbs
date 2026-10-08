@@ -1,5 +1,5 @@
 <section class="bf-employee-page">
-    {{#> admin/page-shell title=title description="Danh sách nhân viên trong đơn vị của bạn." icon="user"}}
+    {{#> admin/page-shell title=title description=description icon="user"}}
         {{> tables/data-table
             mode=mode
             action=action
@@ -18,5 +18,5 @@
         }}
     {{/admin/page-shell}}
 </section>
-{{> modals/nhan-vien-form branchOptions=branchOptions accountTypeOptions=accountTypeOptions}}
-{{> modals/nhan-vien-actions}}
+{{> modals/admin/tai-khoan/nhan-vien-form branchOptions=branchOptions accountTypeOptions=accountTypeOptions}}
+{{> modals/admin/tai-khoan/nhan-vien.actions}}

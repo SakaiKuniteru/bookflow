@@ -123,9 +123,9 @@ if (table) {
         const title = modal.querySelector(".bf-modal-title");
         const description = modal.querySelector(".bf-modal-description");
         const submit = form.querySelector("[data-bf-modal-submit]");
-        if (title) title.textContent = editing ? "Sửa chi nhánh" : "Thêm chi nhánh";
+        if (title) title.textContent = editing ? "Sửa chi nhánh" : "Thêm mới chi nhánh";
         if (description) description.textContent = editing ? "Cập nhật đầy đủ thông tin chi nhánh." : "Nhập thông tin chi nhánh mới.";
-        if (submit) submit.textContent = editing ? "Lưu thay đổi" : "Thêm chi nhánh";
+        if (submit) submit.textContent = editing ? "Lưu thay đổi" : "Thêm mới";
         setSelectValue("branch-type", editing ? branch.loaiChiNhanh : "");
         setSelectValue("branch-country", "VN");
         if (!editing) {
@@ -336,7 +336,7 @@ if (table) {
             await request(editing ? `/api/chi-nhanh/${branchId}` : "/api/chi-nhanh", { method: editing ? "PATCH" : "POST", body: JSON.stringify(payload) });
             hideLoading(document.body);
             closeModal(modal);
-            window.BookFlowFeedback?.toast({ type: "success", message: editing ? "Đã cập nhật chi nhánh." : "Đã thêm chi nhánh." });
+            window.BookFlowFeedback?.toast({ type: "success", message: editing ? "Đã cập nhật chi nhánh." : "Đã thêm mới chi nhánh." });
             await loadBranches();
         } catch (error) {
             if (formError) {

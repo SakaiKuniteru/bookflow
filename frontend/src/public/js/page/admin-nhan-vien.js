@@ -139,10 +139,10 @@ if (table) {
     const setEmployeeFormMode = (mode, employeeId = "") => {
         form.dataset.mode = mode;
         form.dataset.employeeId = employeeId;
-        modal.querySelector(".bf-modal-title").textContent = mode === "edit" ? "Sửa thông tin nhân viên" : "Thêm nhân viên";
+        modal.querySelector(".bf-modal-title").textContent = mode === "edit" ? "Sửa thông tin nhân viên" : "Thêm mới nhân viên";
         modal.querySelector(".bf-modal-description").textContent = mode === "edit" ? "Cập nhật thông tin cá nhân của nhân viên." : "Nhập thông tin nhân viên mới.";
         const submit = modal.querySelector("[data-bf-modal-submit]");
-        if (submit) submit.textContent = mode === "edit" ? "Lưu thay đổi" : "Thêm nhân viên";
+        if (submit) submit.textContent = mode === "edit" ? "Lưu thay đổi" : "Thêm mới";
     };
     const setEmployeeEditLocks = locked => {
         ["tenDangNhap", "maNhanVien", "email", "chiNhanhId", "loaiTaiKhoan", "active"].forEach(name => {
@@ -218,7 +218,8 @@ if (table) {
                 if (key === "actions") {
                     const actions = document.createElement("div");
                     actions.className = "bf-branch-row-actions";
-                    actions.append(createEmployeeAction("view", employee.id), createEmployeeAction("edit", employee.id), createEmployeeAction("delete", employee.id));
+                    actions.append(createEmployeeAction("view", employee.id));
+                    if (employee.trangThai !== "DA_ROI") actions.append(createEmployeeAction("edit", employee.id), createEmployeeAction("delete", employee.id));
                     cell.appendChild(actions);
                 } else {
                     cell.textContent = value ?? "—";
@@ -233,14 +234,24 @@ if (table) {
     };
     const loadEmployees = async () => {
         try {
-            const firstPage = await request("/api/nhan-vien?trang=1&kichThuoc=100");
+            const hienThiNhanVienDaNghi = new URLSearchParams(window.location.search).get("trangThai") === "DA_ROI";
+            const boLocTrangThai = hienThiNhanVienDaNghi ? "&trangThai=DA_ROI" : "";
+            const tieuDe = document.querySelector(".bf-employee-page .bf-admin-page-heading h1");
+            const moTa = document.querySelector(".bf-employee-page .bf-admin-page-heading p");
+            const tieuDeRong = emptyState?.querySelector("strong");
+            const moTaRong = emptyState?.querySelector("[data-table-empty-description]");
+            if (tieuDe) tieuDe.textContent = hienThiNhanVienDaNghi ? "Nhân viên đã nghỉ" : "Nhân viên";
+            if (moTa) moTa.textContent = hienThiNhanVienDaNghi ? "Danh sách nhân viên đã nghỉ việc trong đơn vị." : "Danh sách nhân viên trong đơn vị của bạn.";
+            if (tieuDeRong) tieuDeRong.textContent = hienThiNhanVienDaNghi ? "Chưa có nhân viên đã nghỉ" : "Chưa có nhân viên để hiển thị";
+            if (moTaRong) moTaRong.textContent = hienThiNhanVienDaNghi ? "Nhân viên đã nghỉ việc sẽ hiển thị tại đây." : "Thêm nhân viên vào đơn vị để hiển thị trong danh sách.";
+            const firstPage = await request(`/api/nhan-vien?trang=1&kichThuoc=100${boLocTrangThai}`);
             employees = firstPage.nhanVien || [];
             const totalPages = firstPage.phanTrang?.tongTrang || 1;
             for (let page = 2; page <= totalPages; page += 1) {
-                const result = await request(`/api/nhan-vien?trang=${page}&kichThuoc=100`);
+                const result = await request(`/api/nhan-vien?trang=${page}&kichThuoc=100${boLocTrangThai}`);
                 employees.push(...(result.nhanVien || []));
             }
-            employees = employees.filter(employee => employee.trangThai !== "DA_ROI");
+            if (!hienThiNhanVienDaNghi) employees = employees.filter(employee => employee.trangThai !== "DA_ROI");
             renderEmployees();
         } catch (error) {
             employees = [];

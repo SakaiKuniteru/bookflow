@@ -759,6 +759,7 @@ body.bf-layout-admin .bf-app-main > .bf-layout-content {
 }
 
 body.bf-layout-admin .bf-branch-page,
+body.bf-layout-admin .bf-customer-page,
 body.bf-layout-admin .bf-employee-page {
     display: flex;
     width: 100%;

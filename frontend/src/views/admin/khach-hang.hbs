@@ -1,5 +1,5 @@
-<section class="bf-branch-page">
-    {{#> admin/page-shell title=title description="Danh sách chi nhánh trong phạm vi đơn vị của bạn." icon="store"}}
+<section class="bf-customer-page">
+    {{#> admin/page-shell title=title description="Danh sách khách hàng trong đơn vị của bạn." icon="user"}}
         {{> tables/data-table
             mode=mode
             action=action
@@ -19,5 +19,5 @@
         }}
     {{/admin/page-shell}}
 </section>
-{{> modals/admin/chi-nhanh/chi-nhanh-form branchTypes=branchTypes}}
-{{> modals/admin/chi-nhanh/chi-nhanh-view}}
+{{> modals/admin/tai-khoan/khach-hang-form customerTypeOptions=customerTypeOptions genderOptions=genderOptions}}
+{{> modals/admin/tai-khoan/khach-hang.actions}}
