@@ -1,7 +1,8 @@
 import { closeModal, openModal, setModalLoading } from "/js/components/modals.js";
 import { setSelectDisabled, syncSelect } from "/js/components/forms/select.js";
 import { applyServerFieldErrors, bindInlineValidation, validateForm } from "/js/components/forms/validation.js";
-import { initDataTables } from "/js/components/tables.js";
+import { initDataTables } from "/js/components/tables.js?v=20261009-1";
+import { bindApiTable } from "/js/components/api-table.js";
 const table = document.querySelector(".bf-employee-page [data-bf-table]");
 if (table) {
     const tableBody = table.querySelector("[data-bf-table-body]");
@@ -25,6 +26,11 @@ if (table) {
     let wards = [];
     let ethnicities = [];
     let busy = false;
+    const normalizeApiData = value => {
+        if (Array.isArray(value)) return value.map(normalizeApiData);
+        if (value === null || typeof value !== "object" || value instanceof Date) return value;
+        return Object.fromEntries(Object.entries(value).map(([key, item]) => [key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase()), normalizeApiData(item)]));
+    };
     const request = async (url, options = {}) => {
         const response = await fetch(url, { credentials: "same-origin", headers: { Accept: "application/json", ...(options.body ? { "Content-Type": "application/json" } : {}) }, ...options });
         const result = await response.json();
@@ -34,7 +40,7 @@ if (table) {
             error.code = result?.error?.code || "";
             throw error;
         }
-        return result.data;
+        return normalizeApiData(result.data);
     };
     const createEmployeeAction = (type, employeeId) => {
         const config = {
@@ -256,7 +262,7 @@ if (table) {
         setEmployeeEditLocks(false);
         setEmployeeFormMode("edit", employeeId);
     };
-    const renderEmployees = () => {
+    const renderEmployees = (offset = 0) => {
         tableBody.replaceChildren();
         employees.forEach((employee, index) => {
             const row = document.createElement("tr");
@@ -269,7 +275,7 @@ if (table) {
             const ngayVaoLam = formatDate(employee.ngayVaoLam);
             const ngayNghi = formatDate(employee.ngayNghiViec);
             const soNgayLamViec = employee.soNgayLamViec == null ? "" : `${employee.soNgayLamViec} ngày`;
-            const values = [["stt", index + 1], ["maNhanVien", employee.maNhanVien], ["hoTen", employee.hoTen], ["tenDangNhap", employee.tenDangNhap], ["email", employee.email], ["soDienThoai", employee.soDienThoai], ["loaiTaiKhoan", accountRole], ["chucDanh", employee.chucDanh], ["chiNhanh", branchName], ["ngayVaoLam", ngayVaoLam], ["soNgayLamViec", soNgayLamViec], ...(hienThiNhanVienDaNghi ? [["ngayNghiViec", ngayNghi], ["lyDoNghiViec", employee.lyDoNghiViec || ""]] : []), ["trangThai", status], ["actions", null]];
+            const values = [["stt", offset + index + 1], ["maNhanVien", employee.maNhanVien], ["hoTen", employee.hoTen], ["tenDangNhap", employee.tenDangNhap], ["email", employee.email], ["soDienThoai", employee.soDienThoai], ["loaiTaiKhoan", accountRole], ["chucDanh", employee.chucDanh], ["chiNhanh", branchName], ["ngayVaoLam", ngayVaoLam], ["soNgayLamViec", soNgayLamViec], ...(hienThiNhanVienDaNghi ? [["ngayNghiViec", ngayNghi], ["lyDoNghiViec", employee.lyDoNghiViec || ""]] : []), ["trangThai", status], ["actions", null]];
             row.dataset.searchText = [employee.maNhanVien, employee.hoTen, employee.tenDangNhap, employee.email, employee.soDienThoai, employee.chucDanh, accountRole, branchName, ngayVaoLam, ngayNghi, employee.lyDoNghiViec, status].filter(Boolean).join(" ");
             row.dataset.filterValues = "{}";
             values.forEach(([key, value]) => {
@@ -292,30 +298,22 @@ if (table) {
             tableBody.appendChild(row);
         });
         table.dataset.loading = "false";
-        table.dispatchEvent(new CustomEvent("bookflow:table:refresh"));
         if (emptyState) emptyState.hidden = employees.length > 0;
     };
-    const loadEmployees = async () => {
-        try {
-            const boLocTrangThai = hienThiNhanVienDaNghi ? "&trangThai=DA_ROI" : "";
-            const tieuDe = document.querySelector(".bf-employee-page .bf-admin-page-heading h1");
-            const moTa = document.querySelector(".bf-employee-page .bf-admin-page-heading p");
-            const tieuDeRong = emptyState?.querySelector("strong");
-            const moTaRong = emptyState?.querySelector("[data-table-empty-description]");
-            if (tieuDe) tieuDe.textContent = hienThiNhanVienDaNghi ? "Nhân viên đã nghỉ" : "Nhân viên";
-            if (moTa) moTa.textContent = hienThiNhanVienDaNghi ? "Danh sách nhân viên đã nghỉ việc trong đơn vị." : "Danh sách nhân viên trong đơn vị của bạn.";
-            if (tieuDeRong) tieuDeRong.textContent = hienThiNhanVienDaNghi ? "Chưa có nhân viên đã nghỉ" : "Chưa có nhân viên để hiển thị";
-            if (moTaRong) moTaRong.textContent = hienThiNhanVienDaNghi ? "Nhân viên đã nghỉ việc sẽ hiển thị tại đây." : "Thêm nhân viên vào đơn vị để hiển thị trong danh sách.";
-            const firstPage = await request(`/api/nhan-vien?trang=1&kichThuoc=100${boLocTrangThai}`);
-            employees = firstPage.nhanVien || [];
-            const totalPages = firstPage.phanTrang?.tongTrang || 1;
-            for (let page = 2; page <= totalPages; page += 1) {
-                const result = await request(`/api/nhan-vien?trang=${page}&kichThuoc=100${boLocTrangThai}`);
-                employees.push(...(result.nhanVien || []));
-            }
-            if (!hienThiNhanVienDaNghi) employees = employees.filter(employee => employee.trangThai !== "DA_ROI");
-            renderEmployees();
-        } catch (error) {
+    const apiTable = bindApiTable(table, {
+        endpoint: "/api/nhan-vien",
+        rowsKeys: ["nhanVien", "nhan_vien"],
+        paginationKeys: ["phanTrang", "phan_trang"],
+        queryNames: { page: "trang", pageSize: "kichThuoc", search: "tuKhoa", sort: "sort", order: "order" },
+        extraParams: () => ({
+            ...(hienThiNhanVienDaNghi ? { trangThai: "DA_ROI" } : { anDaNghi: "true" })
+        }),
+        onRows(rows, { offset }) {
+            employees = rows;
+            renderEmployees(offset);
+            if (emptyState) emptyState.hidden = rows.length > 0;
+        },
+        onError(error) {
             employees = [];
             renderEmployees();
             if (emptyState) {
@@ -326,6 +324,17 @@ if (table) {
                 emptyState.hidden = false;
             }
         }
+    });
+    const loadEmployees = async state => {
+        const tieuDe = document.querySelector(".bf-employee-page .bf-admin-page-heading h1");
+        const moTa = document.querySelector(".bf-employee-page .bf-admin-page-heading p");
+        const tieuDeRong = emptyState?.querySelector("strong");
+        const moTaRong = emptyState?.querySelector("[data-table-empty-description]");
+        if (tieuDe) tieuDe.textContent = hienThiNhanVienDaNghi ? "Nhân viên đã nghỉ" : "Nhân viên";
+        if (moTa) moTa.textContent = hienThiNhanVienDaNghi ? "Danh sách nhân viên đã nghỉ việc trong đơn vị." : "Danh sách nhân viên trong đơn vị của bạn.";
+        if (tieuDeRong) tieuDeRong.textContent = hienThiNhanVienDaNghi ? "Chưa có nhân viên đã nghỉ" : "Chưa có nhân viên để hiển thị";
+        if (moTaRong) moTaRong.textContent = hienThiNhanVienDaNghi ? "Nhân viên đã nghỉ việc sẽ hiển thị tại đây." : "Thêm nhân viên vào đơn vị để hiển thị trong danh sách.";
+        await apiTable.load(state);
     };
     table.addEventListener("click", async event => {
         const button = event.target.closest("[data-employee-action]");

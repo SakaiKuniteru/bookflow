@@ -142,6 +142,25 @@ function submitServerTable(table) {
     table.querySelector("[data-bf-table-form]")?.requestSubmit();
 }
 
+function requestApiTable(table) {
+    const state = getState(table);
+    const search = table.querySelector(".bf-search-input");
+    const searchWrapper = table.querySelector("[data-bf-search]");
+    table.dispatchEvent(new CustomEvent("bookflow:table:request", {
+        bubbles: true,
+        detail: {
+            page: state.page,
+            pageSize: state.size,
+            sort: table.dataset.sort,
+            order: table.dataset.order,
+            search: search?.value.trim() || "",
+            searchMode: searchWrapper?.dataset.mode || "relative",
+            searchThreshold: Number(searchWrapper?.dataset.threshold) || 85,
+            filters: getFilterValues(table)
+        }
+    }));
+}
+
 function initialize(table) {
     if (table.dataset.formInitialized === "true") return;
     const form = table.querySelector("[data-bf-table-form]");
@@ -149,7 +168,21 @@ function initialize(table) {
     table.dataset.formInitialized = "true";
     applyColumnAlignment(table);
     const client = table.dataset.mode === "client";
-    const refresh = () => client ? applyClientTable(table) : submitServerTable(table);
+    const api = table.dataset.mode === "api";
+    let searchTimer = null;
+    const refresh = () => {
+        clearTimeout(searchTimer);
+        if (client) applyClientTable(table);
+        else if (api) requestApiTable(table);
+        else submitServerTable(table);
+    };
+    const scheduleApiRefresh = () => {
+        if (!api) return;
+        clearTimeout(searchTimer);
+        const pageInput = table.querySelector("[data-table-page]");
+        if (pageInput) pageInput.value = "1";
+        searchTimer = setTimeout(() => requestApiTable(table), 300);
+    };
     table.querySelectorAll("[data-table-sort-key]").forEach(button => {
         button.addEventListener("click", () => {
             const key = button.dataset.tableSortKey;
@@ -182,26 +215,31 @@ function initialize(table) {
     table.querySelectorAll("[data-table-column-search]").forEach(input => {
         input.addEventListener("input", () => {
             if (client) applyClientTable(table);
+            else scheduleApiRefresh();
         });
         input.addEventListener("change", () => {
             if (client) applyClientTable(table);
+            else scheduleApiRefresh();
         });
     });
     table.querySelectorAll("[data-bf-table-filter] input, [data-bf-table-filter] select, [data-bf-table-filter] textarea").forEach(input => {
         input.addEventListener("input", () => {
             if (client) applyClientTable(table);
+            else scheduleApiRefresh();
         });
         input.addEventListener("change", () => {
             if (client) applyClientTable(table);
+            else scheduleApiRefresh();
         });
     });
+    table.querySelector(".bf-search-input")?.addEventListener("input", scheduleApiRefresh);
     table.querySelector("[data-table-reset]")?.addEventListener("click", () => {
         setTimeout(() => {
             if (client) {
                 const pageInput = table.querySelector("[data-table-page]");
                 if (pageInput) pageInput.value = "1";
                 applyClientTable(table);
-            }
+            } else scheduleApiRefresh();
         }, 0);
     });
     table.querySelectorAll("[data-table-action]").forEach(button => {
@@ -210,16 +248,21 @@ function initialize(table) {
         });
     });
     form.addEventListener("submit", event => {
-        if (client) {
+        if (client || api) {
             event.preventDefault();
+            clearTimeout(searchTimer);
             const pageInput = table.querySelector("[data-table-page]");
             if (pageInput) pageInput.value = "1";
-            applyClientTable(table);
+            if (client) applyClientTable(table);
+            else requestApiTable(table);
         }
     });
     table.addEventListener("bookflow:table:refresh", () => {
         if (client) applyClientTable(table);
-        else updatePagination(table);
+        else {
+            applyColumnAlignment(table);
+            updatePagination(table);
+        }
     });
     if (client) applyClientTable(table);
     else updatePagination(table);

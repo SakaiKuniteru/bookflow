@@ -6,3 +6,16 @@
         </div>
     </footer>
 {{/modals/base-modal}}
+{{#> modals/base-modal id="customer-reset-password-modal" title="Cấp lại mật khẩu" description="Khách hàng sẽ nhận mật khẩu tạm qua email và cần đổi mật khẩu sau khi đăng nhập." size="sm" closeOnBackdrop=false}}
+    <div class="bf-modal-confirm">
+        <span class="bf-modal-confirm-icon">{{> ui/icon name="shield" size=24}}</span>
+        <div>
+            <p class="bf-modal-confirm-message" data-customer-reset-password-message></p>
+            <p class="bf-modal-confirm-detail">Mật khẩu tạm có hiệu lực trong 24 giờ.</p>
+        </div>
+    </div>
+    <footer class="bf-modal-footer">
+        <button type="button" class="bf-btn bf-btn-secondary bf-btn-md" data-bf-modal-close>Hủy</button>
+        <div class="bf-modal-footer-actions"><button type="button" class="bf-btn bf-btn-primary bf-btn-md" data-bf-modal-confirm data-action="reset-password" data-loading-on-confirm="true">Gửi mật khẩu mới</button></div>
+    </footer>
+{{/modals/base-modal}}

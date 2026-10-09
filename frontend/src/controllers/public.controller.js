@@ -7,9 +7,21 @@ function presentBook(item = {}, authenticated = false) {
   const borrowRedirect = encodeURIComponent(`/sach/${item.id}?intent=borrow`);
   return { ...item, title, subtitle: item.tenPhu || '', authorsDisplay: item.tacGia || '', categoryName: item.theLoai || '', isbn: item.isbn || '', description: item.moTaDayDu || item.moTaNgan || '', href: `/sach/${item.id}`, statusLabel: 'Đang phát hành', statusCode: 'DANG_HIEN_THI', statusVariant: 'success', actions: [{ label: 'Mua sách', variant: 'primary', href: authenticated ? '/customer/gio-hang' : `/auth/dang-nhap?redirect=${buyRedirect}` }, { label: 'Mượn sách', variant: 'secondary', href: authenticated ? '/customer/yeu-cau-muon' : `/auth/dang-nhap?redirect=${borrowRedirect}` }] };
 }
+function camelize(value) {
+  if (Array.isArray(value)) return value.map(camelize);
+  if (value === null || typeof value !== 'object' || value instanceof Date) return value;
+  return Object.fromEntries(Object.entries(value).map(([key, item]) => [key.replace(/_([a-z0-9])/gi, (_, letter) => letter.toUpperCase()), camelize(item)]));
+}
 function pageData(result, authenticated = false) {
-  const data = result.data || {};
+  const data = camelize(result.data || {});
   return { books: (data.sach || []).map(item => presentBook(item, authenticated)), meta: data.phanTrang || null };
+}
+function paginationFrom(meta, defaultPageSize = 20) {
+  const page = Number(meta?.trang ?? meta?.page) || 1;
+  const pageSize = Number(meta?.kichThuoc ?? meta?.kich_thuoc ?? meta?.pageSize) || defaultPageSize;
+  const total = Number(meta?.tongSo ?? meta?.tong_so ?? meta?.total ?? meta?.tong) || 0;
+  const pages = Number(meta?.tongTrang ?? meta?.tong_trang ?? meta?.totalPages) || Math.ceil(total / pageSize);
+  return { enabled: true, page, pageSize, total, totalPages: pages, pages, from: total ? (page - 1) * pageSize + 1 : 0, to: Math.min(page * pageSize, total) };
 }
 
 const publicController = {
@@ -42,7 +54,7 @@ const publicController = {
         books,
         meta,
         filters: req.query,
-        pagination: (() => { const page = meta?.trang || meta?.page || 1; const pageSize = meta?.kichThuoc || meta?.pageSize || 20; const total = meta?.tongSo || meta?.total || 0; return { enabled: true, page, pageSize, total, totalPages: meta?.tongTrang || meta?.totalPages || 0, pages: meta?.tongTrang || meta?.totalPages || 0, from: total ? (page - 1) * pageSize + 1 : 0, to: Math.min(page * pageSize, total) }; })()
+        pagination: paginationFrom(meta)
       });
     } catch (error) {
       return next(error);
@@ -69,7 +81,10 @@ const publicController = {
         title: 'Tìm kiếm sách',
         results: books,
         meta,
-        query: req.query
+        query: req.query,
+        pagination: paginationFrom(meta),
+        searchMode: ['relative', 'exact', 'similar', 'ratio'].includes(req.query.mode) ? req.query.mode : 'relative',
+        threshold: Number(req.query.threshold) || 85
       });
     } catch (error) {
       return next(error);

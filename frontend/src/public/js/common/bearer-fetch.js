@@ -45,6 +45,7 @@
     let loadingSequence = 0;
     const getLoadingMessage = (method, pathname) => {
         if (pathname.endsWith("/nhan-vien/kiem-tra-tao-moi")) return "Đang kiểm tra thông tin nhân viên...";
+        if (pathname.endsWith("/khach-hang/kiem-tra-tao-moi") || pathname.endsWith("/kiem-tra")) return "Đang kiểm tra thông tin khách hàng...";
         if (pathname.includes("/reset-mat-khau")) return "Đang gửi mật khẩu mới qua email...";
         if (pathname.endsWith("/quay-lai-lam")) return "Đang cập nhật nhân viên và gửi mật khẩu...";
         if (method === "GET") return "Đang tải dữ liệu...";

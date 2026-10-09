@@ -9,20 +9,137 @@
 }}
     <form id="customer-form" class="bf-modal-form bf-modal-form-grid" data-customer-form novalidate>
         <p class="bf-form-error bf-form-grid-full" data-customer-form-error role="alert" hidden></p>
-        {{> forms/input id="customer-code" name="ma_khach_hang" type="text" label="Mã khách hàng" placeholder="Nhập mã khách hàng" required=true maxlength=40 icon="user"}}
-        {{> forms/input id="customer-name" name="ho_ten" type="text" label="Họ và tên" placeholder="Nhập họ và tên" required=true maxlength=200 icon="user"}}
-        {{> forms/select id="customer-type" name="loai_khach_hang" label="Loại khách hàng" placeholder="Chọn loại khách hàng" required=true options=customerTypeOptions icon="grid"}}
-        <div class="bf-form-grid-full" data-customer-organization-field hidden>
-            <div class="bf-modal-form-grid">
-                {{> forms/input id="customer-organization" name="ten_to_chuc" type="text" label="Tên tổ chức" placeholder="Nhập tên tổ chức" maxlength=255 icon="building"}}
-                {{> forms/input id="customer-tax-code" name="ma_so_thue" type="text" label="Mã số thuế" placeholder="Nhập mã số thuế" maxlength=30 icon="file"}}
-            </div>
+        <div class="bf-form-grid-full">
+            <h3 class="bf-employee-section-title">Thông tin tài khoản</h3>
         </div>
-        {{> forms/email id="customer-email" name="email" label="Email" placeholder="Nhập email" icon="email"}}
-        {{> forms/input id="customer-phone" name="so_dien_thoai" type="tel" label="Số điện thoại" placeholder="Nhập số điện thoại" maxlength=30 icon="phone"}}
-        {{> forms/select id="customer-gender" name="gioi_tinh" label="Giới tính" placeholder="Chọn giới tính" options=genderOptions icon="user"}}
-        {{> forms/input id="customer-source" name="nguon_khach_hang" type="text" label="Nguồn khách hàng" placeholder="Nhập nguồn khách hàng" maxlength=50 icon="info"}}
-        {{> forms/textarea id="customer-note" className="bf-form-grid-full" name="ghi_chu" label="Ghi chú" placeholder="Nhập ghi chú" maxlength=20000 rows=3 icon="file"}}
+        {{> forms/input
+            id="customer-name"
+            name="ho_ten"
+            type="text"
+            label="Họ và tên"
+            placeholder="Nhập họ và tên"
+            required=true
+            minlength=2
+            maxlength=200
+            icon="user"
+        }}
+        {{> forms/input
+            id="customer-username"
+            name="ten_dang_nhap"
+            type="text"
+            label="Tên đăng nhập"
+            placeholder="Nhập tên đăng nhập"
+            required=true
+            minlength=3
+            maxlength=40
+            icon="user"
+        }}
+        {{> forms/email
+            id="customer-email"
+            name="email"
+            label="Email"
+            placeholder="Nhập email nhận thông tin tài khoản"
+            required=true
+            icon="email"
+        }}
+        {{> forms/input
+            id="customer-phone"
+            name="so_dien_thoai"
+            type="tel"
+            label="Số điện thoại"
+            placeholder="Nhập số điện thoại"
+            maxlength=30
+            icon="phone"
+        }}
+        <div class="bf-form-grid-full">
+            <h3 class="bf-employee-section-title">Thông tin cá nhân</h3>
+        </div>
+        {{> forms/date
+            id="customer-birthday"
+            name="ngay_sinh"
+            label="Ngày sinh"
+            placeholder="Ngày sinh"
+        }}
+        {{> forms/select
+            id="customer-gender"
+            name="gioi_tinh"
+            label="Giới tính"
+            placeholder="Chọn giới tính"
+            options=genderOptions
+            icon="user"
+        }}
+        {{> forms/input
+            id="customer-source"
+            name="nguon_khach_hang"
+            type="text"
+            label="Nguồn khách hàng"
+            placeholder="Nhập nguồn khách hàng"
+            maxlength=50
+            icon="info"
+        }}
+        {{> forms/input
+            id="customer-ethnicity"
+            name="dan_toc"
+            type="text"
+            label="Dân tộc"
+            placeholder="Nhập dân tộc"
+            maxlength=100
+            icon="users"
+        }}
+        {{> forms/input
+            id="customer-nationality"
+            name="quoc_tich"
+            type="text"
+            label="Quốc tịch"
+            placeholder="Nhập quốc tịch"
+            maxlength=100
+            icon="globe"
+        }}
+        {{> forms/input
+            id="customer-country"
+            name="quoc_gia"
+            type="text"
+            label="Quốc gia"
+            placeholder="Nhập quốc gia"
+            maxlength=100
+            icon="globe"
+        }}
+        {{> forms/input
+            id="customer-province"
+            name="tinh_thanh_pho"
+            type="text"
+            label="Tỉnh/thành phố"
+            placeholder="Nhập tỉnh/thành phố"
+            maxlength=150
+            icon="map-pin"
+        }}
+        {{> forms/input
+            id="customer-ward"
+            name="phuong_xa"
+            type="text"
+            label="Phường/xã"
+            placeholder="Nhập phường/xã"
+            maxlength=150
+            icon="map-pin"
+        }}
+        {{> forms/textarea
+            id="customer-address"
+            name="dia_chi_chi_tiet"
+            label="Địa chỉ chi tiết"
+            placeholder="Nhập địa chỉ chi tiết"
+            maxlength=300
+            rows=3
+            icon="map-pin"
+        }}
+        {{> forms/textarea
+            id="customer-description"
+            name="mo_ta"
+            label="Mô tả"
+            placeholder="Nhập mô tả"
+            maxlength=20000
+            rows=3
+            icon="file"
+        }}
     </form>
     <footer class="bf-modal-footer">
         <button type="button" class="bf-btn bf-btn-secondary bf-btn-md" data-bf-modal-close>Hủy</button>

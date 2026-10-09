@@ -35,7 +35,7 @@ async branches(req, res) {
   return res.render('admin/chi-nhanh', {
     title: 'Chi nhánh',
     layout: 'admin',
-    mode: 'client',
+    mode: 'api',
     action: '/admin/chi-nhanh',
     ariaLabel: 'Danh sách chi nhánh',
     minWidth: '1990',
@@ -54,7 +54,7 @@ async branches(req, res) {
     pagination: { enabled: true, page: 1, pageSize: 20, total: 0, pages: 1, from: 0, to: 0 },
     emptyTitle: 'Chưa có chi nhánh để hiển thị',
     emptyDescription: 'Nếu đơn vị đã có chi nhánh, hãy kiểm tra đơn vị đang chọn hoặc quyền xem chi nhánh của tài khoản.',
-    scripts: ['/js/page/admin-chi-nhanh.js?v=20261008-2']
+    scripts: ['/js/page/admin-chi-nhanh.js?v=20261009-1']
   });
 },
 async employees(req, res) {
@@ -79,7 +79,7 @@ async employees(req, res) {
     title: nhanVienDaNghi ? 'Nhân viên đã nghỉ' : 'Nhân viên',
     description: nhanVienDaNghi ? 'Danh sách nhân viên đã nghỉ việc trong đơn vị.' : 'Danh sách nhân viên trong đơn vị của bạn.',
     layout: 'admin',
-    mode: 'client',
+    mode: 'api',
     action: '/admin/nhan-vien',
     ariaLabel: 'Danh sách nhân viên',
     columns,
@@ -99,7 +99,7 @@ async employees(req, res) {
     pagination: { enabled: true, page: 1, pageSize: 20, total: 0, pages: 1, from: 0, to: 0 },
     emptyTitle: nhanVienDaNghi ? 'Chưa có nhân viên đã nghỉ' : 'Chưa có nhân viên để hiển thị',
     emptyDescription: nhanVienDaNghi ? 'Nhân viên đã nghỉ việc sẽ hiển thị tại đây.' : 'Thêm nhân viên vào đơn vị để hiển thị trong danh sách.',
-    scripts: ['/js/page/admin-nhan-vien.js?v=20261008-4']
+    scripts: ['/js/page/admin-nhan-vien.js?v=20261009-1']
   });
 },
 async customers(req, res) {
@@ -107,7 +107,9 @@ async customers(req, res) {
       { key: 'stt', label: 'STT', sortable: false, sortType: 'number', width: '40px' },
       { key: 'maKhachHang', label: 'Mã khách hàng', sortable: true, sortType: 'text', width: '120px' },
       { key: 'hoTen', label: 'Khách hàng', sortable: true, sortType: 'text', width: '180px' },
-      { key: 'loaiKhachHang', label: 'Loại khách hàng', align: 'center', sortable: true, sortType: 'text', width: '130px' },
+      { key: 'tenDangNhap', label: 'Tên đăng nhập', sortable: true, sortType: 'text', width: '150px' },
+      { key: 'ngaySinh', label: 'Ngày sinh', sortable: true, sortType: 'text', width: '120px' },
+      { key: 'diaChiChiTiet', label: 'Địa chỉ', sortable: true, sortType: 'text', width: '220px' },
       { key: 'email', label: 'Email', sortable: true, sortType: 'text', width: '200px' },
       { key: 'soDienThoai', label: 'Số điện thoại', sortable: true, sortType: 'text', width: '130px' },
       { key: 'trangThai', label: 'Trạng thái', align: 'center', sortable: true, sortType: 'text', width: '130px' },
@@ -116,7 +118,7 @@ async customers(req, res) {
   return res.render('admin/khach-hang', {
     title: 'Khách hàng',
     layout: 'admin',
-    mode: 'client',
+    mode: 'api',
     action: '/admin/khach-hang',
     ariaLabel: 'Danh sách khách hàng',
     minWidth: '1050',
@@ -126,13 +128,12 @@ async customers(req, res) {
     tableLoading: true,
     search: { id: 'customer-search', name: 'q', placeholder: 'Tìm mã, họ tên, email hoặc số điện thoại', mode: 'relative', threshold: 100 },
     actions: [{ label: 'Thêm mới', action: 'create-customer', icon: 'plus', variant: 'primary', size: 'md' }],
-    customerTypeOptions: [{ value: 'CA_NHAN', label: 'Cá nhân' }, { value: 'TO_CHUC', label: 'Tổ chức' }],
     genderOptions: [{ value: 'NAM', label: 'Nam' }, { value: 'NU', label: 'Nữ' }, { value: 'KHAC', label: 'Khác' }, { value: 'KHONG_TIET_LO', label: 'Không tiết lộ' }],
     sort: { key: 'hoTen', order: 'asc' },
     pagination: { enabled: true, page: 1, pageSize: 20, total: 0, pages: 1, from: 0, to: 0 },
     emptyTitle: 'Chưa có khách hàng để hiển thị',
-    emptyDescription: 'Thêm khách hàng vào đơn vị để hiển thị trong danh sách.',
-    scripts: ['/js/page/admin-khach-hang.js?v=20261008-2']
+    emptyDescription: 'Thêm mới khách hàng để hiển thị trong danh sách.',
+    scripts: ['/js/page/admin-khach-hang.js?v=20261009-4']
   });
 },
   permissions: render('admin/phan-quyen', 'Phân quyền'),

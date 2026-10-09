@@ -2,6 +2,8 @@ import { closeModal, openModal } from "/js/components/modals.js";
 import { hideLoading, showLoading } from "/js/components/feedback.js";
 import { setSelectDisabled, syncSelect } from "/js/components/forms/select.js";
 import { applyServerFieldErrors, bindInlineValidation, validateForm } from "/js/components/forms/validation.js";
+import { initDataTables } from "/js/components/tables.js?v=20261009-1";
+import { bindApiTable } from "/js/components/api-table.js";
 const table = document.querySelector(".bf-branch-page [data-bf-table]");
 if (table) {
     const body = table.querySelector("[data-bf-table-body]");
@@ -36,6 +38,12 @@ if (table) {
         const error = new Error(message);
         error.details = details;
         throw error;
+    };
+    const camelCase = key => key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+    const normalizeApiData = value => {
+        if (Array.isArray(value)) return value.map(normalizeApiData);
+        if (value === null || typeof value !== "object" || value instanceof Date) return value;
+        return Object.fromEntries(Object.entries(value).map(([key, item]) => [camelCase(key), normalizeApiData(item)]));
     };
     const setEmpty = (title, description) => {
         if (!empty) return;
@@ -244,25 +252,25 @@ if (table) {
         const response = await fetch(url, { credentials: "same-origin", headers: { Accept: "application/json", ...(options.body ? { "Content-Type": "application/json" } : {}) }, signal: AbortSignal.timeout(20000), ...options });
         const result = await response.json();
         if (!response.ok || result?.success === false) fail(result?.error?.message || "Yêu cầu không thành công.", result?.error?.details || []);
-        return result;
+        return { ...result, data: normalizeApiData(result?.data) };
     };
-    const loadBranches = async () => {
-        if (!body) return;
-        try {
-            const result = await request("/api/chi-nhanh");
-            const branches = Array.isArray(result?.data?.chiNhanh) ? result.data.chiNhanh : [];
-            body.replaceChildren(...branches.map((branch, index) => renderBranch(branch, index + 1)));
-            table.dataset.total = String(branches.length);
-            table.dataset.loading = "false";
+    const apiTable = bindApiTable(table, {
+        endpoint: "/api/chi-nhanh",
+        rowsKeys: ["chiNhanh", "chi_nhanh"],
+        paginationKeys: ["phanTrang", "phan_trang"],
+        queryNames: { page: "trang", pageSize: "kich_thuoc", search: "tu_khoa", sort: "sort", order: "order" },
+        normalize: normalizeApiData,
+        onRows(branches, { offset }) {
+            body.replaceChildren(...branches.map((branch, index) => renderBranch(branch, offset + index + 1)));
             if (empty) empty.hidden = branches.length > 0;
             if (!branches.length) setEmpty("Chưa có chi nhánh để hiển thị", "Kiểm tra đơn vị đang chọn hoặc quyền xem chi nhánh của tài khoản.");
-        } catch (error) {
+        },
+        onError(error) {
             body.replaceChildren();
-            table.dataset.loading = "false";
             setEmpty("Không tải được danh sách chi nhánh", error.message || "Vui lòng tải lại trang.");
         }
-        table.dispatchEvent(new CustomEvent("bookflow:table:refresh"));
-    };
+    });
+    const loadBranches = state => apiTable.load(state);
     deleteModal.querySelector("[data-branch-delete-confirm]").addEventListener("click", async () => {
         if (!branchPendingDelete || busy) return;
         const branch = branchPendingDelete;
@@ -378,5 +386,6 @@ if (table) {
             if (submit) submit.disabled = false;
         }
     });
+    initDataTables(document);
     loadBranches();
 }

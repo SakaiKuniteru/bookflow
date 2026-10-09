@@ -1,7 +1,7 @@
 const { AppError } = require('../../common/errors/AppError.js');
 const { trongGiaoDich } = require('../../database/transaction.js');
 const phanQuyenService = require('../phan-quyen/phan-quyen.service.js');
-const { capNhatChiNhanhHopLe, chiNhanhMoiHopLe, phanCongHopLe, trangThaiChiNhanhHopLe, idHopLe } = require('./chi-nhanh.validation.js');
+const { capNhatChiNhanhHopLe, chiNhanhMoiHopLe, danhSachHopLe, phanCongHopLe, trangThaiChiNhanhHopLe, idHopLe } = require('./chi-nhanh.validation.js');
 const repo = require('./chi-nhanh.repository.js');
 const xacThucContext = require('../xac-thuc/xac-thuc.context.js');
 
@@ -16,8 +16,11 @@ async function yeuCauQuanLy(auth, chiNhanhId = null, client) {
 }
 
 class ChiNhanhService {
-    async danhSachChiNhanh(auth) {
+    async danhSachChiNhanh(auth, query = {}) {
         const xemTatCa = await phanQuyenService.kiemTraQuyen(auth, 'branches.manage');
+        if (['trang', 'kich_thuoc', 'tu_khoa', 'sort', 'order'].some(key => Object.hasOwn(query, key))) {
+            return { ...await repo.danhSachChiNhanhPhanTrang(auth.donViId, auth.taiKhoanId, xemTatCa, danhSachHopLe(query)) };
+        }
         return { chi_nhanh: await repo.danhSachChiNhanh(auth.donViId, auth.taiKhoanId, xemTatCa) };
     }
 

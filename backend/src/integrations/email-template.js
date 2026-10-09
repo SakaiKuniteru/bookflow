@@ -183,15 +183,17 @@ function taoEmailMoiNhanVien({
     linkDangNhap,
     guiLai = false,
     khongCanOtp = false,
-    thuongHieu: cauHinhThuongHieu
+    loaiTaiKhoan = "nhân viên",
+    thuongHieu: cauHinhThuongHieu,
 }) {
     const thuongHieu = thuongHieuHopLe(cauHinhThuongHieu);
+    const loai = loaiTaiKhoan === "khách hàng" ? "khách hàng" : "nhân viên";
     const tieuDe = khongCanOtp
-        ? 'Mật khẩu tạm thời nhân viên' : guiLai
-        ? 'Thông tin đăng nhập nhân viên mới' : 'Lời mời tham gia {{APP_NAME}}';
+        ? `Mật khẩu tạm thời ${loai}` : guiLai
+        ? `Thông tin đăng nhập ${loai} mới` : "Lời mời tham gia {{APP_NAME}}";
     const moTa = khongCanOtp
-        ? 'Quản trị viên đã cấp mật khẩu tạm thời cho tài khoản nhân viên.' : guiLai
-        ? 'Thông tin đăng nhập tạm thời của bạn đã được cấp lại.' : 'Bạn đã được mời tham gia {{APP_NAME}} với tài khoản nhân viên.';
+        ? `Quản trị viên đã cấp mật khẩu tạm thời cho tài khoản ${loai}.` : guiLai
+        ? `Thông tin đăng nhập tạm thời của tài khoản ${loai} đã được cấp lại.` : `Quản trị viên đã tạo tài khoản ${loai} cho bạn trên {{APP_NAME}}.`;
     const chuThich = khongCanOtp
         ? 'Mật khẩu tạm có hiệu lực trong 24 giờ. Khi đăng nhập, bạn cần tạo mật khẩu mới. Không cần mã OTP. Không chia sẻ thông tin đăng nhập.' : 'Mật khẩu tạm có hiệu lực trong 24 giờ. Khi đăng nhập, bạn cần xác minh OTP và đặt mật khẩu mới. Không chia sẻ thông tin đăng nhập.';
     const noiDungHtml = `

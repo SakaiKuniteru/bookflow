@@ -29,6 +29,20 @@ function idHopLe(value, ten = 'ID') {
     return id;
 }
 
+function danhSachHopLe(query = {}) {
+    const trang = query.trang == null ? 1 : idHopLe(query.trang, 'Trang');
+    const kichThuoc = query.kich_thuoc == null ? 20 : idHopLe(query.kich_thuoc, 'Kích thước trang');
+    if (kichThuoc > 100) throw loiDuLieu('Kích thước trang tối đa 100');
+    const truongSapXep = ['maChiNhanh', 'tenChiNhanh', 'loaiChiNhanh', 'soDienThoai', 'email', 'tenTinhThanh', 'tenPhuongXa', 'diaChiChiTiet', 'choNhanTaiQuay', 'choBanTrucTuyen', 'trangThai'];
+    const sapXep = query.sort ?? 'tenChiNhanh';
+    if (!truongSapXep.includes(sapXep)) throw loiDuLieu('Trường sắp xếp chi nhánh không hợp lệ');
+    const thuTu = String(query.order ?? 'asc').toLowerCase();
+    if (!['asc', 'desc'].includes(thuTu)) throw loiDuLieu('Thứ tự sắp xếp không hợp lệ');
+    const tuKhoa = query.tu_khoa == null ? '' : String(query.tu_khoa).trim();
+    if (tuKhoa.length > 200) throw loiDuLieu('Từ khóa không được vượt quá 200 ký tự');
+    return { trang, kich_thuoc: kichThuoc, tu_khoa: tuKhoa, sap_xep: sapXep, thu_tu: thuTu };
+}
+
 function chuanHoa(body, taoMoi) {
     if (!body || typeof body !== 'object' || Array.isArray(body)) throw loiDuLieu('Dữ liệu chi nhánh không hợp lệ');
     const truongChoPhep = taoMoi ? TRUONG_TAO : TRUONG_SUA;
@@ -120,6 +134,7 @@ function phanCongHopLe(body) {
 
 module.exports = {
     idHopLe,
+    danhSachHopLe,
     chiNhanhMoiHopLe,
     capNhatChiNhanhHopLe,
     trangThaiChiNhanhHopLe,

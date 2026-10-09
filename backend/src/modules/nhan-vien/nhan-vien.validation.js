@@ -31,8 +31,15 @@ function phanTrangHopLe(query = {}) {
     if (kichThuoc > 100) throw loi('Mỗi trang tối đa 100 nhân viên');
     const tuKhoa = query.tuKhoa === undefined ? '' : chuoi(query.tuKhoa, 'Từ khóa', 120);
     const trangThai = query.trangThai || null;
-    if (trangThai && !['CHO_MOI', 'DANG_LAM', 'TAM_KHOA', 'DA_ROI'].includes(trangThai)) throw loi('Trạng thái nhân viên không hợp lệ');
-    return { trang, kichThuoc, tuKhoa, trangThai, chiNhanhId: query.chiNhanhId ? idHopLe(query.chiNhanhId, 'Chi nhánh') : null };
+    if (trangThai && !['CHO_MOI', 'CHO_XAC_MINH', 'DANG_LAM', 'TAM_KHOA', 'DA_ROI'].includes(trangThai)) throw loi('Trạng thái nhân viên không hợp lệ');
+    const anDaNghi = query.anDaNghi === undefined ? false : query.anDaNghi === true || query.anDaNghi === 'true';
+    if (query.anDaNghi !== undefined && ![true, false, 'true', 'false'].includes(query.anDaNghi)) throw loi('Bộ lọc trạng thái nhân viên không hợp lệ');
+    const truongSapXep = ['maNhanVien', 'hoTen', 'tenDangNhap', 'email', 'soDienThoai', 'loaiTaiKhoan', 'chucDanh', 'ngayVaoLam', 'soNgayLamViec', 'ngayNghiViec', 'lyDoNghiViec', 'trangThai'];
+    const sapXep = query.sort || 'hoTen';
+    if (!truongSapXep.includes(sapXep)) throw loi('Trường sắp xếp nhân viên không hợp lệ');
+    const thuTu = String(query.order || 'asc').toLowerCase();
+    if (!['asc', 'desc'].includes(thuTu)) throw loi('Thứ tự sắp xếp không hợp lệ');
+    return { trang, kichThuoc, tuKhoa, trangThai, anDaNghi, sapXep, thuTu, chiNhanhId: query.chiNhanhId ? idHopLe(query.chiNhanhId, 'Chi nhánh') : null };
 }
 function capNhatHopLe(body) {
     const truong = { hoTen: 'hoTen', tenDangNhap: 'tenDangNhap', maNhanVien: 'maNhanVien', email: 'email', soDienThoai: 'dienThoai', chiNhanhId: 'chiNhanhId', loaiTaiKhoan: 'loaiTaiKhoan', active: 'boolean', ngaySinh: 'ngay', ngayVaoLam: 'ngay', cccdNgayCap: 'ngay', gioiTinh: 'gioiTinh', quocTich: 'chuoi', danToc: 'chuoi', moTa: 'chuoi', diaChi: 'chuoi', quocGia: 'chuoi', tinhThanh: 'chuoi', xaPhuong: 'chuoi', chucDanh: 'chuoi', emailCongViec: 'email', soDienThoaiCongViec: 'dienThoai', loaiNhanSu: 'loaiNhanSu', hinhThucLamViec: 'hinhThucLamViec', ngayBatDauThuViec: 'ngay', ngayKetThucThuViec: 'ngay', ngayChinhThuc: 'ngay', ngayNghiViecDuKien: 'ngay', maChamCong: 'chuoi', soMayLe: 'chuoi', emailNoiBo: 'email', ghiChuCongViec: 'chuoi', viTriChinhId: 'id', nguoiQuanLyId: 'id', cccdSo: 'chuoi', cccdNoiCap: 'chuoi', lienHeKhanCapHoTen: 'chuoi', lienHeKhanCapQuanHe: 'chuoi', lienHeKhanCapSoDienThoai: 'dienThoai', lienHeKhanCapDiaChi: 'chuoi', trinhDoHocVan: 'chuoi', chuyenNganh: 'chuoi', truong: 'chuoi', chungChi: 'chuoi', ngoaiNgu: 'chuoi', kyNang: 'chuoi' };

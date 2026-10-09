@@ -29,6 +29,38 @@ class ChiNhanhRepository {
         return rows;
     }
 
+    async danhSachChiNhanhPhanTrang(donViId, taiKhoanId, xemTatCa, loc, client) {
+        const dieuKien = `cn.don_vi_id = $1 AND cn.trang_thai <> 'DA_XOA' AND (
+            $3::boolean OR (
+                cn.trang_thai = 'DANG_DUNG' AND EXISTS (
+                    SELECT 1 FROM thanh_vien_chi_nhanh tvcn
+                    JOIN thanh_vien_don_vi tv ON tv.id = tvcn.thanh_vien_don_vi_id AND tv.don_vi_id = tvcn.don_vi_id
+                    WHERE tvcn.don_vi_id = cn.don_vi_id AND tvcn.chi_nhanh_id = cn.id
+                      AND tv.tai_khoan_id = $2 AND tv.trang_thai = 'DANG_LAM'
+                      AND tvcn.trang_thai = 'HIEU_LUC' AND tvcn.ngay_bat_dau <= CURRENT_DATE
+                      AND (tvcn.ngay_ket_thuc IS NULL OR tvcn.ngay_ket_thuc >= CURRENT_DATE)
+                )
+            )
+        ) AND ($4::text = '%%' OR cn.ma_chi_nhanh ILIKE $4 OR cn.ten_chi_nhanh ILIKE $4
+            OR cn.loai_chi_nhanh ILIKE $4 OR cn.so_dien_thoai ILIKE $4 OR cn.email ILIKE $4
+            OR cn.ten_tinh_thanh ILIKE $4 OR cn.ten_phuong_xa ILIKE $4 OR cn.dia_chi_chi_tiet ILIKE $4)`;
+        const values = [donViId, taiKhoanId, xemTatCa, loc.tu_khoa ? `%${loc.tu_khoa}%` : '%%'];
+        const cotSapXep = {
+            maChiNhanh: 'cn.ma_chi_nhanh', tenChiNhanh: 'cn.ten_chi_nhanh', loaiChiNhanh: 'cn.loai_chi_nhanh',
+            soDienThoai: 'cn.so_dien_thoai', email: 'cn.email', tenTinhThanh: 'cn.ten_tinh_thanh',
+            tenPhuongXa: 'cn.ten_phuong_xa', diaChiChiTiet: 'cn.dia_chi_chi_tiet',
+            choNhanTaiQuay: 'cn.cho_nhan_tai_quay', choBanTrucTuyen: 'cn.cho_ban_truc_tuyen', trangThai: 'cn.trang_thai'
+        };
+        const huong = loc.thu_tu === 'desc' ? 'DESC' : 'ASC';
+        const orderBy = `${cotSapXep[loc.sap_xep]} ${huong} NULLS LAST, cn.id DESC`;
+        const { rows: [dem] } = await query(`SELECT COUNT(*)::integer AS tong_so FROM chi_nhanh cn WHERE ${dieuKien}`, values, client);
+        const { rows } = await query(
+            `SELECT cn.* FROM chi_nhanh cn WHERE ${dieuKien} ORDER BY ${orderBy} LIMIT $5 OFFSET $6`,
+            [...values, loc.kich_thuoc, (loc.trang - 1) * loc.kich_thuoc], client
+        );
+        return { chi_nhanh: rows, phan_trang: { trang: loc.trang, kich_thuoc: loc.kich_thuoc, tong_so: dem.tong_so, tong_trang: Math.ceil(dem.tong_so / loc.kich_thuoc) } };
+    }
+
     async layChiNhanh(donViId, chiNhanhId, client, khoa = false) {
         const sql = `SELECT * FROM chi_nhanh WHERE don_vi_id = $1 AND id = $2 AND trang_thai <> 'DA_XOA'${khoa ? ' FOR UPDATE' : ''}`;
         const { rows } = await query(sql, [donViId, chiNhanhId], client);

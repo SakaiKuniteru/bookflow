@@ -9,7 +9,7 @@ import { initRichTextInputs } from "./forms/rich-text.js";
 import { initSearchInputs } from "./forms/search.js";
 import { initPhoneInputs } from "./forms/phone.js";
 import { initFeedback } from "./feedback.js";
-import { initDataTables } from "./tables.js?v=20261006-1";
+import { initDataTables } from "./tables.js?v=20261009-1";
 import { initModals } from "./modals.js";
 import { initBookGalleries } from "./book-gallery.js";
 

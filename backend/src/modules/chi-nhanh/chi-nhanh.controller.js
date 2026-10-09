@@ -3,16 +3,18 @@ const service = require('./chi-nhanh.service.js');
 function tra(req, res, data, status = 200) {
     return res.status(status).json({ success: true, request_id: req.requestId, data });
 }
+function sangSnakeCase(value) {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return value;
+    return Object.fromEntries(Object.entries(value).map(([key, item]) => [key.replace(/[A-Z]/g, kyTu => `_${kyTu.toLowerCase()}`), item]));
+}
 function bodySangSnakeCase(req) {
-    const body = req.body ?? {};
-    if (!body || typeof body !== 'object' || Array.isArray(body)) return body;
-    return Object.fromEntries(Object.entries(body).map(([key, value]) => [key.replace(/[A-Z]/g, kyTu => `_${kyTu.toLowerCase()}`), value]));
+    return sangSnakeCase(req.body ?? {});
 }
 
 class ChiNhanhController {
     async danhSachChiNhanh(req, res, next) {
         try {
-            const data = await service.danhSachChiNhanh(req.auth);
+            const data = await service.danhSachChiNhanh(req.auth, sangSnakeCase(req.query));
             return tra(req, res, data);
         } catch (error) { next(error); }
     }

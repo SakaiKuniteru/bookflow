@@ -60,7 +60,7 @@ class DonViRepository {
              SELECT $1, $2, q.id, 'DON_VI', $3 FROM quyen q
              WHERE q.ma_quyen = ANY($4::text[]) AND q.trang_thai = 'DANG_DUNG'
              RETURNING id`,
-            [donViId, vaiTroId, actorId, ['members.manage', 'roles.manage', 'units.manage', 'branches.manage']], client
+            [donViId, vaiTroId, actorId, ['members.manage', 'roles.manage', 'units.manage', 'branches.manage', 'customers.read', 'customers.manage']], client
         );
         return rowCount;
     }
