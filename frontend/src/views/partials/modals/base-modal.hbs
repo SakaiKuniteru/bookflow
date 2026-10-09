@@ -6,7 +6,8 @@
     data-close-on-backdrop="{{#if closeOnBackdrop}}true{{else}}false{{/if}}"
     data-loading="{{#if loading}}true{{else}}false{{/if}}"
     role="dialog"
-    aria-modal="true"
+    data-modal-non-modal="{{#if nonModal}}true{{else}}false{{/if}}"
+    aria-modal="{{#if nonModal}}false{{else}}true{{/if}}"
     aria-labelledby="{{id}}-title"
     aria-hidden="{{#if open}}false{{else}}true{{/if}}"
     {{#unless open}}hidden{{/unless}}

@@ -21,7 +21,14 @@ function makeParams(table, state, queryNames, extraParams) {
         if (name && value !== "" && value !== undefined && value !== null) params.set(name, String(value));
     });
     Object.entries(extraParams?.(state) || {}).forEach(([name, value]) => {
-        if (name && value !== "" && value !== undefined && value !== null) params.set(name, String(value));
+        if (!name || value === "" || value === undefined || value === null) return;
+        if (Array.isArray(value)) {
+            value.filter(item => item !== "" && item !== undefined && item !== null).forEach(item => {
+                params.append(name.endsWith("[]") ? name : `${name}[]`, String(item));
+            });
+        } else {
+            params.set(name, String(value));
+        }
     });
     return params;
 }

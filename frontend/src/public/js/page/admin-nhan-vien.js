@@ -1,7 +1,7 @@
-import { closeModal, openModal, setModalLoading } from "/js/components/modals.js";
+import { closeModal, openModal, setModalLoading } from "/js/components/modals.js?v=20261010-2";
 import { setSelectDisabled, syncSelect } from "/js/components/forms/select.js";
 import { applyServerFieldErrors, bindInlineValidation, validateForm } from "/js/components/forms/validation.js";
-import { initDataTables } from "/js/components/tables.js?v=20261009-1";
+import { initDataTables } from "/js/components/tables.js?v=20261010-3";
 import { bindApiTable } from "/js/components/api-table.js";
 const table = document.querySelector(".bf-employee-page [data-bf-table]");
 if (table) {

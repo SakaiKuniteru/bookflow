@@ -1,0 +1,96 @@
+<div class="bf-table-filter-list">
+    {{#each filters}}
+        <div
+            class="bf-table-filter {{className}}"
+            data-bf-table-filter
+            data-filter-name="{{name}}"
+            data-options-endpoint="{{optionsEndpoint}}"
+            data-options-rows-key="{{optionsRowsKey}}"
+            data-options-value-key="{{optionsValueKey}}"
+            data-options-label-key="{{optionsLabelKey}}"
+            data-options-secondary-key="{{optionsSecondaryKey}}"
+        >
+            {{#if (eq type "select")}}
+                {{> forms/select
+                    id=id
+                    name=name
+                    label=label
+                    placeholder=placeholder
+                    options=options
+                    multiple=multiple
+                    checkbox=checkbox
+                    search=search
+                }}
+            {{else if (eq type "date")}}
+                {{> forms/date
+                    id=id
+                    name=name
+                    label=label
+                    value=value
+                    type=dateType
+                    placeholder=placeholder
+                }}
+            {{else if (eq type "date-range")}}
+                <div class="bf-table-date-range">
+                    {{> forms/date
+                        id=fromId
+                        name=fromName
+                        label=labelFrom
+                        value=fromValue
+                        type="date"
+                        placeholder=placeholderFrom
+                    }}
+                    {{> forms/date
+                        id=toId
+                        name=toName
+                        label=labelTo
+                        value=toValue
+                        type="date"
+                        placeholder=placeholderTo
+                    }}
+                </div>
+            {{else if (eq type "number")}}
+                {{> forms/number
+                    id=id
+                    name=name
+                    label=label
+                    value=value
+                    placeholder=placeholder
+                    type=numberType
+                    min=min
+                    max=max
+                    decimals=decimals
+                }}
+            {{else if (eq type "checkbox")}}
+                {{> forms/checkbox
+                    id=id
+                    name=name
+                    label=label
+                    value=value
+                    checked=checked
+                    className="bf-table-checkbox-filter"
+                }}
+            {{else if (eq type "radio")}}
+                {{#each options}}
+                    {{> forms/radio
+                        id=id
+                        name=../name
+                        label=label
+                        value=value
+                        checked=selected
+                    }}
+                {{/each}}
+            {{else}}
+                {{> forms/input
+                    id=id
+                    name=name
+                    label=label
+                    value=value
+                    placeholder=placeholder
+                    type="text"
+                    maxlength=maxlength
+                }}
+            {{/if}}
+        </div>
+    {{/each}}
+</div>

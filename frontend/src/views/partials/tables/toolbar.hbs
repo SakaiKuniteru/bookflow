@@ -14,8 +14,21 @@
         {{/if}}
         {{#if toolbarTitle}}<h2 class="bf-table-title">{{toolbarTitle}}</h2>{{/if}}
     </div>
-    {{#if actions}}
+    {{#if (or actions filterModal)}}
         <div class="bf-table-actions">
+            {{#if (and filters filterModal)}}
+                <button
+                    type="button"
+                    class="bf-btn bf-btn-secondary bf-btn-md bf-table-filter-trigger"
+                    data-bf-modal-open="{{filterModalId}}"
+                    data-table-filter-trigger
+                    aria-haspopup="dialog"
+                >
+                    {{> ui/icon name="filter" size="18"}}
+                    <span class="bf-btn-text">Bộ lọc</span>
+                    <span class="bf-table-filter-count" data-table-filter-count hidden></span>
+                </button>
+            {{/if}}
             {{#each actions}}
                 {{#if href}}
                     {{> ui/nut-bam

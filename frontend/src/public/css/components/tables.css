@@ -100,6 +100,27 @@
     gap: 8px;
 }
 
+.bf-table-filter-trigger {
+    gap: 8px;
+}
+
+.bf-table-filter-count {
+    display: inline-grid;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 5px;
+    place-items: center;
+    border-radius: 999px;
+    background: #d8f2e7;
+    color: #075b4d;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.bf-table-filter-count[hidden] {
+    display: none;
+}
+
 .bf-table-viewport {
     display: block;
     width: 100%;
@@ -798,13 +819,18 @@ body.bf-layout-admin .bf-app-main > .bf-layout-content {
 
 body.bf-layout-admin .bf-branch-page,
 body.bf-layout-admin .bf-customer-page,
-body.bf-layout-admin .bf-employee-page {
+body.bf-layout-admin .bf-employee-page,
+body.bf-layout-admin .bf-catalog-page {
     display: flex;
     width: 100%;
     min-width: 0;
     min-height: 0;
     flex: 1 1 0;
     overflow: hidden;
+}
+
+body.bf-layout-admin .bf-catalog-page .bf-table-viewport {
+    min-height: 220px;
 }
 
 body.bf-layout-admin .bf-admin-page-shell {

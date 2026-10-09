@@ -9,8 +9,8 @@ import { initRichTextInputs } from "./forms/rich-text.js";
 import { initSearchInputs } from "./forms/search.js";
 import { initPhoneInputs } from "./forms/phone.js";
 import { initFeedback } from "./feedback.js";
-import { initDataTables } from "./tables.js?v=20261009-1";
-import { initModals } from "./modals.js";
+import { initDataTables } from "./tables.js?v=20261010-3";
+import { initModals } from "./modals.js?v=20261010-2";
 import { initBookGalleries } from "./book-gallery.js";
 
 const initializers = [

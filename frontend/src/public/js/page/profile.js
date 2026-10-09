@@ -1,4 +1,4 @@
-import { closeModal, openModal } from '../components/modals.js';
+import { closeModal, openModal } from '../components/modals.js?v=20261010-2';
 import { hideLoading, showLoading } from '../components/feedback.js';
 import { setSelectDisabled, syncSelect } from '../components/forms/select.js';
 import { getAvatarCropRect } from './profile-crop.js';

@@ -1,4 +1,6 @@
 import { matchesSearch } from "./forms/search.js";
+import { syncSelect } from "./forms/select.js";
+import { closeModal } from "./modals.js?v=20261010-2";
 
 function normalize(value) {
     return String(value ?? "").trim().toLocaleLowerCase();
@@ -29,7 +31,19 @@ function getState(table) {
     return { pageInput, pageSize, page: Math.max(1, Number(pageInput?.value || table.dataset.page) || 1), size, pages, total };
 }
 
-function getFilterValues(table) {
+function getFilterInputValue(input) {
+    if (input.matches(".bf-number-input, .bf-money-input")) {
+        return input.value.replace(/\./g, "").replace(",", ".");
+    }
+    if (input.dataset.dateType === "date") {
+        const match = input.value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+        if (match) return `${match[3]}-${match[2]}-${match[1]}`;
+    }
+    return input.value;
+}
+
+function getFilterValues(table, readDraft = false) {
+    if (!readDraft && table.__bfAppliedFilterValues) return { ...table.__bfAppliedFilterValues };
     const values = {};
     table.querySelectorAll("[data-bf-table-filter]").forEach(filter => {
         filter.querySelectorAll("input, select, textarea").forEach(input => {
@@ -39,10 +53,50 @@ function getFilterValues(table) {
                 return;
             }
             if (input.type === "hidden" && !input.closest(".bf-select-hidden-values")) return;
-            if (input.value !== "") values[input.name] = input.value;
+            const value = getFilterInputValue(input);
+            if (value === "") return;
+            if (input.name.endsWith("[]")) {
+                values[input.name] ||= [];
+                values[input.name].push(value);
+            } else {
+                values[input.name] = value;
+            }
         });
     });
     return values;
+}
+
+function setFilterValues(table, values = {}) {
+    table.querySelectorAll("[data-bf-table-filter]").forEach(filter => {
+        const select = filter.querySelector("[data-bf-select]");
+        if (select) {
+            const name = select.dataset.name;
+            const selectedValues = values[`${name}[]`] ?? values[name] ?? [];
+            const selected = new Set((Array.isArray(selectedValues) ? selectedValues : [selectedValues]).map(String));
+            select.querySelectorAll(".bf-select-option").forEach(option => {
+                option.classList.toggle("is-selected", selected.has(String(option.dataset.value)));
+            });
+            syncSelect(select);
+        }
+        filter.querySelectorAll("input:not([type='hidden']), textarea, select").forEach(input => {
+            if (!input.name) return;
+            const value = values[input.name];
+            if (input.type === "checkbox") input.checked = value != null && String(value) === input.value;
+            else if (input.type === "radio") input.checked = String(value) === input.value;
+            else if (!input.closest("[data-bf-select]")) {
+                const date = input.dataset.dateType === "date" && String(value ?? "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+                input.value = value == null ? "" : date ? `${date[3]}/${date[2]}/${date[1]}` : String(value);
+            }
+        });
+    });
+}
+
+function updateFilterCount(table) {
+    const count = Object.values(table.__bfAppliedFilterValues || {}).filter(value => Array.isArray(value) ? value.length > 0 : value !== "" && value != null).length;
+    table.querySelectorAll("[data-table-filter-count]").forEach(node => {
+        node.textContent = String(count);
+        node.hidden = count === 0;
+    });
 }
 
 function rowMatchesFilters(row, filters) {
@@ -169,6 +223,51 @@ function initialize(table) {
     applyColumnAlignment(table);
     const client = table.dataset.mode === "client";
     const api = table.dataset.mode === "api";
+    const filterForm = table.querySelector("[data-bf-table-filter-form]");
+    const filterModal = filterForm?.closest("[data-bf-modal]");
+    const filterTrigger = table.querySelector("[data-table-filter-trigger]");
+    if (filterForm) table.__bfAppliedFilterValues = getFilterValues(table, true);
+    updateFilterCount(table);
+    const positionFilterPopover = () => {
+        if (!filterModal || !filterTrigger) return;
+        const trigger = filterTrigger.getBoundingClientRect();
+        const maxHeight = Math.min(520, window.innerHeight * .74);
+        const dialog = filterModal.querySelector(".bf-modal-dialog");
+        const measuredHeight = filterModal.classList.contains("is-open") ? dialog?.getBoundingClientRect().height : 0;
+        const panelHeight = Math.min(maxHeight, measuredHeight || maxHeight);
+        const maxRight = Math.max(12, window.innerWidth - 280 - 12);
+        const right = Math.max(12, Math.min(window.innerWidth - trigger.right, maxRight));
+        let top = trigger.bottom + 8;
+        if (top + panelHeight > window.innerHeight - 8) {
+            const above = trigger.top - panelHeight - 8;
+            top = above >= 8 ? above : Math.max(8, window.innerHeight - panelHeight - 8);
+        }
+        filterModal.style.setProperty("--bf-filter-popover-top", `${top}px`);
+        filterModal.style.setProperty("--bf-filter-popover-right", `${right}px`);
+    };
+    filterTrigger?.addEventListener("click", event => {
+        if (filterModal?.classList.contains("is-open")) {
+            event.preventDefault();
+            event.stopPropagation();
+            closeModal(filterModal);
+            return;
+        }
+        positionFilterPopover();
+        requestAnimationFrame(positionFilterPopover);
+    });
+    if (filterModal) {
+        document.addEventListener("click", event => {
+            if (!filterModal.classList.contains("is-open")) return;
+            if (filterModal.querySelector(".bf-modal-dialog")?.contains(event.target) || filterTrigger?.contains(event.target)) return;
+            closeModal(filterModal);
+        });
+        window.addEventListener("resize", () => {
+            if (filterModal.classList.contains("is-open")) positionFilterPopover();
+        });
+        window.addEventListener("scroll", () => {
+            if (filterModal.classList.contains("is-open")) positionFilterPopover();
+        }, true);
+    }
     let searchTimer = null;
     const refresh = () => {
         clearTimeout(searchTimer);
@@ -224,14 +323,45 @@ function initialize(table) {
     });
     table.querySelectorAll("[data-bf-table-filter] input, [data-bf-table-filter] select, [data-bf-table-filter] textarea").forEach(input => {
         input.addEventListener("input", () => {
+            if (input.closest("[data-bf-table-filter-form]")) return;
             if (client) applyClientTable(table);
             else scheduleApiRefresh();
         });
         input.addEventListener("change", () => {
+            if (input.closest("[data-bf-table-filter-form]")) return;
             if (client) applyClientTable(table);
             else scheduleApiRefresh();
         });
     });
+    filterForm?.addEventListener("submit", event => {
+        event.preventDefault();
+        table.__bfAppliedFilterValues = getFilterValues(table, true);
+        const pageInput = table.querySelector("[data-table-page]");
+        if (pageInput) pageInput.value = "1";
+        table.dataset.page = "1";
+        updateFilterCount(table);
+        if (client) applyClientTable(table);
+        else if (api) requestApiTable(table);
+        else submitServerTable(table);
+        closeModal(filterModal);
+    });
+    filterForm?.addEventListener("reset", () => {
+        setTimeout(() => {
+            filterForm.querySelectorAll("[data-bf-select]").forEach(select => {
+                select.querySelectorAll(".bf-select-option.is-selected").forEach(option => option.classList.remove("is-selected"));
+                syncSelect(select);
+            });
+            updateFilterCount(table);
+        }, 0);
+    });
+    if (filterModal) {
+        table.addEventListener("bookflow:modal:open", event => {
+            if (event.target === filterModal) setFilterValues(table, table.__bfAppliedFilterValues);
+        });
+        table.addEventListener("bookflow:modal:close", event => {
+            if (event.target === filterModal) setFilterValues(table, table.__bfAppliedFilterValues);
+        });
+    }
     table.querySelector(".bf-search-input")?.addEventListener("input", scheduleApiRefresh);
     table.querySelector("[data-table-reset]")?.addEventListener("click", () => {
         setTimeout(() => {

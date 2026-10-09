@@ -2,12 +2,37 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import profileController from './profile.controller.js';
 import branchService from '../services/branch.service.js';
+import { adminDataPages } from '../config/admin-data-pages.js';
 const render = (view, title) => async (req, res) => {
   const viewPath = path.join(req.app.get('views'), `${view}.hbs`);
   const viewDaCo = existsSync(viewPath);
   return res.render(viewDaCo ? view : 'admin/chua-trien-khai', {
     title,
     layout: 'admin'
+  });
+};
+
+const dataPage = (pageKey) => async (req, res) => {
+  const page = adminDataPages[pageKey];
+  return res.render('admin/danh-muc', {
+    ...page,
+    title: page.title,
+    layout: 'admin',
+    mode: 'api',
+    action: req.path,
+    ariaLabel: `Danh sách ${page.title.toLocaleLowerCase('vi')}`,
+    filterModal: true,
+    filterModalId: 'catalog-filter-modal',
+    filterFormId: 'catalog-filter-form',
+    filterTitle: `Lọc ${page.title.toLocaleLowerCase('vi')}`,
+    filterDescription: 'Chọn một hoặc nhiều điều kiện rồi nhấn Tìm để cập nhật danh sách.',
+    rows: [],
+    hasRows: false,
+    tableLoading: true,
+    search: { id: `catalog-search-${page.key}`, name: 'q', placeholder: page.searchPlaceholder, mode: 'relative', threshold: 100 },
+    actions: [{ label: 'Thêm mới', action: 'create-record', icon: 'plus', variant: 'primary', size: 'md' }],
+    pagination: { enabled: true, page: 1, pageSize: 20, total: 0, pages: 1, from: 0, to: 0 },
+    scripts: ['/js/page/admin-danh-muc.js?v=20261010-3']
   });
 };
 
@@ -54,7 +79,7 @@ async branches(req, res) {
     pagination: { enabled: true, page: 1, pageSize: 20, total: 0, pages: 1, from: 0, to: 0 },
     emptyTitle: 'Chưa có chi nhánh để hiển thị',
     emptyDescription: 'Nếu đơn vị đã có chi nhánh, hãy kiểm tra đơn vị đang chọn hoặc quyền xem chi nhánh của tài khoản.',
-    scripts: ['/js/page/admin-chi-nhanh.js?v=20261009-1']
+    scripts: ['/js/page/admin-chi-nhanh.js?v=20261010-2']
   });
 },
 async employees(req, res) {
@@ -99,7 +124,7 @@ async employees(req, res) {
     pagination: { enabled: true, page: 1, pageSize: 20, total: 0, pages: 1, from: 0, to: 0 },
     emptyTitle: nhanVienDaNghi ? 'Chưa có nhân viên đã nghỉ' : 'Chưa có nhân viên để hiển thị',
     emptyDescription: nhanVienDaNghi ? 'Nhân viên đã nghỉ việc sẽ hiển thị tại đây.' : 'Thêm nhân viên vào đơn vị để hiển thị trong danh sách.',
-    scripts: ['/js/page/admin-nhan-vien.js?v=20261009-1']
+    scripts: ['/js/page/admin-nhan-vien.js?v=20261010-2']
   });
 },
 async customers(req, res) {
@@ -133,24 +158,24 @@ async customers(req, res) {
     pagination: { enabled: true, page: 1, pageSize: 20, total: 0, pages: 1, from: 0, to: 0 },
     emptyTitle: 'Chưa có khách hàng để hiển thị',
     emptyDescription: 'Thêm mới khách hàng để hiển thị trong danh sách.',
-    scripts: ['/js/page/admin-khach-hang.js?v=20261009-4']
+    scripts: ['/js/page/admin-khach-hang.js?v=20261010-5']
   });
 },
   permissions: render('admin/phan-quyen', 'Phân quyền'),
-  books: render('admin/sach', 'Quản lý sách'),
-  authors: render('admin/tac-gia', 'Tác giả'),
-  genres: render('admin/the-loai', 'Thể loại'),
-  publishers: render('admin/nha-xuat-ban', 'Nhà xuất bản'),
-  bookVersions: render('admin/phien-ban-sach', 'Phiên bản sách'),
-  suppliers: render('admin/nha-cung-cap', 'Nhà cung cấp'),
-  warehouses: render('admin/kho', 'Quản trị kho'),
+  books: dataPage('books'),
+  authors: dataPage('authors'),
+  genres: dataPage('genres'),
+  publishers: dataPage('publishers'),
+  bookVersions: dataPage('versions'),
+  suppliers: dataPage('suppliers'),
+  warehouses: dataPage('warehouses'),
   stockImport: render('admin/kho/nhap-kho', 'Nhập kho'),
   stockTransfer: render('admin/kho/chuyen-kho', 'Xuất kho / Điều chuyển kho'),
   inventory: render('admin/kho/ton-kho', 'Danh sách tồn kho'),
   inventorySummary: render('admin/kho/ton-kho/tong-hop', 'Tổng hợp tồn kho'),
   inventoryHistory: render('admin/kho/ton-kho/lich-su', 'Lịch sử tồn kho'),
   stocktake: render('admin/kho/kiem-kho', 'Kiểm kho'),
-  memberships: render('admin/hoi-vien', 'Hội viên'),
+  memberships: dataPage('memberships'),
   borrowPolicies: render('admin/chinh-sach-muon', 'Chính sách mượn'),
   payments: render('admin/thanh-toan', 'Thanh toán'),
   reports: render('admin/bao-cao', 'Báo cáo'),

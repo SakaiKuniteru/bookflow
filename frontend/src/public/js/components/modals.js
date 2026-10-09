@@ -7,7 +7,7 @@ function getOpenModals(doc) {
 }
 
 function syncBodyLock(doc) {
-    const hasOpenModal = getOpenModals(doc).length > 0;
+    const hasOpenModal = getOpenModals(doc).some(modal => modal.dataset.modalNonModal !== "true");
     if (hasOpenModal) {
         if (!doc.body.dataset.modalLocked) {
             previousBodyOverflow = doc.body.style.overflow;
@@ -57,7 +57,9 @@ function openModal(modal, trigger) {
     modal.classList.add("is-open");
     modal.setAttribute("aria-hidden", "false");
     syncBodyLock(modal.ownerDocument);
-    const focusTarget = modal.querySelector("[autofocus], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), a[href]");
+    const focusTarget = modal.dataset.modalNonModal === "true"
+        ? modal.querySelector("[autofocus], [data-bf-select] .bf-select-control, input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), a[href]")
+        : modal.querySelector("[autofocus], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), a[href]");
     focusTarget?.focus();
     modal.dispatchEvent(new CustomEvent("bookflow:modal:open", { bubbles: true }));
 }
@@ -119,6 +121,7 @@ function initializeDocument(doc) {
             closeModal(modal);
             return;
         }
+        if (modal.dataset.modalNonModal === "true") return;
         if (event.key !== "Tab") return;
         const focusable = [...modal.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])')].filter(item => !item.hidden);
         if (!focusable.length) {

@@ -239,6 +239,88 @@
     grid-column: 1 / -1;
 }
 
+.bf-table-filter-modal.bf-modal {
+    position: fixed;
+    inset: 0;
+    display: block;
+    padding: 0;
+    pointer-events: none;
+}
+
+.bf-modal.bf-table-filter-modal[hidden] {
+    display: none;
+}
+
+.bf-table-filter-modal .bf-modal-backdrop {
+    display: none;
+}
+
+.bf-modal.bf-table-filter-modal[data-modal-size="md"] .bf-modal-dialog {
+    position: fixed;
+    top: var(--bf-filter-popover-top, 72px);
+    right: var(--bf-filter-popover-right, 16px);
+    width: min(350px, calc(100vw - 24px));
+    max-height: min(74vh, 520px);
+    max-height: min(74dvh, 520px);
+    border-radius: 10px;
+    pointer-events: auto;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, .16);
+}
+
+.bf-table-filter-modal .bf-modal-header {
+    gap: 10px;
+    padding: 13px 15px;
+}
+
+.bf-table-filter-modal .bf-modal-title {
+    font-size: 16px;
+}
+
+.bf-table-filter-modal .bf-modal-description {
+    font-size: 12px;
+}
+
+.bf-table-filter-modal .bf-modal-body {
+    padding: 14px 15px 0;
+}
+
+.bf-table-filter-modal .bf-table-filter-list {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 13px;
+}
+
+.bf-table-filter-modal .bf-table-filter {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    flex: 0 0 auto;
+}
+
+.bf-table-filter-modal .bf-modal-body > .bf-modal-footer {
+    margin: 12px -15px 0;
+    padding: 12px 15px;
+}
+
+.bf-table-filter-modal-footer .bf-btn-primary {
+    gap: 8px;
+}
+
+@media (max-width: 600px) {
+    .bf-modal.bf-table-filter-modal {
+        align-items: initial;
+    }
+    .bf-modal.bf-table-filter-modal[data-modal-size] .bf-modal-dialog {
+        top: var(--bf-filter-popover-top, 64px);
+        right: var(--bf-filter-popover-right, 12px);
+        width: min(280px, calc(100vw - 24px));
+        max-height: min(74vh, 520px);
+        max-height: min(74dvh, 520px);
+        border-radius: 10px;
+    }
+}
+
 @media (max-width: 700px) {
     .bf-modal-form-grid {
         grid-template-columns: minmax(0, 1fr);

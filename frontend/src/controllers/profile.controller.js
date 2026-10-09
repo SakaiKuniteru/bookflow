@@ -32,7 +32,7 @@ const profileController = {
       anhDaiDienTepId: rawAccount.anhDaiDienTepId ?? null
     };
     account.initial = account.hoTen.trim().charAt(0).toLocaleUpperCase('vi') || 'A';
-    return res.render('shared/thong-tin-ca-nhan', { title: 'Thông tin cá nhân', layout, bodyClass: 'bf-profile-scroll', account, gioiTinhOptions, stylesheets: ['/css/pages/profile.css?v=20261005-2'], scripts: ['/js/page/profile.js?v=20261005-3'] });
+    return res.render('shared/thong-tin-ca-nhan', { title: 'Thông tin cá nhân', layout, bodyClass: 'bf-profile-scroll', account, gioiTinhOptions, stylesheets: ['/css/pages/profile.css?v=20261005-2'], scripts: ['/js/page/profile.js?v=20261010-4'] });
   }
 };
 

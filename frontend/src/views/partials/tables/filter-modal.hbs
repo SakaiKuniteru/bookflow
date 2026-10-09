@@ -1,0 +1,21 @@
+{{#> modals/base-modal
+    id=id
+    title=title
+    description=description
+    size="md"
+    className="bf-modal-sticky-footer bf-table-filter-modal"
+    nonModal=true
+    closeOnBackdrop=true
+    loading=false
+}}
+    <form id="{{formId}}" class="bf-modal-form bf-table-filter-form" data-bf-table-filter-form novalidate>
+        {{> tables/filter-fields filters=filters}}
+    </form>
+    <footer class="bf-modal-footer bf-table-filter-modal-footer">
+        <button type="reset" form="{{formId}}" class="bf-btn bf-btn-secondary bf-btn-md" data-table-filter-reset>Đặt lại</button>
+        <button type="submit" form="{{formId}}" class="bf-btn bf-btn-primary bf-btn-md">
+            <span>Tìm</span>
+            {{> ui/icon name="search" size="18"}}
+        </button>
+    </footer>
+{{/modals/base-modal}}

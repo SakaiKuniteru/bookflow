@@ -1,0 +1,103 @@
+<section
+    class="bf-catalog-page"
+    data-catalog-page
+    data-page-key="{{key}}"
+    data-endpoint="{{endpoint}}"
+    data-rows-key="{{rowsKey}}"
+>
+    {{#> admin/page-shell title=title description=description icon=icon}}
+        {{> tables/data-table
+            mode=mode
+            action=action
+            ariaLabel=ariaLabel
+            columns=columns
+            rows=rows
+            hasRows=hasRows
+            loading=tableLoading
+            search=search
+            actions=actions
+            filters=filters
+            filterModal=filterModal
+            filterModalId=filterModalId
+            filterFormId=filterFormId
+            filterTitle=filterTitle
+            filterDescription=filterDescription
+            sort=sort
+            pagination=pagination
+            emptyTitle=emptyTitle
+            emptyDescription=emptyDescription
+            emptyIllustration=true
+        }}
+    {{/admin/page-shell}}
+</section>
+
+{{#> modals/base-modal
+    id="catalog-form-modal"
+    title="Thêm mới"
+    description="Nhập thông tin mới."
+    size="xl"
+    className="bf-modal-sticky-footer"
+    closeOnBackdrop=false
+    loading=false
+}}
+    <form id="catalog-form" class="bf-modal-form bf-modal-form-grid" data-catalog-form novalidate>
+        <p class="bf-form-error bf-modal-form-error bf-form-grid-full" data-catalog-form-error role="alert" hidden></p>
+        <p class="bf-form-help bf-form-grid-full" data-catalog-form-notice role="status" hidden></p>
+        {{#each formFields}}
+            {{#if (eq type "textarea")}}
+                {{> forms/textarea
+                    id=id
+                    name=name
+                    label=label
+                    placeholder=placeholder
+                    required=required
+                    maxlength=maxlength
+                    rows=rows
+                    className=className
+                }}
+            {{else if (eq type "select")}}
+                {{> forms/select
+                    id=id
+                    name=name
+                    label=label
+                    placeholder=label
+                    required=required
+                    options=options
+                    search=true
+                }}
+            {{else}}
+                {{> forms/input
+                    id=id
+                    name=name
+                    type=type
+                    label=label
+                    placeholder=placeholder
+                    required=required
+                    maxlength=maxlength
+                    minlength=minlength
+                    className=className
+                }}
+            {{/if}}
+        {{/each}}
+    </form>
+    <footer class="bf-modal-footer">
+        <button type="button" class="bf-btn bf-btn-secondary bf-btn-md" data-bf-modal-close>Hủy</button>
+        <div class="bf-modal-footer-actions">
+            <button type="submit" form="catalog-form" class="bf-btn bf-btn-primary bf-btn-md" data-bf-modal-submit>Thêm mới</button>
+        </div>
+    </footer>
+{{/modals/base-modal}}
+
+{{#> modals/base-modal
+    id="catalog-view-modal"
+    title="Thông tin chi tiết"
+    description="Thông tin được tải từ API."
+    size="xl"
+    closeOnBackdrop=true
+    loading=false
+}}
+    <div class="bf-modal-form-grid" data-catalog-view-details></div>
+    <footer class="bf-modal-footer">
+        <button type="button" class="bf-btn bf-btn-secondary bf-btn-md" data-bf-modal-close>Đóng</button>
+    </footer>
+{{/modals/base-modal}}

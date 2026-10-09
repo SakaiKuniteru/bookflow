@@ -22,10 +22,14 @@
         {{> tables/toolbar
             search=search
             actions=actions
-        }}
-        {{> tables/filters
             filters=filters
+            filterModal=filterModal
+            filterModalId=filterModalId
+            filterFormId=filterFormId
         }}
+        {{#unless filterModal}}
+            {{> tables/filters filters=filters}}
+        {{/unless}}
         <div
             class="bf-table-viewport"
             role="region"
@@ -140,4 +144,13 @@
             }}
         {{/if}}
     </form>
+    {{#if filterModal}}
+        {{> tables/filter-modal
+            id=filterModalId
+            formId=filterFormId
+            title=filterTitle
+            description=filterDescription
+            filters=filters
+        }}
+    {{/if}}
 </section>

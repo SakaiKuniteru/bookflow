@@ -7,8 +7,8 @@
 @import url("./forms/date.css");
 @import url("./forms/phone.css");
 @import url("./feedback.css");
-@import url("./tables.css");
-@import url("./modals.css");
+@import url("./tables.css?v=20261010-2");
+@import url("./modals.css?v=20261010-2");
 
 :root {
     --bf-form-primary: var(--bf-primary, #2563eb);
