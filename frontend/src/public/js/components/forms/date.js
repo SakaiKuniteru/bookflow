@@ -2,7 +2,7 @@ const MONTHS = ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Th�
 const WEEKDAYS = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
 
 function getType(input) {
-    return ["date", "time", "datetime"].includes(input.dataset.dateType) ? input.dataset.dateType : "date";
+    return ["date", "time", "datetime", "year"].includes(input.dataset.dateType) ? input.dataset.dateType : "date";
 }
 
 function getTimeFormat(input) {
@@ -36,10 +36,11 @@ function getParts(input) {
     const dateText = type === "datetime" ? value.split(/\s+/)[0] : value;
     const timeText = type === "datetime" ? value.split(/\s+/)[1] : type === "time" ? value : "";
     const dateMatch = dateText?.match(/^(\d{1,2})\/(\d{1,2})\/(\d{1,4})$/);
+    const yearMatch = type === "year" ? value.match(/^(\d{4})$/) : null;
     const timeMatch = timeText?.match(/^(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$/);
     const defaultTime = input.dataset.defaultTime?.match(/^(\d{2}):(\d{2})(?::(\d{2}))?$/);
     return {
-        date: dateMatch ? localDate(Number(dateMatch[3]), Number(dateMatch[2]) - 1, Number(dateMatch[1])) : localDate(now.getFullYear(), now.getMonth(), now.getDate()),
+        date: yearMatch ? localDate(Number(yearMatch[1]), 0, 1) : dateMatch ? localDate(Number(dateMatch[3]), Number(dateMatch[2]) - 1, Number(dateMatch[1])) : localDate(now.getFullYear(), now.getMonth(), now.getDate()),
         hour: timeMatch ? Number(timeMatch[1]) : Number(defaultTime?.[1] ?? 0),
         minute: timeMatch ? Number(timeMatch[2]) : Number(defaultTime?.[2] ?? 0),
         second: timeMatch?.[3] ? Number(timeMatch[3]) : Number(defaultTime?.[3] ?? 0)
@@ -58,6 +59,10 @@ function formatTime(parts, input) {
 function formatInput(input) {
     const type = getType(input);
     const digits = input.value.replace(/\D/g, "");
+    if (type === "year") {
+        input.value = digits.slice(0, 4);
+        return;
+    }
     if (type === "time") {
         const parts = [digits.slice(0, 2), digits.slice(2, 4)];
         if (getTimeFormat(input) === "hms") parts.push(digits.slice(4, 6));
@@ -85,6 +90,50 @@ function validateDate(value) {
     return date.getFullYear() === year && date.getMonth() === month && date.getDate() === day;
 }
 
+function parseDateValue(value) {
+    const text = String(value ?? "").trim();
+    const display = text.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    const iso = text.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (display) {
+        if (!validateDate(text)) return null;
+        return localDate(Number(display[3]), Number(display[2]) - 1, Number(display[1]));
+    }
+    if (iso) {
+        const date = localDate(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]));
+        return date.getFullYear() === Number(iso[1]) && date.getMonth() === Number(iso[2]) - 1 && date.getDate() === Number(iso[3]) ? date : null;
+    }
+    return null;
+}
+
+function getDateBounds(input) {
+    const readBound = (sourceAttribute, offsetAttribute) => {
+        const sourceId = input.dataset[sourceAttribute];
+        const source = sourceId ? document.getElementById(sourceId) : null;
+        const date = source ? parseDateValue(source.value) : null;
+        if (!date) return null;
+        const offset = Number(input.dataset[offsetAttribute] || 0);
+        return localDate(date.getFullYear(), date.getMonth(), date.getDate() + (Number.isFinite(offset) ? offset : 0));
+    };
+    return {
+        min: readBound("minDateFrom", "minDateOffsetDays"),
+        max: readBound("maxDateFrom", "maxDateOffsetDays")
+    };
+}
+
+function isWithinDateBounds(input, date) {
+    const value = localDate(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+    const { min, max } = getDateBounds(input);
+    return (!min || value >= min.getTime()) && (!max || value <= max.getTime());
+}
+
+function clampToDateBounds(input, date) {
+    const { min, max } = getDateBounds(input);
+    let value = localDate(date.getFullYear(), date.getMonth(), date.getDate());
+    if (min && value < min) value = min;
+    if (max && value > max) value = max;
+    return value;
+}
+
 function validateTime(value, input) {
     const match = getTimeFormat(input) === "hm" ? value.match(/^(\d{2}):(\d{2})$/) : value.match(/^(\d{2}):(\d{2}):(\d{2})$/);
     return Boolean(match) && Number(match[1]) <= 23 && Number(match[2]) <= 59 && (getTimeFormat(input) === "hm" || Number(match[3]) <= 59);
@@ -101,7 +150,16 @@ function validate(input) {
         return true;
     }
     let valid = false;
-    if (type === "date") valid = validateDate(value);
+    if (type === "year") valid = /^\d{4}$/.test(value) && Number(value) > 0;
+    let errorMessage = type === "year" ? "Năm không hợp lệ." : "Ngày hoặc thời gian không hợp lệ.";
+    if (type === "date") {
+        valid = validateDate(value);
+        if (valid) {
+            const date = parseDateValue(value);
+            valid = isWithinDateBounds(input, date);
+            if (!valid) errorMessage = input.dataset.rangeError || "Ngày nằm ngoài khoảng cho phép.";
+        }
+    }
     if (type === "time") valid = validateTime(value, input);
     if (type === "datetime") {
         const parts = value.split(/\s+/);
@@ -109,8 +167,11 @@ function validate(input) {
     }
     const error = input.closest("[data-form-field]")?.querySelector(".bf-date-error");
     input.classList.toggle("is-invalid", !valid);
-    input.setCustomValidity(valid ? "" : "Ngày hoặc thời gian không hợp lệ.");
-    if (error) error.hidden = valid;
+    input.setCustomValidity(valid ? "" : errorMessage);
+    if (error) {
+        error.textContent = valid ? (type === "year" ? "Năm không hợp lệ." : "Ngày hoặc thời gian không hợp lệ.") : errorMessage;
+        error.hidden = valid;
+    }
     return valid;
 }
 
@@ -118,6 +179,10 @@ function commitInput(input) {
     const value = input.value.trim();
     if (!value) return validate(input);
     const type = getType(input);
+    if (type === "year") {
+        input.value = value.replace(/\D/g, "").slice(0, 4);
+        return validate(input);
+    }
     const dateText = type === "datetime" ? value.split(/\s+/)[0] : value;
     const timeText = type === "datetime" ? value.split(/\s+/)[1] || "" : type === "time" ? value : "";
     const dateMatch = dateText.match(/^(\d{1,2})\/(\d{1,2})\/(\d{1,4})$/);
@@ -145,7 +210,8 @@ function renderCalendar(picker, input) {
     const days = Array.from({ length: 42 }, (_, index) => {
         const day = localDate(start.getFullYear(), start.getMonth(), start.getDate() + index);
         const selected = day.toDateString() === date.toDateString();
-        return `<button type="button" class="bf-date-day${day.getMonth() !== month ? " is-outside" : ""}${selected ? " is-selected" : ""}" data-day="${day.getFullYear()}-${day.getMonth()}-${day.getDate()}">${day.getDate()}</button>`;
+        const disabled = !isWithinDateBounds(input, day);
+        return `<button type="button" class="bf-date-day${day.getMonth() !== month ? " is-outside" : ""}${selected ? " is-selected" : ""}" data-day="${day.getFullYear()}-${day.getMonth()}-${day.getDate()}"${disabled ? " disabled" : ""}>${day.getDate()}</button>`;
     }).join("");
     const decadeStart = Math.floor(year / 10) * 10;
     const centuryStart = Math.floor(year / 100) * 100;
@@ -193,7 +259,8 @@ function openPicker(input, picker) {
         if (item !== picker) item.classList.remove("is-open");
     });
     picker._state = getParts(input);
-    picker._state.view = "day";
+    if (getType(input) === "date") picker._state.date = clampToDateBounds(input, picker._state.date);
+    picker._state.view = getType(input) === "year" ? "year" : "day";
     renderPicker(picker, input);
     picker.classList.add("is-open");
 }
@@ -212,6 +279,11 @@ function selectNow(input, picker) {
 function selectValue(input, picker) {
     const state = picker._state;
     const type = getType(input);
+    if (type === "date" && !isWithinDateBounds(input, state.date)) {
+        validate(input);
+        return;
+    }
+    if (type === "year") input.value = String(state.date.getFullYear()).padStart(4, "0");
     if (type === "date") input.value = formatDate(state.date);
     if (type === "time") input.value = formatTime(state, input);
     if (type === "datetime") input.value = `${formatDate(state.date)} ${formatTime(state, input)}`;
@@ -254,6 +326,7 @@ function handlePickerClick(event, input, picker) {
         state.view = "day";
     } else if (button.dataset.year) {
         state.date.setFullYear(Number(button.dataset.year));
+        if (getType(input) === "year") return selectValue(input, picker);
         state.view = "month";
     } else if (button.dataset.decade) {
         state.date.setFullYear(Number(button.dataset.decade) + 5);
@@ -274,8 +347,25 @@ function initializeInput(input) {
     const picker = wrapper?.querySelector(".bf-date-picker");
     const toggle = control?.querySelector(".bf-date-picker-toggle");
     if (!picker || !control) return;
-    input.addEventListener("input", () => formatInput(input));
-    input.addEventListener("blur", () => commitInput(input));
+    const refreshLinkedDates = () => {
+        const form = input.closest("form");
+        form?.querySelectorAll(`[data-min-date-from="${CSS.escape(input.id)}"], [data-max-date-from="${CSS.escape(input.id)}"]`).forEach(target => {
+            validate(target);
+            const targetPicker = target.closest("[data-form-field]")?.querySelector(".bf-date-picker");
+            if (targetPicker?._state && targetPicker.classList.contains("is-open")) {
+                targetPicker._state.date = clampToDateBounds(target, targetPicker._state.date);
+                renderPicker(targetPicker, target);
+            }
+        });
+    };
+    input.addEventListener("input", () => {
+        formatInput(input);
+        refreshLinkedDates();
+    });
+    input.addEventListener("blur", () => {
+        commitInput(input);
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+    });
     input.addEventListener("keydown", event => {
         if (event.key === "Enter") {
             event.preventDefault();
@@ -284,6 +374,18 @@ function initializeInput(input) {
             input.blur();
         }
         if (event.key === "Escape") picker.classList.remove("is-open");
+    });
+    input.addEventListener("change", () => {
+        const date = input.value.trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+        const iso = input.value.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        const year = date?.[3] || iso?.[1] || (getType(input) === "year" && /^\d{4}$/.test(input.value.trim()) ? input.value.trim() : "");
+        const form = input.closest("form");
+        form?.querySelectorAll(`[data-derived-from="${CSS.escape(input.id)}"] .bf-date-input`).forEach(target => {
+            target.value = year;
+            validate(target);
+            target.dispatchEvent(new Event("input", { bubbles: true }));
+        });
+        refreshLinkedDates();
     });
     input.addEventListener("focus", () => openPicker(input, picker));
     input.addEventListener("click", () => openPicker(input, picker));

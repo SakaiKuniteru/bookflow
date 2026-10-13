@@ -1,0 +1,21 @@
+{{#> modals/base-modal
+    id="catalog-form-modal"
+    title="Thêm mới kho"
+    description="Nhập thông tin kho."
+    size="xl"
+    className="bf-modal-sticky-footer"
+    closeOnBackdrop=false
+    loading=false
+}}
+    <form id="catalog-form" class="bf-modal-form bf-modal-form-grid" data-catalog-form novalidate>
+        <p class="bf-form-error bf-modal-form-error bf-form-grid-full" data-catalog-form-error role="alert" hidden></p>
+        <p class="bf-form-help bf-form-grid-full" data-catalog-form-notice role="status" hidden></p>
+        {{#each formFields}}{{> forms/catalog-field this}}{{/each}}
+    </form>
+    <footer class="bf-modal-footer">
+        <button type="button" class="bf-btn bf-btn-secondary bf-btn-md" data-bf-modal-close>Hủy</button>
+        <div class="bf-modal-footer-actions">
+            <button type="submit" form="catalog-form" class="bf-btn bf-btn-primary bf-btn-md" data-bf-modal-submit>Thêm mới</button>
+        </div>
+    </footer>
+{{/modals/base-modal}}

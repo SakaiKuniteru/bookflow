@@ -30,8 +30,12 @@ class NhaXuatBanRepository {
         return rows[0] ?? null;
     }
     async tepTonTai(donViId, tepId, client) {
-        const { rows } = await query('SELECT EXISTS (SELECT 1 FROM tep_dinh_kem WHERE don_vi_id = $1 AND id = $2) AS hop_le', [donViId, tepId], client);
+        const { rows } = await query("SELECT EXISTS (SELECT 1 FROM tep_dinh_kem WHERE don_vi_so_huu_id = $1 AND id = $2 AND loai_tep = 'LOGO' AND trang_thai = 'SAN_SANG' AND trang_thai_quet_virus = 'SACH' AND mime_type_xac_minh LIKE 'image/%' AND ngay_xoa IS NULL) AS hop_le", [donViId, tepId], client);
         return rows[0].hop_le;
+    }
+    async maNhaXuatBanDaTonTai(donViId, ma, boQuaId = null, client) {
+        const { rows } = await query('SELECT EXISTS (SELECT 1 FROM nha_xuat_ban WHERE don_vi_id = $1 AND ma_nha_xuat_ban = $2 AND ($3::integer IS NULL OR id <> $3)) AS ton_tai', [donViId, ma, boQuaId], client);
+        return rows[0].ton_tai;
     }
     async taoNhaXuatBan(donViId, actorId, duLieu, client) {
         const cot = Object.keys(duLieu);

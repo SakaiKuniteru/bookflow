@@ -30,6 +30,10 @@ const LIEN_KET = {
 function loi(message) {
     return new AppError({ code: 'INVALID_INPUT', message, status: 422 });
 }
+function loiNhieuTruong(details) {
+    const unique = [...new Map(details.map(item => [`${item.field}:${item.message}`, item])).values()];
+    return new AppError({ code: 'INVALID_INPUT', message: unique.map(item => item.message).join('. '), status: 422, details: unique });
+}
 function idHopLe(value, ten = 'ID') {
     const hopLe = typeof value === 'number' ? Number.isInteger(value) : typeof value === 'string' && /^[1-9]\d*$/.test(value);
     const id = Number(value);
@@ -70,32 +74,44 @@ function giaTri(value, ten, moTa) {
 }
 function duLieuSach(body, taoMoi = false) {
     objectHopLe(body, taoMoi ? TRUONG_SACH : TRUONG_SACH.filter(ten => ten !== 'ma_dau_sach'));
-    if (taoMoi && (body.ma_dau_sach == null || body.ten_sach == null)) throw loi('Mã đầu sách và tên sách là bắt buộc');
     if (!taoMoi && !Object.keys(body).length) throw loi('Không có dữ liệu cập nhật');
     const duLieu = {};
-    for (const [ten, value] of Object.entries(body)) {
-        if (value === null) {
-            if (['ma_dau_sach', 'ten_sach', 'loai_tac_pham', ...BOOLEAN].includes(ten)) throw loi(`${ten} không được để trống`);
-            duLieu[ten] = null;
-        } else if (ten in CHUOI) {
-            duLieu[ten] = chuoi(value, ten, CHUOI[ten]);
-            if (ten === 'ma_dau_sach') {
-                if (!/^[A-Za-z0-9][A-Za-z0-9_-]*$/.test(duLieu[ten])) throw loi('Mã đầu sách không hợp lệ');
-                duLieu[ten] = duLieu[ten].toUpperCase();
-            }
-            if (ten === 'duong_dan' && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(duLieu[ten])) throw loi('Đường dẫn phải là slug chữ thường, không dấu');
-            if (ten === 'url_nguon') {
-                let url;
-                try { url = new URL(duLieu[ten]); } catch { throw loi('URL nguồn không hợp lệ'); }
-                if (!['http:', 'https:'].includes(url.protocol)) throw loi('URL nguồn không hợp lệ');
-            }
-        } else if (ID.includes(ten)) duLieu[ten] = idHopLe(value, ten);
-        else if (NAM.includes(ten)) duLieu[ten] = giaTri(value, ten, ['int', 1, 9999]);
-        else if (TUOI.includes(ten)) duLieu[ten] = giaTri(value, ten, ['int', 0, 32767]);
-        else if (BOOLEAN.includes(ten)) duLieu[ten] = giaTri(value, ten, ['boolean']);
-        else if (ten === 'ngay_xuat_ban_hien_thi') duLieu[ten] = ngay(value, ten);
-        else if (ten === 'loai_tac_pham') duLieu[ten] = giaTri(value, ten, ['enum', LOAI_TAC_PHAM]);
+    const loiTruong = [];
+    const tenTruong = { ma_dau_sach: 'Mã đầu sách', ten_sach: 'Tên sách', loai_tac_pham: 'Loại tác phẩm', la_tac_pham_dich: 'Là tác phẩm dịch', la_tac_pham_doc_lap: 'Là tác phẩm độc lập' };
+    const batBuoc = ['ma_dau_sach', 'ten_sach'];
+    if (taoMoi) {
+        if (!Object.hasOwn(body, 'ma_dau_sach')) loiTruong.push({ field: 'ma_dau_sach', message: 'Mã đầu sách là bắt buộc' });
+        if (!Object.hasOwn(body, 'ten_sach')) loiTruong.push({ field: 'ten_sach', message: 'Tên sách là bắt buộc' });
     }
+    for (const [ten, value] of Object.entries(body)) {
+        try {
+            if (batBuoc.includes(ten) && (value == null || typeof value === 'string' && !value.trim())) throw loi(`${tenTruong[ten]} là bắt buộc`);
+            if (value === null) {
+                if (['ma_dau_sach', 'ten_sach', 'loai_tac_pham', ...BOOLEAN].includes(ten)) throw loi(`${tenTruong[ten] || ten} không được để trống`);
+                duLieu[ten] = null;
+            } else if (ten in CHUOI) {
+                duLieu[ten] = chuoi(value, ten, CHUOI[ten]);
+                if (ten === 'ma_dau_sach') {
+                    if (!/^[A-Za-z0-9][A-Za-z0-9_-]*$/.test(duLieu[ten])) throw loi('Mã đầu sách không hợp lệ');
+                    duLieu[ten] = duLieu[ten].toUpperCase();
+                }
+                if (ten === 'duong_dan' && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(duLieu[ten])) throw loi('Đường dẫn phải là slug chữ thường, không dấu');
+                if (ten === 'url_nguon') {
+                    let url;
+                    try { url = new URL(duLieu[ten]); } catch { throw loi('URL nguồn không hợp lệ'); }
+                    if (!['http:', 'https:'].includes(url.protocol)) throw loi('URL nguồn không hợp lệ');
+                }
+            } else if (ID.includes(ten)) duLieu[ten] = idHopLe(value, ten);
+            else if (NAM.includes(ten)) duLieu[ten] = giaTri(value, ten, ['int', 1, 9999]);
+            else if (TUOI.includes(ten)) duLieu[ten] = giaTri(value, ten, ['int', 0, 32767]);
+            else if (BOOLEAN.includes(ten)) duLieu[ten] = giaTri(value, ten, ['boolean']);
+            else if (ten === 'ngay_xuat_ban_hien_thi') duLieu[ten] = ngay(value, ten);
+            else if (ten === 'loai_tac_pham') duLieu[ten] = giaTri(value, ten, ['enum', LOAI_TAC_PHAM]);
+        } catch (error) {
+            loiTruong.push({ field: ten, message: error.message || `${ten} không hợp lệ` });
+        }
+    }
+    if (loiTruong.length) throw loiNhieuTruong(loiTruong);
     return duLieu;
 }
 function duLieuLienKet(loai, body, taoMoi = false) {

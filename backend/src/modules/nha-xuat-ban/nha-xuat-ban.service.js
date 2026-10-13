@@ -1,7 +1,7 @@
 const { AppError } = require('../../common/errors/AppError.js');
 const { trongGiaoDich } = require('../../database/transaction.js');
 const phanQuyenService = require('../phan-quyen/phan-quyen.service.js');
-const { idHopLe, nhaXuatBanMoiHopLe, suaNhaXuatBanHopLe, trangThaiHopLe, thuongHieuMoiHopLe, suaThuongHieuHopLe, boLocHopLe } = require('./nha-xuat-ban.validation.js');
+const { idHopLe, loiNhieuTruong, nhaXuatBanMoiHopLe, suaNhaXuatBanHopLe, trangThaiHopLe, thuongHieuMoiHopLe, suaThuongHieuHopLe, boLocHopLe } = require('./nha-xuat-ban.validation.js');
 const repo = require('./nha-xuat-ban.repository.js');
 class NhaXuatBanService {
     loi(message, status = 422, code = 'INVALID_INPUT') {
@@ -24,7 +24,7 @@ class NhaXuatBanService {
         if (duLieu.logo_tep_id && !await repo.tepTonTai(donViId, duLieu.logo_tep_id, client)) throw this.loi('Logo không tồn tại trong đơn vị');
     }
     xuLyLoiDb(error) {
-        if (error.code === '23505') throw this.loi('Mã nhà xuất bản hoặc mã thương hiệu đã tồn tại trong đơn vị', 409, 'PUBLISHER_EXISTS');
+        if (error.code === '23505') throw loiNhieuTruong([{ field: 'ma_nha_xuat_ban', message: 'Mã nhà xuất bản đã tồn tại trong đơn vị' }], 409, 'PUBLISHER_EXISTS');
         if (error.code === '23503') throw this.loi('Nhà xuất bản hoặc thương hiệu đang được sử dụng, hoặc dữ liệu tham chiếu không hợp lệ', 409, 'PUBLISHER_IN_USE');
         if (error.code === '23514' || error.code === '22003' || error.code === '22P02') throw this.loi('Dữ liệu nhà xuất bản vi phạm ràng buộc');
         throw error;
@@ -41,34 +41,63 @@ class NhaXuatBanService {
         return { ...nhaXuatBan, thuong_hieu_xuat_ban: await repo.danhSachThuongHieu(auth.donViId, nhaXuatBanId) };
     }
     async taoNhaXuatBan(auth, body, requestId) {
-        const duLieu = nhaXuatBanMoiHopLe(body);
-        let ketQua;
+        const kiemTra = body?.kiem_tra === true;
+        const dauVao = { ...body };
+        delete dauVao.kiem_tra;
+        let duLieu = {};
+        let loiTruong = [];
+        try { duLieu = nhaXuatBanMoiHopLe(dauVao); }
+        catch (error) {
+            if (!kiemTra) throw error;
+            loiTruong = error.details || [];
+        }
         try {
-            ketQua = await trongGiaoDich(async client => {
+            const ketQua = await trongGiaoDich(async client => {
                 await this.yeuCauQuyen(auth, 'books.create', client);
-                await this.kiemTraLogo(auth.donViId, duLieu, client);
+                const ma = typeof dauVao.ma_nha_xuat_ban === 'string' ? dauVao.ma_nha_xuat_ban.trim().toUpperCase() : '';
+                if (ma && await repo.maNhaXuatBanDaTonTai(auth.donViId, ma, null, client)) loiTruong.push({ field: 'ma_nha_xuat_ban', message: 'Mã nhà xuất bản đã tồn tại trong đơn vị' });
+                const logoId = duLieu.logo_tep_id ?? (Number.isSafeInteger(Number(dauVao.logo_tep_id)) && Number(dauVao.logo_tep_id) > 0 ? Number(dauVao.logo_tep_id) : null);
+                if (logoId && !await repo.tepTonTai(auth.donViId, logoId, client)) loiTruong.push({ field: 'logo_tep_id', message: 'Logo không tồn tại trong đơn vị' });
+                if (loiTruong.length) {
+                    const duplicate = loiTruong.some(item => item.field === 'ma_nha_xuat_ban' && item.message.includes('đã tồn tại'));
+                    throw loiNhieuTruong(loiTruong, duplicate ? 409 : 422, duplicate ? 'PUBLISHER_EXISTS' : 'INVALID_INPUT');
+                }
+                if (kiemTra) return { da_kiem_tra: true };
                 const nhaXuatBan = await repo.taoNhaXuatBan(auth.donViId, auth.taiKhoanId, duLieu, client);
                 await repo.ghiNhatKy({ donViId: auth.donViId, actorId: auth.taiKhoanId, doiTuongLoai: 'nha_xuat_ban', doiTuongId: nhaXuatBan.id, hanhDong: 'books.publisher.create', requestId }, client);
                 return nhaXuatBan;
             });
+            if (kiemTra) return ketQua;
+            return { ...ketQua, thuong_hieu_xuat_ban: [] };
         } catch (error) { this.xuLyLoiDb(error); }
-        return { ...ketQua, thuong_hieu_xuat_ban: [] };
     }
     async suaNhaXuatBan(auth, nhaXuatBanId, body, requestId) {
         nhaXuatBanId = idHopLe(nhaXuatBanId, 'Nhà xuất bản');
-        const duLieu = suaNhaXuatBanHopLe(body);
-        let ketQua;
+        const kiemTra = body?.kiem_tra === true;
+        const dauVao = { ...body };
+        delete dauVao.kiem_tra;
+        let duLieu = {};
+        let loiTruong = [];
+        try { duLieu = suaNhaXuatBanHopLe(dauVao); }
+        catch (error) {
+            if (!kiemTra) throw error;
+            loiTruong = error.details || [];
+        }
         try {
-            ketQua = await trongGiaoDich(async client => {
+            const ketQua = await trongGiaoDich(async client => {
                 await this.yeuCauQuyen(auth, 'books.create', client);
                 await this.nhaXuatBanTonTai(auth.donViId, nhaXuatBanId, client, true);
-                await this.kiemTraLogo(auth.donViId, duLieu, client);
+                const logoId = duLieu.logo_tep_id ?? (Number.isSafeInteger(Number(dauVao.logo_tep_id)) && Number(dauVao.logo_tep_id) > 0 ? Number(dauVao.logo_tep_id) : null);
+                if (logoId && !await repo.tepTonTai(auth.donViId, logoId, client)) loiTruong.push({ field: 'logo_tep_id', message: 'Logo không tồn tại trong đơn vị' });
+                if (loiTruong.length) throw loiNhieuTruong(loiTruong);
+                if (kiemTra) return { da_kiem_tra: true };
                 const nhaXuatBan = await repo.suaNhaXuatBan(auth.donViId, nhaXuatBanId, auth.taiKhoanId, duLieu, client);
                 await repo.ghiNhatKy({ donViId: auth.donViId, actorId: auth.taiKhoanId, doiTuongLoai: 'nha_xuat_ban', doiTuongId: nhaXuatBanId, hanhDong: 'books.publisher.update', requestId }, client);
                 return nhaXuatBan;
             });
+            if (kiemTra) return ketQua;
+            return { ...ketQua, thuong_hieu_xuat_ban: await repo.danhSachThuongHieu(auth.donViId, nhaXuatBanId) };
         } catch (error) { this.xuLyLoiDb(error); }
-        return { ...ketQua, thuong_hieu_xuat_ban: await repo.danhSachThuongHieu(auth.donViId, nhaXuatBanId) };
     }
     async doiTrangThai(auth, nhaXuatBanId, body, requestId) {
         nhaXuatBanId = idHopLe(nhaXuatBanId, 'Nhà xuất bản');

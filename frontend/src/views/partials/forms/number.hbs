@@ -1,7 +1,8 @@
-<div class="bf-form-field {{className}}" data-form-field>
+<div class="bf-form-field {{className}}" data-form-field {{#if readonlyOnEdit}}data-readonly-on-edit="true"{{/if}}>
     {{#if label}}
         <label class="bf-form-label" for="{{id}}">{{label}}{{#if required}}<span class="bf-form-required">*</span>{{/if}}</label>
     {{/if}}
+    {{#if icon}}<div class="bf-input-icon-wrap"><span class="bf-input-leading-icon">{{> ui/icon name=icon size=18}}</span>{{/if}}
     <input
         id="{{id}}"
         {{#if name}}name="{{name}}"{{/if}}
@@ -21,6 +22,7 @@
         {{#if disabled}}disabled{{/if}}
         {{#if readonly}}readonly{{/if}}
     >
+    {{#if icon}}</div>{{/if}}
     {{#if helpText}}<div class="bf-form-help">{{helpText}}</div>{{/if}}
     {{#if error}}<div class="bf-form-error">{{error}}</div>{{/if}}
 </div>

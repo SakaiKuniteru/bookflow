@@ -1,0 +1,28 @@
+<section class="bf-catalog-page" data-catalog-page data-page-key="{{key}}" data-endpoint="{{endpoint}}" data-rows-key="{{rowsKey}}">
+    {{#> admin/page-shell title=title description=description icon=icon}}
+        {{> tables/data-table
+            mode=mode
+            action=action
+            ariaLabel=ariaLabel
+            columns=columns
+            rows=rows
+            hasRows=hasRows
+            loading=tableLoading
+            search=search
+            actions=actions
+            filters=filters
+            filterModal=filterModal
+            filterModalId=filterModalId
+            filterFormId=filterFormId
+            filterTitle=filterTitle
+            filterDescription=filterDescription
+            sort=sort
+            pagination=pagination
+            emptyTitle=emptyTitle
+            emptyDescription=emptyDescription
+            emptyIllustration=true
+        }}
+    {{/admin/page-shell}}
+</section>
+{{> modals/admin/quan-ly-sach/sach/sach-form formFields=formFields}}
+{{> modals/admin/quan-ly-sach/sach/sach-view}}

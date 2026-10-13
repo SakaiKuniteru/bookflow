@@ -12,10 +12,16 @@ const render = (view, title) => async (req, res) => {
   });
 };
 
-const dataPage = (pageKey) => async (req, res) => {
+const dataPage = (pageKey, view = 'admin/danh-muc', pageAssets = {}) => async (req, res) => {
   const page = adminDataPages[pageKey];
-  return res.render('admin/danh-muc', {
+  const publisherIdentity = new Set(['ma_nha_xuat_ban', 'ten_nha_xuat_ban', 'ten_phap_ly']);
+  return res.render(view, {
     ...page,
+    ...(pageKey === 'publishers' ? {
+      logoField: page.formFields.find(field => field.name === 'logo_tep_id'),
+      profileFields: page.formFields.filter(field => publisherIdentity.has(field.name)),
+      formFields: page.formFields.filter(field => field.name !== 'logo_tep_id' && !publisherIdentity.has(field.name))
+    } : {}),
     title: page.title,
     layout: 'admin',
     mode: 'api',
@@ -32,7 +38,8 @@ const dataPage = (pageKey) => async (req, res) => {
     search: { id: `catalog-search-${page.key}`, name: 'q', placeholder: page.searchPlaceholder, mode: 'relative', threshold: 100 },
     actions: [{ label: 'Thêm mới', action: 'create-record', icon: 'plus', variant: 'primary', size: 'md' }],
     pagination: { enabled: true, page: 1, pageSize: 20, total: 0, pages: 1, from: 0, to: 0 },
-    scripts: ['/js/page/admin-danh-muc.js?v=20261010-3']
+    scripts: pageAssets.scripts || ['/js/page/admin-danh-muc.js?v=20261013-4'],
+    stylesheets: pageAssets.stylesheets || []
   });
 };
 
@@ -162,20 +169,23 @@ async customers(req, res) {
   });
 },
   permissions: render('admin/phan-quyen', 'Phân quyền'),
-  books: dataPage('books'),
-  authors: dataPage('authors'),
-  genres: dataPage('genres'),
-  publishers: dataPage('publishers'),
-  bookVersions: dataPage('versions'),
+  books: dataPage('books', 'admin/quan-ly-sach', { scripts: ['/js/page/admin-quan-ly-sach.js?v=20261013-2'] }),
+  authors: dataPage('authors', 'admin/tac-gia', {
+    scripts: ['/js/page/admin-danh-muc.js?v=20261013-4', '/js/page/admin-tac-gia.js?v=20261013-3'],
+    stylesheets: ['/css/pages/admin/tac-gia.css?v=20261013-4']
+  }),
+  genres: dataPage('genres', 'admin/the-loai'),
+  publishers: dataPage('publishers', 'admin/nha-xuat-ban'),
+  bookVersions: dataPage('versions', 'admin/phien-ban-sach'),
   suppliers: dataPage('suppliers'),
-  warehouses: dataPage('warehouses'),
+  warehouses: dataPage('warehouses', 'admin/quan-ly-kho', { scripts: ['/js/page/admin-quan-ly-kho.js?v=20261013-2'] }),
   stockImport: render('admin/kho/nhap-kho', 'Nhập kho'),
   stockTransfer: render('admin/kho/chuyen-kho', 'Xuất kho / Điều chuyển kho'),
   inventory: render('admin/kho/ton-kho', 'Danh sách tồn kho'),
   inventorySummary: render('admin/kho/ton-kho/tong-hop', 'Tổng hợp tồn kho'),
   inventoryHistory: render('admin/kho/ton-kho/lich-su', 'Lịch sử tồn kho'),
   stocktake: render('admin/kho/kiem-kho', 'Kiểm kho'),
-  memberships: dataPage('memberships'),
+  memberships: dataPage('memberships', 'admin/hoi-vien', { scripts: ['/js/page/admin-hoi-vien.js?v=20261013-2'] }),
   borrowPolicies: render('admin/chinh-sach-muon', 'Chính sách mượn'),
   payments: render('admin/thanh-toan', 'Thanh toán'),
   reports: render('admin/bao-cao', 'Báo cáo'),

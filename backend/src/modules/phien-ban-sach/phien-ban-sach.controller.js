@@ -9,6 +9,12 @@ class PhienBanSachController {
             return tra(req, res, data);
         } catch (error) { next(error); }
     }
+    async danhSachNhaPhatHanh(req, res, next) {
+        try {
+            const data = await service.danhSachNhaPhatHanh(req.auth);
+            return tra(req, res, data);
+        } catch (error) { next(error); }
+    }
     async chiTiet(req, res, next) {
         try {
             const data = await service.chiTiet(req.auth, req.params.phienBanId);

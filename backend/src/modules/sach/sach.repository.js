@@ -36,8 +36,17 @@ class SachRepository {
         return rows[0] ?? null;
     }
     async layTheoMa(donViId, maDauSach, client) {
-        const { rows } = await query('SELECT * FROM dau_sach WHERE don_vi_id = $1 AND ma_dau_sach = $2 AND ngay_xoa IS NULL', [donViId, maDauSach], client);
+        const { rows } = await query('SELECT * FROM dau_sach WHERE don_vi_id = $1 AND ma_dau_sach = $2', [donViId, maDauSach], client);
         return rows[0] ?? null;
+    }
+    async kiemTraTrungDinhDanh(donViId, maDauSach, duongDan, boQuaId = null, client) {
+        const { rows: [result] } = await query(
+            `SELECT
+                EXISTS (SELECT 1 FROM dau_sach WHERE don_vi_id = $1 AND ma_dau_sach = $2 AND ($4::integer IS NULL OR id <> $4)) AS trung_ma,
+                ($3::text IS NOT NULL AND EXISTS (SELECT 1 FROM dau_sach WHERE don_vi_id = $1 AND lower(duong_dan) = lower($3) AND ($4::integer IS NULL OR id <> $4))) AS trung_duong_dan`,
+            [donViId, maDauSach, duongDan || null, boQuaId], client
+        );
+        return result;
     }
     async thamChieuTonTai(bang, donViId, id, client) {
         if (!['tep_dinh_kem', 'tac_gia', 'the_loai_sach', 'tu_khoa_sach', 'bo_sach', 'dau_sach'].includes(bang)) throw new Error('Bảng tham chiếu không hợp lệ');

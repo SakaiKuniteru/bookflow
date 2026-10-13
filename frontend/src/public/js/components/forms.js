@@ -1,10 +1,10 @@
 import { initNumberInputs } from "./forms/number.js";
 import { initEmailInputs } from "./forms/email.js";
 import { initPasswordInputs } from "./forms/password.js";
-import { initDateInputs } from "./forms/date.js";
+import { initDateInputs } from "./forms/date.js?v=20261013-3";
 import { initSelectInputs } from "./forms/select.js";
 import { initFileInputs } from "./forms/file.js";
-import { initImageInputs } from "./forms/image.js";
+import { initImageInputs } from "./forms/image.js?v=20261013-4";
 import { initRichTextInputs } from "./forms/rich-text.js";
 import { initSearchInputs } from "./forms/search.js";
 import { initPhoneInputs } from "./forms/phone.js";

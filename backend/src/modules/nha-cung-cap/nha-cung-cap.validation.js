@@ -33,6 +33,7 @@ function duLieuHopLe(body, { tao = false, bang = 'nha_cung_cap' } = {}) {
         if (typeof value === 'string') {
             const chuoi = value.trim();
             if (chuoi.length > 20000) throw loi(`${ten} vượt quá độ dài cho phép`);
+            if (['so_dien_thoai', 'so_dien_thoai_phu'].includes(ten) && chuoi && !/^\+?\d{6,29}$/.test(chuoi)) throw loi('Số điện thoại chỉ được chứa chữ số và dấu + ở đầu số');
             duLieu[ten] = chuoi;
         } else if (value === null || typeof value === 'boolean' || typeof value === 'number' && Number.isFinite(value)) duLieu[ten] = value;
         else if (ten === 'lich_lam_viec' || ten === 'thong_so_ky_thuat') duLieu[ten] = value;

@@ -1,25 +1,29 @@
-<div class="bf-form-field {{className}}" data-form-field>
+<div class="bf-form-field {{className}}" data-form-field {{#if yearFrom}}data-derived-from="{{yearFrom}}"{{/if}} {{#if readonlyOnEdit}}data-readonly-on-edit="true"{{/if}}>
     {{#if label}}
         <label class="bf-form-label" for="{{id}}">
             {{label}}
             {{#if required}}<span class="bf-form-required">*</span>{{/if}}
         </label>
     {{/if}}
-    <div class="bf-date-control">
+    <div class="bf-date-control {{#if icon}}has-leading-icon{{/if}}">
+        {{#if icon}}<span class="bf-input-leading-icon">{{> ui/icon name=icon size=18}}</span>{{/if}}
         <input
             id="{{id}}"
             name="{{name}}"
             type="text"
             class="bf-form-control bf-date-input"
             value="{{value}}"
-            placeholder="{{#if placeholder}}{{placeholder}}{{else}}{{#if (eq type "time")}}{{#if (eq timeFormat "hm")}}HH:mm{{else}}HH:mm:ss{{/if}}{{else}}{{#if (eq type "datetime")}}{{#if (eq timeFormat "hm")}}dd/MM/yyyy HH:mm{{else}}dd/MM/yyyy HH:mm:ss{{/if}}{{else}}dd/MM/yyyy{{/if}}{{/if}}{{/if}}"
+            placeholder="{{#if placeholder}}{{placeholder}}{{else}}{{#if (eq type "year")}}YYYY{{else}}{{#if (eq type "time")}}{{#if (eq timeFormat "hm")}}HH:mm{{else}}HH:mm:ss{{/if}}{{else}}{{#if (eq type "datetime")}}{{#if (eq timeFormat "hm")}}dd/MM/yyyy HH:mm{{else}}dd/MM/yyyy HH:mm:ss{{/if}}{{else}}dd/MM/yyyy{{/if}}{{/if}}{{/if}}{{/if}}"
             data-date-type="{{type}}"
             data-time-format="{{timeFormat}}"
             data-default-time="{{defaultTime}}"
-            maxlength="{{#if (eq type "datetime")}}{{#if (eq timeFormat "hm")}}16{{else}}19{{/if}}{{else}}{{#if (eq type "time")}}{{#if (eq timeFormat "hm")}}5{{else}}8{{/if}}{{else}}10{{/if}}{{/if}}"
+            {{#if minDateFrom}}data-min-date-from="{{minDateFrom}}" data-min-date-offset-days="{{minDateOffsetDays}}"{{/if}}
+            {{#if maxDateFrom}}data-max-date-from="{{maxDateFrom}}" data-max-date-offset-days="{{maxDateOffsetDays}}"{{/if}}
+            {{#if rangeError}}data-range-error="{{rangeError}}"{{/if}}
+            maxlength="{{#if (eq type "year")}}4{{else}}{{#if (eq type "datetime")}}{{#if (eq timeFormat "hm")}}16{{else}}19{{/if}}{{else}}{{#if (eq type "time")}}{{#if (eq timeFormat "hm")}}5{{else}}8{{/if}}{{else}}10{{/if}}{{/if}}{{/if}}"
             autocomplete="off"
             {{#if required}}required{{/if}}
-            {{#if disabled}}disabled{{/if}}
+            {{#if yearFrom}}disabled{{else}}{{#if disabled}}disabled{{/if}}{{/if}}
             {{#if readonly}}readonly{{/if}}
         >
         <button
@@ -27,7 +31,7 @@
             class="bf-date-picker-toggle"
             aria-label="Mở lịch"
             tabindex="-1"
-            {{#if disabled}}disabled{{/if}}
+            {{#if yearFrom}}disabled{{else}}{{#if disabled}}disabled{{/if}}{{/if}}
         >
             <svg viewBox="0 0 24 24" aria-hidden="true">
                 <rect x="3" y="5" width="18" height="16" rx="2"></rect>
@@ -36,5 +40,5 @@
         </button>
         <div class="bf-date-picker" role="dialog" aria-label="Chọn ngày và giờ"></div>
     </div>
-    <div class="bf-form-error bf-date-error" hidden>Ngày hoặc thời gian không hợp lệ.</div>
+    <div class="bf-form-error bf-date-error" hidden>{{#if (eq type "year")}}Năm không hợp lệ.{{else}}Ngày hoặc thời gian không hợp lệ.{{/if}}</div>
 </div>

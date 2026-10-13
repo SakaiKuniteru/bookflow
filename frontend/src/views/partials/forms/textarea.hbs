@@ -1,4 +1,4 @@
-<div class="bf-form-field {{className}}" data-form-field>
+<div class="bf-form-field {{className}}" data-form-field {{#if readonlyOnEdit}}data-readonly-on-edit="true"{{/if}}>
     {{#if label}}
         <label class="bf-form-label" for="{{id}}">{{label}}{{#if required}}<span class="bf-form-required">*</span>{{/if}}</label>
     {{/if}}

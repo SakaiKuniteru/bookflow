@@ -23,7 +23,7 @@ async function kiemTraQuyenUpload(auth, phamVi, loaiTep) {
     if (!tv) throw loi('Không có quyền upload vào đơn vị');
     const chiNhanhId = auth.chiNhanhId || null;
     const coQuyen = async ma => await phanQuyenService.kiemTraQuyen(auth, ma) || (chiNhanhId && await phanQuyenService.kiemTraQuyen(auth, ma, { phamVi: 'CHI_NHANH', chiNhanhId }));
-    const duocPhep = loaiTep === 'LOGO' ? await phanQuyenService.kiemTraQuyen(auth, 'units.manage') : loaiTep === 'ANH_BIA' ? await coQuyen('books.create') || await coQuyen('files.upload') : await coQuyen('files.upload');
+    const duocPhep = loaiTep === 'LOGO' ? await coQuyen('units.manage') || await coQuyen('books.create') : ['ANH_BIA', 'ANH_TAC_GIA'].includes(loaiTep) ? await coQuyen('books.create') || await coQuyen('files.upload') : await coQuyen('files.upload');
     if (!duocPhep) throw loi('Không có quyền upload loại file này');
 }
 async function xuLyNoiDung(file, loaiTep) {

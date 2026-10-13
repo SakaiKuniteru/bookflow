@@ -48,6 +48,14 @@ class HoiVienRepository {
         const { rows } = await query(`SELECT * FROM hoi_vien WHERE don_vi_id = $1 AND id = $2${khoa ? ' FOR UPDATE' : ''}`,[donViId,hoiVienId],client);
         return rows[0] ?? null;
     }
+    async hoiVienTheoMa(donViId, maHoiVien, client, boQuaId = null) {
+        const { rows } = await query('SELECT id FROM hoi_vien WHERE don_vi_id = $1 AND upper(ma_hoi_vien) = upper($2) AND ($3::integer IS NULL OR id <> $3) LIMIT 1',[donViId,maHoiVien,boQuaId],client);
+        return rows[0] ?? null;
+    }
+    async hoiVienTheoKhachHang(donViId, khachHangId, client) {
+        const { rows } = await query('SELECT id FROM hoi_vien WHERE don_vi_id = $1 AND khach_hang_id = $2 LIMIT 1',[donViId,khachHangId],client);
+        return rows[0] ?? null;
+    }
     async khachHang(donViId, khachHangId, client) {
         const { rows } = await query('SELECT * FROM khach_hang WHERE don_vi_id = $1 AND id = $2 AND ngay_xoa IS NULL',[donViId,khachHangId],client);
         return rows[0] ?? null;
@@ -55,6 +63,11 @@ class HoiVienRepository {
     async taoHoiVien(donViId, data, client) {
         const { rows } = await query(`INSERT INTO hoi_vien (don_vi_id,khach_hang_id,hang_hoi_vien_id,ma_hoi_vien,ngay_het_han) VALUES ($1,$2,$3,$4,$5) RETURNING *`,[donViId,data.khach_hang_id,data.hang_hoi_vien_id,data.ma_hoi_vien,data.ngay_het_han],client);
         return rows[0];
+    }
+    async suaHoiVien(donViId, hoiVienId, data, client) {
+        const entries = Object.entries(data);
+        const { rows } = await query(`UPDATE hoi_vien SET ${entries.map(([key],index) => `${key} = $${index + 3}`).join(',')},ngay_cap_nhat = now() WHERE don_vi_id = $1 AND id = $2 RETURNING *`,[donViId,hoiVienId,...entries.map(([,value]) => value)],client);
+        return rows[0] ?? null;
     }
     async chuyenHang(donViId, hoiVienId, hangId, client) {
         const { rows } = await query('UPDATE hoi_vien SET hang_hoi_vien_id = $3,ngay_xet_hang = now(),ngay_cap_nhat = now() WHERE don_vi_id = $1 AND id = $2 RETURNING *',[donViId,hoiVienId,hangId],client);

@@ -61,7 +61,7 @@ const localsMiddleware = (req, res, next) => {
         { label: 'Nhà cung cấp', href: '/admin/nha-cung-cap', icon: 'building' }
       ] },
       { label: 'Quản lý kho', children: [
-        { label: 'Quản trị kho', href: '/admin/kho' },
+        { label: 'Quản lý kho', href: '/admin/kho' },
         { label: 'Nhập kho', href: '/admin/kho/nhap-kho', icon: 'upload' },
         { label: 'Xuất kho / Điều chuyển kho', href: '/admin/kho/chuyen-kho', icon: 'download' },
         { label: 'Danh sách tồn kho', href: '/admin/kho/ton-kho', icon: 'chart' },

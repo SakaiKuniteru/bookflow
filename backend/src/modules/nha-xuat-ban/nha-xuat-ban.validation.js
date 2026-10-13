@@ -5,6 +5,7 @@ const TRUONG_CHUOI = {
     ma_nha_xuat_ban: 40, ten_nha_xuat_ban: 255, ten_phap_ly: 255,
     ten_viet_tat: 100, ten_quoc_te: 255, ma_so_thue: 50,
     ma_dinh_danh: 100, quoc_gia: 100, tinh_thanh: 150,
+    ma_tinh_thanh: 20, ma_phuong_xa: 20, phuong_xa: 120,
     dia_chi: 2000, email: 255, so_dien_thoai: 30,
     website: 2000, nguoi_lien_he: 200, so_dien_thoai_lien_he: 30,
     mo_ta: 20000, ghi_chu_noi_bo: 20000
@@ -12,6 +13,10 @@ const TRUONG_CHUOI = {
 const TRUONG_TAO = [...Object.keys(TRUONG_CHUOI), 'logo_tep_id'];
 function loiDuLieu(message) {
     return new AppError({ code: 'INVALID_INPUT', message, status: 422 });
+}
+function loiNhieuTruong(details, status = 422, code = 'INVALID_INPUT') {
+    const unique = [...new Map(details.map(item => [`${item.field}:${item.message}`, item])).values()];
+    return new AppError({ code, message: unique.map(item => item.message).join('. '), status, details: unique });
 }
 function kiemTraTruong(body, cacTruong) {
     if (!body || typeof body !== 'object' || Array.isArray(body)) throw loiDuLieu('Dữ liệu không hợp lệ');
@@ -49,16 +54,29 @@ function giaTriHopLe(ten, value) {
 }
 function nhaXuatBanMoiHopLe(body) {
     kiemTraTruong(body, TRUONG_TAO);
-    if (body.ma_nha_xuat_ban == null || body.ten_nha_xuat_ban == null) throw loiDuLieu('Mã và tên nhà xuất bản là bắt buộc');
+    const details = [];
     const duLieu = {};
-    for (const [ten, value] of Object.entries(body)) duLieu[ten] = giaTriHopLe(ten, value);
+    for (const [field, label] of [['ma_nha_xuat_ban', 'Mã nhà xuất bản'], ['ten_nha_xuat_ban', 'Tên nhà xuất bản']]) {
+        if (!Object.hasOwn(body, field) || body[field] == null || typeof body[field] === 'string' && !body[field].trim()) details.push({ field, message: `${label} là bắt buộc` });
+    }
+    for (const [field, value] of Object.entries(body)) {
+        if (value == null && ['ma_nha_xuat_ban', 'ten_nha_xuat_ban'].includes(field)) continue;
+        try { duLieu[field] = giaTriHopLe(field, value); }
+        catch (error) { details.push({ field, message: error.message || `${field} không hợp lệ` }); }
+    }
+    if (details.length) throw loiNhieuTruong(details);
     return duLieu;
 }
 function suaNhaXuatBanHopLe(body) {
     kiemTraTruong(body, TRUONG_TAO.filter(ten => ten !== 'ma_nha_xuat_ban'));
-    if (!Object.keys(body).length) throw loiDuLieu('Không có dữ liệu cập nhật');
+    if (!Object.keys(body).length) throw loiNhieuTruong([{ field: 'ten_nha_xuat_ban', message: 'Không có dữ liệu cập nhật' }]);
     const duLieu = {};
-    for (const [ten, value] of Object.entries(body)) duLieu[ten] = giaTriHopLe(ten, value);
+    const details = [];
+    for (const [field, value] of Object.entries(body)) {
+        try { duLieu[field] = giaTriHopLe(field, value); }
+        catch (error) { details.push({ field, message: error.message || `${field} không hợp lệ` }); }
+    }
+    if (details.length) throw loiNhieuTruong(details);
     return duLieu;
 }
 function trangThaiHopLe(body) {
@@ -93,4 +111,4 @@ function boLocHopLe(query = {}) {
     const trang_thai = query.trang_thai == null ? null : trangThaiHopLe({ trang_thai: query.trang_thai });
     return { trang, kich_thuoc, tu_khoa: query.tu_khoa == null ? '' : chuoiHopLe(query.tu_khoa, 'Từ khóa', 1, 120), trang_thai };
 }
-module.exports = { idHopLe, nhaXuatBanMoiHopLe, suaNhaXuatBanHopLe, trangThaiHopLe, thuongHieuMoiHopLe, suaThuongHieuHopLe, boLocHopLe };
+module.exports = { idHopLe, loiNhieuTruong, nhaXuatBanMoiHopLe, suaNhaXuatBanHopLe, trangThaiHopLe, thuongHieuMoiHopLe, suaThuongHieuHopLe, boLocHopLe };

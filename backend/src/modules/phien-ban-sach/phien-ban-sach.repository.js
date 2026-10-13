@@ -1,5 +1,9 @@
 const { query } = require('../../database/query.js');
 class PhienBanSachRepository {
+    async danhSachNhaPhatHanh(donViId) {
+        const { rows } = await query(`SELECT id, ma_nha_phat_hanh, ten_nha_phat_hanh FROM nha_phat_hanh WHERE don_vi_id = $1 AND trang_thai = 'DANG_DUNG' ORDER BY ten_nha_phat_hanh, id`, [donViId]);
+        return { nha_phat_hanh: rows };
+    }
     async danhSach(donViId, boLoc, client) {
         const values = [donViId, boLoc.dau_sach_id, boLoc.nha_xuat_ban_id, boLoc.loai_phien_ban, boLoc.trang_thai, `%${boLoc.tu_khoa.replace(/[\\%_]/g, '\\$&')}%`];
         const where = `pb.don_vi_id = $1 AND ($2::integer IS NULL OR pb.dau_sach_id = $2) AND ($3::integer IS NULL OR pb.nha_xuat_ban_id = $3) AND ($4::text IS NULL OR pb.loai_phien_ban = $4) AND ($5::text IS NULL OR pb.trang_thai = $5) AND (pb.ma_phien_ban ILIKE $6 ESCAPE '\\' OR pb.ma_sku_noi_bo ILIKE $6 ESCAPE '\\' OR pb.ten_phien_ban ILIKE $6 ESCAPE '\\' OR pb.ten_hien_thi ILIKE $6 ESCAPE '\\' OR pb.isbn_10 ILIKE $6 ESCAPE '\\' OR pb.isbn_13 ILIKE $6 ESCAPE '\\')`;
@@ -14,6 +18,17 @@ class PhienBanSachRepository {
             [...values, boLoc.kich_thuoc, (boLoc.trang - 1) * boLoc.kich_thuoc], client
         );
         return { phien_ban_sach: rows, phan_trang: { trang: boLoc.trang, kich_thuoc: boLoc.kich_thuoc, tong_so: tong.tong_so, tong_trang: Math.ceil(tong.tong_so / boLoc.kich_thuoc) } };
+    }
+    async kiemTraTrungDinhDanh(donViId, duLieu, boQuaId = null, client) {
+        const { rows: [result] } = await query(
+            `SELECT
+                EXISTS (SELECT 1 FROM phien_ban_sach WHERE don_vi_id = $1 AND ma_phien_ban = $2 AND ($6::integer IS NULL OR id <> $6)) AS trung_ma,
+                ($3::text IS NOT NULL AND EXISTS (SELECT 1 FROM phien_ban_sach WHERE don_vi_id = $1 AND ma_sku_noi_bo = $3 AND ($6::integer IS NULL OR id <> $6))) AS trung_sku,
+                ($4::text IS NOT NULL AND EXISTS (SELECT 1 FROM phien_ban_sach WHERE don_vi_id = $1 AND isbn_10 = $4 AND ($6::integer IS NULL OR id <> $6))) AS trung_isbn_10,
+                ($5::text IS NOT NULL AND EXISTS (SELECT 1 FROM phien_ban_sach WHERE don_vi_id = $1 AND isbn_13 = $5 AND ($6::integer IS NULL OR id <> $6))) AS trung_isbn_13`,
+            [donViId, duLieu.ma_phien_ban, duLieu.ma_sku_noi_bo || null, duLieu.isbn_10 || null, duLieu.isbn_13 || null, boQuaId], client
+        );
+        return result;
     }
     async layPhienBan(donViId, phienBanId, client, khoa = false) {
         const { rows } = await query(`SELECT * FROM phien_ban_sach WHERE don_vi_id = $1 AND id = $2${khoa ? ' FOR UPDATE' : ''}`, [donViId, phienBanId], client);

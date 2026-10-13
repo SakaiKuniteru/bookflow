@@ -1,14 +1,14 @@
 const { AppError } = require('../../common/errors/AppError.js');
 const MAX_ID = 2147483647;
 const TRANG_THAI = ['DANG_DUNG', 'TAM_AN', 'NGUNG_DUNG'];
-const LOAI_TEN = ['BUT_DAN', 'TEN_GOC', 'PHIEN_AM', 'TEN_KHAC'];
+const LOAI_TEN = ['BUT_DANH', 'TEN_GOC', 'PHIEN_AM', 'TEN_KHAC'];
 const TRUONG_CHUOI = {
     ma_tac_gia: 50, ho_ten: 200, ten_hien_thi: 200, ten_goc: 200,
     ten_sap_xep: 200, ten_khac: 200, quoc_tich: 100,
-    quoc_gia_xuat_than: 100, ngon_ngu_sang_tac: 100,
+    quoc_gia_xuat_than: 100, ngon_ngu_sang_tac: 15,
     tieu_su_ngan: 2000, tieu_su_day_du: 30000,
     linh_vuc_sang_tac: 2000, thanh_tuu: 10000,
-    website: 2000, url_tham_khao: 2000, nguon_du_lieu: 200
+    website: 2000, url_tham_khao: 2000, nguon_du_lieu: 80
 };
 const TRUONG_ID = ['anh_dai_dien_tep_id'];
 const TRUONG_NGAY = ['ngay_sinh', 'ngay_mat'];
@@ -16,6 +16,10 @@ const TRUONG_NAM = ['nam_sinh', 'nam_mat'];
 const TRUONG_TAO = [...Object.keys(TRUONG_CHUOI), ...TRUONG_ID, ...TRUONG_NGAY, ...TRUONG_NAM];
 function loiDuLieu(message) {
     return new AppError({ code: 'INVALID_INPUT', message, status: 422 });
+}
+function loiNhieuTruong(details, status = 422, code = 'INVALID_INPUT') {
+    const unique = [...new Map(details.map(item => [`${item.field}:${item.message}`, item])).values()];
+    return new AppError({ code, message: unique.map(item => item.message).join('. '), status, details: unique });
 }
 function kiemTraTruong(body, cacTruong) {
     if (!body || typeof body !== 'object' || Array.isArray(body)) throw loiDuLieu('Dữ liệu không hợp lệ');
@@ -62,16 +66,29 @@ function giaTriHopLe(ten, value) {
 }
 function tacGiaMoiHopLe(body) {
     kiemTraTruong(body, TRUONG_TAO);
-    if (body.ma_tac_gia == null || body.ho_ten == null) throw loiDuLieu('Mã tác giả và họ tên là bắt buộc');
+    const errors = [];
     const duLieu = {};
-    for (const [ten, value] of Object.entries(body)) duLieu[ten] = giaTriHopLe(ten, value);
+    for (const [field, label] of [['ma_tac_gia', 'Mã tác giả'], ['ho_ten', 'Họ và tên']]) {
+        if (!Object.hasOwn(body, field) || body[field] == null || typeof body[field] === 'string' && !body[field].trim()) errors.push({ field, message: `${label} là bắt buộc` });
+    }
+    for (const [field, value] of Object.entries(body)) {
+        if (value == null && ['ma_tac_gia', 'ho_ten'].includes(field)) continue;
+        try { duLieu[field] = giaTriHopLe(field, value); }
+        catch (error) { errors.push({ field, message: error.message || `${field} không hợp lệ` }); }
+    }
+    if (errors.length) throw loiNhieuTruong(errors);
     return duLieu;
 }
 function suaTacGiaHopLe(body) {
-    kiemTraTruong(body, TRUONG_TAO.filter(ten => ten !== 'ma_tac_gia'));
-    if (!Object.keys(body).length) throw loiDuLieu('Không có dữ liệu cập nhật');
+    kiemTraTruong(body, TRUONG_TAO);
+    if (!Object.keys(body).length) throw loiNhieuTruong([{ field: 'ho_ten', message: 'Không có dữ liệu cập nhật' }]);
     const duLieu = {};
-    for (const [ten, value] of Object.entries(body)) duLieu[ten] = giaTriHopLe(ten, value);
+    const errors = [];
+    for (const [field, value] of Object.entries(body)) {
+        try { duLieu[field] = giaTriHopLe(field, value); }
+        catch (error) { errors.push({ field, message: error.message || `${field} không hợp lệ` }); }
+    }
+    if (errors.length) throw loiNhieuTruong(errors);
     return duLieu;
 }
 function trangThaiHopLe(body) {
@@ -116,4 +133,4 @@ function boLocHopLe(query = {}) {
     const trang_thai = query.trang_thai == null ? null : trangThaiHopLe({ trang_thai: query.trang_thai });
     return { trang, kich_thuoc, tu_khoa: query.tu_khoa == null ? '' : chuoiHopLe(query.tu_khoa, 'Từ khóa', 1, 120), trang_thai };
 }
-module.exports = { idHopLe, tacGiaMoiHopLe, suaTacGiaHopLe, trangThaiHopLe, tenKhacMoiHopLe, suaTenKhacHopLe, boLocHopLe };
+module.exports = { idHopLe, loiNhieuTruong, tacGiaMoiHopLe, suaTacGiaHopLe, trangThaiHopLe, tenKhacMoiHopLe, suaTenKhacHopLe, boLocHopLe };

@@ -16,8 +16,10 @@ class SachService {
         return sach;
     }
     kiemTraNghiepVu(duLieu) {
-        if (duLieu.do_tuoi_toi_thieu != null && duLieu.do_tuoi_toi_da != null && duLieu.do_tuoi_toi_da < duLieu.do_tuoi_toi_thieu) throw this.loi('Độ tuổi tối đa không được nhỏ hơn độ tuổi tối thiểu');
-        if (duLieu.nam_sang_tac != null && duLieu.nam_xuat_ban_dau_tien != null && duLieu.nam_xuat_ban_dau_tien < duLieu.nam_sang_tac) throw this.loi('Năm xuất bản đầu tiên không được trước năm sáng tác');
+        const details = [];
+        if (duLieu.do_tuoi_toi_thieu != null && duLieu.do_tuoi_toi_da != null && duLieu.do_tuoi_toi_da < duLieu.do_tuoi_toi_thieu) details.push({ field: 'do_tuoi_toi_da', message: 'Độ tuổi tối đa không được nhỏ hơn độ tuổi tối thiểu' });
+        if (duLieu.nam_sang_tac != null && duLieu.nam_xuat_ban_dau_tien != null && duLieu.nam_xuat_ban_dau_tien < duLieu.nam_sang_tac) details.push({ field: 'nam_xuat_ban_dau_tien', message: 'Năm xuất bản đầu tiên không được trước năm sáng tác' });
+        if (details.length) throw new AppError({ code: 'INVALID_INPUT', message: details.map(item => item.message).join('. '), status: 422, details });
     }
     async kiemTraThamChieu(donViId, bang, id, client) {
         if (id != null && !await repo.thamChieuTonTai(bang, donViId, id, client)) throw this.loi(`Dữ liệu tham chiếu ${bang} không tồn tại trong đơn vị`);
@@ -29,7 +31,11 @@ class SachService {
         if (loai === 'lien-quan' && duLieu.dau_sach_lien_quan_id === sachId) throw this.loi('Đầu sách không thể liên quan đến chính nó');
     }
     xuLyLoiDb(error) {
-        if (error.code === '23505') throw this.loi('Mã đầu sách, đường dẫn hoặc dữ liệu liên kết đã tồn tại', 409, 'BOOK_DUPLICATE');
+        if (error.code === '23505') {
+            const field = error.constraint === 'uq_dau_sach_ma' ? 'ma_dau_sach' : error.constraint === 'uq_dau_sach_slug' ? 'duong_dan' : null;
+            const message = field === 'ma_dau_sach' ? 'Mã đầu sách đã tồn tại trong đơn vị' : field === 'duong_dan' ? 'Đường dẫn đã được sử dụng' : 'Mã đầu sách, đường dẫn hoặc dữ liệu liên kết đã tồn tại';
+            throw new AppError({ code: 'BOOK_DUPLICATE', message, status: 409, details: field ? [{ field, message }] : [] });
+        }
         if (error.code === '23503') throw this.loi('Dữ liệu đang được sử dụng hoặc tham chiếu không hợp lệ', 409, 'BOOK_REFERENCE_CONFLICT');
         if (['23514', '23502', '22003', '22P02', '22001'].includes(error.code)) throw this.loi('Dữ liệu sách vi phạm ràng buộc');
         throw error;
@@ -170,12 +176,35 @@ class SachService {
         };
     }
     async taoSach(auth, body, requestId) {
-        const duLieu = duLieuSach(body, true);
-        this.kiemTraNghiepVu(duLieu);
+        const kiemTra = body?.kiem_tra === true;
+        const dauVao = { ...body };
+        delete dauVao.kiem_tra;
+        let duLieu = {};
+        let loiTruong = [];
+        try { duLieu = duLieuSach(dauVao, true); }
+        catch (error) {
+            if (!kiemTra) throw error;
+            loiTruong = error.details || [];
+        }
         try {
             return await trongGiaoDich(async client => {
                 await this.yeuCauQuyen(auth, 'books.create', client);
-                await this.kiemTraThamChieu(auth.donViId, 'tep_dinh_kem', duLieu.anh_bia_chinh_id, client);
+                const maDauSach = typeof dauVao.ma_dau_sach === 'string' ? dauVao.ma_dau_sach.trim().toUpperCase() : '';
+                const duongDan = typeof dauVao.duong_dan === 'string' ? dauVao.duong_dan.trim() : '';
+                const trung = await repo.kiemTraTrungDinhDanh(auth.donViId, maDauSach, duongDan, null, client);
+                if (trung.trung_ma) loiTruong.push({ field: 'ma_dau_sach', message: 'Mã đầu sách đã tồn tại trong đơn vị' });
+                if (trung.trung_duong_dan) loiTruong.push({ field: 'duong_dan', message: 'Đường dẫn đã được sử dụng' });
+                if (Object.keys(duLieu).length) {
+                    try { this.kiemTraNghiepVu(duLieu); }
+                    catch (error) { loiTruong.push(...(error.details || [])); }
+                    if (duLieu.anh_bia_chinh_id != null && !await repo.thamChieuTonTai('tep_dinh_kem', auth.donViId, duLieu.anh_bia_chinh_id, client)) loiTruong.push({ field: 'anh_bia_chinh_id', message: 'Ảnh bìa không tồn tại trong đơn vị' });
+                }
+                if (loiTruong.length) {
+                    const details = [...new Map(loiTruong.map(item => [`${item.field}:${item.message}`, item])).values()];
+                    const duplicate = details.some(item => item.message.includes('đã tồn tại') || item.message.includes('đã được sử dụng'));
+                    throw new AppError({ code: duplicate ? 'BOOK_DUPLICATE' : 'INVALID_INPUT', message: details.map(item => item.message).join('. '), status: duplicate ? 409 : 422, details });
+                }
+                if (kiemTra) return { da_kiem_tra: true };
                 const sach = await repo.taoSach(auth.donViId, auth.taiKhoanId, duLieu, client);
                 await repo.ghiNhatKy({ donViId: auth.donViId, actorId: auth.taiKhoanId, doiTuongLoai: 'dau_sach', doiTuongId: sach.id, hanhDong: 'books.create', requestId }, client);
                 return sach;
@@ -184,14 +213,35 @@ class SachService {
     }
     async suaSach(auth, sachId, body, requestId) {
         sachId = idHopLe(sachId, 'Đầu sách');
-        const duLieu = duLieuSach(body);
+        const kiemTra = body?.kiem_tra === true;
+        const dauVao = { ...body };
+        delete dauVao.kiem_tra;
+        let duLieu = {};
+        let loiTruong = [];
+        try { duLieu = duLieuSach(dauVao); }
+        catch (error) {
+            if (!kiemTra) throw error;
+            loiTruong = error.details || [];
+        }
         try {
             return await trongGiaoDich(async client => {
                 await this.yeuCauQuyen(auth, 'books.create', client);
                 const hienTai = await this.sachTonTai(auth.donViId, sachId, client, true);
                 if (hienTai.trang_thai === 'NGUNG_KINH_DOANH') throw this.loi('Không thể sửa sách đã ngừng kinh doanh', 409, 'BOOK_INACTIVE');
-                this.kiemTraNghiepVu({ ...hienTai, ...duLieu });
-                await this.kiemTraThamChieu(auth.donViId, 'tep_dinh_kem', duLieu.anh_bia_chinh_id, client);
+                const duongDan = typeof dauVao.duong_dan === 'string' ? dauVao.duong_dan.trim() : '';
+                const trung = await repo.kiemTraTrungDinhDanh(auth.donViId, hienTai.ma_dau_sach, duongDan, sachId, client);
+                if (trung.trung_duong_dan) loiTruong.push({ field: 'duong_dan', message: 'Đường dẫn đã được sử dụng' });
+                if (Object.keys(duLieu).length) {
+                    try { this.kiemTraNghiepVu({ ...hienTai, ...duLieu }); }
+                    catch (error) { loiTruong.push(...(error.details || [])); }
+                    if (duLieu.anh_bia_chinh_id != null && !await repo.thamChieuTonTai('tep_dinh_kem', auth.donViId, duLieu.anh_bia_chinh_id, client)) loiTruong.push({ field: 'anh_bia_chinh_id', message: 'Ảnh bìa không tồn tại trong đơn vị' });
+                }
+                if (loiTruong.length) {
+                    const details = [...new Map(loiTruong.map(item => [`${item.field}:${item.message}`, item])).values()];
+                    const duplicate = details.some(item => item.message.includes('đã tồn tại') || item.message.includes('đã được sử dụng'));
+                    throw new AppError({ code: duplicate ? 'BOOK_DUPLICATE' : 'INVALID_INPUT', message: details.map(item => item.message).join('. '), status: duplicate ? 409 : 422, details });
+                }
+                if (kiemTra) return { da_kiem_tra: true };
                 const sach = await repo.suaSach(auth.donViId, sachId, auth.taiKhoanId, duLieu, client);
                 await repo.ghiNhatKy({ donViId: auth.donViId, actorId: auth.taiKhoanId, doiTuongLoai: 'dau_sach', doiTuongId: sachId, hanhDong: 'books.update', requestId }, client);
                 return sach;

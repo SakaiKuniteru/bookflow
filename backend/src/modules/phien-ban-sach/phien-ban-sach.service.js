@@ -22,6 +22,15 @@ class PhienBanSachService {
         }
         if (duLieu.thuong_hieu_xuat_ban_id && !await repo.thuongHieuThuocNhaXuatBan(donViId, duLieu.thuong_hieu_xuat_ban_id, duLieu.nha_xuat_ban_id, client)) throw this.loi('Thương hiệu không thuộc nhà xuất bản đã chọn');
     }
+    async kiemTraTrung(auth, duLieu, boQuaId = null, client) {
+        const result = await repo.kiemTraTrungDinhDanh(auth.donViId, duLieu, boQuaId, client);
+        const details = [];
+        if (result.trung_ma) details.push({ field: 'ma_phien_ban', message: 'Mã phiên bản đã tồn tại' });
+        if (result.trung_sku) details.push({ field: 'ma_sku_noi_bo', message: 'SKU nội bộ đã tồn tại' });
+        if (result.trung_isbn_10) details.push({ field: 'isbn_10', message: 'ISBN-10 đã tồn tại' });
+        if (result.trung_isbn_13) details.push({ field: 'isbn_13', message: 'ISBN-13 đã tồn tại' });
+        if (details.length) throw new AppError({ code: 'BOOK_EDITION_EXISTS', message: details.map(item => item.message).join('. '), status: 409, details });
+    }
     kiemTraNghiepVu(duLieu) {
         if (duLieu.thuong_hieu_xuat_ban_id && !duLieu.nha_xuat_ban_id) throw this.loi('Thương hiệu xuất bản phải có nhà xuất bản');
         if (duLieu.ngay_ngung_phat_hanh && duLieu.ngay_phat_hanh && String(duLieu.ngay_ngung_phat_hanh).slice(0, 10) < String(duLieu.ngay_phat_hanh).slice(0, 10)) throw this.loi('Ngày ngừng phát hành không được trước ngày phát hành');
@@ -39,6 +48,10 @@ class PhienBanSachService {
         await this.yeuCauQuyen(auth, 'books.read');
         return repo.danhSach(auth.donViId, boLoc);
     }
+    async danhSachNhaPhatHanh(auth) {
+        await this.yeuCauQuyen(auth, 'books.read');
+        return repo.danhSachNhaPhatHanh(auth.donViId);
+    }
     async chiTiet(auth, phienBanId) {
         phienBanId = idHopLe(phienBanId, 'Phiên bản sách');
         await this.yeuCauQuyen(auth, 'books.read');
@@ -53,13 +66,18 @@ class PhienBanSachService {
         return { ...phienBan, nguoi_dong_gop: nguoiDongGop, ngon_ngu: ngonNgu, ma_dinh_danh: maDinhDanh, tep_sach: tepSach };
     }
     async taoPhienBan(auth, body, requestId) {
-        const duLieu = phienBanMoiHopLe(body);
+        const kiemTra = body?.kiem_tra === true;
+        const dauVao = { ...(body || {}) };
+        delete dauVao.kiem_tra;
+        const duLieu = phienBanMoiHopLe(dauVao);
         this.kiemTraNghiepVu(duLieu);
         let ketQua;
         try {
             ketQua = await trongGiaoDich(async client => {
                 await this.yeuCauQuyen(auth, 'books.create', client);
                 await this.kiemTraThamChieu(auth.donViId, duLieu, client);
+                await this.kiemTraTrung(auth, duLieu, null, client);
+                if (kiemTra) return { da_kiem_tra: true };
                 const phienBan = await repo.taoPhienBan(auth.donViId, auth.taiKhoanId, duLieu, client);
                 await repo.ghiNhatKy({ donViId: auth.donViId, actorId: auth.taiKhoanId, doiTuongId: phienBan.id, hanhDong: 'books.edition.create', requestId }, client);
                 return phienBan;
@@ -69,7 +87,10 @@ class PhienBanSachService {
     }
     async suaPhienBan(auth, phienBanId, body, requestId) {
         phienBanId = idHopLe(phienBanId, 'Phiên bản sách');
-        const duLieu = suaPhienBanHopLe(body);
+        const kiemTra = body?.kiem_tra === true;
+        const dauVao = { ...(body || {}) };
+        delete dauVao.kiem_tra;
+        const duLieu = suaPhienBanHopLe(dauVao);
         let ketQua;
         try {
             ketQua = await trongGiaoDich(async client => {
@@ -78,6 +99,8 @@ class PhienBanSachService {
                 const moi = { ...hienTai, ...duLieu };
                 this.kiemTraNghiepVu(moi);
                 await this.kiemTraThamChieu(auth.donViId, moi, client);
+                await this.kiemTraTrung(auth, moi, phienBanId, client);
+                if (kiemTra) return { da_kiem_tra: true };
                 const phienBan = await repo.suaPhienBan(auth.donViId, phienBanId, auth.taiKhoanId, duLieu, client);
                 await repo.ghiNhatKy({ donViId: auth.donViId, actorId: auth.taiKhoanId, doiTuongId: phienBanId, hanhDong: 'books.edition.update', requestId }, client);
                 return phienBan;

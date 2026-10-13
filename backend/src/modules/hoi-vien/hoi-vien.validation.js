@@ -1,4 +1,9 @@
 const { loi, idHopLe, chuoi, truongHopLe } = require('../khach-hang/khach-hang.validation.js');
+const { AppError } = require('../../common/errors/AppError.js');
+function loiNhieuTruong(details, status = 422, code = 'INVALID_INPUT') {
+    const unique = [...new Map(details.map(item => [`${item.field}:${item.message}`, item])).values()];
+    return new AppError({ code, message: unique.map(item => item.message).join('. '), status, details: unique });
+}
 function soNguyen(value, ten, min = 0) {
     if (!Number.isSafeInteger(value) || value < min) throw loi(`${ten} phải là số nguyên từ ${min} trở lên`);
     return value;
@@ -53,8 +58,50 @@ function chinhSachHopLe(body) {
     return { ty_le_tich_diem: tyLe, so_tien_moi_diem: body.so_tien_moi_diem == null ? null : soTien(body.so_tien_moi_diem,'Số tiền mỗi điểm'), gia_tri_moi_diem: soTien(body.gia_tri_moi_diem ?? 0,'Giá trị mỗi điểm'), giam_gia_phan_tram: phanTram, giam_gia_toi_da: body.giam_gia_toi_da == null ? null : soTien(body.giam_gia_toi_da,'Giảm giá tối đa'), mien_phi_van_chuyen: body.mien_phi_van_chuyen ?? false, so_lan_gia_han_mien_phi: soNguyen(body.so_lan_gia_han_mien_phi ?? 0,'Số lần gia hạn miễn phí'), so_ngay_muon_them: soNguyen(body.so_ngay_muon_them ?? 0,'Số ngày mượn thêm'), han_su_dung_diem_ngay: body.han_su_dung_diem_ngay == null ? null : soNguyen(body.han_su_dung_diem_ngay,'Hạn sử dụng điểm',1), dieu_kien: json(body.dieu_kien,'Điều kiện',{}), quyen_loi: json(body.quyen_loi,'Quyền lợi',{}), hieu_luc_tu: tu, hieu_luc_den: den };
 }
 function dangKyHopLe(body) {
-    truongHopLe(body,['khach_hang_id','hang_hoi_vien_id','ma_hoi_vien','ngay_het_han'],['khach_hang_id','hang_hoi_vien_id','ma_hoi_vien']);
-    return { khach_hang_id: idHopLe(body.khach_hang_id,'Khách hàng'), hang_hoi_vien_id: idHopLe(body.hang_hoi_vien_id,'Hạng hội viên'), ma_hoi_vien: chuoi(body.ma_hoi_vien,'Mã hội viên',40,true), ngay_het_han: thoiGian(body.ngay_het_han,'Ngày hết hạn') };
+    truongHopLe(body,['khach_hang_id','hang_hoi_vien_id','ma_hoi_vien','ngay_het_han']);
+    const errors = [];
+    const result = {};
+    const required = [
+        ['khach_hang_id', 'Khách hàng'],
+        ['hang_hoi_vien_id', 'Hạng hội viên'],
+        ['ma_hoi_vien', 'Mã hội viên']
+    ];
+    for (const [field, label] of required) {
+        if (!Object.hasOwn(body, field) || body[field] == null || typeof body[field] === 'string' && !body[field].trim()) errors.push({ field, message: `${label} là bắt buộc` });
+    }
+    try { result.khach_hang_id = idHopLe(body.khach_hang_id, 'Khách hàng'); }
+    catch (error) { if (!errors.some(item => item.field === 'khach_hang_id')) errors.push({ field: 'khach_hang_id', message: error.message }); }
+    try { result.hang_hoi_vien_id = idHopLe(body.hang_hoi_vien_id, 'Hạng hội viên'); }
+    catch (error) { if (!errors.some(item => item.field === 'hang_hoi_vien_id')) errors.push({ field: 'hang_hoi_vien_id', message: error.message }); }
+    try {
+        result.ma_hoi_vien = chuoi(body.ma_hoi_vien, 'Mã hội viên', 40, true);
+        if (result.ma_hoi_vien && !/^[A-Za-z0-9][A-Za-z0-9_-]*$/.test(result.ma_hoi_vien)) throw loi('Mã hội viên chỉ được gồm chữ, số, gạch dưới hoặc gạch ngang');
+        if (result.ma_hoi_vien) result.ma_hoi_vien = result.ma_hoi_vien.toUpperCase();
+    }
+    catch (error) { if (!errors.some(item => item.field === 'ma_hoi_vien')) errors.push({ field: 'ma_hoi_vien', message: error.message }); }
+    try { result.ngay_het_han = thoiGian(body.ngay_het_han, 'Ngày hết hạn'); }
+    catch (error) { errors.push({ field: 'ngay_het_han', message: error.message }); }
+    if (errors.length) throw loiNhieuTruong(errors);
+    return result;
+}
+function suaHoiVienHopLe(body) {
+    truongHopLe(body,['ma_hoi_vien','ngay_het_han']);
+    const errors = [];
+    const result = {};
+    if (!Object.keys(body).length) throw loiNhieuTruong([{ field: 'ma_hoi_vien', message: 'Không có dữ liệu cập nhật' }]);
+    if (Object.hasOwn(body,'ma_hoi_vien')) {
+        try {
+            result.ma_hoi_vien = chuoi(body.ma_hoi_vien,'Mã hội viên',40,true);
+            if (!/^[A-Za-z0-9][A-Za-z0-9_-]*$/.test(result.ma_hoi_vien)) throw loi('Mã hội viên chỉ được gồm chữ, số, gạch dưới hoặc gạch ngang');
+            result.ma_hoi_vien = result.ma_hoi_vien.toUpperCase();
+        } catch (error) { errors.push({ field: 'ma_hoi_vien', message: error.message }); }
+    }
+    if (Object.hasOwn(body,'ngay_het_han')) {
+        try { result.ngay_het_han = thoiGian(body.ngay_het_han,'Ngày hết hạn'); }
+        catch (error) { errors.push({ field: 'ngay_het_han', message: error.message }); }
+    }
+    if (errors.length) throw loiNhieuTruong(errors);
+    return result;
 }
 function chuyenHangHopLe(body) {
     truongHopLe(body,['hang_hoi_vien_id','ly_do'],['hang_hoi_vien_id']);
@@ -71,4 +118,4 @@ function boLocHopLe(query = {}) {
     if (kichThuoc > 100) throw loi('Kích thước trang tối đa 100');
     return { trang, kich_thuoc: kichThuoc, tu_khoa: chuoi(query.tu_khoa,'Từ khóa',200), hang_hoi_vien_id: query.hang_hoi_vien_id == null ? null : idHopLe(query.hang_hoi_vien_id,'Hạng hội viên') };
 }
-module.exports = { loi, idHopLe, truongHopLe, hangMoiHopLe, suaHangHopLe, chinhSachHopLe, dangKyHopLe, chuyenHangHopLe, giaoDichDiemHopLe, boLocHopLe };
+module.exports = { loi, loiNhieuTruong, idHopLe, truongHopLe, hangMoiHopLe, suaHangHopLe, chinhSachHopLe, dangKyHopLe, suaHoiVienHopLe, chuyenHangHopLe, giaoDichDiemHopLe, boLocHopLe };

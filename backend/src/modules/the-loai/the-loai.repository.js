@@ -38,6 +38,14 @@ class TheLoaiRepository {
         const { rows } = await query('SELECT EXISTS (SELECT 1 FROM tep_dinh_kem WHERE don_vi_id = $1 AND id = $2) AS hop_le', [donViId, tepId], client);
         return rows[0].hop_le;
     }
+    async maTheLoaiDaTonTai(donViId, ma, boQuaId = null, client) {
+        const { rows } = await query('SELECT EXISTS (SELECT 1 FROM the_loai_sach WHERE don_vi_id = $1 AND ma_the_loai = $2 AND ($3::integer IS NULL OR id <> $3)) AS ton_tai', [donViId, ma, boQuaId], client);
+        return rows[0].ton_tai;
+    }
+    async duongDanDaTonTai(donViId, duongDan, boQuaId = null, client) {
+        const { rows } = await query('SELECT EXISTS (SELECT 1 FROM the_loai_sach WHERE don_vi_id = $1 AND lower(duong_dan) = lower($2) AND duong_dan IS NOT NULL AND ($3::integer IS NULL OR id <> $3)) AS ton_tai', [donViId, duongDan, boQuaId], client);
+        return rows[0].ton_tai;
+    }
     async taoTheLoai(donViId, actorId, duLieu, capDo, client) {
         const { rows } = await query(
             `INSERT INTO the_loai_sach (don_vi_id, ma_the_loai, ten_the_loai, ten_tieng_anh, the_loai_cha_id, mo_ta, duong_dan, thu_tu, cap_do, anh_dai_dien_tep_id, icon_tep_id, hien_thi_menu, hien_thi_trang_chu, nguoi_tao_id)

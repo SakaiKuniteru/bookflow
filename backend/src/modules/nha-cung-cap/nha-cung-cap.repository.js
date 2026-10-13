@@ -20,6 +20,15 @@ class NhaCungCapRepository {
         const { rows } = await query(`SELECT * FROM ${bang} WHERE don_vi_id = $1 AND id = $2${cauHinh.xoaMem ? ' AND ngay_xoa IS NULL' : ''}${khoa ? ' FOR UPDATE' : ''}`, [donViId, id], client);
         return rows[0] ?? null;
     }
+    async kiemTraTrungDinhDanhNhaCungCap(donViId, duLieu, boQuaId = null, client) {
+        const { rows: [result] } = await query(
+            `SELECT
+                EXISTS (SELECT 1 FROM nha_cung_cap WHERE don_vi_id = $1 AND upper(ma_nha_cung_cap) = upper($2) AND ngay_xoa IS NULL AND ($4::integer IS NULL OR id <> $4)) AS trung_ma,
+                ($3::text IS NOT NULL AND EXISTS (SELECT 1 FROM nha_cung_cap WHERE don_vi_id = $1 AND ma_so_thue = $3 AND ngay_xoa IS NULL AND ($4::integer IS NULL OR id <> $4))) AS trung_ma_so_thue`,
+            [donViId, duLieu.ma_nha_cung_cap || null, duLieu.ma_so_thue || null, boQuaId], client
+        );
+        return result;
+    }
     async danhSach(donViId, bang, boLoc, { chaId = null } = {}, client) {
         const cauHinh = this.BANG[bang];
         const where = ['don_vi_id = $1'];

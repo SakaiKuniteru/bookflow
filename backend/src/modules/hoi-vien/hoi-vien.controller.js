@@ -13,6 +13,7 @@ function xuLy(hanhDong, status = 200) {
                 danhSach: () => service.danhSach(req.auth,req.query),
                 chiTiet: () => service.chiTiet(req.auth,hoiVienId),
                 dangKy: () => service.dangKy(req.auth,req.body,req.requestId),
+                suaHoiVien: () => service.suaHoiVien(req.auth,hoiVienId,req.body,req.requestId),
                 chuyenHang: () => service.chuyenHang(req.auth,hoiVienId,req.body,req.requestId),
                 giaoDichDiem: () => service.giaoDichDiem(req.auth,hoiVienId,req.body,req.requestId)
             };

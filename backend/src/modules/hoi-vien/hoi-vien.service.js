@@ -18,7 +18,11 @@ class HoiVienService {
         return row;
     }
     xuLyLoiDb(error) {
-        if (error.code === '23505') throw v.loi('Mã hạng, mã hội viên hoặc khóa chống trùng đã tồn tại',409,'DUPLICATE');
+        if (error.code === '23505') {
+            const field = error.constraint === 'hoi_vien_don_vi_id_khach_hang_id_key' ? 'khach_hang_id' : 'ma_hoi_vien';
+            const message = field === 'khach_hang_id' ? 'Khách hàng đã đăng ký hội viên' : 'Mã hội viên đã tồn tại trong đơn vị';
+            throw v.loiNhieuTruong([{ field, message }],409,'DUPLICATE');
+        }
         if (error.code === '23503') throw v.loi('Dữ liệu tham chiếu không hợp lệ',409,'REFERENCE_CONFLICT');
         if (['23514','22P02','22003'].includes(error.code)) throw v.loi('Dữ liệu vi phạm ràng buộc');
         throw error;
@@ -81,18 +85,101 @@ class HoiVienService {
         return { ...hoiVien, khach_hang: khachHang, hang_hoi_vien: hang, chinh_sach_hien_hanh: await repo.chinhSachHienHanh(auth.donViId,hoiVien.hang_hoi_vien_id), lich_su_hang: lichSuHang, giao_dich_diem_gan_day: giaoDichDiem };
     }
     async dangKy(auth, body, requestId) {
-        const data = v.dangKyHopLe(body);
+        const kiemTra = body?.kiem_tra === true;
+        const dauVao = { ...body };
+        delete dauVao.kiem_tra;
+        let data = {};
+        let loiTruong = [];
+        try { data = v.dangKyHopLe(dauVao); }
+        catch (error) {
+            if (!kiemTra) throw error;
+            loiTruong = error.details || [];
+        }
+        if (kiemTra) return trongGiaoDich(async client => {
+            await this.quyen(auth,true,client);
+            const idHopLeAnToan = (value, label) => {
+                try { return v.idHopLe(value,label); }
+                catch { return null; }
+            };
+            const khachHangId = data.khach_hang_id || idHopLeAnToan(dauVao.khach_hang_id,'Khách hàng');
+            const hangId = data.hang_hoi_vien_id || idHopLeAnToan(dauVao.hang_hoi_vien_id,'Hạng hội viên');
+            if (khachHangId) {
+                const khachHang = await repo.khachHang(auth.donViId,khachHangId,client);
+                if (!khachHang || khachHang.trang_thai !== 'HOAT_DONG') loiTruong.push({ field: 'khach_hang_id', message: 'Khách hàng không tồn tại hoặc không hoạt động' });
+                if (await repo.hoiVienTheoKhachHang(auth.donViId,khachHangId,client)) loiTruong.push({ field: 'khach_hang_id', message: 'Khách hàng đã đăng ký hội viên' });
+            }
+            if (hangId) {
+                const hang = await repo.hang(auth.donViId,hangId,client);
+                if (!hang || hang.trang_thai !== 'HOAT_DONG') loiTruong.push({ field: 'hang_hoi_vien_id', message: 'Hạng hội viên không tồn tại hoặc không hoạt động' });
+            }
+            const maHoiVien = typeof dauVao.ma_hoi_vien === 'string' ? dauVao.ma_hoi_vien.trim() : '';
+            if (maHoiVien && await repo.hoiVienTheoMa(auth.donViId,maHoiVien,client)) loiTruong.push({ field: 'ma_hoi_vien', message: 'Mã hội viên đã tồn tại trong đơn vị' });
+            if (loiTruong.length) {
+                const details = [...new Map(loiTruong.map(item => [`${item.field}:${item.message}`,item])).values()];
+                const duplicate = details.some(item => item.message.includes('đã đăng ký hội viên') || item.message.includes('Mã hội viên đã tồn tại'));
+                throw v.loiNhieuTruong(details,duplicate ? 409 : 422,duplicate ? 'DUPLICATE' : 'INVALID_INPUT');
+            }
+            return { da_kiem_tra: true };
+        });
         try {
             return await trongGiaoDich(async client => {
                 await this.quyen(auth,true,client);
                 const khachHang = await repo.khachHang(auth.donViId,data.khach_hang_id,client);
-                if (!khachHang || khachHang.trang_thai !== 'HOAT_DONG') throw v.loi('Khách hàng không tồn tại hoặc không hoạt động',409,'CUSTOMER_INVALID');
-                const hang = await this.hang(auth,data.hang_hoi_vien_id,client);
-                if (hang.trang_thai !== 'HOAT_DONG') throw v.loi('Hạng hội viên không hoạt động',409,'TIER_INACTIVE');
+                const hang = await repo.hang(auth.donViId,data.hang_hoi_vien_id,client);
+                const details = [];
+                if (!khachHang || khachHang.trang_thai !== 'HOAT_DONG') details.push({ field: 'khach_hang_id', message: 'Khách hàng không tồn tại hoặc không hoạt động' });
+                if (!hang || hang.trang_thai !== 'HOAT_DONG') details.push({ field: 'hang_hoi_vien_id', message: 'Hạng hội viên không tồn tại hoặc không hoạt động' });
+                if (await repo.hoiVienTheoMa(auth.donViId,data.ma_hoi_vien,client)) details.push({ field: 'ma_hoi_vien', message: 'Mã hội viên đã tồn tại trong đơn vị' });
+                if (await repo.hoiVienTheoKhachHang(auth.donViId,data.khach_hang_id,client)) details.push({ field: 'khach_hang_id', message: 'Khách hàng đã đăng ký hội viên' });
+                if (details.length) {
+                    const duplicate = details.some(item => item.message.includes('đã tồn tại') || item.message.includes('đã đăng ký'));
+                    throw v.loiNhieuTruong(details,duplicate ? 409 : 422,duplicate ? 'DUPLICATE' : 'REFERENCE_INVALID');
+                }
                 const hoiVien = await repo.taoHoiVien(auth.donViId,data,client);
                 await repo.ghiLichSuHang(auth.donViId,hoiVien.id,null,hang.id,auth.taiKhoanId,'Đăng ký hội viên',client);
                 await repo.nhatKy(auth.donViId,auth.taiKhoanId,'hoi_vien',hoiVien.id,'members.enroll',requestId,client);
                 return { ...hoiVien, khach_hang: khachHang, hang_hoi_vien: hang };
+            });
+        } catch (error) { this.xuLyLoiDb(error); }
+    }
+    async suaHoiVien(auth, id, body, requestId) {
+        const kiemTra = body?.kiem_tra === true;
+        const dauVao = { ...body };
+        delete dauVao.kiem_tra;
+        let data = {};
+        let loiTruong = [];
+        try { data = v.suaHoiVienHopLe(dauVao); }
+        catch (error) {
+            if (!kiemTra) throw error;
+            loiTruong = error.details || [];
+        }
+        if (kiemTra) {
+            try {
+                return await trongGiaoDich(async client => {
+                    await this.quyen(auth,true,client);
+                    const hoiVien = await this.hoiVien(auth,id,client,true);
+                    const maHoiVien = typeof data.ma_hoi_vien === 'string' ? data.ma_hoi_vien : typeof dauVao.ma_hoi_vien === 'string' ? dauVao.ma_hoi_vien.trim() : '';
+                    if (maHoiVien && await repo.hoiVienTheoMa(auth.donViId,maHoiVien,client,hoiVien.id)) loiTruong.push({ field: 'ma_hoi_vien', message: 'Mã hội viên đã tồn tại trong đơn vị' });
+                    if (loiTruong.length) {
+                        const details = [...new Map(loiTruong.map(item => [`${item.field}:${item.message}`,item])).values()];
+                        const duplicate = details.some(item => item.message.includes('đã tồn tại'));
+                        throw v.loiNhieuTruong(details,duplicate ? 409 : 422,duplicate ? 'DUPLICATE' : 'INVALID_INPUT');
+                    }
+                    return { da_kiem_tra: true };
+                });
+            } catch (error) { this.xuLyLoiDb(error); }
+        }
+        try {
+            return await trongGiaoDich(async client => {
+                await this.quyen(auth,true,client);
+                const hoiVien = await this.hoiVien(auth,id,client,true);
+                const maHoiVien = data.ma_hoi_vien || hoiVien.ma_hoi_vien;
+                if (await repo.hoiVienTheoMa(auth.donViId,maHoiVien,client,hoiVien.id)) {
+                    throw v.loiNhieuTruong([{ field: 'ma_hoi_vien', message: 'Mã hội viên đã tồn tại trong đơn vị' }],409,'DUPLICATE');
+                }
+                const ketQua = await repo.suaHoiVien(auth.donViId,hoiVien.id,data,client);
+                await repo.nhatKy(auth.donViId,auth.taiKhoanId,'hoi_vien',hoiVien.id,'members.update',requestId,client);
+                return ketQua;
             });
         } catch (error) { this.xuLyLoiDb(error); }
     }

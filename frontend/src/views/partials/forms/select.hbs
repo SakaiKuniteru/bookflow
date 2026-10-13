@@ -1,4 +1,4 @@
-<div class="bf-form-field {{className}}" data-form-field>
+<div class="bf-form-field {{className}}" data-form-field {{#if readonlyOnEdit}}data-readonly-on-edit="true"{{/if}}>
     {{#if label}}
         <label class="bf-form-label" for="{{id}}">
             {{label}}
@@ -17,6 +17,19 @@
         data-placeholder="{{placeholder}}"
         data-required="{{required}}"
         data-disabled="{{#if disabled}}true{{else}}false{{/if}}"
+        {{#if optionsEndpoint}}data-options-endpoint="{{optionsEndpoint}}"{{/if}}
+        {{#if optionsRowsKey}}data-options-rows-key="{{optionsRowsKey}}"{{/if}}
+        {{#if optionsValueKey}}data-options-value-key="{{optionsValueKey}}"{{/if}}
+        {{#if optionsLabelKey}}data-options-label-key="{{optionsLabelKey}}"{{/if}}
+        {{#if optionsSecondaryKey}}data-options-secondary-key="{{optionsSecondaryKey}}"{{/if}}
+        {{#if dependsOn}}data-options-depends-on="{{dependsOn}}"{{/if}}
+        {{#if addressRole}}data-address-role="{{addressRole}}"{{/if}}
+        {{#if addressGroup}}data-address-group="{{addressGroup}}"{{/if}}
+        {{#if addressMode}}data-address-mode="{{addressMode}}"{{/if}}
+        {{#if addressCodeName}}data-address-code-name="{{addressCodeName}}"{{/if}}
+        {{#if addressLabelName}}data-address-label-name="{{addressLabelName}}"{{/if}}
+        {{#if frontendOnly}}data-frontend-only="true"{{/if}}
+        {{#if includeEmpty}}data-include-empty="{{includeEmpty}}"{{/if}}
     >
         <div class="bf-select-control" role="combobox" tabindex="{{#if search}}-1{{else}}0{{/if}}" aria-haspopup="listbox" aria-expanded="false">
             {{#if icon}}<span class="bf-input-leading-icon">{{> ui/icon name=icon size=18}}</span>{{/if}}

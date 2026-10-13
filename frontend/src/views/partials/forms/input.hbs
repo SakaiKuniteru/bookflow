@@ -1,4 +1,4 @@
-<div class="bf-form-field {{className}}" data-form-field>
+<div class="bf-form-field {{className}}" data-form-field {{#if readonlyOnEdit}}data-readonly-on-edit="true"{{/if}}>
     {{#if label}}
         <label class="bf-form-label" for="{{id}}">
             {{label}}
@@ -11,6 +11,8 @@
         name="{{name}}"
         type="{{type}}"
         class="bf-form-control {{#if error}}is-invalid{{/if}}"
+        {{#if inputmode}}inputmode="{{inputmode}}"{{/if}}
+        {{#if phoneCharsOnly}}data-phone-chars-only="true"{{/if}}
         value="{{value}}"
         placeholder="{{placeholder}}"
         autocomplete="{{autocomplete}}"

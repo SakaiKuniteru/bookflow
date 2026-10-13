@@ -8,6 +8,9 @@
         data-width="{{#if width}}{{width}}{{else}}160{{/if}}"
         data-height="{{#if height}}{{height}}{{else}}160{{/if}}"
         data-multiple="{{multiple}}"
+        data-image-target="{{imageTarget}}"
+        data-upload-type="{{#if uploadType}}{{uploadType}}{{else}}KHAC{{/if}}"
+        data-max-files="{{#if maxFiles}}{{maxFiles}}{{else}}10{{/if}}"
     >
         <input
             id="{{id}}"
@@ -20,17 +23,18 @@
             {{#if required}}required{{/if}}
             {{#if disabled}}disabled{{/if}}
         >
+        {{#if imageTarget}}<input type="hidden" class="bf-image-value" name="{{imageTarget}}" value="{{value}}">{{/if}}
         <input type="hidden" class="bf-image-delete-state" name="{{name}}Remove" value="false">
         <label class="bf-image-add" for="{{id}}">
             <span>+</span>
             <small>Thêm ảnh</small>
         </label>
         <div class="bf-image-list">
-            {{#if src}}
+            {{#if value}}
                 <div class="bf-image-item" data-existing-src>
-                    <img src="{{src}}" alt="{{alt}}">
+                    <img src="/api/tep-tin/{{value}}/noi-dung" alt="{{alt}}">
                     <div class="bf-image-actions">
-                        <button type="button" class="bf-image-preview" data-existing-src="{{src}}" data-alt="{{alt}}" aria-label="Xem ảnh">
+                        <button type="button" class="bf-image-preview" data-existing-src="/api/tep-tin/{{value}}/noi-dung" data-alt="{{alt}}" aria-label="Xem ảnh">
                             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                         </button>
                         <button type="button" class="bf-image-delete" aria-label="Xóa ảnh">×</button>
@@ -39,4 +43,5 @@
             {{/if}}
         </div>
     </div>
+    <div class="bf-form-error bf-image-error" data-bf-image-error role="alert" hidden></div>
 </div>

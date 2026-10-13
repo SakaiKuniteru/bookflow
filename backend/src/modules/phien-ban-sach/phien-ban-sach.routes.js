@@ -4,6 +4,7 @@ const { authorize } = require('../../common/middlewares/authorize.js');
 const controller = require('./phien-ban-sach.controller.js');
 const router = Router();
 router.use(authenticate);
+router.get('/nha-phat-hanh', authorize('books.read'), controller.danhSachNhaPhatHanh);
 router.get('/', authorize('books.read'), controller.danhSach);
 router.get('/:phienBanId', authorize('books.read'), controller.chiTiet);
 router.post('/', authorize('books.create'), controller.taoPhienBan);

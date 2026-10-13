@@ -6,7 +6,7 @@ function valueOf(field) {
 function fieldError(field, message) {
     const container = field.closest("[data-form-field]");
     if (!container) return;
-    const specificError = field.matches(".bf-email-input") ? container.querySelector(".bf-email-error") : field.matches(".bf-phone-input") ? container.querySelector(".bf-phone-error") : null;
+    const specificError = field.matches(".bf-email-input") ? container.querySelector(".bf-email-error") : field.matches(".bf-phone-input") ? container.querySelector(".bf-phone-error") : field.matches(".bf-image-input") ? container.querySelector("[data-bf-image-error]") : field.matches(".bf-date-input") ? container.querySelector(".bf-date-error") : null;
     const error = specificError || container.querySelector("[data-bf-field-error]") || document.createElement("div");
     if (specificError) container.querySelectorAll("[data-bf-field-error]").forEach(item => item.remove());
     if (!specificError && !error.isConnected) {
@@ -81,13 +81,25 @@ function messageFor(field) {
     const value = valueOf(field);
     const label = field.closest("[data-form-field]")?.querySelector(".bf-form-label")?.textContent.replace("*", "").trim() || "Trường này";
     const required = field.required || field.dataset.required === "true";
+    if (field.matches(".bf-image-input")) {
+        const imageError = field.closest("[data-form-field]")?.querySelector("[data-bf-image-error]");
+        if (imageError && !imageError.hidden) return imageError.textContent || "Ảnh không hợp lệ.";
+    }
     if (required && !value) return `Vui lòng nhập ${label.toLocaleLowerCase("vi")}.`;
     if (!value) return "";
     if (field.matches(".bf-phone-input")) {
         const digits = value.replace(/\D/g, "");
         if (!((digits.length === 10 && digits.startsWith("0")) || (digits.length === 11 && digits.startsWith("84")))) return "Số điện thoại Việt Nam phải gồm mã 0 và 9 chữ số.";
     }
+    if (field.dataset.phoneCharsOnly === "true" && !/^\+?\d+$/.test(value)) return "Chỉ nhập chữ số và dấu + ở đầu số điện thoại.";
+    if (field.matches(".bf-date-input") && !field.validity.valid) return field.closest("[data-form-field]")?.querySelector(".bf-date-error")?.textContent || "Ngày hoặc năm không hợp lệ.";
+    if (field.type === "tel" && field.closest(".bf-vietnam-phone") && !/^(?:0\d{9}|84\d{9})$/.test(value.replace(/[\s().+-]/g, ""))) return "Số điện thoại phải gồm mã 0 hoặc 84 và 9 chữ số.";
     if (field.type === "email" && !/^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*@[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)+$/.test(value)) return "Email không đúng định dạng.";
+    if (field.type === "url") {
+        let url;
+        try { url = new URL(value); } catch { return `${label} phải là URL hợp lệ.`; }
+        if (!["http:", "https:"].includes(url.protocol)) return `${label} chỉ hỗ trợ HTTP hoặc HTTPS.`;
+    }
     if (field.type === "number" && !Number.isFinite(Number(value))) return `${label} phải là số hợp lệ.`;
     if (field.maxLength > 0 && value.length > field.maxLength) return `${label} không được vượt quá ${field.maxLength} ký tự.`;
     if (field.minLength > 0 && value.length < field.minLength) return `${label} phải có ít nhất ${field.minLength} ký tự.`;

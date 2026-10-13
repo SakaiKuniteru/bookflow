@@ -13,6 +13,7 @@ router.post('/hang/:hangId/chinh-sach',authorize('members.manage'),controller.xu
 router.get('/',authorize('members.read'),controller.xuLy('danhSach'));
 router.post('/',authorize('members.manage'),controller.xuLy('dangKy',201));
 router.get('/:hoiVienId',authorize('members.read'),controller.xuLy('chiTiet'));
+router.patch('/:hoiVienId',authorize('members.manage'),controller.xuLy('suaHoiVien'));
 router.post('/:hoiVienId/chuyen-hang',authorize('members.manage'),controller.xuLy('chuyenHang'));
 router.post('/:hoiVienId/giao-dich-diem',authorize('members.manage'),controller.xuLy('giaoDichDiem',201));
 module.exports = router;

@@ -1,4 +1,5 @@
 const { trongGiaoDich } = require('../../database/transaction.js');
+const { AppError } = require('../../common/errors/AppError.js');
 const phanQuyenService = require('../phan-quyen/phan-quyen.service.js');
 const validation = require('./nha-cung-cap.validation.js');
 const { BANG, loi, idHopLe, boLocHopLe } = validation;
@@ -26,6 +27,14 @@ class NhaCungCapService {
         if (['23502', '23514', '22P02', '22003', '22001'].includes(error.code)) throw loi('Dữ liệu vi phạm ràng buộc database');
         throw error;
     }
+    async kiemTraTrung(auth, bang, duLieu, boQuaId = null, client) {
+        if (bang !== 'nha_cung_cap') return;
+        const result = await this.repo.kiemTraTrungDinhDanhNhaCungCap(auth.donViId, duLieu, boQuaId, client);
+        const details = [];
+        if (result.trung_ma) details.push({ field: 'ma_nha_cung_cap', message: 'Mã nhà cung cấp đã tồn tại' });
+        if (result.trung_ma_so_thue) details.push({ field: 'ma_so_thue', message: 'Mã số thuế đã tồn tại' });
+        if (details.length) throw new AppError({ code: 'DUPLICATE_DATA', message: details.map(item => item.message).join('. '), status: 409, details });
+    }
     async danhSach(auth, bang, query, chaId) {
         if (!Object.hasOwn(this.BANG, bang)) throw loi('Loại dữ liệu không được hỗ trợ', 404, 'NOT_FOUND');
         const boLoc = boLocHopLe(query);
@@ -49,12 +58,17 @@ class NhaCungCapService {
     }
     async tao(auth, bang, body, requestId, chaId) {
         if (!Object.hasOwn(this.BANG, bang)) throw loi('Loại dữ liệu không được hỗ trợ', 404, 'NOT_FOUND');
-        const duLieu = validation.duLieuHopLe(body, { tao: true, bang })
+        const kiemTra = body?.kiem_tra === true;
+        const dauVao = { ...(body || {}) };
+        delete dauVao.kiem_tra;
+        const duLieu = this.validation.duLieuHopLe(dauVao, { tao: true, bang })
         if (chaId != null) chaId = idHopLe(chaId, 'Nhà cung cấp');
         try {
             return await trongGiaoDich(async client => {
                 await this.quyen(auth, true, client);
                 await this.chaTonTai(auth, bang, chaId, client, true);
+                await this.kiemTraTrung(auth, bang, duLieu, null, client);
+                if (kiemTra) return { da_kiem_tra: true };
                 const row = await this.repo.tao(auth.donViId, auth.taiKhoanId, bang, duLieu, { chaId }, client);
                 await this.repo.ghiNhatKy({ donViId: auth.donViId, actorId: auth.taiKhoanId, bang, id: row.id, hanhDong: `${bang}.create`, requestId }, client);
                 return row;
@@ -64,7 +78,10 @@ class NhaCungCapService {
     async sua(auth, bang, id, body, requestId, chaId) {
         if (!Object.hasOwn(this.BANG, bang)) throw loi('Loại dữ liệu không được hỗ trợ', 404, 'NOT_FOUND');
         id = idHopLe(id);
-        const duLieu = validation.duLieuHopLe(body, { bang })
+        const kiemTra = body?.kiem_tra === true;
+        const dauVao = { ...(body || {}) };
+        delete dauVao.kiem_tra;
+        const duLieu = this.validation.duLieuHopLe(dauVao, { bang })
         if (chaId != null) chaId = idHopLe(chaId, 'Nhà cung cấp');
         try {
             return await trongGiaoDich(async client => {
@@ -72,6 +89,8 @@ class NhaCungCapService {
                 await this.chaTonTai(auth, bang, chaId, client, true);
                 const hienTai = await this.tonTai(auth, bang, id, client, true);
                 if (this.BANG[bang].khoaCha && hienTai[this.BANG[bang].khoaCha] !== chaId) throw loi('Không tìm thấy dữ liệu', 404, 'NOT_FOUND');
+                await this.kiemTraTrung(auth, bang, duLieu, id, client);
+                if (kiemTra) return { da_kiem_tra: true };
                 const row = await this.repo.sua(auth.donViId, auth.taiKhoanId, bang, id, duLieu, { chaId }, client);
                 await this.repo.ghiNhatKy({ donViId: auth.donViId, actorId: auth.taiKhoanId, bang, id, hanhDong: `${bang}.update`, requestId }, client);
                 return row;
