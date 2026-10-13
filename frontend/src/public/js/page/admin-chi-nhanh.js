@@ -1,9 +1,9 @@
 import { closeModal, openModal } from "/js/components/modals.js?v=20261010-2";
 import { hideLoading, showLoading } from "/js/components/feedback.js";
 import { setSelectDisabled, syncSelect } from "/js/components/forms/select.js";
-import { applyServerFieldErrors, bindInlineValidation, validateForm } from "/js/components/forms/validation.js";
+import { applyServerFieldErrors, bindInlineValidation, validateForm } from "/js/components/forms/validation.js?v=20261013-1";
 import { initDataTables } from "/js/components/tables.js?v=20261010-3";
-import { bindApiTable } from "/js/components/api-table.js";
+import { bindApiTable } from "/js/components/api-table.js?v=20261013-1";
 const table = document.querySelector(".bf-branch-page [data-bf-table]");
 if (table) {
     const body = table.querySelector("[data-bf-table-body]");
@@ -39,12 +39,7 @@ if (table) {
         error.details = details;
         throw error;
     };
-    const camelCase = key => key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
-    const normalizeApiData = value => {
-        if (Array.isArray(value)) return value.map(normalizeApiData);
-        if (value === null || typeof value !== "object" || value instanceof Date) return value;
-        return Object.fromEntries(Object.entries(value).map(([key, item]) => [camelCase(key), normalizeApiData(item)]));
-    };
+    const normalizeApiData = value => value;
     const setEmpty = (title, description) => {
         if (!empty) return;
         const heading = empty.querySelector("strong");
@@ -256,9 +251,9 @@ if (table) {
     };
     const apiTable = bindApiTable(table, {
         endpoint: "/api/chi-nhanh",
-        rowsKeys: ["chiNhanh", "chi_nhanh"],
-        paginationKeys: ["phanTrang", "phan_trang"],
-        queryNames: { page: "trang", pageSize: "kich_thuoc", search: "tu_khoa", sort: "sort", order: "order" },
+        rowsKeys: ["chiNhanh"],
+        paginationKeys: ["phanTrang"],
+        queryNames: { page: "trang", pageSize: "kichThuoc", search: "tuKhoa", sort: "sort", order: "order" },
         normalize: normalizeApiData,
         onRows(branches, { offset }) {
             body.replaceChildren(...branches.map((branch, index) => renderBranch(branch, offset + index + 1)));

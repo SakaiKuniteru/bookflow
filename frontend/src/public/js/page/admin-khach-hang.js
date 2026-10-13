@@ -1,8 +1,8 @@
 import { closeModal, openModal, setModalLoading } from "/js/components/modals.js?v=20261010-2";
 import { syncSelect } from "/js/components/forms/select.js";
-import { applyServerFieldErrors, bindInlineValidation, validateForm } from "/js/components/forms/validation.js";
+import { applyServerFieldErrors, bindInlineValidation, validateForm } from "/js/components/forms/validation.js?v=20261013-1";
 import { initDataTables } from "/js/components/tables.js?v=20261010-3";
-import { bindApiTable } from "/js/components/api-table.js";
+import { bindApiTable } from "/js/components/api-table.js?v=20261013-1";
 const table = document.querySelector(".bf-customer-page [data-bf-table]");
 if (table) {
     const tableBody = table.querySelector("[data-bf-table-body]");
@@ -12,16 +12,11 @@ if (table) {
     const viewModal = document.querySelector("#customer-view-modal");
     const resetPasswordModal = document.querySelector("#customer-reset-password-modal");
     const errorBox = form.querySelector("[data-customer-form-error]");
-    const usernameInput = form.elements.namedItem("ten_dang_nhap");
+    const usernameInput = form.elements.namedItem("tenDangNhap");
     let customers = [];
     let customerPendingPasswordReset = null;
     let busy = false;
-    const snakeCase = key => key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
-    const normalizeApiData = value => {
-        if (Array.isArray(value)) return value.map(normalizeApiData);
-        if (value === null || typeof value !== "object" || value instanceof Date) return value;
-        return Object.fromEntries(Object.entries(value).map(([key, item]) => [snakeCase(key), normalizeApiData(item)]));
-    };
+    const normalizeApiData = value => value;
     const request = async (url, options = {}) => {
         const response = await fetch(url, { credentials: "same-origin", headers: { Accept: "application/json", ...(options.body ? { "Content-Type": "application/json" } : {}) }, signal: AbortSignal.timeout(20000), ...options });
         const result = await response.json();
@@ -74,7 +69,7 @@ if (table) {
         return button;
     };
     const renderCustomer = (customer, index) => {
-        const values = [["stt", index], ["maKhachHang", customer.ma_khach_hang], ["hoTen", customer.ho_ten], ["tenDangNhap", customer.ten_dang_nhap], ["ngaySinh", formatDate(customer.ngay_sinh)], ["diaChiChiTiet", customer.dia_chi_chi_tiet], ["email", customer.email], ["soDienThoai", customer.so_dien_thoai], ["trangThai", customerStatusLabel(customer.trang_thai)]];
+        const values = [["stt", index], ["maKhachHang", customer.maKhachHang], ["hoTen", customer.hoTen], ["tenDangNhap", customer.tenDangNhap], ["ngaySinh", formatDate(customer.ngaySinh)], ["diaChiChiTiet", customer.diaChiChiTiet], ["email", customer.email], ["soDienThoai", customer.soDienThoai], ["trangThai", customerStatusLabel(customer.trangThai)]];
         const row = document.createElement("tr");
         row.dataset.tableRow = "true";
         row.dataset.customer = JSON.stringify(customer);
@@ -92,7 +87,7 @@ if (table) {
         actions.dataset.columnKey = "actions";
         actions.className = "bf-branch-row-actions";
         actions.append(customerAction("view", customer.id), customerAction("edit", customer.id));
-        if (customer.tai_khoan_id) actions.append(customerAction("reset-password", customer.id));
+        if (customer.taiKhoanId) actions.append(customerAction("reset-password", customer.id));
         row.appendChild(actions);
         return row;
     };
@@ -106,9 +101,9 @@ if (table) {
     };
     const apiTable = bindApiTable(table, {
         endpoint: "/api/khach-hang",
-        rowsKeys: ["danh_sach", "danhSach"],
-        paginationKeys: ["phan_trang", "phanTrang"],
-        queryNames: { page: "trang", pageSize: "kich_thuoc", search: "tu_khoa", sort: "sort", order: "order" },
+        rowsKeys: ["danhSach"],
+        paginationKeys: ["phanTrang"],
+        queryNames: { page: "trang", pageSize: "kichThuoc", search: "tuKhoa", sort: "sort", order: "order" },
         normalize: normalizeApiData,
         onRows(rows) {
             customers = rows;
@@ -135,14 +130,14 @@ if (table) {
         modal.querySelector(".bf-modal-title").textContent = editing ? "Sửa thông tin khách hàng" : "Thêm mới khách hàng";
         modal.querySelector(".bf-modal-description").textContent = editing ? "Cập nhật thông tin khách hàng." : "Nhập thông tin khách hàng mới.";
         modal.querySelector("[data-bf-modal-submit]").textContent = editing ? "Lưu thay đổi" : "Thêm mới";
-        setSelectValue("customer-gender", editing ? customer.gioi_tinh : "");
+        setSelectValue("customer-gender", editing ? customer.gioiTinh : "");
         usernameInput.disabled = editing;
         usernameInput.required = !editing;
-        if (editing) ["ten_dang_nhap","ho_ten","email","so_dien_thoai","ngay_sinh","quoc_tich","dan_toc","mo_ta","dia_chi_chi_tiet","quoc_gia","tinh_thanh_pho","phuong_xa","nguon_khach_hang","ghi_chu"].forEach(name => { const field = form.elements.namedItem(name); if (field) field.value = name === "ngay_sinh" ? String(customer[name] ?? "").slice(0, 10) : customer[name] || ""; });
+        if (editing) ["tenDangNhap","hoTen","email","soDienThoai","ngaySinh","quocTich","danToc","moTa","diaChiChiTiet","quocGia","tinhThanhPho","phuongXa","nguonKhachHang","ghiChu"].forEach(name => { const field = form.elements.namedItem(name); if (field) field.value = name === "ngaySinh" ? formatDate(customer[name]) : customer[name] || ""; });
     };
     const renderCustomerDetails = customer => {
         const container = viewModal.querySelector("[data-customer-view-details]");
-        const rows = [["Mã khách hàng",customer.ma_khach_hang],["Họ và tên",customer.ho_ten],["Tên đăng nhập",customer.ten_dang_nhap],["Email",customer.email],["Số điện thoại",customer.so_dien_thoai],["Ngày sinh",formatDate(customer.ngay_sinh)],["Giới tính",customer.gioi_tinh],["Quốc tịch",customer.quoc_tich],["Dân tộc",customer.dan_toc],["Quốc gia",customer.quoc_gia],["Tỉnh/thành phố",customer.tinh_thanh_pho],["Phường/xã",customer.phuong_xa],["Địa chỉ chi tiết",customer.dia_chi_chi_tiet],["Nguồn khách hàng",customer.nguon_khach_hang],["Mô tả",customer.mo_ta],["Trạng thái",customerStatusLabel(customer.trang_thai)],["Ghi chú",customer.ghi_chu]];
+        const rows = [["Mã khách hàng",customer.maKhachHang],["Họ và tên",customer.hoTen],["Tên đăng nhập",customer.tenDangNhap],["Email",customer.email],["Số điện thoại",customer.soDienThoai],["Ngày sinh",formatDate(customer.ngaySinh)],["Giới tính",customer.gioiTinh],["Quốc tịch",customer.quocTich],["Dân tộc",customer.danToc],["Quốc gia",customer.quocGia],["Tỉnh/thành phố",customer.tinhThanhPho],["Phường/xã",customer.phuongXa],["Địa chỉ chi tiết",customer.diaChiChiTiet],["Nguồn khách hàng",customer.nguonKhachHang],["Mô tả",customer.moTa],["Trạng thái",customerStatusLabel(customer.trangThai)],["Ghi chú",customer.ghiChu]];
         container.replaceChildren(...rows.map(([label, value]) => {
             const field = document.createElement("div");
             field.className = "bf-form-field";
@@ -169,7 +164,7 @@ if (table) {
         if (!customer) return;
         if (button.dataset.customerAction === "reset-password") {
             customerPendingPasswordReset = customer;
-            resetPasswordModal.querySelector("[data-customer-reset-password-message]").textContent = `Gửi mật khẩu tạm mới tới ${customer.email || "email khách hàng"} của ${customer.ho_ten}?`;
+            resetPasswordModal.querySelector("[data-customer-reset-password-message]").textContent = `Gửi mật khẩu tạm mới tới ${customer.email || "email khách hàng"} của ${customer.hoTen}?`;
             openModal(resetPasswordModal, button);
             return;
         }
@@ -198,9 +193,9 @@ if (table) {
         errorBox.textContent = "";
         const editing = form.dataset.mode === "edit";
         const value = name => String(form.elements.namedItem(name)?.value || "").trim();
-        const payload = { ho_ten:value("ho_ten"),email:value("email"),so_dien_thoai:value("so_dien_thoai") || null,ngay_sinh:value("ngay_sinh") || null,gioi_tinh:getSelectValue("customer-gender") || null,quoc_tich:value("quoc_tich") || null,dan_toc:value("dan_toc") || null,mo_ta:value("mo_ta") || null,dia_chi_chi_tiet:value("dia_chi_chi_tiet") || null,quoc_gia:value("quoc_gia") || null,tinh_thanh_pho:value("tinh_thanh_pho") || null,phuong_xa:value("phuong_xa") || null,nguon_khach_hang:value("nguon_khach_hang") || null,ghi_chu:value("ghi_chu") || null };
+        const payload = { hoTen:value("hoTen"),email:value("email"),soDienThoai:value("soDienThoai") || null,ngaySinh:value("ngaySinh") || null,gioiTinh:getSelectValue("customer-gender") || null,quocTich:value("quocTich") || null,danToc:value("danToc") || null,moTa:value("moTa") || null,diaChiChiTiet:value("diaChiChiTiet") || null,quocGia:value("quocGia") || null,tinhThanhPho:value("tinhThanhPho") || null,phuongXa:value("phuongXa") || null,nguonKhachHang:value("nguonKhachHang") || null,ghiChu:value("ghiChu") || null };
         if (!editing) {
-            payload.ten_dang_nhap = value("ten_dang_nhap");
+            payload.tenDangNhap = value("tenDangNhap");
         }
         const submit = form.querySelector("[data-bf-modal-submit]");
         if (submit) submit.disabled = true;

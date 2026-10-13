@@ -1,8 +1,8 @@
 import { closeModal, openModal } from "/js/components/modals.js?v=20261010-2";
 import { setSelectDisabled, syncSelect } from "/js/components/forms/select.js";
-import { applyServerFieldErrors, bindInlineValidation, validateForm } from "/js/components/forms/validation.js";
+import { applyServerFieldErrors, bindInlineValidation, validateForm } from "/js/components/forms/validation.js?v=20261013-1";
 import { initDataTables } from "/js/components/tables.js?v=20261010-3";
-import { bindApiTable } from "/js/components/api-table.js";
+import { bindApiTable } from "/js/components/api-table.js?v=20261013-1";
 
 const page = document.querySelector("[data-catalog-page]");
 
@@ -18,7 +18,7 @@ if (page) {
     const formNotice = form?.querySelector("[data-catalog-form-notice]");
     const laTrangTacGia = page.dataset.pageKey === "authors";
     const coApiGhi = ["books", "genres", "publishers", "warehouses", "memberships", "versions", "suppliers"].includes(page.dataset.pageKey);
-    const rowsKey = String(page.dataset.rowsKey || "").replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+    const rowsKey = String(page.dataset.rowsKey || "");
     const endpoint = page.dataset.endpoint;
     const pageTitle = document.querySelector(".bf-admin-page-heading h1")?.textContent?.trim() || document.title.split("|")[0].trim();
     const defaultEmptyTitle = emptyState?.querySelector("strong")?.textContent || "Chưa có dữ liệu để hiển thị";
@@ -26,12 +26,7 @@ if (page) {
     let records = [];
     let busy = false;
 
-    const toCamel = key => key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
-    const normalizeApiData = value => {
-        if (Array.isArray(value)) return value.map(normalizeApiData);
-        if (value === null || typeof value !== "object" || value instanceof Date) return value;
-        return Object.fromEntries(Object.entries(value).map(([key, item]) => [toCamel(key), normalizeApiData(item)]));
-    };
+    const normalizeApiData = value => value;
     const request = async url => {
         const response = await fetch(url, {
             credentials: "same-origin",
@@ -190,8 +185,8 @@ if (page) {
     const apiTable = bindApiTable(table, {
         endpoint,
         rowsKeys: [rowsKey],
-        paginationKeys: ["phanTrang", "phan_trang"],
-        queryNames: { page: "trang", pageSize: "kich_thuoc", search: "tu_khoa" },
+        paginationKeys: ["phanTrang"],
+        queryNames: { page: "trang", pageSize: "kichThuoc", search: "tuKhoa" },
         extraParams: state => state.filters || readFilters(),
         normalize: normalizeApiData,
         onRows(items, { offset }) {
@@ -211,7 +206,7 @@ if (page) {
         const name = field.dataset.name || field.name;
         if (!name) return undefined;
         const parts = name.split(".");
-        const value = parts.reduce((current, part) => current?.[toCamel(part)] ?? current?.[part], record);
+        const value = parts.reduce((current, part) => current?.[part], record);
         return value;
     };
     const setSelectValue = (select, value) => {
@@ -258,10 +253,10 @@ if (page) {
         return Object.values(data || {}).find(Array.isArray) || [];
     };
     const fetchAllOptions = async (url, rowsKey) => {
-        const first = await request(`${url}${url.includes("?") ? "&" : "?"}trang=1&kich_thuoc=100`);
-        const pagination = first?.phanTrang || first?.phan_trang || {};
-        const pages = Math.max(1, Math.min(100, Number(pagination.tongTrang ?? pagination.tong_trang) || 1));
-        const rest = await Promise.all(Array.from({ length: pages - 1 }, (_, index) => request(`${url}${url.includes("?") ? "&" : "?"}trang=${index + 2}&kich_thuoc=100`)));
+        const first = await request(`${url}${url.includes("?") ? "&" : "?"}trang=1&kichThuoc=100`);
+        const pagination = first?.phanTrang || {};
+        const pages = Math.max(1, Math.min(100, Number(pagination.tongTrang) || 1));
+        const rest = await Promise.all(Array.from({ length: pages - 1 }, (_, index) => request(`${url}${url.includes("?") ? "&" : "?"}trang=${index + 2}&kichThuoc=100`)));
         return [first, ...rest].flatMap(data => rowsFrom(data, rowsKey));
     };
     let countriesDataPromise;
@@ -380,9 +375,9 @@ if (page) {
         if (formError) { formError.hidden = true; formError.textContent = ""; }
         if (!editing) {
             const defaults = page.dataset.pageKey === "books"
-                ? { loai_tac_pham: "SACH", la_tac_pham_dich: "false", la_tac_pham_doc_lap: "true" }
+                ? { loaiTacPham: "SACH", laTacPhamDich: "false", laTacPhamDocLap: "true" }
                 : page.dataset.pageKey === "warehouses"
-                    ? { loai_kho: "TONG_HOP", hinh_thuc_so_huu: "SO_HUU", phuong_phap_xuat_kho: "FIFO" }
+                    ? { loaiKho: "TONG_HOP", hinhThucSoHuu: "SO_HUU", phuongPhapXuatKho: "FIFO" }
                     : {};
             for (const [name, value] of Object.entries(defaults)) {
                 const select = [...form.querySelectorAll("[data-bf-select]")].find(item => item.dataset.name === name);
@@ -408,10 +403,10 @@ if (page) {
         form.dataset.addressRecordId = supplierAddress?.id ? String(supplierAddress.id) : "";
         const fields = [...form.querySelectorAll("input, textarea, select, [data-bf-select]")];
         const addressNameValues = page.dataset.pageKey === "suppliers" ? {
-            ma_tinh_thanh: supplierAddress?.maTinhThanh,
-            dia_chi_chi_tiet: supplierAddress?.diaChiChiTiet,
-            quoc_gia: record.quocGia || supplierAddress?.quocGia,
-            ma_phuong_xa: supplierAddress?.maPhuongXa
+            maTinhThanh: supplierAddress?.maTinhThanh,
+            diaChiChiTiet: supplierAddress?.diaChiChiTiet,
+            quocGia: record.quocGia || supplierAddress?.quocGia,
+            maPhuongXa: supplierAddress?.maPhuongXa
         } : {};
         const applyFieldValue = (field, value) => {
             if (value === undefined || value === null) return;
@@ -460,8 +455,8 @@ if (page) {
         for (const select of form.querySelectorAll("[data-options-endpoint*='{']")) await loadDependentOptions(select).catch(() => {});
         if (page.dataset.pageKey === "books") {
             for (const relation of [
-                { path: "tac-gia", field: "tac_gia_id", key: "tacGiaId" },
-                { path: "the-loai", field: "the_loai_id", key: "theLoaiId" }
+                { path: "tac-gia", field: "tacGiaId", key: "tacGiaId" },
+                { path: "the-loai", field: "theLoaiId", key: "theLoaiId" }
             ]) {
                 const select = [...form.querySelectorAll("[data-bf-select]")].find(item => item.dataset.name === relation.field);
                 const linked = rowsFrom(await request(`/api/sach/${encodeURIComponent(record.id)}/${relation.path}`));
@@ -475,10 +470,10 @@ if (page) {
         form.dispatchEvent(new CustomEvent("bookflow:catalog:form-mode", { detail: { mode, record } }));
     };
     const labelFor = key => {
-        const normalized = toCamel(key.split(".").at(-1));
+        const normalized = key.split(".").at(-1);
         const field = [...form.querySelectorAll("[data-form-field]")].find(container => {
             const control = container.querySelector("input, textarea, select, [data-bf-select]");
-            return control && toCamel(control.dataset.name || control.name || "") === normalized;
+            return control && (control.dataset.name || control.name || "") === normalized;
         });
         return field?.querySelector(".bf-form-label")?.textContent?.replace("*", "").trim() || columnHeaders().find(header => header.key === normalized)?.label || normalized.replace(/([A-Z])/g, " $1").replace(/^./, letter => letter.toLocaleUpperCase("vi"));
     };
@@ -524,15 +519,15 @@ if (page) {
             if (!select || !optionsBox) return;
             const endpoint = filter.dataset.optionsEndpoint;
             const rowsKey = filter.dataset.optionsRowsKey;
-            const getItems = data => Array.isArray(data) ? data : data?.[rowsKey] || data?.danhSach || data?.danh_sach || [];
+            const getItems = data => Array.isArray(data) ? data : data?.[rowsKey] || data?.danhSach || [];
             const loadPage = async pageNumber => {
-                const params = new URLSearchParams({ trang: String(pageNumber), kich_thuoc: "100" });
+                const params = new URLSearchParams({ trang: String(pageNumber), kichThuoc: "100" });
                 return request(`${endpoint}?${params}`);
             };
             try {
                 const firstPage = await loadPage(1);
-                const pagination = firstPage?.phanTrang || firstPage?.phan_trang || {};
-                const totalPages = Math.max(1, Number(pagination.tongTrang ?? pagination.tong_trang) || 1);
+                const pagination = firstPage?.phanTrang || {};
+                const totalPages = Math.max(1, Number(pagination.tongTrang) || 1);
                 const remainingPages = await Promise.all(
                     Array.from({ length: totalPages - 1 }, (_, index) => loadPage(index + 2))
                 );
@@ -626,8 +621,8 @@ if (page) {
             } else if (control?.matches(".bf-date-input")) {
                 const match = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
                 const isoDate = match ? `${match[3]}-${match[2]}-${match[1]}` : value;
-                payload[name] = page.dataset.pageKey === "memberships" && name === "ngay_het_han" ? `${isoDate}T23:59:59.000Z` : isoDate;
-            } else if (control?.matches("[data-bf-select]") && name.endsWith("_id")) {
+                payload[name] = page.dataset.pageKey === "memberships" && name === "ngayHetHan" ? `${isoDate}T23:59:59.000Z` : isoDate;
+            } else if (control?.matches("[data-bf-select]") && name.endsWith("Id")) {
                 payload[name] = Number(value);
             } else if (value === "true" || value === "false") {
                 payload[name] = value === "true";
@@ -642,7 +637,7 @@ if (page) {
             const selected = select.querySelector(".bf-select-option.is-selected");
             if (selected) payload[select.dataset.addressLabelName] = selected.dataset.label || null;
         });
-        if (page.dataset.pageKey === "publishers" && !String(payload.ten_phap_ly || "").trim()) payload.ten_phap_ly = String(payload.ten_nha_xuat_ban || "").trim() || null;
+        if (page.dataset.pageKey === "publishers" && !String(payload.tenPhapLy || "").trim()) payload.tenPhapLy = String(payload.tenNhaXuatBan || "").trim() || null;
         return payload;
     };
     const ghiDuLieu = async (url, method, payload) => {
@@ -674,8 +669,8 @@ if (page) {
         const files = [...(input?.files || [])];
         if (!files.length) return [];
         const data = new FormData();
-        data.append("pham_vi_so_huu", "DON_VI");
-        data.append("loai_tep", wrapper.dataset.uploadType || "KHAC");
+        data.append("phamViSoHuu", "DON_VI");
+        data.append("loaiTep", wrapper.dataset.uploadType || "KHAC");
         files.forEach(file => data.append("files", file, file.name));
         const response = await fetch("/api/tep-tin/upload", { method: "POST", credentials: "same-origin", headers: { Accept: "application/json" }, body: data });
         const result = await response.json().catch(() => null);
@@ -705,8 +700,8 @@ if (page) {
     };
     const syncBookLinks = async bookId => {
         for (const relation of [
-            { name: "tac-gia", field: "tac_gia_id", idKey: "tacGiaId", make: (id, index) => ({ tac_gia_id: id, vai_tro_dong_gop: "TAC_GIA", thu_tu_hien_thi: index + 1, la_nguoi_dong_gop_chinh: index === 0 }) },
-            { name: "the-loai", field: "the_loai_id", idKey: "theLoaiId", make: (id, index) => ({ the_loai_id: id, la_the_loai_chinh: index === 0, thu_tu_hien_thi: index }) }
+            { name: "tac-gia", field: "tacGiaId", idKey: "tacGiaId", make: (id, index) => ({ tacGiaId: id, vaiTroDongGop: "TAC_GIA", thuTuHienThi: index + 1, laNguoiDongGopChinh: index === 0 }) },
+            { name: "the-loai", field: "theLoaiId", idKey: "theLoaiId", make: (id, index) => ({ theLoaiId: id, laTheLoaiChinh: index === 0, thuTuHienThi: index }) }
         ]) {
             const select = [...form.querySelectorAll("[data-bf-select]")].find(item => item.dataset.name === relation.field);
             const desired = getSelectedValues(select).map(Number).filter(Number.isFinite);
@@ -723,11 +718,11 @@ if (page) {
     const attachBookImages = async (bookId, imageIds) => {
         if (!imageIds.length) return;
         await ghiDuLieu(`/api/sach/${encodeURIComponent(bookId)}/anh`, "POST", {
-            anh: imageIds.map((id, index) => ({ tep_dinh_kem_id: id, loai_anh: "ANH_BEN_TRONG", thu_tu: index, la_anh_chinh: false, hien_thi_cong_khai: true }))
+            anh: imageIds.map((id, index) => ({ tepDinhKemId: id, loaiAnh: "ANH_BEN_TRONG", thuTu: index, laAnhChinh: false, hienThiCongKhai: true }))
         });
     };
     const saveSupplierAddress = async supplierId => {
-        const detail = String(formControl("dia_chi_chi_tiet")?.value || "").trim();
+        const detail = String(formControl("diaChiChiTiet")?.value || "").trim();
         const province = addressRoleSelect("supplier", "province");
         const ward = addressRoleSelect("supplier", "ward");
         const country = addressRoleSelect("supplier", "country");
@@ -737,16 +732,16 @@ if (page) {
         const provinceOption = province?.querySelector(".bf-select-option.is-selected");
         const wardOption = ward?.querySelector(".bf-select-option.is-selected");
         const body = {
-            ma_dia_chi: "TRU_SO",
-            ten_dia_chi: "Trụ sở",
-            loai_dia_chi: "TRU_SO",
-            dia_chi_chi_tiet: detail,
-            quoc_gia: countryCode || "VN",
-            ma_tinh_thanh: provinceCode || null,
-            ten_tinh_thanh: provinceOption?.dataset.label || null,
-            ma_phuong_xa: wardCode || null,
-            ten_phuong_xa: wardOption?.dataset.label || null,
-            la_mac_dinh: true
+            maDiaChi: "TRU_SO",
+            tenDiaChi: "Trụ sở",
+            loaiDiaChi: "TRU_SO",
+            diaChiChiTiet: detail,
+            quocGia: countryCode || "VN",
+            maTinhThanh: provinceCode || null,
+            tenTinhThanh: provinceOption?.dataset.label || null,
+            maPhuongXa: wardCode || null,
+            tenPhuongXa: wardOption?.dataset.label || null,
+            laMacDinh: true
         };
         if (!detail && !countryCode && !provinceCode && !wardCode) return;
         const addressId = form.dataset.addressRecordId;
@@ -786,7 +781,7 @@ if (page) {
     form.addEventListener("bookflow:catalog:form-mode", event => {
         const record = event.detail?.record;
         form.querySelectorAll("[data-bf-image][data-image-target]").forEach(wrapper => {
-            const key = toCamel(wrapper.dataset.imageTarget);
+            const key = wrapper.dataset.imageTarget;
             const value = record?.[key];
             wrapper.dispatchEvent(new CustomEvent("bookflow:image:set-existing", {
                 detail: { value: value ? String(value) : "", src: value ? `/api/tep-tin/${encodeURIComponent(value)}/noi-dung` : "" }
@@ -819,7 +814,7 @@ if (page) {
         const url = editing ? `${endpoint}/${encodeURIComponent(recordId)}` : endpoint;
         let payload = taoPayload();
         try {
-            await ghiDuLieu(url, method, { ...payload, kiem_tra: true });
+            await ghiDuLieu(url, method, { ...payload, kiemTra: true });
             if (!valid) {
                 if (formError) {
                     formError.textContent = "Vui lòng kiểm tra các trường được đánh dấu bên dưới.";
@@ -829,7 +824,7 @@ if (page) {
             }
             const galleryImageIds = await uploadCatalogImages();
             payload = taoPayload();
-            if (galleryImageIds.length || form.querySelector("[data-bf-image] .bf-image-input")?.files?.length) await ghiDuLieu(url, method, { ...payload, kiem_tra: true });
+            if (galleryImageIds.length || form.querySelector("[data-bf-image] .bf-image-input")?.files?.length) await ghiDuLieu(url, method, { ...payload, kiemTra: true });
             const saved = await ghiDuLieu(url, method, payload);
             if (page.dataset.pageKey === "books") {
                 const bookId = saved.id || recordId;

@@ -1,7 +1,7 @@
 {{#> modals/base-modal
     id="catalog-form-modal"
-    title="Thêm mới kho"
-    description="Nhập thông tin kho."
+    title="Thêm mới quản lý kho"
+    description="Nhập thông tin quản lý kho."
     size="xl"
     className="bf-modal-sticky-footer"
     closeOnBackdrop=false
@@ -10,7 +10,271 @@
     <form id="catalog-form" class="bf-modal-form bf-modal-form-grid" data-catalog-form novalidate>
         <p class="bf-form-error bf-modal-form-error bf-form-grid-full" data-catalog-form-error role="alert" hidden></p>
         <p class="bf-form-help bf-form-grid-full" data-catalog-form-notice role="status" hidden></p>
-        {{#each formFields}}{{> forms/catalog-field this}}{{/each}}
+        {{> forms/select
+            id="catalog-chi-nhanh-id"
+            name="chiNhanhId"
+            label="Chi nhánh"
+            placeholder="Nhập chi nhánh"
+            required=true
+            search=true
+            optionsEndpoint="/api/chi-nhanh"
+            optionsRowsKey="chiNhanh"
+            optionsValueKey="id"
+            optionsLabelKey="tenChiNhanh"
+            optionsSecondaryKey="maChiNhanh"
+            readonlyOnEdit=true
+            icon="building"
+        }}
+        {{> forms/input
+            id="catalog-ma-kho"
+            name="maKho"
+            type="text"
+            label="Mã kho"
+            placeholder="Nhập mã kho"
+            required=true
+            maxlength="50"
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-ten-kho"
+            name="tenKho"
+            type="text"
+            label="Tên kho"
+            placeholder="Nhập tên kho"
+            required=true
+            maxlength="200"
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-ten-viet-tat"
+            name="tenVietTat"
+            type="text"
+            label="Tên viết tắt"
+            placeholder="Nhập tên viết tắt"
+            maxlength="80"
+            icon="edit"
+        }}
+        {{> forms/select
+            id="catalog-loai-kho"
+            name="loaiKho"
+            label="Loại kho"
+            placeholder="Nhập loại kho"
+            search=true
+            options=(lookup formOptions "loaiKho")
+            icon="grid"
+        }}
+        {{> forms/select
+            id="catalog-hinh-thuc-so-huu"
+            name="hinhThucSoHuu"
+            label="Hình thức sở hữu"
+            placeholder="Nhập hình thức sở hữu"
+            search=true
+            options=(lookup formOptions "hinhThucSoHuu")
+            icon="grid"
+        }}
+        {{> forms/input
+            id="catalog-ma-kho-ben-ngoai"
+            name="maKhoBenNgoai"
+            type="text"
+            label="Mã kho bên ngoài"
+            placeholder="Nhập mã kho bên ngoài"
+            maxlength="100"
+            icon="edit"
+        }}
+        {{> forms/select
+            id="catalog-kho-cha-id"
+            name="khoChaId"
+            label="Kho cha"
+            placeholder="Nhập kho cha"
+            search=true
+            optionsEndpoint="/api/kho"
+            optionsRowsKey="danhSach"
+            optionsValueKey="id"
+            optionsLabelKey="tenKho"
+            optionsSecondaryKey="maKho"
+            readonlyOnEdit=true
+            icon="store"
+        }}
+        {{> forms/select
+            id="catalog-phuong-phap-xuat-kho"
+            name="phuongPhapXuatKho"
+            label="Phương pháp xuất kho"
+            placeholder="Nhập phương pháp xuất kho"
+            search=true
+            options=(lookup formOptions "phuongPhapXuatKho")
+            icon="grid"
+        }}
+        {{> forms/number
+            id="catalog-nguong-canh-bao-suc-chua-phan-tram"
+            name="nguongCanhBaoSucChuaPhanTram"
+            label="Ngưỡng cảnh báo sức chứa (%)"
+            placeholder="Nhập ngưỡng cảnh báo sức chứa (%)"
+            decimals="2"
+            min="0"
+            max="100"
+            icon="info"
+        }}
+        {{> forms/number
+            id="catalog-suc-chua-toi-da-cuon"
+            name="sucChuaToiDaCuon"
+            label="Sức chứa tối đa (cuốn)"
+            placeholder="Nhập sức chứa tối đa (cuốn)"
+            type="positive-integer"
+            min="1"
+            icon="info"
+        }}
+        {{> forms/number
+            id="catalog-suc-chua-toi-da-kg"
+            name="sucChuaToiDaKg"
+            label="Sức chứa tối đa (kg)"
+            placeholder="Nhập sức chứa tối đa (kg)"
+            decimals="3"
+            min="0"
+            icon="info"
+        }}
+        {{> forms/number
+            id="catalog-dien-tich-m2"
+            name="dienTichM2"
+            label="Diện tích (m²)"
+            placeholder="Nhập diện tích (m²)"
+            decimals="3"
+            min="0"
+            icon="info"
+        }}
+        {{> forms/number
+            id="catalog-dien-tich-su-dung-m2"
+            name="dienTichSuDungM2"
+            label="Diện tích sử dụng (m²)"
+            placeholder="Nhập diện tích sử dụng (m²)"
+            decimals="3"
+            min="0"
+            icon="info"
+        }}
+        {{> forms/number
+            id="catalog-chieu-cao-su-dung-m"
+            name="chieuCaoSuDungM"
+            label="Chiều cao sử dụng (m)"
+            placeholder="Nhập chiều cao sử dụng (m)"
+            decimals="3"
+            min="0"
+            icon="info"
+        }}
+        {{> forms/number
+            id="catalog-the-tich-su-dung-m3"
+            name="theTichSuDungM3"
+            label="Thể tích sử dụng (m³)"
+            placeholder="Nhập thể tích sử dụng (m³)"
+            decimals="3"
+            min="0"
+            icon="info"
+        }}
+        {{> forms/select
+            id="catalog-quoc-gia"
+            name="quocGia"
+            label="Quốc gia"
+            placeholder="Nhập quốc gia"
+            search=true
+            addressRole="country"
+            addressGroup="warehouse"
+            icon="globe"
+        }}
+        {{> forms/select
+            id="catalog-ma-tinh-thanh"
+            name="maTinhThanh"
+            label="Tỉnh/thành"
+            placeholder="Nhập tỉnh/thành"
+            search=true
+            addressRole="province"
+            addressGroup="warehouse"
+            addressLabelName="tenTinhThanh"
+            icon="map"
+        }}
+        {{> forms/select
+            id="catalog-ma-phuong-xa"
+            name="maPhuongXa"
+            label="Xã/phường"
+            placeholder="Nhập xã/phường"
+            search=true
+            addressRole="ward"
+            addressGroup="warehouse"
+            addressLabelName="tenPhuongXa"
+            icon="map-pin"
+        }}
+        {{> forms/textarea
+            id="catalog-dia-chi-chi-tiet"
+            name="diaChiChiTiet"
+            label="Địa chỉ chi tiết"
+            placeholder="Nhập địa chỉ chi tiết"
+            rows="3"
+            maxlength="350"
+            className="bf-form-grid-full"
+            icon="edit"
+        }}
+        {{> forms/select
+            id="catalog-nguoi-quan-ly-id"
+            name="nguoiQuanLyId"
+            label="Người quản lý"
+            placeholder="Nhập người quản lý"
+            search=true
+            optionsEndpoint="/api/nhan-vien"
+            optionsRowsKey="nhanVien"
+            optionsValueKey="taiKhoanId"
+            optionsLabelKey="hoTen"
+            optionsSecondaryKey="maNhanVien"
+            icon="user"
+        }}
+        {{> forms/date
+            id="catalog-ngay-bat-dau-hoat-dong"
+            name="ngayBatDauHoatDong"
+            label="Ngày bắt đầu hoạt động"
+            placeholder="Nhập ngày bắt đầu hoạt động"
+            icon="calendar"
+        }}
+        {{> forms/select
+            id="catalog-co-dieu-hoa"
+            name="coDieuHoa"
+            label="Có điều hòa"
+            placeholder="Nhập có điều hòa"
+            search=true
+            options=(lookup formOptions "coDieuHoa")
+            icon="grid"
+        }}
+        {{> forms/select
+            id="catalog-co-hut-am"
+            name="coHutAm"
+            label="Có hệ thống hút ẩm"
+            placeholder="Nhập có hệ thống hút ẩm"
+            search=true
+            options=(lookup formOptions "coHutAm")
+            icon="grid"
+        }}
+        {{> forms/select
+            id="catalog-co-he-thong-chua-chay"
+            name="coHeThongChuaChay"
+            label="Có hệ thống chữa cháy"
+            placeholder="Nhập có hệ thống chữa cháy"
+            search=true
+            options=(lookup formOptions "coHeThongChuaChay")
+            icon="grid"
+        }}
+        {{> forms/select
+            id="catalog-co-camera"
+            name="coCamera"
+            label="Có camera"
+            placeholder="Nhập có camera"
+            search=true
+            options=(lookup formOptions "coCamera")
+            icon="grid"
+        }}
+        {{> forms/select
+            id="catalog-co-kiem-soat-ra-vao"
+            name="coKiemSoatRaVao"
+            label="Có kiểm soát ra vào"
+            placeholder="Nhập có kiểm soát ra vào"
+            search=true
+            options=(lookup formOptions "coKiemSoatRaVao")
+            icon="grid"
+        }}
     </form>
     <footer class="bf-modal-footer">
         <button type="button" class="bf-btn bf-btn-secondary bf-btn-md" data-bf-modal-close>Hủy</button>

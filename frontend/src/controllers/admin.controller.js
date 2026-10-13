@@ -14,14 +14,12 @@ const render = (view, title) => async (req, res) => {
 
 const dataPage = (pageKey, view = 'admin/danh-muc', pageAssets = {}) => async (req, res) => {
   const page = adminDataPages[pageKey];
-  const publisherIdentity = new Set(['ma_nha_xuat_ban', 'ten_nha_xuat_ban', 'ten_phap_ly']);
+  const formOptions = Object.fromEntries((page.formFields || [])
+    .filter(field => Array.isArray(field.options) && field.options.length)
+    .map(field => [field.name, field.options]));
   return res.render(view, {
     ...page,
-    ...(pageKey === 'publishers' ? {
-      logoField: page.formFields.find(field => field.name === 'logo_tep_id'),
-      profileFields: page.formFields.filter(field => publisherIdentity.has(field.name)),
-      formFields: page.formFields.filter(field => field.name !== 'logo_tep_id' && !publisherIdentity.has(field.name))
-    } : {}),
+    formOptions,
     title: page.title,
     layout: 'admin',
     mode: 'api',
@@ -38,7 +36,7 @@ const dataPage = (pageKey, view = 'admin/danh-muc', pageAssets = {}) => async (r
     search: { id: `catalog-search-${page.key}`, name: 'q', placeholder: page.searchPlaceholder, mode: 'relative', threshold: 100 },
     actions: [{ label: 'Thêm mới', action: 'create-record', icon: 'plus', variant: 'primary', size: 'md' }],
     pagination: { enabled: true, page: 1, pageSize: 20, total: 0, pages: 1, from: 0, to: 0 },
-    scripts: pageAssets.scripts || ['/js/page/admin-danh-muc.js?v=20261013-4'],
+    scripts: pageAssets.scripts || ['/js/page/admin-danh-muc.js?v=20261013-5'],
     stylesheets: pageAssets.stylesheets || []
   });
 };
@@ -86,7 +84,7 @@ async branches(req, res) {
     pagination: { enabled: true, page: 1, pageSize: 20, total: 0, pages: 1, from: 0, to: 0 },
     emptyTitle: 'Chưa có chi nhánh để hiển thị',
     emptyDescription: 'Nếu đơn vị đã có chi nhánh, hãy kiểm tra đơn vị đang chọn hoặc quyền xem chi nhánh của tài khoản.',
-    scripts: ['/js/page/admin-chi-nhanh.js?v=20261010-2']
+    scripts: ['/js/page/admin-chi-nhanh.js?v=20261013-3']
   });
 },
 async employees(req, res) {
@@ -131,7 +129,7 @@ async employees(req, res) {
     pagination: { enabled: true, page: 1, pageSize: 20, total: 0, pages: 1, from: 0, to: 0 },
     emptyTitle: nhanVienDaNghi ? 'Chưa có nhân viên đã nghỉ' : 'Chưa có nhân viên để hiển thị',
     emptyDescription: nhanVienDaNghi ? 'Nhân viên đã nghỉ việc sẽ hiển thị tại đây.' : 'Thêm nhân viên vào đơn vị để hiển thị trong danh sách.',
-    scripts: ['/js/page/admin-nhan-vien.js?v=20261010-2']
+    scripts: ['/js/page/admin-nhan-vien.js?v=20261013-3']
   });
 },
 async customers(req, res) {
@@ -165,20 +163,20 @@ async customers(req, res) {
     pagination: { enabled: true, page: 1, pageSize: 20, total: 0, pages: 1, from: 0, to: 0 },
     emptyTitle: 'Chưa có khách hàng để hiển thị',
     emptyDescription: 'Thêm mới khách hàng để hiển thị trong danh sách.',
-    scripts: ['/js/page/admin-khach-hang.js?v=20261010-5']
+    scripts: ['/js/page/admin-khach-hang.js?v=20261013-2']
   });
 },
   permissions: render('admin/phan-quyen', 'Phân quyền'),
-  books: dataPage('books', 'admin/quan-ly-sach', { scripts: ['/js/page/admin-quan-ly-sach.js?v=20261013-2'] }),
+  books: dataPage('books', 'admin/quan-ly-sach', { scripts: ['/js/page/admin-quan-ly-sach.js?v=20261013-3'] }),
   authors: dataPage('authors', 'admin/tac-gia', {
-    scripts: ['/js/page/admin-danh-muc.js?v=20261013-4', '/js/page/admin-tac-gia.js?v=20261013-3'],
+    scripts: ['/js/page/admin-danh-muc.js?v=20261013-5', '/js/page/admin-tac-gia.js?v=20261013-4'],
     stylesheets: ['/css/pages/admin/tac-gia.css?v=20261013-4']
   }),
   genres: dataPage('genres', 'admin/the-loai'),
   publishers: dataPage('publishers', 'admin/nha-xuat-ban'),
   bookVersions: dataPage('versions', 'admin/phien-ban-sach'),
-  suppliers: dataPage('suppliers'),
-  warehouses: dataPage('warehouses', 'admin/quan-ly-kho', { scripts: ['/js/page/admin-quan-ly-kho.js?v=20261013-2'] }),
+  suppliers: dataPage('suppliers', 'admin/nha-cung-cap'),
+  warehouses: dataPage('warehouses', 'admin/quan-ly-kho', { scripts: ['/js/page/admin-quan-ly-kho.js?v=20261013-3'] }),
   stockImport: render('admin/kho/nhap-kho', 'Nhập kho'),
   stockTransfer: render('admin/kho/chuyen-kho', 'Xuất kho / Điều chuyển kho'),
   inventory: render('admin/kho/ton-kho', 'Danh sách tồn kho'),

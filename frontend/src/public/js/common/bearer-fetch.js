@@ -10,34 +10,6 @@
         accessToken = typeof token === 'string' ? token : '';
         channel?.postMessage({ token: accessToken });
     };
-    const doiTenTruongCamelCase = ten => ten.replace(/_([a-z0-9])/gi, (_, kyTu) => kyTu.toUpperCase());
-    const chuyenCamelCase = value => {
-        if (Array.isArray(value)) return value.map(chuyenCamelCase);
-        if (value === null || typeof value !== 'object' || value instanceof Date) return value;
-        return Object.fromEntries(Object.entries(value).map(([key, item]) => [doiTenTruongCamelCase(key), chuyenCamelCase(item)]));
-    };
-    const chuyenDuongDanCamelCase = url => {
-        const query = new URLSearchParams();
-        for (const [key, value] of url.searchParams) query.append(doiTenTruongCamelCase(key), value);
-        url.search = query.toString();
-        return url;
-    };
-    const chuyenBodyCamelCase = body => {
-        if (typeof body === 'string') {
-            try { return JSON.stringify(chuyenCamelCase(JSON.parse(body))); } catch { return body; }
-        }
-        if (body instanceof FormData) {
-            const formData = new FormData();
-            for (const [key, value] of body.entries()) formData.append(doiTenTruongCamelCase(key), value);
-            return formData;
-        }
-        if (body instanceof URLSearchParams) {
-            const params = new URLSearchParams();
-            for (const [key, value] of body) params.append(doiTenTruongCamelCase(key), value);
-            return params;
-        }
-        return body;
-    };
     window.BookFlowAuth = { setAccessToken: capNhatToken, clearAccessToken: () => capNhatToken('') };
     const nativeFetch = window.fetch.bind(window);
     const activeLoadingRequests = window.__bfActiveLoadingRequests instanceof Map ? window.__bfActiveLoadingRequests : new Map();
@@ -63,12 +35,10 @@
         const isApiRequest = /^\/api(?:\/|$)/.test(url.pathname);
         const isDataJsonRequest = /^\/data\/.*\.json$/i.test(url.pathname);
         if (url.origin !== window.location.origin || (!isApiRequest && !isDataJsonRequest)) return nativeFetch(input, options);
-        if (isApiRequest) chuyenDuongDanCamelCase(url);
         const headers = new Headers(input instanceof Request ? input.headers : undefined);
         new Headers(options.headers || {}).forEach((value, name) => headers.set(name, value));
         if (isApiRequest && accessToken) headers.set("Authorization", `Bearer ${accessToken}`);
         const requestOptions = { ...options, headers };
-        if (isApiRequest && options.body !== undefined) requestOptions.body = chuyenBodyCamelCase(options.body);
         const method = String(options.method || (input instanceof Request ? input.method : "GET")).toUpperCase();
         const loadingRequest = url.pathname === "/api/xac-thuc/hoat-dong" ? null : { id: `bf-${Date.now()}-${++loadingSequence}`, text: getLoadingMessage(method, url.pathname) };
         if (loadingRequest) {

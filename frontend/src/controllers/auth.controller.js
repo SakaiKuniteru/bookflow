@@ -188,7 +188,7 @@ const authController = {
     } catch (error) {
       const backendError = error.data?.error;
       const tenTruongFrontend = { hoTen: 'fullName', email: 'email', tenDangNhap: 'username', soDienThoai: 'phone', matKhau: 'password' };
-      const fieldErrors = Object.fromEntries((backendError?.details || []).filter(item => item.field).map(item => { const field = item.field.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase()); return [tenTruongFrontend[field] || field, item.message]; }));
+      const fieldErrors = Object.fromEntries((backendError?.details || []).filter(item => item.field).map(item => { const field = item.field; return [tenTruongFrontend[field] || field, item.message]; }));
       if (error.field) fieldErrors[error.field] = error.message;
       if (!fieldErrors.email && backendError?.code === 'EMAIL_EXISTS') fieldErrors.email = 'Email này đã được đăng ký';
       if (!fieldErrors.username && backendError?.code === 'USERNAME_EXISTS') fieldErrors.username = 'Tên đăng nhập này đã được sử dụng';

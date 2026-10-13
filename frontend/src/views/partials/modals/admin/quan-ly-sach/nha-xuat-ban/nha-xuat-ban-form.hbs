@@ -11,12 +11,197 @@
         <p class="bf-form-error bf-modal-form-error bf-form-grid-full" data-catalog-form-error role="alert" hidden></p>
         <p class="bf-form-help bf-form-grid-full" data-catalog-form-notice role="status" hidden></p>
         <div class="bf-profile-image-layout bf-form-grid-full bf-publisher-profile-layout">
-            {{> forms/catalog-field logoField}}
+            {{> forms/image
+                id="catalog-logo-tep-id"
+                name="logoTepId"
+                label="Logo nhà xuất bản"
+                width="176"
+                height="176"
+                imageTarget="logoTepId"
+                uploadType="LOGO"
+                className="bf-publisher-logo"
+                icon="upload"
+            }}
             <div class="bf-profile-image-fields">
-                {{#each profileFields}}{{> forms/catalog-field this}}{{/each}}
+                {{> forms/input
+                    id="catalog-ma-nha-xuat-ban"
+                    name="maNhaXuatBan"
+                    type="text"
+                    label="Mã nhà xuất bản"
+                    placeholder="Nhập mã nhà xuất bản"
+                    required=true
+                    maxlength="40"
+                    readonlyOnEdit=true
+                    icon="edit"
+                }}
+                {{> forms/input
+                    id="catalog-ten-nha-xuat-ban"
+                    name="tenNhaXuatBan"
+                    type="text"
+                    label="Tên nhà xuất bản"
+                    placeholder="Nhập tên nhà xuất bản"
+                    required=true
+                    maxlength="255"
+                    icon="building"
+                }}
+                {{> forms/input
+                    id="catalog-ten-phap-ly"
+                    name="tenPhapLy"
+                    type="text"
+                    label="Tên pháp lý"
+                    placeholder="Nhập tên pháp lý"
+                    maxlength="255"
+                    icon="file"
+                }}
             </div>
         </div>
-        {{#each formFields}}{{> forms/catalog-field this}}{{/each}}
+        {{> forms/input
+            id="catalog-ten-viet-tat"
+            name="tenVietTat"
+            type="text"
+            label="Tên viết tắt"
+            placeholder="Nhập tên viết tắt"
+            maxlength="100"
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-ten-quoc-te"
+            name="tenQuocTe"
+            type="text"
+            label="Tên quốc tế"
+            placeholder="Nhập tên quốc tế"
+            maxlength="255"
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-ma-so-thue"
+            name="maSoThue"
+            type="text"
+            label="Mã số thuế"
+            placeholder="Nhập mã số thuế"
+            maxlength="50"
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-ma-dinh-danh"
+            name="maDinhDanh"
+            type="text"
+            label="Mã định danh"
+            placeholder="Nhập mã định danh"
+            maxlength="100"
+            icon="edit"
+        }}
+        {{> forms/select
+            id="catalog-quoc-gia"
+            name="quocGia"
+            label="Quốc gia"
+            placeholder="Nhập quốc gia"
+            search=true
+            addressRole="country"
+            addressGroup="publisher"
+            icon="globe"
+        }}
+        {{> forms/select
+            id="catalog-ma-tinh-thanh"
+            name="maTinhThanh"
+            label="Tỉnh/thành"
+            placeholder="Nhập tỉnh/thành"
+            search=true
+            addressRole="province"
+            addressGroup="publisher"
+            addressLabelName="tinhThanh"
+            icon="map"
+        }}
+        {{> forms/select
+            id="catalog-ma-phuong-xa"
+            name="maPhuongXa"
+            label="Xã/phường"
+            placeholder="Nhập xã/phường"
+            search=true
+            addressRole="ward"
+            addressGroup="publisher"
+            addressLabelName="phuongXa"
+            icon="map-pin"
+        }}
+        {{> forms/textarea
+            id="catalog-dia-chi"
+            name="diaChi"
+            label="Địa chỉ"
+            placeholder="Nhập địa chỉ"
+            rows="3"
+            maxlength="2000"
+            className="bf-form-grid-full"
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-email"
+            name="email"
+            type="email"
+            label="Email"
+            placeholder="Nhập email"
+            maxlength="255"
+            icon="email"
+        }}
+        {{> forms/input
+            id="catalog-so-dien-thoai"
+            name="soDienThoai"
+            type="tel"
+            label="Số điện thoại"
+            placeholder="Nhập số điện thoại"
+            inputmode="tel"
+            phoneCharsOnly=true
+            maxlength="30"
+            icon="phone"
+        }}
+        {{> forms/input
+            id="catalog-nguoi-lien-he"
+            name="nguoiLienHe"
+            type="text"
+            label="Người liên hệ"
+            placeholder="Nhập người liên hệ"
+            maxlength="200"
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-so-dien-thoai-lien-he"
+            name="soDienThoaiLienHe"
+            type="tel"
+            label="Điện thoại người liên hệ"
+            placeholder="Nhập điện thoại người liên hệ"
+            inputmode="tel"
+            phoneCharsOnly=true
+            maxlength="30"
+            icon="phone"
+        }}
+        {{> forms/input
+            id="catalog-website"
+            name="website"
+            type="url"
+            label="Website"
+            placeholder="Nhập website"
+            maxlength="2000"
+            icon="globe"
+        }}
+        {{> forms/textarea
+            id="catalog-mo-ta"
+            name="moTa"
+            label="Mô tả"
+            placeholder="Nhập mô tả"
+            rows="3"
+            maxlength="20000"
+            className="bf-form-grid-full"
+            icon="edit"
+        }}
+        {{> forms/textarea
+            id="catalog-ghi-chu-noi-bo"
+            name="ghiChuNoiBo"
+            label="Ghi chú nội bộ"
+            placeholder="Nhập ghi chú nội bộ"
+            rows="3"
+            maxlength="20000"
+            className="bf-form-grid-full"
+            icon="edit"
+        }}
     </form>
     <footer class="bf-modal-footer">
         <button type="button" class="bf-btn bf-btn-secondary bf-btn-md" data-bf-modal-close>Hủy</button>

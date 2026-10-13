@@ -1,8 +1,3 @@
-function toCamelCase(value) {
-  if (Array.isArray(value)) return value.map(toCamelCase);
-  if (!value || typeof value !== 'object' || value instanceof Date) return value;
-  return Object.fromEntries(Object.entries(value).map(([key, item]) => [key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase()), toCamelCase(item)]));
-}
 const gioiTinhOptions = [
   { value: 'NAM', label: 'Nam' },
   { value: 'NU', label: 'Nữ' },
@@ -12,7 +7,7 @@ const gioiTinhOptions = [
 const profileController = {
   render(req, res, next, layout) {
     if (req.userLoadError) return next(req.userLoadError);
-    const currentUser = toCamelCase(req.user);
+    const currentUser = req.user;
     const rawAccount = currentUser?.taiKhoan;
     if (!rawAccount) return res.redirect('/auth/dang-nhap');
     const account = {

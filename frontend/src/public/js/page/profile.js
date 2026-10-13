@@ -68,7 +68,7 @@ if (root) {
         return payload?.error?.details || payload?.details || payload?.data?.error?.details || payload?.errors || [];
     }
     function normalizeField(field) {
-        return String(field || '').replace(/_([a-z])/g, (_, letter) => letter.toUpperCase()) === 'hoTen' ? 'hoTen' : '';
+        return field === 'hoTen' ? 'hoTen' : '';
     }
     async function requestJson(url, options) {
         const response = await fetch(url, { credentials: 'same-origin', headers: { Accept: 'application/json', ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }), ...(options.headers || {}) }, ...options });

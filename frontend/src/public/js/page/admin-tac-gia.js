@@ -1,5 +1,5 @@
 import { closeModal } from "/js/components/modals.js?v=20261010-2";
-import { applyServerFieldErrors, validateForm } from "/js/components/forms/validation.js";
+import { applyServerFieldErrors, validateForm } from "/js/components/forms/validation.js?v=20261013-1";
 
 const page = document.querySelector('[data-catalog-page][data-page-key="authors"]');
 if (page) {
@@ -10,11 +10,11 @@ if (page) {
     const endpoint = page.dataset.endpoint;
     const formError = form?.querySelector("[data-catalog-form-error]");
     const formNotice = form?.querySelector("[data-catalog-form-notice]");
-    const imageWrapper = form?.querySelector('[data-bf-image][data-image-target="anh_dai_dien_tep_id"]');
+    const imageWrapper = form?.querySelector('[data-bf-image][data-image-target="anhDaiDienTepId"]');
     const imageInput = imageWrapper?.querySelector(".bf-image-input");
     const imageId = imageWrapper?.querySelector(".bf-image-value");
-    const authorName = form?.elements.namedItem("ho_ten");
-    const displayName = form?.elements.namedItem("ten_hien_thi");
+    const authorName = form?.elements.namedItem("hoTen");
+    const displayName = form?.elements.namedItem("tenHienThi");
     let saving = false;
     const validateImage = () => true;
     const showFormError = (message, error = null) => {
@@ -37,8 +37,8 @@ if (page) {
     };
     const uploadImage = async file => {
         const data = new FormData();
-        data.append("pham_vi_so_huu", "DON_VI");
-        data.append("loai_tep", "ANH_TAC_GIA");
+        data.append("phamViSoHuu", "DON_VI");
+        data.append("loaiTep", "ANH_TAC_GIA");
         data.append("files", file, file.name);
         const response = await fetch("/api/tep-tin/upload", { method: "POST", credentials: "same-origin", headers: { Accept: "application/json" }, body: data });
         const result = await response.json().catch(() => null);
@@ -61,22 +61,22 @@ if (page) {
     const buildPayload = editing => {
         const payload = {};
         for (const [name, rawValue] of new FormData(form).entries()) {
-            if (rawValue instanceof File || name.endsWith("Remove") || name === "author-photo") continue;
+            if (rawValue instanceof File || name.endsWith("Remove") || name === "authorPhoto") continue;
             const control = [...form.querySelectorAll("input, textarea, [data-bf-select]")].find(item => (item.dataset.name || item.name) === name);
             if (control?.dataset.frontendOnly === "true") continue;
             const value = String(rawValue).trim();
             let normalized = value || null;
-            if (["ngay_sinh", "ngay_mat"].includes(name) && value) {
+            if (["ngaySinh", "ngayMat"].includes(name) && value) {
                 const match = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
                 if (match) normalized = `${match[3]}-${match[2]}-${match[1]}`;
             }
-            if (["nam_sinh", "nam_mat", "anh_dai_dien_tep_id"].includes(name) && value) normalized = Number(value);
+            if (["namSinh", "namMat", "anhDaiDienTepId"].includes(name) && value) normalized = Number(value);
             payload[name] = normalized;
         }
         const name = String(authorName?.value || "").trim();
         if (!String(displayName?.value || "").trim()) {
             if (displayName) displayName.value = name;
-            payload.ten_hien_thi = name || null;
+            payload.tenHienThi = name || null;
         }
         for (const select of form.querySelectorAll("[data-address-label-name]")) {
             const selected = select.querySelector(".bf-select-option.is-selected");
@@ -146,7 +146,7 @@ if (page) {
         const url = editing ? `${endpoint}/${encodeURIComponent(form.dataset.recordId)}` : endpoint;
         const method = editing ? "PATCH" : "POST";
         try {
-            await requestWrite(url, method, { ...buildPayload(editing), kiem_tra: true });
+            await requestWrite(url, method, { ...buildPayload(editing), kiemTra: true });
             if (!valid || !imageValid) {
                 showFormError("Vui lòng kiểm tra các trường được đánh dấu bên dưới.");
                 return;

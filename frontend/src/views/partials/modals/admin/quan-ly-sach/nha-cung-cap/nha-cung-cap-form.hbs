@@ -1,0 +1,342 @@
+{{#> modals/base-modal
+    id="catalog-form-modal"
+    title="Thêm mới nhà cung cấp"
+    description="Nhập thông tin nhà cung cấp."
+    size="xl"
+    className="bf-modal-sticky-footer"
+    closeOnBackdrop=false
+    loading=false
+}}
+    <form id="catalog-form" class="bf-modal-form bf-modal-form-grid" data-catalog-form novalidate>
+        <p class="bf-form-error bf-modal-form-error bf-form-grid-full" data-catalog-form-error role="alert" hidden></p>
+        <p class="bf-form-help bf-form-grid-full" data-catalog-form-notice role="status" hidden></p>
+        {{> forms/input
+            id="catalog-ma-nha-cung-cap"
+            name="maNhaCungCap"
+            type="text"
+            label="Mã nhà cung cấp"
+            placeholder="Nhập mã nhà cung cấp"
+            required=true
+            maxlength="50"
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-ten-nha-cung-cap"
+            name="tenNhaCungCap"
+            type="text"
+            label="Tên nhà cung cấp"
+            placeholder="Nhập tên nhà cung cấp"
+            required=true
+            maxlength="255"
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-ten-phap-ly"
+            name="tenPhapLy"
+            type="text"
+            label="Tên pháp lý"
+            placeholder="Nhập tên pháp lý"
+            maxlength="255"
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-ten-giao-dich"
+            name="tenGiaoDich"
+            type="text"
+            label="Tên giao dịch"
+            placeholder="Nhập tên giao dịch"
+            maxlength="255"
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-ten-viet-tat"
+            name="tenVietTat"
+            type="text"
+            label="Tên viết tắt"
+            placeholder="Nhập tên viết tắt"
+            maxlength="100"
+            icon="edit"
+        }}
+        {{> forms/select
+            id="catalog-loai-nha-cung-cap"
+            name="loaiNhaCungCap"
+            label="Loại nhà cung cấp"
+            placeholder="Nhập loại nhà cung cấp"
+            search=true
+            options=(lookup formOptions "loaiNhaCungCap")
+            icon="grid"
+        }}
+        {{> forms/input
+            id="catalog-ma-so-thue"
+            name="maSoThue"
+            type="text"
+            label="Mã số thuế"
+            placeholder="Nhập mã số thuế"
+            maxlength="40"
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-ma-dang-ky-kinh-doanh"
+            name="maDangKyKinhDoanh"
+            type="text"
+            label="Mã đăng ký kinh doanh"
+            placeholder="Nhập mã đăng ký kinh doanh"
+            maxlength="80"
+            icon="edit"
+        }}
+        {{> forms/date
+            id="catalog-ngay-cap-dang-ky"
+            name="ngayCapDangKy"
+            label="Ngày cấp đăng ký"
+            placeholder="Nhập ngày cấp đăng ký"
+            icon="calendar"
+        }}
+        {{> forms/input
+            id="catalog-noi-cap-dang-ky"
+            name="noiCapDangKy"
+            type="text"
+            label="Nơi cấp đăng ký"
+            placeholder="Nhập nơi cấp đăng ký"
+            maxlength="255"
+            icon="edit"
+        }}
+        {{> forms/select
+            id="catalog-quoc-gia"
+            name="quocGia"
+            label="Quốc gia"
+            placeholder="Nhập quốc gia"
+            search=true
+            addressRole="country"
+            addressGroup="supplier"
+            icon="globe"
+        }}
+        {{> forms/select
+            id="catalog-ma-tinh-thanh"
+            name="maTinhThanh"
+            label="Tỉnh/thành"
+            placeholder="Nhập tỉnh/thành"
+            search=true
+            addressRole="province"
+            addressGroup="supplier"
+            addressLabelName="tenTinhThanh"
+            frontendOnly=true
+            icon="map"
+        }}
+        {{> forms/select
+            id="catalog-ma-phuong-xa"
+            name="maPhuongXa"
+            label="Xã/phường"
+            placeholder="Nhập xã/phường"
+            search=true
+            addressRole="ward"
+            addressGroup="supplier"
+            addressLabelName="tenPhuongXa"
+            frontendOnly=true
+            icon="map-pin"
+        }}
+        {{> forms/input
+            id="catalog-dia-chi-chi-tiet"
+            name="diaChiChiTiet"
+            type="text"
+            label="Địa chỉ chi tiết"
+            placeholder="Nhập địa chỉ chi tiết"
+            maxlength="350"
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-email"
+            name="email"
+            type="email"
+            label="Email"
+            placeholder="Nhập email"
+            maxlength="254"
+            icon="email"
+        }}
+        {{> forms/input
+            id="catalog-so-dien-thoai"
+            name="soDienThoai"
+            type="tel"
+            label="Số điện thoại"
+            placeholder="Nhập số điện thoại"
+            inputmode="tel"
+            phoneCharsOnly=true
+            maxlength="30"
+            icon="phone"
+        }}
+        {{> forms/input
+            id="catalog-so-dien-thoai-phu"
+            name="soDienThoaiPhu"
+            type="tel"
+            label="Số điện thoại phụ"
+            placeholder="Nhập số điện thoại phụ"
+            inputmode="tel"
+            phoneCharsOnly=true
+            maxlength="30"
+            icon="phone"
+        }}
+        {{> forms/input
+            id="catalog-website"
+            name="website"
+            type="url"
+            label="Website"
+            placeholder="Nhập website"
+            maxlength="2000"
+            icon="globe"
+        }}
+        {{> forms/input
+            id="catalog-nguoi-dai-dien-phap-luat"
+            name="nguoiDaiDienPhapLuat"
+            type="text"
+            label="Người đại diện"
+            placeholder="Nhập người đại diện"
+            maxlength="160"
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-chuc-vu-dai-dien"
+            name="chucVuDaiDien"
+            type="text"
+            label="Chức vụ đại diện"
+            placeholder="Nhập chức vụ đại diện"
+            maxlength="120"
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-nhom-nha-cung-cap"
+            name="nhomNhaCungCap"
+            type="text"
+            label="Nhóm nhà cung cấp"
+            placeholder="Nhập nhóm nhà cung cấp"
+            maxlength="80"
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-xep-hang-noi-bo"
+            name="xepHangNoiBo"
+            type="text"
+            label="Xếp hạng nội bộ"
+            placeholder="Nhập xếp hạng nội bộ"
+            maxlength="30"
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-don-vi-tien-te"
+            name="donViTienTe"
+            type="text"
+            label="Đơn vị tiền tệ"
+            placeholder="Nhập đơn vị tiền tệ"
+            maxlength="3"
+            icon="edit"
+        }}
+        {{> forms/number
+            id="catalog-han-muc-cong-no"
+            name="hanMucCongNo"
+            label="Hạn mức công nợ"
+            placeholder="Nhập hạn mức công nợ"
+            decimals="2"
+            min="0"
+            icon="info"
+        }}
+        {{> forms/number
+            id="catalog-so-ngay-cong-no"
+            name="soNgayCongNo"
+            label="Số ngày công nợ"
+            placeholder="Nhập số ngày công nợ"
+            type="integer"
+            min="0"
+            icon="info"
+        }}
+        {{> forms/select
+            id="catalog-phuong-thuc-thanh-toan-uu-tien"
+            name="phuongThucThanhToanUuTien"
+            label="Thanh toán ưu tiên"
+            placeholder="Nhập thanh toán ưu tiên"
+            search=true
+            options=(lookup formOptions "phuongThucThanhToanUuTien")
+            icon="grid"
+        }}
+        {{> forms/number
+            id="catalog-thoi-gian-giao-hang-du-kien-ngay"
+            name="thoiGianGiaoHangDuKienNgay"
+            label="Thời gian giao dự kiến (ngày)"
+            placeholder="Nhập thời gian giao dự kiến (ngày)"
+            type="integer"
+            min="0"
+            icon="info"
+        }}
+        {{> forms/number
+            id="catalog-gia-tri-don-hang-toi-thieu"
+            name="giaTriDonHangToiThieu"
+            label="Giá trị đơn tối thiểu"
+            placeholder="Nhập giá trị đơn tối thiểu"
+            decimals="2"
+            min="0"
+            icon="info"
+        }}
+        {{> forms/select
+            id="catalog-cho-phep-tra-hang"
+            name="choPhepTraHang"
+            label="Cho phép trả hàng"
+            placeholder="Nhập cho phép trả hàng"
+            search=true
+            options=(lookup formOptions "choPhepTraHang")
+            icon="grid"
+        }}
+        {{> forms/textarea
+            id="catalog-chinh-sach-doi-tra"
+            name="chinhSachDoiTra"
+            label="Chính sách đổi trả"
+            placeholder="Nhập chính sách đổi trả"
+            rows="3"
+            className="bf-form-grid-full"
+            icon="edit"
+        }}
+        {{> forms/textarea
+            id="catalog-chinh-sach-bao-hanh"
+            name="chinhSachBaoHanh"
+            label="Chính sách bảo hành"
+            placeholder="Nhập chính sách bảo hành"
+            rows="3"
+            className="bf-form-grid-full"
+            icon="edit"
+        }}
+        {{> forms/textarea
+            id="catalog-dieu-khoan-hop-tac"
+            name="dieuKhoanHopTac"
+            label="Điều khoản hợp tác"
+            placeholder="Nhập điều khoản hợp tác"
+            rows="3"
+            className="bf-form-grid-full"
+            icon="edit"
+        }}
+        {{> forms/date
+            id="catalog-ngay-bat-dau-hop-tac"
+            name="ngayBatDauHopTac"
+            label="Ngày bắt đầu hợp tác"
+            placeholder="Nhập ngày bắt đầu hợp tác"
+            icon="calendar"
+        }}
+        {{> forms/date
+            id="catalog-ngay-ket-thuc-hop-tac"
+            name="ngayKetThucHopTac"
+            label="Ngày kết thúc hợp tác"
+            placeholder="Nhập ngày kết thúc hợp tác"
+            icon="calendar"
+        }}
+        {{> forms/textarea
+            id="catalog-ghi-chu"
+            name="ghiChu"
+            label="Ghi chú"
+            placeholder="Nhập ghi chú"
+            rows="3"
+            className="bf-form-grid-full"
+            icon="edit"
+        }}
+    </form>
+    <footer class="bf-modal-footer">
+        <button type="button" class="bf-btn bf-btn-secondary bf-btn-md" data-bf-modal-close>Hủy</button>
+        <div class="bf-modal-footer-actions">
+            <button type="submit" form="catalog-form" class="bf-btn bf-btn-primary bf-btn-md" data-bf-modal-submit>Thêm mới</button>
+        </div>
+    </footer>
+{{/modals/base-modal}}

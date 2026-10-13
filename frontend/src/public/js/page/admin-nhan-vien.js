@@ -1,8 +1,8 @@
 import { closeModal, openModal, setModalLoading } from "/js/components/modals.js?v=20261010-2";
 import { setSelectDisabled, syncSelect } from "/js/components/forms/select.js";
-import { applyServerFieldErrors, bindInlineValidation, validateForm } from "/js/components/forms/validation.js";
+import { applyServerFieldErrors, bindInlineValidation, validateForm } from "/js/components/forms/validation.js?v=20261013-1";
 import { initDataTables } from "/js/components/tables.js?v=20261010-3";
-import { bindApiTable } from "/js/components/api-table.js";
+import { bindApiTable } from "/js/components/api-table.js?v=20261013-1";
 const table = document.querySelector(".bf-employee-page [data-bf-table]");
 if (table) {
     const tableBody = table.querySelector("[data-bf-table-body]");
@@ -26,11 +26,7 @@ if (table) {
     let wards = [];
     let ethnicities = [];
     let busy = false;
-    const normalizeApiData = value => {
-        if (Array.isArray(value)) return value.map(normalizeApiData);
-        if (value === null || typeof value !== "object" || value instanceof Date) return value;
-        return Object.fromEntries(Object.entries(value).map(([key, item]) => [key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase()), normalizeApiData(item)]));
-    };
+    const normalizeApiData = value => value;
     const request = async (url, options = {}) => {
         const response = await fetch(url, { credentials: "same-origin", headers: { Accept: "application/json", ...(options.body ? { "Content-Type": "application/json" } : {}) }, ...options });
         const result = await response.json();
@@ -302,8 +298,8 @@ if (table) {
     };
     const apiTable = bindApiTable(table, {
         endpoint: "/api/nhan-vien",
-        rowsKeys: ["nhanVien", "nhan_vien"],
-        paginationKeys: ["phanTrang", "phan_trang"],
+        rowsKeys: ["nhanVien"],
+        paginationKeys: ["phanTrang"],
         queryNames: { page: "trang", pageSize: "kichThuoc", search: "tuKhoa", sort: "sort", order: "order" },
         extraParams: () => ({
             ...(hienThiNhanVienDaNghi ? { trangThai: "DA_ROI" } : { anDaNghi: "true" })

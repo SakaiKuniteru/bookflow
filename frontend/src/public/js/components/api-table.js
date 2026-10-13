@@ -36,7 +36,7 @@ function makeParams(table, state, queryNames, extraParams) {
 export function bindApiTable(table, {
     endpoint,
     rowsKeys,
-    paginationKeys = ["phanTrang", "phan_trang", "pagination"],
+    paginationKeys = ["phanTrang"],
     queryNames = { page: "trang", pageSize: "kichThuoc", search: "tuKhoa", sort: "sort", order: "order" },
     extraParams,
     normalize = value => value,
@@ -72,9 +72,9 @@ export function bindApiTable(table, {
             const pagination = getValue(data, paginationKeys, {});
             if (!Array.isArray(rows)) throw new Error("API không trả về danh sách dữ liệu hợp lệ.");
 
-            const total = Number(getValue(pagination, ["tongSo", "tong_so", "total", "tong"], rows.length)) || 0;
-            const pageSizeResult = Number(getValue(pagination, ["kichThuoc", "kich_thuoc", "pageSize"], pageSize)) || pageSize;
-            const pages = Math.max(1, Number(getValue(pagination, ["tongTrang", "tong_trang", "totalPages"], Math.ceil(total / pageSizeResult))) || 1);
+            const total = Number(getValue(pagination, ["tongSo"], rows.length)) || 0;
+            const pageSizeResult = Number(getValue(pagination, ["kichThuoc"], pageSize)) || pageSize;
+            const pages = Math.max(1, Number(getValue(pagination, ["tongTrang"], Math.ceil(total / pageSizeResult))) || 1);
             const pageResult = Math.min(pages, Math.max(1, Number(getValue(pagination, ["trang", "page"], page)) || page));
             if (pageResult !== page) {
                 return load({ ...state, page: pageResult, pageSize: pageSizeResult });

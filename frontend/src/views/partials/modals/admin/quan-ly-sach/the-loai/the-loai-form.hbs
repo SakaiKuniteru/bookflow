@@ -1,7 +1,7 @@
 {{#> modals/base-modal
     id="catalog-form-modal"
     title="Thêm mới thể loại"
-    description="Nhập thông tin thể loại sách."
+    description="Nhập thông tin thể loại."
     size="xl"
     className="bf-modal-sticky-footer"
     closeOnBackdrop=false
@@ -10,7 +10,76 @@
     <form id="catalog-form" class="bf-modal-form bf-modal-form-grid" data-catalog-form novalidate>
         <p class="bf-form-error bf-modal-form-error bf-form-grid-full" data-catalog-form-error role="alert" hidden></p>
         <p class="bf-form-help bf-form-grid-full" data-catalog-form-notice role="status" hidden></p>
-        {{#each formFields}}{{> forms/catalog-field this}}{{/each}}
+        {{> forms/input
+            id="catalog-ma-the-loai"
+            name="maTheLoai"
+            type="text"
+            label="Mã thể loại"
+            placeholder="Nhập mã thể loại"
+            required=true
+            maxlength="50"
+            readonlyOnEdit=true
+            icon="grid"
+        }}
+        {{> forms/input
+            id="catalog-ten-the-loai"
+            name="tenTheLoai"
+            type="text"
+            label="Tên thể loại"
+            placeholder="Nhập tên thể loại"
+            required=true
+            maxlength="200"
+            icon="book"
+        }}
+        {{> forms/input
+            id="catalog-ten-tieng-anh"
+            name="tenTiengAnh"
+            type="text"
+            label="Tên tiếng Anh"
+            placeholder="Nhập tên tiếng anh"
+            maxlength="200"
+            icon="globe"
+        }}
+        {{> forms/select
+            id="catalog-the-loai-cha-id"
+            name="theLoaiChaId"
+            label="Thể loại cha"
+            placeholder="Nhập thể loại cha"
+            search=true
+            optionsEndpoint="/api/the-loai"
+            optionsRowsKey="theLoai"
+            optionsValueKey="id"
+            optionsLabelKey="tenTheLoai"
+            optionsSecondaryKey="maTheLoai"
+            icon="grid"
+        }}
+        {{> forms/input
+            id="catalog-duong-dan"
+            name="duongDan"
+            type="text"
+            label="Đường dẫn"
+            placeholder="Nhập đường dẫn"
+            maxlength="200"
+            icon="globe"
+        }}
+        {{> forms/number
+            id="catalog-thu-tu"
+            name="thuTu"
+            label="Thứ tự"
+            placeholder="Nhập thứ tự"
+            type="integer"
+            icon="info"
+        }}
+        {{> forms/textarea
+            id="catalog-mo-ta"
+            name="moTa"
+            label="Mô tả"
+            placeholder="Nhập mô tả"
+            rows="3"
+            maxlength="20000"
+            className="bf-form-grid-full"
+            icon="edit"
+        }}
     </form>
     <footer class="bf-modal-footer">
         <button type="button" class="bf-btn bf-btn-secondary bf-btn-md" data-bf-modal-close>Hủy</button>

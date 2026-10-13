@@ -24,23 +24,18 @@ function fieldError(field, message) {
     return error;
 }
 function fieldByName(form, name) {
-    const camelName = name.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
-    const snakeName = name.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
-    const names = [...new Set([name, camelName, snakeName])];
-    for (const candidate of names) {
-        const customSelect = [...form.querySelectorAll("[data-bf-select]")].find(item => item.dataset.name === candidate || item.id === candidate);
-        if (customSelect) return customSelect;
-        let field = form.elements.namedItem(candidate);
-        if (field && typeof field.length === "number" && !field.nodeType) field = field[0];
-        if (field?.matches('input[type="hidden"].bf-phone-value')) field = field.closest("[data-form-field]")?.querySelector(".bf-phone-input");
-        if (field) return field;
-        const dataField = [...form.querySelectorAll("[data-name]")].find(item => item.dataset.name === candidate);
-        if (dataField) return dataField;
-    }
+    const customSelect = [...form.querySelectorAll("[data-bf-select]")].find(item => item.dataset.name === name || item.id === name);
+    if (customSelect) return customSelect;
+    let field = form.elements.namedItem(name);
+    if (field && typeof field.length === "number" && !field.nodeType) field = field[0];
+    if (field?.matches('input[type="hidden"].bf-phone-value')) field = field.closest("[data-form-field]")?.querySelector(".bf-phone-input");
+    if (field) return field;
+    const dataField = [...form.querySelectorAll("[data-name]")].find(item => item.dataset.name === name);
+    if (dataField) return dataField;
     return null;
 }
 function fieldByErrorMessage(form, message) {
-    const aliases = [[/email|e-mail/i, ["email"]], [/tên đăng nhập|username/i, ["ten_dang_nhap", "username"]], [/họ và tên|họ tên/i, ["ho_ten", "hoTen"]], [/số điện thoại|điện thoại/i, ["so_dien_thoai", "soDienThoai"]], [/ngày sinh/i, ["ngay_sinh", "ngaySinh"]], [/giới tính/i, ["gioi_tinh", "gioiTinh"]], [/tài khoản/i, ["tai_khoan_id", "taiKhoanId"]], [/nguồn khách hàng/i, ["nguon_khach_hang", "nguonKhachHang"]], [/dân tộc/i, ["dan_toc", "danToc"]], [/quốc tịch/i, ["quoc_tich", "quocTich"]], [/quốc gia/i, ["quoc_gia", "quocGia"]], [/tỉnh(?:\/thành phố| thành phố)/i, ["tinh_thanh_pho", "tinhThanhPho"]], [/phường(?:\/xã| xã)/i, ["phuong_xa", "phuongXa"]], [/địa chỉ/i, ["dia_chi_chi_tiet", "diaChiChiTiet"]], [/mô tả/i, ["mo_ta", "moTa"]], [/ghi chú/i, ["ghi_chu", "ghiChu"]]];
+    const aliases = [[/email|e-mail/i, ["email"]], [/tên đăng nhập|username/i, ["tenDangNhap", "username"]], [/họ và tên|họ tên/i, ["hoTen"]], [/số điện thoại|điện thoại/i, ["soDienThoai"]], [/ngày sinh/i, ["ngaySinh"]], [/giới tính/i, ["gioiTinh"]], [/tài khoản/i, ["taiKhoanId"]], [/nguồn khách hàng/i, ["nguonKhachHang"]], [/dân tộc/i, ["danToc"]], [/quốc tịch/i, ["quocTich"]], [/quốc gia/i, ["quocGia"]], [/tỉnh(?:\/thành phố| thành phố)/i, ["tinhThanhPho"]], [/phường(?:\/xã| xã)/i, ["phuongXa"]], [/địa chỉ/i, ["diaChiChiTiet"]], [/mô tả/i, ["moTa"]], [/ghi chú/i, ["ghiChu"]]];
     for (const [pattern, names] of aliases) {
         if (!pattern.test(message)) continue;
         for (const name of names) {

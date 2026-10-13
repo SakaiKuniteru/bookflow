@@ -1,7 +1,7 @@
 {{#> modals/base-modal
     id="catalog-form-modal"
     title="Thêm mới sách"
-    description="Nhập thông tin đầu sách."
+    description="Nhập thông tin sách."
     size="xl"
     className="bf-modal-sticky-footer"
     closeOnBackdrop=false
@@ -10,7 +10,349 @@
     <form id="catalog-form" class="bf-modal-form bf-modal-form-grid" data-catalog-form novalidate>
         <p class="bf-form-error bf-modal-form-error bf-form-grid-full" data-catalog-form-error role="alert" hidden></p>
         <p class="bf-form-help bf-form-grid-full" data-catalog-form-notice role="status" hidden></p>
-        {{#each formFields}}{{> forms/catalog-field this}}{{/each}}
+        {{> forms/input
+            id="catalog-ma-dau-sach"
+            name="maDauSach"
+            type="text"
+            label="Mã đầu sách"
+            placeholder="Nhập mã đầu sách"
+            required=true
+            maxlength="50"
+            readonlyOnEdit=true
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-ten-sach"
+            name="tenSach"
+            type="text"
+            label="Tên sách"
+            placeholder="Nhập tên sách"
+            required=true
+            maxlength="300"
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-ten-goc"
+            name="tenGoc"
+            type="text"
+            label="Tên gốc"
+            placeholder="Nhập tên gốc"
+            maxlength="300"
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-ten-phu"
+            name="tenPhu"
+            type="text"
+            label="Tên phụ"
+            placeholder="Nhập tên phụ"
+            maxlength="300"
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-ten-ngan"
+            name="tenNgan"
+            type="text"
+            label="Tên ngắn"
+            placeholder="Nhập tên ngắn"
+            maxlength="160"
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-ten-hien-thi"
+            name="tenHienThi"
+            type="text"
+            label="Tên hiển thị"
+            placeholder="Nhập tên hiển thị"
+            maxlength="350"
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-ma-dau-sach-ngoai"
+            name="maDauSachNgoai"
+            type="text"
+            label="Mã đầu sách ngoài"
+            placeholder="Nhập mã đầu sách ngoài"
+            maxlength="100"
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-duong-dan"
+            name="duongDan"
+            type="text"
+            label="Đường dẫn"
+            placeholder="Nhập đường dẫn"
+            maxlength="300"
+            icon="edit"
+        }}
+        {{> forms/select
+            id="catalog-loai-tac-pham"
+            name="loaiTacPham"
+            label="Loại tác phẩm"
+            placeholder="Nhập loại tác phẩm"
+            search=true
+            options=(lookup formOptions "loaiTacPham")
+            icon="grid"
+        }}
+        {{> forms/input
+            id="catalog-ngon-ngu-goc"
+            name="ngonNguGoc"
+            type="text"
+            label="Ngôn ngữ gốc"
+            placeholder="Nhập ngôn ngữ gốc"
+            maxlength="15"
+            icon="edit"
+        }}
+        {{> forms/select
+            id="catalog-quoc-gia-xuat-xu"
+            name="quocGiaXuatXu"
+            label="Quốc gia xuất xứ"
+            placeholder="Nhập quốc gia xuất xứ"
+            search=true
+            addressRole="country"
+            addressGroup="book"
+            icon="globe"
+        }}
+        {{> forms/date
+            id="catalog-nam-sang-tac"
+            name="namSangTac"
+            label="Năm sáng tác"
+            placeholder="Nhập năm sáng tác"
+            type="year"
+            icon="calendar"
+        }}
+        {{> forms/date
+            id="catalog-nam-xuat-ban-dau-tien"
+            name="namXuatBanDauTien"
+            label="Năm xuất bản đầu tiên"
+            placeholder="Nhập năm xuất bản đầu tiên"
+            type="year"
+            icon="calendar"
+        }}
+        {{> forms/date
+            id="catalog-ngay-xuat-ban-hien-thi"
+            name="ngayXuatBanHienThi"
+            label="Ngày xuất bản hiển thị"
+            placeholder="Nhập ngày xuất bản hiển thị"
+            icon="calendar"
+        }}
+        {{> forms/number
+            id="catalog-do-tuoi-goi-y"
+            name="doTuoiGoiY"
+            label="Độ tuổi gợi ý"
+            placeholder="Nhập độ tuổi gợi ý"
+            type="integer"
+            min="0"
+            icon="info"
+        }}
+        {{> forms/number
+            id="catalog-do-tuoi-toi-thieu"
+            name="doTuoiToiThieu"
+            label="Độ tuổi tối thiểu"
+            placeholder="Nhập độ tuổi tối thiểu"
+            type="integer"
+            min="0"
+            icon="info"
+        }}
+        {{> forms/number
+            id="catalog-do-tuoi-toi-da"
+            name="doTuoiToiDa"
+            label="Độ tuổi tối đa"
+            placeholder="Nhập độ tuổi tối đa"
+            type="integer"
+            min="0"
+            icon="info"
+        }}
+        {{> forms/select
+            id="catalog-tac-gia-id"
+            name="tacGiaId"
+            label="Tác giả"
+            placeholder="Nhập tác giả"
+            required=true
+            search=true
+            multiple=true
+            optionsEndpoint="/api/tac-gia"
+            optionsRowsKey="tacGia"
+            optionsValueKey="id"
+            optionsLabelKey="tenHienThi"
+            optionsSecondaryKey="maTacGia"
+            frontendOnly=true
+            icon="user"
+        }}
+        {{> forms/select
+            id="catalog-the-loai-id"
+            name="theLoaiId"
+            label="Thể loại"
+            placeholder="Nhập thể loại"
+            required=true
+            search=true
+            multiple=true
+            optionsEndpoint="/api/the-loai"
+            optionsRowsKey="theLoai"
+            optionsValueKey="id"
+            optionsLabelKey="tenTheLoai"
+            optionsSecondaryKey="maTheLoai"
+            frontendOnly=true
+            icon="grid"
+        }}
+        {{> forms/select
+            id="catalog-nha-san-xuat-id"
+            name="nhaSanXuatId"
+            label="Nhà sản xuất"
+            placeholder="Nhập nhà sản xuất"
+            required=true
+            search=true
+            optionsEndpoint="/api/nha-cung-cap"
+            optionsRowsKey="danhSach"
+            optionsValueKey="id"
+            optionsLabelKey="tenNhaCungCap"
+            optionsSecondaryKey="maNhaCungCap"
+            frontendOnly=true
+            icon="building"
+        }}
+        {{> forms/select
+            id="catalog-nha-xuat-ban-id"
+            name="nhaXuatBanId"
+            label="Nhà xuất bản"
+            placeholder="Nhập nhà xuất bản"
+            required=true
+            search=true
+            optionsEndpoint="/api/nha-xuat-ban"
+            optionsRowsKey="nhaXuatBan"
+            optionsValueKey="id"
+            optionsLabelKey="tenNhaXuatBan"
+            optionsSecondaryKey="maNhaXuatBan"
+            frontendOnly=true
+            icon="building"
+        }}
+        {{> forms/image
+            id="catalog-anh-bia-chinh-id"
+            name="anhBiaChinhId"
+            label="Ảnh bìa"
+            width="180"
+            height="250"
+            imageTarget="anhBiaChinhId"
+            uploadType="ANH_BIA"
+            className="bf-form-grid-full"
+            icon="upload"
+        }}
+        {{> forms/image
+            id="catalog-anh-sach-them"
+            name="anhSachThem"
+            label="Ảnh sách"
+            multiple=true
+            width="128"
+            height="176"
+            uploadType="ANH_BIA"
+            maxFiles="10"
+            className="bf-form-grid-full"
+            icon="upload"
+        }}
+        {{> forms/input
+            id="catalog-doi-tuong-doc"
+            name="doiTuongDoc"
+            type="text"
+            label="Đối tượng đọc"
+            placeholder="Nhập đối tượng đọc"
+            maxlength="160"
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-cap-hoc-goi-y"
+            name="capHocGoiY"
+            type="text"
+            label="Cấp học gợi ý"
+            placeholder="Nhập cấp học gợi ý"
+            maxlength="60"
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-muc-do-kho"
+            name="mucDoKho"
+            type="text"
+            label="Mức độ khó"
+            placeholder="Nhập mức độ khó"
+            maxlength="30"
+            icon="edit"
+        }}
+        {{> forms/select
+            id="catalog-la-tac-pham-dich"
+            name="laTacPhamDich"
+            label="Là tác phẩm dịch"
+            placeholder="Nhập là tác phẩm dịch"
+            search=true
+            options=(lookup formOptions "laTacPhamDich")
+            icon="grid"
+        }}
+        {{> forms/select
+            id="catalog-la-tac-pham-doc-lap"
+            name="laTacPhamDocLap"
+            label="Là tác phẩm độc lập"
+            placeholder="Nhập là tác phẩm độc lập"
+            search=true
+            options=(lookup formOptions "laTacPhamDocLap")
+            icon="grid"
+        }}
+        {{> forms/textarea
+            id="catalog-mo-ta-ngan"
+            name="moTaNgan"
+            label="Mô tả ngắn"
+            placeholder="Nhập mô tả ngắn"
+            rows="3"
+            maxlength="20000"
+            className="bf-form-grid-full"
+            icon="edit"
+        }}
+        {{> forms/textarea
+            id="catalog-tom-tat-noi-dung"
+            name="tomTatNoiDung"
+            label="Tóm tắt nội dung"
+            placeholder="Nhập tóm tắt nội dung"
+            rows="4"
+            maxlength="100000"
+            className="bf-form-grid-full"
+            icon="edit"
+        }}
+        {{> forms/textarea
+            id="catalog-diem-noi-bat"
+            name="diemNoiBat"
+            label="Điểm nổi bật"
+            placeholder="Nhập điểm nổi bật"
+            rows="3"
+            maxlength="30000"
+            className="bf-form-grid-full"
+            icon="edit"
+        }}
+        {{> forms/textarea
+            id="catalog-chu-de-noi-bat"
+            name="chuDeNoiBat"
+            label="Chủ đề nổi bật"
+            placeholder="Nhập chủ đề nổi bật"
+            rows="3"
+            maxlength="20000"
+            className="bf-form-grid-full"
+            icon="edit"
+        }}
+        {{> forms/textarea
+            id="catalog-canh-bao-noi-dung"
+            name="canhBaoNoiDung"
+            label="Cảnh báo nội dung"
+            placeholder="Nhập cảnh báo nội dung"
+            rows="2"
+            maxlength="20000"
+            className="bf-form-grid-full"
+            icon="edit"
+        }}
+        {{> forms/textarea
+            id="catalog-ghi-chu-noi-dung"
+            name="ghiChuNoiDung"
+            label="Ghi chú nội dung"
+            placeholder="Nhập ghi chú nội dung"
+            rows="3"
+            maxlength="30000"
+            className="bf-form-grid-full"
+            icon="edit"
+        }}
     </form>
     <footer class="bf-modal-footer">
         <button type="button" class="bf-btn bf-btn-secondary bf-btn-md" data-bf-modal-close>Hủy</button>

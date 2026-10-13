@@ -10,7 +10,249 @@
     <form id="catalog-form" class="bf-modal-form bf-modal-form-grid" data-catalog-form novalidate>
         <p class="bf-form-error bf-modal-form-error bf-form-grid-full" data-catalog-form-error role="alert" hidden></p>
         <p class="bf-form-help bf-form-grid-full" data-catalog-form-notice role="status" hidden></p>
-        {{#each formFields}}{{> forms/catalog-field this}}{{/each}}
+        {{> forms/select
+            id="catalog-dau-sach-id"
+            name="dauSachId"
+            label="Đầu sách"
+            placeholder="Nhập đầu sách"
+            required=true
+            search=true
+            optionsEndpoint="/api/sach"
+            optionsRowsKey="sach"
+            optionsValueKey="id"
+            optionsLabelKey="tenSach"
+            optionsSecondaryKey="maDauSach"
+            icon="book"
+        }}
+        {{> forms/input
+            id="catalog-ma-phien-ban"
+            name="maPhienBan"
+            type="text"
+            label="Mã phiên bản"
+            placeholder="Nhập mã phiên bản"
+            required=true
+            maxlength="60"
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-ma-sku-noi-bo"
+            name="maSkuNoiBo"
+            type="text"
+            label="SKU nội bộ"
+            placeholder="Nhập sku nội bộ"
+            maxlength="80"
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-ten-phien-ban"
+            name="tenPhienBan"
+            type="text"
+            label="Tên phiên bản"
+            placeholder="Nhập tên phiên bản"
+            maxlength="300"
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-ten-hien-thi"
+            name="tenHienThi"
+            type="text"
+            label="Tên hiển thị"
+            placeholder="Nhập tên hiển thị"
+            maxlength="350"
+            icon="edit"
+        }}
+        {{> forms/select
+            id="catalog-loai-phien-ban"
+            name="loaiPhienBan"
+            label="Loại phiên bản"
+            placeholder="Nhập loại phiên bản"
+            search=true
+            options=(lookup formOptions "loaiPhienBan")
+            icon="grid"
+        }}
+        {{> forms/select
+            id="catalog-nha-xuat-ban-id"
+            name="nhaXuatBanId"
+            label="Nhà xuất bản"
+            placeholder="Nhập nhà xuất bản"
+            search=true
+            optionsEndpoint="/api/nha-xuat-ban"
+            optionsRowsKey="nhaXuatBan"
+            optionsValueKey="id"
+            optionsLabelKey="tenNhaXuatBan"
+            optionsSecondaryKey="maNhaXuatBan"
+            icon="building"
+        }}
+        {{> forms/select
+            id="catalog-thuong-hieu-xuat-ban-id"
+            name="thuongHieuXuatBanId"
+            label="Thương hiệu xuất bản"
+            placeholder="Nhập thương hiệu xuất bản"
+            search=true
+            optionsEndpoint="/api/nha-xuat-ban/{nhaXuatBanId}/thuong-hieu"
+            optionsRowsKey="thuongHieu"
+            optionsValueKey="id"
+            optionsLabelKey="tenThuongHieu"
+            dependsOn="catalog-nha-xuat-ban-id"
+            icon="building"
+        }}
+        {{> forms/select
+            id="catalog-nha-phat-hanh-id"
+            name="nhaPhatHanhId"
+            label="Nhà phát hành"
+            placeholder="Nhập nhà phát hành"
+            search=true
+            optionsEndpoint="/api/phien-ban-sach/nha-phat-hanh"
+            optionsRowsKey="nhaPhatHanh"
+            optionsValueKey="id"
+            optionsLabelKey="tenNhaPhatHanh"
+            optionsSecondaryKey="maNhaPhatHanh"
+            icon="building"
+        }}
+        {{> forms/input
+            id="catalog-isbn10"
+            name="isbn10"
+            type="text"
+            label="ISBN-10"
+            placeholder="Nhập isbn-10"
+            maxlength="20"
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-isbn13"
+            name="isbn13"
+            type="text"
+            label="ISBN-13"
+            placeholder="Nhập isbn-13"
+            maxlength="20"
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-ma-ean13"
+            name="maEan13"
+            type="text"
+            label="EAN-13"
+            placeholder="Nhập ean-13"
+            maxlength="20"
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-ma-vach-nha-xuat-ban"
+            name="maVachNhaXuatBan"
+            type="text"
+            label="Mã vạch nhà xuất bản"
+            placeholder="Nhập mã vạch nhà xuất bản"
+            maxlength="60"
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-ma-san-pham-nha-xuat-ban"
+            name="maSanPhamNhaXuatBan"
+            type="text"
+            label="Mã sản phẩm nhà xuất bản"
+            placeholder="Nhập mã sản phẩm nhà xuất bản"
+            maxlength="80"
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-ngon-ngu-chinh"
+            name="ngonNguChinh"
+            type="text"
+            label="Ngôn ngữ chính"
+            placeholder="Nhập ngôn ngữ chính"
+            maxlength="15"
+            icon="edit"
+        }}
+        {{> forms/input
+            id="catalog-ngon-ngu-goc"
+            name="ngonNguGoc"
+            type="text"
+            label="Ngôn ngữ gốc"
+            placeholder="Nhập ngôn ngữ gốc"
+            maxlength="15"
+            icon="edit"
+        }}
+        {{> forms/date
+            id="catalog-ngay-xuat-ban"
+            name="ngayXuatBan"
+            label="Ngày xuất bản"
+            placeholder="Nhập ngày xuất bản"
+            icon="calendar"
+        }}
+        {{> forms/date
+            id="catalog-nam-xuat-ban"
+            name="namXuatBan"
+            label="Năm xuất bản"
+            placeholder="Nhập năm xuất bản"
+            type="year"
+            yearFrom="catalog-ngay-xuat-ban"
+            icon="calendar"
+        }}
+        {{> forms/number
+            id="catalog-so-trang"
+            name="soTrang"
+            label="Số trang"
+            placeholder="Nhập số trang"
+            type="integer"
+            min="1"
+            icon="info"
+        }}
+        {{> forms/select
+            id="catalog-loai-bia"
+            name="loaiBia"
+            label="Loại bìa"
+            placeholder="Nhập loại bìa"
+            search=true
+            options=(lookup formOptions "loaiBia")
+            icon="grid"
+        }}
+        {{> forms/number
+            id="catalog-trong-luong-gram"
+            name="trongLuongGram"
+            label="Trọng lượng (g)"
+            placeholder="Nhập trọng lượng (g)"
+            decimals="2"
+            min="0"
+            icon="info"
+        }}
+        {{> forms/number
+            id="catalog-gia-bia"
+            name="giaBia"
+            label="Giá bìa"
+            placeholder="Nhập giá bìa"
+            decimals="2"
+            min="0"
+            icon="info"
+        }}
+        {{> forms/input
+            id="catalog-don-vi-tien-te"
+            name="donViTienTe"
+            type="text"
+            label="Đơn vị tiền tệ"
+            placeholder="Nhập đơn vị tiền tệ"
+            maxlength="3"
+            icon="edit"
+        }}
+        {{> forms/textarea
+            id="catalog-mo-ta-rieng-phien-ban"
+            name="moTaRiengPhienBan"
+            label="Mô tả riêng phiên bản"
+            placeholder="Nhập mô tả riêng phiên bản"
+            rows="3"
+            maxlength="30000"
+            className="bf-form-grid-full"
+            icon="edit"
+        }}
+        {{> forms/textarea
+            id="catalog-ghi-chu-phien-ban"
+            name="ghiChuPhienBan"
+            label="Ghi chú phiên bản"
+            placeholder="Nhập ghi chú phiên bản"
+            rows="3"
+            maxlength="20000"
+            className="bf-form-grid-full"
+            icon="edit"
+        }}
     </form>
     <footer class="bf-modal-footer">
         <button type="button" class="bf-btn bf-btn-secondary bf-btn-md" data-bf-modal-close>Hủy</button>

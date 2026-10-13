@@ -70,19 +70,6 @@ const createTimeoutSignal = timeout => {
   return { signal: controller.signal, clear: () => clearTimeout(timer) };
 };
 
-const doiTenTruongCamelCase = ten => ten.replace(/_([a-z0-9])/gi, (_, kyTu) => kyTu.toUpperCase());
-const chuyenCamelCase = value => {
-  if (Array.isArray(value)) return value.map(chuyenCamelCase);
-  if (value === null || typeof value !== 'object' || value instanceof Date) return value;
-  return Object.fromEntries(Object.entries(value).map(([key, item]) => [doiTenTruongCamelCase(key), chuyenCamelCase(item)]));
-};
-const chuyenDuongDanCamelCase = path => {
-  const url = new URL(path, 'http://bookflow.local');
-  const query = new URLSearchParams();
-  for (const [key, value] of url.searchParams) query.append(doiTenTruongCamelCase(key), value);
-  return `${url.pathname}${query.size ? `?${query.toString()}` : ''}${url.hash}`;
-};
-
 const request = async (path, options = {}) => {
   const method = String(options.method || 'GET').toUpperCase();
   const headers = {
@@ -94,18 +81,15 @@ const request = async (path, options = {}) => {
   if (options.body !== undefined && !(options.body instanceof FormData)) {
     headers['Content-Type'] = 'application/json';
   }
+  const body = options.body !== undefined && !(options.body instanceof FormData) && typeof options.body !== 'string'
+    ? JSON.stringify(options.body)
+    : options.body;
   const timeout = options.timeout ?? apiConfig.timeout;
   const timeoutController = createTimeoutSignal(timeout);
   const controller = options.signal ? null : timeoutController;
   const signal = options.signal || controller.signal;
-  let body = options.body;
-  if (body !== undefined && !(body instanceof FormData) && typeof body !== 'string') {
-    body = JSON.stringify(chuyenCamelCase(body));
-  } else if (typeof body === 'string') {
-    try { body = JSON.stringify(chuyenCamelCase(JSON.parse(body))); } catch {}
-  }
   try {
-    const response = await fetch(`${apiConfig.baseUrl}${chuyenDuongDanCamelCase(path)}`, {
+    const response = await fetch(`${apiConfig.baseUrl}${path}`, {
       method,
       headers,
       body,
