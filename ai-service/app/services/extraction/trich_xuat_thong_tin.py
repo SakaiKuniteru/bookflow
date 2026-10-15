@@ -287,9 +287,7 @@ class TrichXuatThongTinService:
         else:
             status = "COMPLETED"
         if low_confidence_fields:
-            warnings.append(
-                f"Trường bắt buộc có confidence thấp: {', '.join(low_confidence_fields)}."
-            )
+            warnings.append(f"Trường bắt buộc có confidence thấp: {', '.join(low_confidence_fields)}.")
         result = ExtractionResult(
             source_file_id=ocr_result.get("source_file_id"),
             source_version=ocr_result.get("source_version"),
@@ -330,14 +328,60 @@ class TrichXuatThongTinService:
         self._them_field(fields, "isbn", self._tim_isbn(raw_text), raw_text, allowed_fields, "RULE")
         self._them_field(fields, "email", self._tim_email(raw_text), raw_text, allowed_fields, "RULE")
         self._them_field(fields, "phone", self._tim_phone(raw_text), raw_text, allowed_fields, "RULE")
-        self._them_field(fields, "title", self._tim_label_value(raw_text, ["Tên sách", "Tên tài liệu", "Title", "Tiêu đề"]), raw_text, allowed_fields, "RULE")
-        self._them_field(fields, "author", self._tim_label_value(raw_text, ["Tác giả", "Author"]), raw_text, allowed_fields, "RULE")
-        self._them_field(fields, "publisher", self._tim_label_value(raw_text, ["Nhà xuất bản", "Publisher"]), raw_text, allowed_fields, "RULE")
-        self._them_field(fields, "edition", self._tim_label_value(raw_text, ["Edition", "Lần xuất bản", "Ấn bản"]), raw_text, allowed_fields, "RULE")
-        self._them_field(fields, "supplier", self._tim_label_value(raw_text, ["Nhà cung cấp", "Supplier"]), raw_text, allowed_fields, "RULE")
-        self._them_field(fields, "invoice_number", self._tim_label_value(raw_text, ["Số hóa đơn", "Invoice No", "Invoice Number"]), raw_text, allowed_fields, "RULE")
-        self._them_field(fields, "receipt_number", self._tim_label_value(raw_text, ["Số phiếu", "Số biên nhận", "Receipt No"]), raw_text, allowed_fields, "RULE")
-        self._them_field(fields, "warehouse", self._tim_label_value(raw_text, ["Kho", "Warehouse"]), raw_text, allowed_fields, "RULE")
+        self._them_field(
+            fields,
+            "title",
+            self._tim_label_value(raw_text, ["Tên sách", "Tên tài liệu", "Title", "Tiêu đề"]),
+            raw_text,
+            allowed_fields,
+            "RULE",
+        )
+        self._them_field(
+            fields, "author", self._tim_label_value(raw_text, ["Tác giả", "Author"]), raw_text, allowed_fields, "RULE"
+        )
+        self._them_field(
+            fields,
+            "publisher",
+            self._tim_label_value(raw_text, ["Nhà xuất bản", "Publisher"]),
+            raw_text,
+            allowed_fields,
+            "RULE",
+        )
+        self._them_field(
+            fields,
+            "edition",
+            self._tim_label_value(raw_text, ["Edition", "Lần xuất bản", "Ấn bản"]),
+            raw_text,
+            allowed_fields,
+            "RULE",
+        )
+        self._them_field(
+            fields,
+            "supplier",
+            self._tim_label_value(raw_text, ["Nhà cung cấp", "Supplier"]),
+            raw_text,
+            allowed_fields,
+            "RULE",
+        )
+        self._them_field(
+            fields,
+            "invoice_number",
+            self._tim_label_value(raw_text, ["Số hóa đơn", "Invoice No", "Invoice Number"]),
+            raw_text,
+            allowed_fields,
+            "RULE",
+        )
+        self._them_field(
+            fields,
+            "receipt_number",
+            self._tim_label_value(raw_text, ["Số phiếu", "Số biên nhận", "Receipt No"]),
+            raw_text,
+            allowed_fields,
+            "RULE",
+        )
+        self._them_field(
+            fields, "warehouse", self._tim_label_value(raw_text, ["Kho", "Warehouse"]), raw_text, allowed_fields, "RULE"
+        )
         date_value, date_evidence = self._tim_ngay(raw_text)
         self._them_field_with_evidence(fields, "date", date_value, date_evidence, allowed_fields, "RULE", raw_text)
         self._them_field(fields, "publication_year", self._tim_nam(raw_text), raw_text, allowed_fields, "RULE")
@@ -351,7 +395,11 @@ class TrichXuatThongTinService:
                 source="OCR_TABLE",
                 evidence="Dữ liệu lấy từ cấu trúc bảng OCR.",
             )
-        if document_type in {DOCUMENT_TYPE_BOOK_COVER, DOCUMENT_TYPE_BOOK_METADATA} and "title" in allowed_fields and "title" not in fields:
+        if (
+            document_type in {DOCUMENT_TYPE_BOOK_COVER, DOCUMENT_TYPE_BOOK_METADATA}
+            and "title" in allowed_fields
+            and "title" not in fields
+        ):
             first_line = self._lay_dong_dau_tien_hop_le(raw_text)
             if first_line:
                 fields["title"] = ExtractedField(
@@ -452,6 +500,7 @@ class TrichXuatThongTinService:
             return self.llm_provider
         try:
             from app.providers.llm import get_llm_provider
+
             provider = get_llm_provider()
             if inspect.isawaitable(provider):
                 provider = await provider
@@ -633,10 +682,7 @@ class TrichXuatThongTinService:
         if isinstance(value, list):
             return [self._chuan_hoa_field(field_name, item) for item in value]
         if isinstance(value, dict):
-            return {
-                key: self._chuan_hoa_field(key, item)
-                for key, item in value.items()
-            }
+            return {key: self._chuan_hoa_field(key, item) for key, item in value.items()}
         if value is None:
             return None
         if field_name == "isbn":
@@ -737,8 +783,7 @@ class TrichXuatThongTinService:
         return [
             field_name
             for field_name in required_fields
-            if field_name not in normalized_data
-            or normalized_data[field_name] in {None, ""}
+            if field_name not in normalized_data or normalized_data[field_name] in {None, ""}
         ]
 
     def _chuan_hoa_document_type(self, document_type: str | None) -> str:

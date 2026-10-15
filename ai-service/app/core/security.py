@@ -1,6 +1,8 @@
 from __future__ import annotations
 from fastapi import Header, HTTPException
 from app.core.config import get_settings
+
+
 def _lay_bearer_token(authorization: str | None) -> str:
     if not authorization:
         return ""
@@ -8,6 +10,8 @@ def _lay_bearer_token(authorization: str | None) -> str:
     if len(parts) != 2 or parts[0].lower() != "bearer":
         return ""
     return parts[1].strip()
+
+
 def xac_thuc_internal(
     x_internal_token: str | None = Header(default=None, alias="X-Internal-Token"),
     authorization: str | None = Header(default=None, alias="Authorization"),

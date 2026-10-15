@@ -3,6 +3,7 @@ from typing import Any
 from redis.asyncio import Redis
 from app.core.config import Settings
 
+
 class QueueConnection:
     def __init__(self, settings: Settings):
         self.settings = settings
@@ -11,10 +12,8 @@ class QueueConnection:
     async def khoi_tao(self) -> None:
         if not self.settings.redis_url:
             return
-        self.client = Redis.from_url(
-            self.settings.redis_url,
-            decode_responses=True
-        )
+        self.client = Redis.from_url(self.settings.redis_url, decode_responses=True)
+
     async def ping(self) -> bool:
         if self.client is None:
             return False
@@ -23,6 +22,7 @@ class QueueConnection:
             return bool(result)
         except Exception:
             return False
+
     async def dong(self) -> None:
         if self.client:
             await self.client.aclose()
@@ -51,7 +51,9 @@ class QueueConnection:
             raise RuntimeError("Queue Redis chưa được khởi tạo")
         return int(await self.client.llen(queue_name))
 
+
 queue_connection: QueueConnection | None = None
+
 
 def tao_queue_connection(settings: Settings) -> QueueConnection:
     global queue_connection

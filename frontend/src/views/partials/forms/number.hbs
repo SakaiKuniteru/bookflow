@@ -9,6 +9,7 @@
         type="text"
         inputmode="decimal"
         class="bf-form-control bf-number-input"
+        {{#if frontendOnly}}data-frontend-only="true"{{/if}}
         value="{{value}}"
         placeholder="{{placeholder}}"
         data-number-type="{{#if type}}{{type}}{{else}}decimal{{/if}}"

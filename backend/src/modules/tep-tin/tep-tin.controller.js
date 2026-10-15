@@ -1,43 +1,69 @@
-const service = require('./tep-tin.service.js');
+const service = require("./tep-tin.service.js");
 
 function camel(value) {
-    if (Array.isArray(value)) return value.map(camel);
-    if (value === null || typeof value !== 'object' || value instanceof Date) return value;
-    return Object.fromEntries(Object.entries(value).map(([key, item]) => [key.replace(/_([a-z])/g, (_, c) => c.toUpperCase()), camel(item)]));
+  if (Array.isArray(value)) return value.map(camel);
+  if (value === null || typeof value !== "object" || value instanceof Date)
+    return value;
+  return Object.fromEntries(
+    Object.entries(value).map(([key, item]) => [
+      key.replace(/_([a-z])/g, (_, c) => c.toUpperCase()),
+      camel(item),
+    ]),
+  );
 }
 function tra(req, res, data, status = 200) {
-    return res.status(status).json({ success: true, requestId: req.requestId, data: camel(data) });
+  return res
+    .status(status)
+    .json({ success: true, requestId: req.requestId, data: camel(data) });
 }
-const xuLy = (fn, status = 200) => async (req, res, next) => {
-    try { return tra(req, res, await fn(req), status); }
-    catch (error) { next(error); }
-};
+const xuLy =
+  (fn, status = 200) =>
+  async (req, res, next) => {
+    try {
+      return tra(req, res, await fn(req), status);
+    } catch (error) {
+      next(error);
+    }
+  };
 module.exports = {
-    uploadNhieu: xuLy(req => service.uploadNhieu(req.auth, req.body, req.files), 201),
-    danhSach: xuLy(req => service.danhSach(req.auth, req.query)),
-    async logoDonViCongKhai(req, res, next) {
-        try {
-            const logo = await service.logoDonViCongKhai(req.params.donViId);
-            res.set('Content-Type', logo.mime_type);
-            res.set('Cache-Control', 'public, max-age=300, stale-while-revalidate=3600');
-            res.set('X-Content-Type-Options', 'nosniff');
-            logo.body.Body.on('error', next);
-            return logo.body.Body.pipe(res);
-        } catch (error) { return next(error); }
-    },
-    chiTiet: xuLy(req => service.chiTiet(req.auth, req.params.tepId)),
-    urlDoc: xuLy(req => service.urlDoc(req.auth, req.params.tepId)),
-    async noiDungAnh(req, res, next) {
-        try {
-            const anh = await service.noiDungAnh(req.auth, req.params.tepId);
-            const ten = `bookflow-${anh.id}.${anh.duoi_tep || 'webp'}`;
-            res.set('Content-Type', anh.mime_type);
-            res.set('Cache-Control', 'private, no-store');
-            res.set('X-Content-Type-Options', 'nosniff');
-            res.set('Content-Disposition', `${req.query.tai_xuong === '1' ? 'attachment' : 'inline'}; filename="${ten}"`);
-            anh.body.Body.on('error', next);
-            return anh.body.Body.pipe(res);
-        } catch (error) { return next(error); }
-    },
-    xoa: xuLy(req => service.xoa(req.auth, req.params.tepId))
+  uploadNhieu: xuLy(
+    (req) => service.uploadNhieu(req.auth, req.body, req.files),
+    201,
+  ),
+  danhSach: xuLy((req) => service.danhSach(req.auth, req.query)),
+  async logoDonViCongKhai(req, res, next) {
+    try {
+      const logo = await service.logoDonViCongKhai(req.params.donViId);
+      res.set("Content-Type", logo.mime_type);
+      res.set(
+        "Cache-Control",
+        "public, max-age=300, stale-while-revalidate=3600",
+      );
+      res.set("X-Content-Type-Options", "nosniff");
+      logo.body.Body.on("error", next);
+      return logo.body.Body.pipe(res);
+    } catch (error) {
+      return next(error);
+    }
+  },
+  chiTiet: xuLy((req) => service.chiTiet(req.auth, req.params.tepId)),
+  urlDoc: xuLy((req) => service.urlDoc(req.auth, req.params.tepId)),
+  async noiDungAnh(req, res, next) {
+    try {
+      const anh = await service.noiDungAnh(req.auth, req.params.tepId);
+      const ten = `bookflow-${anh.id}.${anh.duoi_tep || "webp"}`;
+      res.set("Content-Type", anh.mime_type);
+      res.set("Cache-Control", "private, no-store");
+      res.set("X-Content-Type-Options", "nosniff");
+      res.set(
+        "Content-Disposition",
+        `${req.query.tai_xuong === "1" ? "attachment" : "inline"}; filename="${ten}"`,
+      );
+      anh.body.Body.on("error", next);
+      return anh.body.Body.pipe(res);
+    } catch (error) {
+      return next(error);
+    }
+  },
+  xoa: xuLy((req) => service.xoa(req.auth, req.params.tepId)),
 };

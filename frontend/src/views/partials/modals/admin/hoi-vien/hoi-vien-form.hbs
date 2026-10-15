@@ -8,7 +8,6 @@
     loading=false
 }}
     <form id="catalog-form" class="bf-modal-form bf-modal-form-grid" data-catalog-form novalidate>
-        <p class="bf-form-error bf-modal-form-error bf-form-grid-full" data-catalog-form-error role="alert" hidden></p>
         <p class="bf-form-help bf-form-grid-full" data-catalog-form-notice role="status" hidden></p>
         {{> forms/select
             id="catalog-khach-hang-id"
@@ -57,6 +56,7 @@
             placeholder="Nhập ngày hết hạn"
             icon="calendar"
         }}
+        {{> forms/catalog-active}}
     </form>
     <footer class="bf-modal-footer">
         <button type="button" class="bf-btn bf-btn-secondary bf-btn-md" data-bf-modal-close>Hủy</button>

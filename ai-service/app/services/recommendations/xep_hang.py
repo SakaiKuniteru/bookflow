@@ -16,65 +16,65 @@ from app.services.recommendations.tao_ung_vien import (
     RECOMMENDATION_MODE_BORROW,
     RECOMMENDATION_MODE_PURCHASE,
     RECOMMENDATION_MODE_RENT,
-    RECOMMENDATION_MODE_READ
+    RECOMMENDATION_MODE_READ,
 )
 
 logger = logging.getLogger("bookflow-ai.recommendations.ranking")
 
 DEFAULT_WEIGHT_PROFILES = {
-    RECOMMENDATION_CONTEXT_HOME: {
-        "semantic": 0.30,
-        "context": 0.25,
-        "history": 0.20,
-        "source": 0.10,
-        "business": 0.15
-    },
+    RECOMMENDATION_CONTEXT_HOME: {"semantic": 0.30, "context": 0.25, "history": 0.20, "source": 0.10, "business": 0.15},
     RECOMMENDATION_CONTEXT_BOOK_DETAIL: {
         "semantic": 0.50,
         "context": 0.30,
         "history": 0.05,
         "source": 0.10,
-        "business": 0.05
+        "business": 0.05,
     },
     RECOMMENDATION_CONTEXT_SEARCH: {
         "semantic": 0.45,
         "context": 0.30,
         "history": 0.10,
         "source": 0.05,
-        "business": 0.10
+        "business": 0.10,
     },
     RECOMMENDATION_CONTEXT_PERSONAL: {
         "semantic": 0.20,
         "context": 0.15,
         "history": 0.40,
         "source": 0.10,
-        "business": 0.15
+        "business": 0.15,
     },
-    RECOMMENDATION_CONTEXT_CHAT: {
-        "semantic": 0.35,
-        "context": 0.30,
-        "history": 0.15,
-        "source": 0.10,
-        "business": 0.10
-    },
+    RECOMMENDATION_CONTEXT_CHAT: {"semantic": 0.35, "context": 0.30, "history": 0.15, "source": 0.10, "business": 0.10},
     RECOMMENDATION_CONTEXT_STAFF: {
         "semantic": 0.30,
         "context": 0.30,
         "history": 0.05,
         "source": 0.15,
-        "business": 0.20
-    }
+        "business": 0.20,
+    },
 }
 
 
 class XepHangService:
-    def __init__(self, data_provider: RecommendationDataProvider | None = None, weight_profiles: dict[str, dict[str, float]] | None = None, diversity_penalty: float = 0.04, algorithm_version: str = "recommendation-v1"):
+    def __init__(
+        self,
+        data_provider: RecommendationDataProvider | None = None,
+        weight_profiles: dict[str, dict[str, float]] | None = None,
+        diversity_penalty: float = 0.04,
+        algorithm_version: str = "recommendation-v1",
+    ):
         self.data_provider = data_provider or BackendRecommendationDataProvider()
         self.weight_profiles = weight_profiles or DEFAULT_WEIGHT_PROFILES
         self.diversity_penalty = max(0.0, min(1.0, diversity_penalty))
         self.algorithm_version = algorithm_version
 
-    async def xep_hang(self, candidates: list[dict[str, Any]] | dict[str, Any], context: RecommendationContext | dict[str, Any], user_context: dict[str, Any] | None = None, limit: int | None = None) -> dict[str, Any]:
+    async def xep_hang(
+        self,
+        candidates: list[dict[str, Any]] | dict[str, Any],
+        context: RecommendationContext | dict[str, Any],
+        user_context: dict[str, Any] | None = None,
+        limit: int | None = None,
+    ) -> dict[str, Any]:
         context = context if isinstance(context, RecommendationContext) else RecommendationContext.tu_dict(context)
         if isinstance(candidates, dict):
             candidates = candidates.get("candidates", candidates.get("results", []))
@@ -88,8 +88,12 @@ class XepHangService:
             try:
                 states = await self.data_provider.kiem_tra_kha_dung(book_ids, context, user_context)
             except Exception as error:
-                raise AIBackendException("Không thể kiểm tra trạng thái nghiệp vụ hiện tại của sách", details=str(error)) from error
-            business_states = {str(self._lay_book_id(item)): item for item in states if self._lay_book_id(item) is not None}
+                raise AIBackendException(
+                    "Không thể kiểm tra trạng thái nghiệp vụ hiện tại của sách", details=str(error)
+                ) from error
+            business_states = {
+                str(self._lay_book_id(item)): item for item in states if self._lay_book_id(item) is not None
+            }
         scored = []
         weights = self._lay_weights(context.context_type)
         for candidate in candidates:
@@ -118,8 +122,8 @@ class XepHangService:
                 "algorithm_version": self.algorithm_version,
                 "weights": weights,
                 "business_validation": self._can_kiem_tra_nghiep_vu(context),
-                "diversity_penalty": self.diversity_penalty
-            }
+                "diversity_penalty": self.diversity_penalty,
+            },
         }
 
     def _loai_trung(self, candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -135,7 +139,9 @@ class XepHangService:
                 result[key] = dict(candidate)
                 continue
             current = result[key]
-            current["matched_features"] = list(dict.fromkeys(current.get("matched_features", []) + candidate.get("matched_features", [])))
+            current["matched_features"] = list(
+                dict.fromkeys(current.get("matched_features", []) + candidate.get("matched_features", []))
+            )
             current["sources"] = list(dict.fromkeys(current.get("sources", []) + candidate.get("sources", [])))
             for key_name in ("semantic_score", "context_score", "history_score", "source_score"):
                 current[key_name] = max(self._score(current.get(key_name, 0)), self._score(candidate.get(key_name, 0)))
@@ -151,7 +157,9 @@ class XepHangService:
             raise AIValidationException("Trọng số recommendation không hợp lệ")
         return {key: value / total for key, value in weights.items()}
 
-    def _lay_features(self, candidate: dict[str, Any], state: dict[str, Any] | None, context: RecommendationContext) -> dict[str, float]:
+    def _lay_features(
+        self, candidate: dict[str, Any], state: dict[str, Any] | None, context: RecommendationContext
+    ) -> dict[str, float]:
         matched_features = {str(item).upper() for item in candidate.get("matched_features", [])}
         semantic = self._score(candidate.get("semantic_score", candidate.get("source_score", 0)))
         context_score = self._score(candidate.get("context_score", 0))
@@ -167,7 +175,7 @@ class XepHangService:
             "context": context_score,
             "history": history,
             "source": source,
-            "business": business
+            "business": business,
         }
 
     def _tinh_business_score(self, state: dict[str, Any] | None, context: RecommendationContext) -> float:
@@ -197,7 +205,9 @@ class XepHangService:
             score += self._score(features.get(key, 0)) * weight
         return round(max(0.0, min(1.0, score)), 6)
 
-    def _xep_hang_da_dang(self, candidates: list[dict[str, Any]], context: RecommendationContext, limit: int) -> list[dict[str, Any]]:
+    def _xep_hang_da_dang(
+        self, candidates: list[dict[str, Any]], context: RecommendationContext, limit: int
+    ) -> list[dict[str, Any]]:
         remaining = sorted(candidates, key=lambda item: float(item.get("score", 0)), reverse=True)
         selected = []
         same_author_requested = bool(context.filters.get("author_id") or context.filters.get("authorId"))
@@ -257,11 +267,13 @@ class XepHangService:
             "chiNhanhId",
             "sale_enabled",
             "borrow_enabled",
-            "rental_enabled"
+            "rental_enabled",
         }
         return any(key in context.filters for key in dynamic_filters)
 
-    def _hop_le_theo_nghiep_vu(self, candidate: dict[str, Any], state: dict[str, Any] | None, context: RecommendationContext) -> bool:
+    def _hop_le_theo_nghiep_vu(
+        self, candidate: dict[str, Any], state: dict[str, Any] | None, context: RecommendationContext
+    ) -> bool:
         if state is None:
             return False
         if state.get("allowed") is False or state.get("duoc_phep") is False or state.get("hop_le") is False:
@@ -269,11 +281,17 @@ class XepHangService:
         if state.get("active") is False or state.get("is_active") is False:
             return False
         mode = context.recommendation_mode
-        if mode == RECOMMENDATION_MODE_PURCHASE and (state.get("sale_enabled") is False or state.get("co_the_mua") is False):
+        if mode == RECOMMENDATION_MODE_PURCHASE and (
+            state.get("sale_enabled") is False or state.get("co_the_mua") is False
+        ):
             return False
-        if mode == RECOMMENDATION_MODE_BORROW and (state.get("borrow_enabled") is False or state.get("co_the_muon") is False):
+        if mode == RECOMMENDATION_MODE_BORROW and (
+            state.get("borrow_enabled") is False or state.get("co_the_muon") is False
+        ):
             return False
-        if mode == RECOMMENDATION_MODE_RENT and (state.get("rental_enabled") is False or state.get("co_the_thue") is False):
+        if mode == RECOMMENDATION_MODE_RENT and (
+            state.get("rental_enabled") is False or state.get("co_the_thue") is False
+        ):
             return False
         if mode == RECOMMENDATION_MODE_READ and state.get("read_enabled") is False:
             return False

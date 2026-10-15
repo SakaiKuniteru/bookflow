@@ -2,7 +2,10 @@ from __future__ import annotations
 from typing import Any, Awaitable, Callable
 
 JOB_TYPE = "EXTRACT_INFORMATION"
-WorkerService = Callable[[dict[str, Any], Callable[[dict[str, Any]], Awaitable[None]], dict[str, Any]], Awaitable[dict[str, Any]]]
+WorkerService = Callable[
+    [dict[str, Any], Callable[[dict[str, Any]], Awaitable[None]], dict[str, Any]], Awaitable[dict[str, Any]]
+]
+
 
 def _kiem_tra_payload(payload: Any) -> dict[str, Any]:
     if not isinstance(payload, dict):
@@ -13,6 +16,7 @@ def _kiem_tra_payload(payload: Any) -> dict[str, Any]:
     if not isinstance(payload["version"], int) or payload["version"] < 1:
         raise ValueError("EXTRACT_INFORMATION version không hợp lệ.")
     return payload
+
 
 async def xu_ly(
     job: dict[str, Any],

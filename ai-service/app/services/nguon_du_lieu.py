@@ -2,6 +2,8 @@ from __future__ import annotations
 from typing import Any
 from app.core.exceptions import AIValidationException
 from app.repositories.nguon_du_lieu import nguon_du_lieu_repository
+
+
 async def tao(payload: dict[str, Any], request_context: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise AIValidationException("Nguồn dữ liệu phải là object.")
@@ -20,5 +22,7 @@ async def tao(payload: dict[str, Any], request_context: dict[str, Any]) -> dict[
         status="ACTIVE",
         metadata=payload.get("metadata") or {},
     )
+
+
 async def lay(source_id: str, request_context: dict[str, Any]) -> dict[str, Any] | None:
     return await nguon_du_lieu_repository.lay_theo_id(source_id)

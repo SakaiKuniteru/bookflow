@@ -1,4 +1,4 @@
-import env from './env.js';
+import env from "./env.js";
 
 const appConfig = {
   name: env.appName,
@@ -9,9 +9,9 @@ const appConfig = {
   port: env.port,
   url: env.appUrl,
   nodeEnv: env.nodeEnv,
-  isProduction: env.nodeEnv === 'production',
-  isDevelopment: env.nodeEnv === 'development',
-  isTest: env.nodeEnv === 'test'
+  isProduction: env.nodeEnv === "production",
+  isDevelopment: env.nodeEnv === "development",
+  isTest: env.nodeEnv === "test",
 };
 
 export default appConfig;

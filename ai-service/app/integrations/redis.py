@@ -1,6 +1,7 @@
 from redis.asyncio import Redis
 from app.core.config import Settings
 
+
 class RedisClient:
     def __init__(self, settings: Settings):
         self.settings = settings
@@ -9,10 +10,7 @@ class RedisClient:
     async def khoi_tao(self) -> None:
         if not self.settings.redis_url:
             return
-        self.client = Redis.from_url(
-            self.settings.redis_url,
-            decode_responses=True
-        )
+        self.client = Redis.from_url(self.settings.redis_url, decode_responses=True)
 
     async def dong(self) -> None:
         if self.client:
@@ -47,7 +45,9 @@ class RedisClient:
             raise RuntimeError("Redis chưa được khởi tạo")
         return int(await self.client.delete(key))
 
+
 redis_client: RedisClient | None = None
+
 
 def tao_redis_client(settings: Settings) -> RedisClient:
     global redis_client

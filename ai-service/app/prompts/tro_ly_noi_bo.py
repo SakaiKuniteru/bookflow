@@ -140,17 +140,22 @@ SYSTEM_PROMPT = "\n".join(
     ]
 )
 
+
 def get_prompt_version() -> str:
     return TRO_LY_NOI_BO_PROMPT_VERSION
+
 
 def get_prompt_name() -> str:
     return PROMPT_NAME
 
+
 def get_system_prompt() -> str:
     return SYSTEM_PROMPT
 
+
 def get_output_instructions() -> str:
     return OUTPUT_INSTRUCTIONS
+
 
 def build_prompt_context(context: Mapping[str, Any] | None = None) -> str:
     payload = dict(context or {})
@@ -165,6 +170,7 @@ def build_prompt_context(context: Mapping[str, Any] | None = None) -> str:
         "</data>\n"
         "</bookflow_context>"
     )
+
 
 def build_messages(
     user_message: str,

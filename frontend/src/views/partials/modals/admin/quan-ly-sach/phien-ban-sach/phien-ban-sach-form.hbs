@@ -8,7 +8,6 @@
     loading=false
 }}
     <form id="catalog-form" class="bf-modal-form bf-modal-form-grid" data-catalog-form novalidate>
-        <p class="bf-form-error bf-modal-form-error bf-form-grid-full" data-catalog-form-error role="alert" hidden></p>
         <p class="bf-form-help bf-form-grid-full" data-catalog-form-notice role="status" hidden></p>
         {{> forms/select
             id="catalog-dau-sach-id"
@@ -21,7 +20,6 @@
             optionsRowsKey="sach"
             optionsValueKey="id"
             optionsLabelKey="tenSach"
-            optionsSecondaryKey="maDauSach"
             icon="book"
         }}
         {{> forms/input
@@ -32,15 +30,6 @@
             placeholder="Nhập mã phiên bản"
             required=true
             maxlength="60"
-            icon="edit"
-        }}
-        {{> forms/input
-            id="catalog-ma-sku-noi-bo"
-            name="maSkuNoiBo"
-            type="text"
-            label="SKU nội bộ"
-            placeholder="Nhập sku nội bộ"
-            maxlength="80"
             icon="edit"
         }}
         {{> forms/input
@@ -69,6 +58,17 @@
             search=true
             options=(lookup formOptions "loaiPhienBan")
             icon="grid"
+            required=true
+        }}
+        {{> forms/select
+            id="catalog-loai-bia"
+            name="loaiBia"
+            label="Loại bìa"
+            placeholder="Nhập loại bìa"
+            search=true
+            options=(lookup formOptions "loaiBia")
+            icon="grid"
+            required=true
         }}
         {{> forms/select
             id="catalog-nha-xuat-ban-id"
@@ -80,70 +80,8 @@
             optionsRowsKey="nhaXuatBan"
             optionsValueKey="id"
             optionsLabelKey="tenNhaXuatBan"
-            optionsSecondaryKey="maNhaXuatBan"
             icon="building"
-        }}
-        {{> forms/select
-            id="catalog-thuong-hieu-xuat-ban-id"
-            name="thuongHieuXuatBanId"
-            label="Thương hiệu xuất bản"
-            placeholder="Nhập thương hiệu xuất bản"
-            search=true
-            optionsEndpoint="/api/nha-xuat-ban/{nhaXuatBanId}/thuong-hieu"
-            optionsRowsKey="thuongHieu"
-            optionsValueKey="id"
-            optionsLabelKey="tenThuongHieu"
-            dependsOn="catalog-nha-xuat-ban-id"
-            icon="building"
-        }}
-        {{> forms/select
-            id="catalog-nha-phat-hanh-id"
-            name="nhaPhatHanhId"
-            label="Nhà phát hành"
-            placeholder="Nhập nhà phát hành"
-            search=true
-            optionsEndpoint="/api/phien-ban-sach/nha-phat-hanh"
-            optionsRowsKey="nhaPhatHanh"
-            optionsValueKey="id"
-            optionsLabelKey="tenNhaPhatHanh"
-            optionsSecondaryKey="maNhaPhatHanh"
-            icon="building"
-        }}
-        {{> forms/input
-            id="catalog-isbn10"
-            name="isbn10"
-            type="text"
-            label="ISBN-10"
-            placeholder="Nhập isbn-10"
-            maxlength="20"
-            icon="edit"
-        }}
-        {{> forms/input
-            id="catalog-isbn13"
-            name="isbn13"
-            type="text"
-            label="ISBN-13"
-            placeholder="Nhập isbn-13"
-            maxlength="20"
-            icon="edit"
-        }}
-        {{> forms/input
-            id="catalog-ma-ean13"
-            name="maEan13"
-            type="text"
-            label="EAN-13"
-            placeholder="Nhập ean-13"
-            maxlength="20"
-            icon="edit"
-        }}
-        {{> forms/input
-            id="catalog-ma-vach-nha-xuat-ban"
-            name="maVachNhaXuatBan"
-            type="text"
-            label="Mã vạch nhà xuất bản"
-            placeholder="Nhập mã vạch nhà xuất bản"
-            maxlength="60"
-            icon="edit"
+            required=true
         }}
         {{> forms/input
             id="catalog-ma-san-pham-nha-xuat-ban"
@@ -162,6 +100,7 @@
             placeholder="Nhập ngôn ngữ chính"
             maxlength="15"
             icon="edit"
+            required=true
         }}
         {{> forms/input
             id="catalog-ngon-ngu-goc"
@@ -171,6 +110,7 @@
             placeholder="Nhập ngôn ngữ gốc"
             maxlength="15"
             icon="edit"
+            required=true
         }}
         {{> forms/date
             id="catalog-ngay-xuat-ban"
@@ -178,6 +118,7 @@
             label="Ngày xuất bản"
             placeholder="Nhập ngày xuất bản"
             icon="calendar"
+            required=true
         }}
         {{> forms/date
             id="catalog-nam-xuat-ban"
@@ -187,6 +128,7 @@
             type="year"
             yearFrom="catalog-ngay-xuat-ban"
             icon="calendar"
+            required=true
         }}
         {{> forms/number
             id="catalog-so-trang"
@@ -196,15 +138,7 @@
             type="integer"
             min="1"
             icon="info"
-        }}
-        {{> forms/select
-            id="catalog-loai-bia"
-            name="loaiBia"
-            label="Loại bìa"
-            placeholder="Nhập loại bìa"
-            search=true
-            options=(lookup formOptions "loaiBia")
-            icon="grid"
+            required=true
         }}
         {{> forms/number
             id="catalog-trong-luong-gram"
@@ -253,6 +187,7 @@
             className="bf-form-grid-full"
             icon="edit"
         }}
+        {{> forms/catalog-active}}
     </form>
     <footer class="bf-modal-footer">
         <button type="button" class="bf-btn bf-btn-secondary bf-btn-md" data-bf-modal-close>Hủy</button>

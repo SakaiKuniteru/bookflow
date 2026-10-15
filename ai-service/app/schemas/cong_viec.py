@@ -5,6 +5,7 @@ from uuid import UUID
 from pydantic import Field
 from app.schemas.dung_chung import ChiTietLoi, Metadata, SchemaCoSo, YeuCauPhanTrang, KetQuaPhanTrang
 
+
 class TrangThaiCongViec(str, Enum):
     QUEUED = "QUEUED"
     RUNNING = "RUNNING"
@@ -13,11 +14,13 @@ class TrangThaiCongViec(str, Enum):
     FAILED = "FAILED"
     CANCELLED = "CANCELLED"
 
+
 class MucDoUuTien(str, Enum):
     LOW = "LOW"
     NORMAL = "NORMAL"
     HIGH = "HIGH"
     URGENT = "URGENT"
+
 
 class CongViecTao(SchemaCoSo):
     job_type: str = Field(min_length=1, max_length=100)
@@ -29,6 +32,7 @@ class CongViecTao(SchemaCoSo):
     created_by: int | None = Field(default=None, ge=1)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
+
 class CongViecCapNhat(SchemaCoSo):
     status: TrangThaiCongViec | None = None
     retry_count: int | None = Field(default=None, ge=0)
@@ -37,6 +41,7 @@ class CongViecCapNhat(SchemaCoSo):
     started_at: datetime | None = None
     completed_at: datetime | None = None
     metadata: dict[str, Any] | None = None
+
 
 class CongViec(SchemaCoSo):
     job_id: UUID
@@ -56,9 +61,11 @@ class CongViec(SchemaCoSo):
     completed_at: datetime | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
 
+
 class DanhSachCongViec(SchemaCoSo):
     items: list[CongViec] = Field(default_factory=list)
     pagination: KetQuaPhanTrang
+
 
 class CongViecLoc(YeuCauPhanTrang):
     job_type: str | None = Field(default=None, max_length=100)
@@ -66,5 +73,6 @@ class CongViecLoc(YeuCauPhanTrang):
     priority: MucDoUuTien | None = None
     don_vi_id: int | None = Field(default=None, ge=1)
     chi_nhanh_id: int | None = Field(default=None, ge=1)
+
 
 CongViecTaoRequest = CongViecTao

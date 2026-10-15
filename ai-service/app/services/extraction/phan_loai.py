@@ -177,9 +177,7 @@ class PhanLoaiService:
         model_version: str | None = None
         llm_provider = await self._lay_llm_provider()
         top_type, top_score, second_score = self._lay_top_scores(rule_scores)
-        if llm_provider is not None and (
-            top_score < 0.75 or top_score - second_score < self.review_margin
-        ):
+        if llm_provider is not None and (top_score < 0.75 or top_score - second_score < self.review_margin):
             try:
                 model_result, model_version = await self._phan_loai_bang_llm(
                     raw_text=text,
@@ -189,9 +187,7 @@ class PhanLoaiService:
                     provider=llm_provider,
                 )
             except Exception as exc:
-                rule_evidence.setdefault("OTHER", []).append(
-                    f"LLM classifier không sử dụng được: {exc}"
-                )
+                rule_evidence.setdefault("OTHER", []).append(f"LLM classifier không sử dụng được: {exc}")
         final_scores = self._tron_diem(rule_scores, model_result)
         primary_type, primary_score, second_score = self._lay_top_scores(final_scores)
         if primary_score < self.confidence_threshold:
@@ -242,9 +238,7 @@ class PhanLoaiService:
         normalized_text = self._normalize_text(raw_text)
         normalized_file_name = self._normalize_text(file_name)
         scores = {document_type: 0.0 for document_type in DOCUMENT_TYPES}
-        evidence: dict[str, list[str]] = {
-            document_type: [] for document_type in DOCUMENT_TYPES
-        }
+        evidence: dict[str, list[str]] = {document_type: [] for document_type in DOCUMENT_TYPES}
         for document_type, keywords in KEYWORDS_BY_TYPE.items():
             for keyword in keywords:
                 normalized_keyword = self._normalize_text(keyword)
@@ -264,10 +258,7 @@ class PhanLoaiService:
             scores["REPORT"] += 0.05
         if not raw_text:
             scores["OTHER"] = 0.10
-        normalized_scores = {
-            document_type: min(1.0, score)
-            for document_type, score in scores.items()
-        }
+        normalized_scores = {document_type: min(1.0, score) for document_type, score in scores.items()}
         if max(normalized_scores.values(), default=0.0) == 0:
             normalized_scores["OTHER"] = 0.35
         return normalized_scores, evidence
@@ -362,16 +353,8 @@ class PhanLoaiService:
             if str(value).upper() in DOCUMENT_TYPES and str(value).upper() != primary_type
         ]
         confidence = self._clamp_confidence(parsed.get("confidence", 0.0))
-        evidence = [
-            str(value)
-            for value in parsed.get("evidence") or []
-            if isinstance(value, str)
-        ]
-        evidence = [
-            value
-            for value in evidence
-            if self._evidence_exists(value, raw_text)
-        ]
+        evidence = [str(value) for value in parsed.get("evidence") or [] if isinstance(value, str)]
+        evidence = [value for value in evidence if self._evidence_exists(value, raw_text)]
         return {
             "primary_type": primary_type,
             "secondary_types": secondary_types,
@@ -409,6 +392,7 @@ class PhanLoaiService:
             return self.llm_provider
         try:
             from app.providers.llm import get_llm_provider
+
             provider = get_llm_provider()
             if inspect.isawaitable(provider):
                 provider = await provider
@@ -434,10 +418,7 @@ class PhanLoaiService:
         for secondary_type in model_result.get("secondary_types") or []:
             if secondary_type in DOCUMENT_TYPES:
                 scores[secondary_type] = scores.get(secondary_type, 0.0) + 0.08
-        return {
-            document_type: min(1.0, score)
-            for document_type, score in scores.items()
-        }
+        return {document_type: min(1.0, score) for document_type, score in scores.items()}
 
     def _lay_top_scores(
         self,

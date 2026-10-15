@@ -7,6 +7,7 @@
         id="{{id}}"
         name="{{name}}"
         class="bf-form-control bf-textarea"
+        {{#if frontendOnly}}data-frontend-only="true"{{/if}}
         rows="{{#if rows}}{{rows}}{{else}}4{{/if}}"
         placeholder="{{placeholder}}"
         {{#if required}}required{{/if}}

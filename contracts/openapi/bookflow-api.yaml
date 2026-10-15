@@ -36,10 +36,10 @@ paths:
         Không trả thông tin bí mật hoặc dữ liệu khách hàng.
 
       parameters:
-        - $ref: '#/components/parameters/RequestId'
+        - $ref: "#/components/parameters/RequestId"
 
       responses:
-        '200':
+        "200":
           description: Backend API đang hoạt động
 
           headers:
@@ -51,7 +51,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HealthResponse'
+                $ref: "#/components/schemas/HealthResponse"
 
               example:
                 success: true
@@ -60,8 +60,8 @@ paths:
                   status: ok
                   service: backend
 
-        '500':
-          $ref: '#/components/responses/LoiApi'
+        "500":
+          $ref: "#/components/responses/LoiApi"
 
   /ready:
     get:
@@ -70,15 +70,15 @@ paths:
       operationId: kiemTraSanSangBackend
       summary: Kiểm tra các dịch vụ thiết yếu của Backend
       parameters:
-        - $ref: '#/components/parameters/RequestId'
+        - $ref: "#/components/parameters/RequestId"
       responses:
-        '200':
+        "200":
           description: Backend và các dịch vụ thiết yếu sẵn sàng
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/ThanhCong'
+                  - $ref: "#/components/schemas/ThanhCong"
                   - type: object
                     properties:
                       data:
@@ -104,8 +104,8 @@ paths:
                               storage:
                                 type: string
                                 const: ok
-        '503':
-          $ref: '#/components/responses/LoiApi'
+        "503":
+          $ref: "#/components/responses/LoiApi"
 
 components:
   parameters:
@@ -129,7 +129,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '../schemas/loi-api.schema.json'
+            $ref: "../schemas/loi-api.schema.json"
 
   schemas:
     ThanhCong:
@@ -154,11 +154,11 @@ components:
         meta:
           type:
             - object
-            - 'null'
+            - "null"
 
     HealthResponse:
       allOf:
-        - $ref: '#/components/schemas/ThanhCong'
+        - $ref: "#/components/schemas/ThanhCong"
 
         - type: object
           properties:
@@ -217,13 +217,13 @@ components:
       pattern: '^-?(0|[1-9][0-9]*)\.[0-9]{2}$'
 
       examples:
-        - '125000.00'
-        - '0.00'
+        - "125000.00"
+        - "0.00"
 
     ThoiDiemUtc:
       type: string
       format: date-time
-      pattern: 'Z$'
+      pattern: "Z$"
 
       description: |
         Thời điểm ISO 8601 UTC, kết thúc bằng Z.

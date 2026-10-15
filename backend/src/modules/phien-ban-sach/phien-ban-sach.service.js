@@ -1,135 +1,387 @@
-const { AppError } = require('../../common/errors/AppError.js');
-const { trongGiaoDich } = require('../../database/transaction.js');
-const phanQuyenService = require('../phan-quyen/phan-quyen.service.js');
-const { idHopLe, phienBanMoiHopLe, suaPhienBanHopLe, trangThaiHopLe, boLocHopLe } = require('./phien-ban-sach.validation.js');
-const repo = require('./phien-ban-sach.repository.js');
+const { AppError } = require("../../common/errors/AppError.js");
+const { trongGiaoDich } = require("../../database/transaction.js");
+const phanQuyenService = require("../phan-quyen/phan-quyen.service.js");
+const {
+  idHopLe,
+  phienBanMoiHopLe,
+  suaPhienBanHopLe,
+  trangThaiHopLe,
+  boLocHopLe,
+} = require("./phien-ban-sach.validation.js");
+const repo = require("./phien-ban-sach.repository.js");
 class PhienBanSachService {
-    loi(message, status = 422, code = 'INVALID_INPUT') {
-        return new AppError({ code, message, status });
+  loi(message, status = 422, code = "INVALID_INPUT") {
+    return new AppError({ code, message, status });
+  }
+  async yeuCauQuyen(auth, maQuyen, client) {
+    if (!(await phanQuyenService.kiemTraQuyen(auth, maQuyen, {}, client)))
+      throw this.loi("Không có quyền quản lý phiên bản sách", 403, "FORBIDDEN");
+  }
+  async phienBanTonTai(donViId, phienBanId, client, khoa = false) {
+    const phienBan = await repo.layPhienBan(donViId, phienBanId, client, khoa);
+    if (!phienBan)
+      throw this.loi("Không tìm thấy phiên bản sách", 404, "NOT_FOUND");
+    return phienBan;
+  }
+  async kiemTraThamChieu(donViId, duLieu, client) {
+    const bang = {
+      dau_sach_id: "dau_sach",
+      nha_xuat_ban_id: "nha_xuat_ban",
+      thuong_hieu_xuat_ban_id: "thuong_hieu_xuat_ban",
+      nha_phat_hanh_id: "nha_phat_hanh",
+      anh_bia_chinh_id: "tep_dinh_kem",
+    };
+    for (const [ten, tenBang] of Object.entries(bang)) {
+      if (
+        duLieu[ten] &&
+        !(await repo.thamChieuTonTai(tenBang, donViId, duLieu[ten], client))
+      )
+        throw this.loi(`${ten} không tồn tại trong đơn vị`);
     }
-    async yeuCauQuyen(auth, maQuyen, client) {
-        if (!await phanQuyenService.kiemTraQuyen(auth, maQuyen, {}, client)) throw this.loi('Không có quyền quản lý phiên bản sách', 403, 'FORBIDDEN');
+    if (
+      duLieu.thuong_hieu_xuat_ban_id &&
+      !(await repo.thuongHieuThuocNhaXuatBan(
+        donViId,
+        duLieu.thuong_hieu_xuat_ban_id,
+        duLieu.nha_xuat_ban_id,
+        client,
+      ))
+    )
+      throw this.loi("Thương hiệu không thuộc nhà xuất bản đã chọn");
+  }
+  async kiemTraTrung(auth, duLieu, boQuaId = null, client) {
+    const result = await repo.kiemTraTrungDinhDanh(
+      auth.donViId,
+      duLieu,
+      boQuaId,
+      client,
+    );
+    const details = [];
+    if (result.trung_ma)
+      details.push({
+        field: "ma_phien_ban",
+        message: "Mã phiên bản đã tồn tại",
+      });
+    if (result.trung_sku)
+      details.push({
+        field: "ma_sku_noi_bo",
+        message: "SKU nội bộ đã tồn tại",
+      });
+    if (result.trung_isbn_10)
+      details.push({ field: "isbn_10", message: "ISBN-10 đã tồn tại" });
+    if (result.trung_isbn_13)
+      details.push({ field: "isbn_13", message: "ISBN-13 đã tồn tại" });
+    if (result.trung_ten)
+      details.push({
+        field: "ten_phien_ban",
+        message: "Tên phiên bản đã tồn tại trong đơn vị",
+      });
+    return details;
+  }
+  duLieuKiemTraTrung(dauVao, duLieu = {}) {
+    const result = { ...duLieu };
+    for (const field of [
+      "ma_phien_ban",
+      "ma_sku_noi_bo",
+      "isbn_10",
+      "isbn_13",
+      "ten_phien_ban",
+    ]) {
+      if (typeof dauVao[field] !== "string") continue;
+      const value = dauVao[field].trim();
+      if (!value) {
+        result[field] = null;
+        continue;
+      }
+      result[field] =
+        field === "ma_phien_ban"
+          ? value.toUpperCase()
+          : field === "isbn_10" || field === "isbn_13"
+            ? value.replace(/[\s-]/g, "").toUpperCase()
+            : value;
     }
-    async phienBanTonTai(donViId, phienBanId, client, khoa = false) {
-        const phienBan = await repo.layPhienBan(donViId, phienBanId, client, khoa);
-        if (!phienBan) throw this.loi('Không tìm thấy phiên bản sách', 404, 'NOT_FOUND');
-        return phienBan;
+    return result;
+  }
+  loiTruong(details) {
+    const unique = [
+      ...new Map(details.map((item) => [`${item.field}:${item.message}`, item])).values(),
+    ];
+    const duplicate = unique.some((item) => item.message.includes("đã tồn tại"));
+    throw new AppError({
+      code: duplicate ? "BOOK_EDITION_EXISTS" : "INVALID_INPUT",
+      message: unique.map((item) => item.message).join(". "),
+      status: duplicate ? 409 : 422,
+      details: unique,
+    });
+  }
+  kiemTraNghiepVu(duLieu) {
+    if (duLieu.thuong_hieu_xuat_ban_id && !duLieu.nha_xuat_ban_id)
+      throw this.loi("Thương hiệu xuất bản phải có nhà xuất bản");
+    if (
+      duLieu.ngay_ngung_phat_hanh &&
+      duLieu.ngay_phat_hanh &&
+      String(duLieu.ngay_ngung_phat_hanh).slice(0, 10) <
+        String(duLieu.ngay_phat_hanh).slice(0, 10)
+    )
+      throw this.loi("Ngày ngừng phát hành không được trước ngày phát hành");
+    if (
+      duLieu.so_trang != null &&
+      duLieu.so_trang_noi_dung != null &&
+      duLieu.so_trang_noi_dung > duLieu.so_trang
+    )
+      throw this.loi("Số trang nội dung không được lớn hơn tổng số trang");
+    if (
+      duLieu.nam_xuat_ban != null &&
+      duLieu.ngay_xuat_ban &&
+      Number(String(duLieu.ngay_xuat_ban).slice(0, 4)) !== duLieu.nam_xuat_ban
+    )
+      throw this.loi("Năm xuất bản không khớp ngày xuất bản");
+  }
+  xuLyLoiDb(error) {
+    if (error.code === "23505")
+      throw new AppError({
+        code: "BOOK_EDITION_EXISTS",
+        message:
+          error.constraint === "uq_phien_ban_ten"
+            ? "Tên phiên bản đã tồn tại trong đơn vị"
+            : "Mã phiên bản, SKU hoặc ISBN đã tồn tại",
+        status: 409,
+        details: [
+          {
+            field:
+              error.constraint === "uq_phien_ban_ten"
+                ? "ten_phien_ban"
+                : "ma_phien_ban",
+            message:
+              error.constraint === "uq_phien_ban_ten"
+                ? "Tên phiên bản đã tồn tại trong đơn vị"
+                : "Mã phiên bản, SKU hoặc ISBN đã tồn tại",
+          },
+        ],
+      });
+    if (error.code === "23503")
+      throw this.loi(
+        "Phiên bản đang được sử dụng hoặc dữ liệu tham chiếu không hợp lệ",
+        409,
+        "BOOK_EDITION_IN_USE",
+      );
+    if (
+      error.code === "23514" ||
+      error.code === "22003" ||
+      error.code === "22P02"
+    )
+      throw this.loi("Dữ liệu phiên bản vi phạm ràng buộc");
+    throw error;
+  }
+  async danhSach(auth, queryString) {
+    const boLoc = boLocHopLe(queryString);
+    await this.yeuCauQuyen(auth, "books.read");
+    return repo.danhSach(auth.donViId, boLoc);
+  }
+  async danhSachNhaPhatHanh(auth) {
+    await this.yeuCauQuyen(auth, "books.read");
+    return repo.danhSachNhaPhatHanh(auth.donViId);
+  }
+  async chiTiet(auth, phienBanId) {
+    phienBanId = idHopLe(phienBanId, "Phiên bản sách");
+    await this.yeuCauQuyen(auth, "books.read");
+    const phienBan = await repo.layChiTiet(auth.donViId, phienBanId);
+    if (!phienBan)
+      throw this.loi("Không tìm thấy phiên bản sách", 404, "NOT_FOUND");
+    const [nguoiDongGop, ngonNgu, maDinhDanh, tepSach] = await Promise.all([
+      repo.nguoiDongGop(auth.donViId, phienBanId),
+      repo.ngonNgu(auth.donViId, phienBanId),
+      repo.maDinhDanh(auth.donViId, phienBanId),
+      repo.tepSach(auth.donViId, phienBanId),
+    ]);
+    return {
+      ...phienBan,
+      nguoi_dong_gop: nguoiDongGop,
+      ngon_ngu: ngonNgu,
+      ma_dinh_danh: maDinhDanh,
+      tep_sach: tepSach,
+    };
+  }
+  async taoPhienBan(auth, body, requestId) {
+    const kiemTra = body?.kiem_tra === true;
+    const dauVao = { ...(body || {}) };
+    delete dauVao.kiem_tra;
+    let duLieu = {};
+    let loiTruong = [];
+    try {
+      duLieu = phienBanMoiHopLe(dauVao);
+      this.kiemTraNghiepVu(duLieu);
+    } catch (error) {
+      if (!kiemTra) throw error;
+      loiTruong = error.details || [
+        { field: "ten_phien_ban", message: error.message },
+      ];
     }
-    async kiemTraThamChieu(donViId, duLieu, client) {
-        const bang = { dau_sach_id: 'dau_sach', nha_xuat_ban_id: 'nha_xuat_ban', thuong_hieu_xuat_ban_id: 'thuong_hieu_xuat_ban', nha_phat_hanh_id: 'nha_phat_hanh', anh_bia_chinh_id: 'tep_dinh_kem' };
-        for (const [ten, tenBang] of Object.entries(bang)) {
-            if (duLieu[ten] && !await repo.thamChieuTonTai(tenBang, donViId, duLieu[ten], client)) throw this.loi(`${ten} không tồn tại trong đơn vị`);
+    let ketQua;
+    try {
+      ketQua = await trongGiaoDich(async (client) => {
+        await this.yeuCauQuyen(auth, "books.create", client);
+        if (duLieu.dau_sach_id) {
+          try {
+            await this.kiemTraThamChieu(auth.donViId, duLieu, client);
+          } catch (error) {
+            loiTruong.push({
+              field: "dau_sach_id",
+              message: error.message || "Thông tin tham chiếu không hợp lệ",
+            });
+          }
         }
-        if (duLieu.thuong_hieu_xuat_ban_id && !await repo.thuongHieuThuocNhaXuatBan(donViId, duLieu.thuong_hieu_xuat_ban_id, duLieu.nha_xuat_ban_id, client)) throw this.loi('Thương hiệu không thuộc nhà xuất bản đã chọn');
+        loiTruong.push(
+          ...(await this.kiemTraTrung(
+            auth,
+            this.duLieuKiemTraTrung(dauVao, duLieu),
+            null,
+            client,
+          )),
+        );
+        if (loiTruong.length) this.loiTruong(loiTruong);
+        if (kiemTra) return { da_kiem_tra: true };
+        const phienBan = await repo.taoPhienBan(
+          auth.donViId,
+          auth.taiKhoanId,
+          duLieu,
+          client,
+        );
+        await repo.ghiNhatKy(
+          {
+            donViId: auth.donViId,
+            actorId: auth.taiKhoanId,
+            doiTuongId: phienBan.id,
+            hanhDong: "books.edition.create",
+            requestId,
+          },
+          client,
+        );
+        return phienBan;
+      });
+    } catch (error) {
+      this.xuLyLoiDb(error);
     }
-    async kiemTraTrung(auth, duLieu, boQuaId = null, client) {
-        const result = await repo.kiemTraTrungDinhDanh(auth.donViId, duLieu, boQuaId, client);
-        const details = [];
-        if (result.trung_ma) details.push({ field: 'ma_phien_ban', message: 'Mã phiên bản đã tồn tại' });
-        if (result.trung_sku) details.push({ field: 'ma_sku_noi_bo', message: 'SKU nội bộ đã tồn tại' });
-        if (result.trung_isbn_10) details.push({ field: 'isbn_10', message: 'ISBN-10 đã tồn tại' });
-        if (result.trung_isbn_13) details.push({ field: 'isbn_13', message: 'ISBN-13 đã tồn tại' });
-        if (details.length) throw new AppError({ code: 'BOOK_EDITION_EXISTS', message: details.map(item => item.message).join('. '), status: 409, details });
+    return ketQua;
+  }
+  async suaPhienBan(auth, phienBanId, body, requestId) {
+    phienBanId = idHopLe(phienBanId, "Phiên bản sách");
+    const kiemTra = body?.kiem_tra === true;
+    const dauVao = { ...(body || {}) };
+    delete dauVao.kiem_tra;
+    let duLieu = {};
+    let loiTruong = [];
+    try {
+      duLieu = suaPhienBanHopLe(dauVao);
+    } catch (error) {
+      if (!kiemTra) throw error;
+      loiTruong = error.details || [
+        { field: "ten_phien_ban", message: error.message },
+      ];
     }
-    kiemTraNghiepVu(duLieu) {
-        if (duLieu.thuong_hieu_xuat_ban_id && !duLieu.nha_xuat_ban_id) throw this.loi('Thương hiệu xuất bản phải có nhà xuất bản');
-        if (duLieu.ngay_ngung_phat_hanh && duLieu.ngay_phat_hanh && String(duLieu.ngay_ngung_phat_hanh).slice(0, 10) < String(duLieu.ngay_phat_hanh).slice(0, 10)) throw this.loi('Ngày ngừng phát hành không được trước ngày phát hành');
-        if (duLieu.so_trang != null && duLieu.so_trang_noi_dung != null && duLieu.so_trang_noi_dung > duLieu.so_trang) throw this.loi('Số trang nội dung không được lớn hơn tổng số trang');
-        if (duLieu.nam_xuat_ban != null && duLieu.ngay_xuat_ban && Number(String(duLieu.ngay_xuat_ban).slice(0, 4)) !== duLieu.nam_xuat_ban) throw this.loi('Năm xuất bản không khớp ngày xuất bản');
-    }
-    xuLyLoiDb(error) {
-        if (error.code === '23505') throw this.loi('Mã phiên bản, SKU hoặc ISBN đã tồn tại', 409, 'BOOK_EDITION_EXISTS');
-        if (error.code === '23503') throw this.loi('Phiên bản đang được sử dụng hoặc dữ liệu tham chiếu không hợp lệ', 409, 'BOOK_EDITION_IN_USE');
-        if (error.code === '23514' || error.code === '22003' || error.code === '22P02') throw this.loi('Dữ liệu phiên bản vi phạm ràng buộc');
-        throw error;
-    }
-    async danhSach(auth, queryString) {
-        const boLoc = boLocHopLe(queryString);
-        await this.yeuCauQuyen(auth, 'books.read');
-        return repo.danhSach(auth.donViId, boLoc);
-    }
-    async danhSachNhaPhatHanh(auth) {
-        await this.yeuCauQuyen(auth, 'books.read');
-        return repo.danhSachNhaPhatHanh(auth.donViId);
-    }
-    async chiTiet(auth, phienBanId) {
-        phienBanId = idHopLe(phienBanId, 'Phiên bản sách');
-        await this.yeuCauQuyen(auth, 'books.read');
-        const phienBan = await repo.layChiTiet(auth.donViId, phienBanId);
-        if (!phienBan) throw this.loi('Không tìm thấy phiên bản sách', 404, 'NOT_FOUND');
-        const [nguoiDongGop, ngonNgu, maDinhDanh, tepSach] = await Promise.all([
-            repo.nguoiDongGop(auth.donViId, phienBanId),
-            repo.ngonNgu(auth.donViId, phienBanId),
-            repo.maDinhDanh(auth.donViId, phienBanId),
-            repo.tepSach(auth.donViId, phienBanId)
-        ]);
-        return { ...phienBan, nguoi_dong_gop: nguoiDongGop, ngon_ngu: ngonNgu, ma_dinh_danh: maDinhDanh, tep_sach: tepSach };
-    }
-    async taoPhienBan(auth, body, requestId) {
-        const kiemTra = body?.kiem_tra === true;
-        const dauVao = { ...(body || {}) };
-        delete dauVao.kiem_tra;
-        const duLieu = phienBanMoiHopLe(dauVao);
-        this.kiemTraNghiepVu(duLieu);
-        let ketQua;
+    let ketQua;
+    try {
+      ketQua = await trongGiaoDich(async (client) => {
+        await this.yeuCauQuyen(auth, "books.create", client);
+        const hienTai = await this.phienBanTonTai(
+          auth.donViId,
+          phienBanId,
+          client,
+          true,
+        );
+        const moi = { ...hienTai, ...duLieu };
         try {
-            ketQua = await trongGiaoDich(async client => {
-                await this.yeuCauQuyen(auth, 'books.create', client);
-                await this.kiemTraThamChieu(auth.donViId, duLieu, client);
-                await this.kiemTraTrung(auth, duLieu, null, client);
-                if (kiemTra) return { da_kiem_tra: true };
-                const phienBan = await repo.taoPhienBan(auth.donViId, auth.taiKhoanId, duLieu, client);
-                await repo.ghiNhatKy({ donViId: auth.donViId, actorId: auth.taiKhoanId, doiTuongId: phienBan.id, hanhDong: 'books.edition.create', requestId }, client);
-                return phienBan;
-            });
-        } catch (error) { this.xuLyLoiDb(error); }
+          this.kiemTraNghiepVu(moi);
+          await this.kiemTraThamChieu(auth.donViId, moi, client);
+        } catch (error) {
+          if (!kiemTra) throw error;
+          loiTruong.push({
+            field: "ten_phien_ban",
+            message: error.message || "Thông tin phiên bản không hợp lệ",
+          });
+        }
+        loiTruong.push(
+          ...(await this.kiemTraTrung(
+            auth,
+            this.duLieuKiemTraTrung(dauVao, moi),
+            phienBanId,
+            client,
+          )),
+        );
+        if (loiTruong.length) this.loiTruong(loiTruong);
+        if (kiemTra) return { da_kiem_tra: true };
+        const phienBan = await repo.suaPhienBan(
+          auth.donViId,
+          phienBanId,
+          auth.taiKhoanId,
+          duLieu,
+          client,
+        );
+        await repo.ghiNhatKy(
+          {
+            donViId: auth.donViId,
+            actorId: auth.taiKhoanId,
+            doiTuongId: phienBanId,
+            hanhDong: "books.edition.update",
+            requestId,
+          },
+          client,
+        );
+        return phienBan;
+      });
+    } catch (error) {
+      this.xuLyLoiDb(error);
+    }
+    return ketQua;
+  }
+  async doiTrangThai(auth, phienBanId, body, requestId) {
+    phienBanId = idHopLe(phienBanId, "Phiên bản sách");
+    const trangThai = trangThaiHopLe(body);
+    return trongGiaoDich(async (client) => {
+      await this.yeuCauQuyen(auth, "books.create", client);
+      await this.phienBanTonTai(auth.donViId, phienBanId, client, true);
+      const phienBan = await repo.doiTrangThai(
+        auth.donViId,
+        phienBanId,
+        auth.taiKhoanId,
+        trangThai,
+        client,
+      );
+      await repo.ghiNhatKy(
+        {
+          donViId: auth.donViId,
+          actorId: auth.taiKhoanId,
+          doiTuongId: phienBanId,
+          hanhDong: "books.edition.status.update",
+          requestId,
+        },
+        client,
+      );
+      return phienBan;
+    });
+  }
+  async xoaPhienBan(auth, phienBanId, requestId) {
+    phienBanId = idHopLe(phienBanId, "Phiên bản sách");
+    try {
+      return await trongGiaoDich(async (client) => {
+        await this.yeuCauQuyen(auth, "books.create", client);
+        await this.phienBanTonTai(auth.donViId, phienBanId, client, true);
+        const ketQua = await repo.xoaPhienBan(auth.donViId, phienBanId, client);
+        await repo.ghiNhatKy(
+          {
+            donViId: auth.donViId,
+            actorId: auth.taiKhoanId,
+            doiTuongId: phienBanId,
+            hanhDong: "books.edition.delete",
+            requestId,
+          },
+          client,
+        );
         return ketQua;
+      });
+    } catch (error) {
+      this.xuLyLoiDb(error);
     }
-    async suaPhienBan(auth, phienBanId, body, requestId) {
-        phienBanId = idHopLe(phienBanId, 'Phiên bản sách');
-        const kiemTra = body?.kiem_tra === true;
-        const dauVao = { ...(body || {}) };
-        delete dauVao.kiem_tra;
-        const duLieu = suaPhienBanHopLe(dauVao);
-        let ketQua;
-        try {
-            ketQua = await trongGiaoDich(async client => {
-                await this.yeuCauQuyen(auth, 'books.create', client);
-                const hienTai = await this.phienBanTonTai(auth.donViId, phienBanId, client, true);
-                const moi = { ...hienTai, ...duLieu };
-                this.kiemTraNghiepVu(moi);
-                await this.kiemTraThamChieu(auth.donViId, moi, client);
-                await this.kiemTraTrung(auth, moi, phienBanId, client);
-                if (kiemTra) return { da_kiem_tra: true };
-                const phienBan = await repo.suaPhienBan(auth.donViId, phienBanId, auth.taiKhoanId, duLieu, client);
-                await repo.ghiNhatKy({ donViId: auth.donViId, actorId: auth.taiKhoanId, doiTuongId: phienBanId, hanhDong: 'books.edition.update', requestId }, client);
-                return phienBan;
-            });
-        } catch (error) { this.xuLyLoiDb(error); }
-        return ketQua;
-    }
-    async doiTrangThai(auth, phienBanId, body, requestId) {
-        phienBanId = idHopLe(phienBanId, 'Phiên bản sách');
-        const trangThai = trangThaiHopLe(body);
-        return trongGiaoDich(async client => {
-            await this.yeuCauQuyen(auth, 'books.create', client);
-            await this.phienBanTonTai(auth.donViId, phienBanId, client, true);
-            const phienBan = await repo.doiTrangThai(auth.donViId, phienBanId, auth.taiKhoanId, trangThai, client);
-            await repo.ghiNhatKy({ donViId: auth.donViId, actorId: auth.taiKhoanId, doiTuongId: phienBanId, hanhDong: 'books.edition.status.update', requestId }, client);
-            return phienBan;
-        });
-    }
-    async xoaPhienBan(auth, phienBanId, requestId) {
-        phienBanId = idHopLe(phienBanId, 'Phiên bản sách');
-        try {
-            return await trongGiaoDich(async client => {
-                await this.yeuCauQuyen(auth, 'books.create', client);
-                await this.phienBanTonTai(auth.donViId, phienBanId, client, true);
-                const ketQua = await repo.xoaPhienBan(auth.donViId, phienBanId, client);
-                await repo.ghiNhatKy({ donViId: auth.donViId, actorId: auth.taiKhoanId, doiTuongId: phienBanId, hanhDong: 'books.edition.delete', requestId }, client);
-                return ketQua;
-            });
-        } catch (error) { this.xuLyLoiDb(error); }
-    }
+  }
 }
 module.exports = new PhienBanSachService();

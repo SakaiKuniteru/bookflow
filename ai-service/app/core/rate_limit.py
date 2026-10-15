@@ -5,6 +5,7 @@ from fastapi import Request
 from app.core.config import Settings
 from app.core.exceptions import AIRateLimitException
 
+
 class RateLimiter:
     def __init__(self, requests: int, window_seconds: int):
         self.requests = requests
@@ -43,10 +44,8 @@ class RateLimiter:
             for key in keys_can_xoa:
                 del self._records[key]
 
+
 def tao_rate_limiter(settings: Settings) -> RateLimiter | None:
     if not settings.rate_limit_enabled:
         return None
-    return RateLimiter(
-        requests=settings.rate_limit_requests,
-        window_seconds=settings.rate_limit_window_seconds
-    )
+    return RateLimiter(requests=settings.rate_limit_requests, window_seconds=settings.rate_limit_window_seconds)

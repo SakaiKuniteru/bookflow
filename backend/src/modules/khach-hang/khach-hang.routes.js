@@ -1,24 +1,80 @@
-const { Router } = require('express');
-const { authenticate } = require('../../common/middlewares/authenticate.js');
-const { tenantScope } = require('../../common/middlewares/tenant-scope.js');
-const { authorize } = require('../../common/middlewares/authorize.js');
-const controller = require('./khach-hang.controller.js');
+const { Router } = require("express");
+const { authenticate } = require("../../common/middlewares/authenticate.js");
+const { tenantScope } = require("../../common/middlewares/tenant-scope.js");
+const { authorize } = require("../../common/middlewares/authorize.js");
+const controller = require("./khach-hang.controller.js");
 const router = Router();
-router.use(authenticate,tenantScope);
-router.get('/',authorize('customers.read'),controller.xuLy('danhSach'));
-router.post('/kiem-tra-tao-moi',authorize('customers.manage'),controller.xuLy('kiemTraTaoMoi'));
-router.patch('/:khachHangId/kiem-tra',authorize('customers.manage'),controller.xuLy('kiemTraSua'));
-router.post('/:khachHangId/reset-mat-khau',authorize('customers.manage'),controller.xuLy('resetMatKhau'));
-router.post('/',authorize('customers.manage'),controller.xuLy('tao',201));
-router.get('/:khachHangId',authorize('customers.read'),controller.xuLy('chiTiet'));
-router.patch('/:khachHangId',authorize('customers.manage'),controller.xuLy('sua'));
-router.patch('/:khachHangId/trang-thai',authorize('customers.manage'),controller.xuLy('doiTrangThai'));
-router.get('/:khachHangId/giao-dich',authorize('customers.read'),controller.xuLy('lichSuGiaoDich'));
-router.post('/:khachHangId/dia-chi',authorize('customers.manage'),controller.xuLy('taoDiaChi',201));
-router.patch('/:khachHangId/dia-chi/:diaChiId',authorize('customers.manage'),controller.xuLy('suaDiaChi'));
-router.delete('/:khachHangId/dia-chi/:diaChiId',authorize('customers.manage'),controller.xuLy('xoaDiaChi'));
-router.post('/:khachHangId/lien-he',authorize('customers.manage'),controller.xuLy('taoLienHe',201));
-router.patch('/:khachHangId/lien-he/:lienHeId',authorize('customers.manage'),controller.xuLy('suaLienHe'));
-router.delete('/:khachHangId/lien-he/:lienHeId',authorize('customers.manage'),controller.xuLy('xoaLienHe'));
-router.post('/:khachHangId/tuong-tac',authorize('customers.manage'),controller.xuLy('taoTuongTac',201));
+router.use(authenticate, tenantScope);
+router.get("/", authorize("customers.read"), controller.xuLy("danhSach"));
+router.post(
+  "/kiem-tra-tao-moi",
+  authorize("customers.manage"),
+  controller.xuLy("kiemTraTaoMoi"),
+);
+router.patch(
+  "/:khachHangId/kiem-tra",
+  authorize("customers.manage"),
+  controller.xuLy("kiemTraSua"),
+);
+router.post(
+  "/:khachHangId/reset-mat-khau",
+  authorize("customers.manage"),
+  controller.xuLy("resetMatKhau"),
+);
+router.post("/", authorize("customers.manage"), controller.xuLy("tao", 201));
+router.get(
+  "/:khachHangId",
+  authorize("customers.read"),
+  controller.xuLy("chiTiet"),
+);
+router.patch(
+  "/:khachHangId",
+  authorize("customers.manage"),
+  controller.xuLy("sua"),
+);
+router.patch(
+  "/:khachHangId/trang-thai",
+  authorize("customers.manage"),
+  controller.xuLy("doiTrangThai"),
+);
+router.get(
+  "/:khachHangId/giao-dich",
+  authorize("customers.read"),
+  controller.xuLy("lichSuGiaoDich"),
+);
+router.post(
+  "/:khachHangId/dia-chi",
+  authorize("customers.manage"),
+  controller.xuLy("taoDiaChi", 201),
+);
+router.patch(
+  "/:khachHangId/dia-chi/:diaChiId",
+  authorize("customers.manage"),
+  controller.xuLy("suaDiaChi"),
+);
+router.delete(
+  "/:khachHangId/dia-chi/:diaChiId",
+  authorize("customers.manage"),
+  controller.xuLy("xoaDiaChi"),
+);
+router.post(
+  "/:khachHangId/lien-he",
+  authorize("customers.manage"),
+  controller.xuLy("taoLienHe", 201),
+);
+router.patch(
+  "/:khachHangId/lien-he/:lienHeId",
+  authorize("customers.manage"),
+  controller.xuLy("suaLienHe"),
+);
+router.delete(
+  "/:khachHangId/lien-he/:lienHeId",
+  authorize("customers.manage"),
+  controller.xuLy("xoaLienHe"),
+);
+router.post(
+  "/:khachHangId/tuong-tac",
+  authorize("customers.manage"),
+  controller.xuLy("taoTuongTac", 201),
+);
 module.exports = router;

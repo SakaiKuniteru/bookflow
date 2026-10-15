@@ -3,7 +3,10 @@ from fastapi import APIRouter, Depends
 from app.core.dependencies import get_internal_request_context
 from app.schemas.tro_ly import TroLyRequest
 from app.services.assistant import tro_chuyen
+
 router = APIRouter()
+
+
 @router.post("")
 async def tro_ly(
     body: TroLyRequest,

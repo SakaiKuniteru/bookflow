@@ -4,6 +4,7 @@ from app.core.config import Settings
 from app.core.exceptions import AIProviderException
 from app.providers.base import LLMMessage, LLMProvider, LLMResponse
 
+
 class OpenAICompatibleLLMProvider(LLMProvider):
     def __init__(self, settings: Settings):
         self.settings = settings
@@ -16,9 +17,7 @@ class OpenAICompatibleLLMProvider(LLMProvider):
         if self.settings.llm_api_key:
             headers["Authorization"] = f"Bearer {self.settings.llm_api_key}"
         self.client = httpx.AsyncClient(
-            base_url=self.settings.llm_base_url.rstrip("/"),
-            headers=headers,
-            timeout=self.settings.llm_timeout
+            base_url=self.settings.llm_base_url.rstrip("/"), headers=headers, timeout=self.settings.llm_timeout
         )
 
     async def dong(self) -> None:
@@ -76,6 +75,7 @@ class OpenAICompatibleLLMProvider(LLMProvider):
             tool_calls=message.get("tool_calls") or [],
             raw=data,
         )
+
     async def kiem_tra_ket_noi(self) -> bool:
         if not self.client or not self.settings.llm_model:
             return False
@@ -92,12 +92,16 @@ class OpenAICompatibleLLMProvider(LLMProvider):
         except ValueError:
             return response.text
 
+
 llm_provider: OpenAICompatibleLLMProvider | None = None
+
 
 def tao_llm_provider(settings: Settings) -> OpenAICompatibleLLMProvider:
     global llm_provider
     if llm_provider is None:
         llm_provider = OpenAICompatibleLLMProvider(settings)
     return llm_provider
+
+
 def get_llm_provider() -> LLMProvider:
     return llm_provider

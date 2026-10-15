@@ -3,6 +3,7 @@
         id="{{id}}"
         name="{{name}}"
         type="checkbox"
+        {{#if activeToggle}}data-catalog-active-toggle="true"{{/if}}
         value="{{#if value}}{{value}}{{else}}1{{/if}}"
         {{#if checked}}checked{{/if}}
         {{#if required}}required{{/if}}

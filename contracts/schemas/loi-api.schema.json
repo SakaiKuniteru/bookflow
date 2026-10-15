@@ -2,11 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "BookFlow API Error",
   "type": "object",
-  "required": [
-    "success",
-    "requestId",
-    "error"
-  ],
+  "required": ["success", "requestId", "error"],
   "properties": {
     "success": {
       "const": false
@@ -17,11 +13,7 @@
     },
     "error": {
       "type": "object",
-      "required": [
-        "code",
-        "message",
-        "details"
-      ],
+      "required": ["code", "message", "details"],
       "properties": {
         "code": {
           "type": "string",
@@ -35,10 +27,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": [
-              "field",
-              "reason"
-            ],
+            "required": ["field", "reason"],
             "properties": {
               "field": {
                 "type": "string"

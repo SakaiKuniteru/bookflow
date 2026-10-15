@@ -1,5 +1,5 @@
 (() => {
-  const key = 'bookflow.pendingLoginCredentials';
+  const key = "bookflow.pendingLoginCredentials";
   const lifetime = 60 * 60 * 1000;
   let storage;
   try {
@@ -20,19 +20,23 @@
       return null;
     }
   };
-  const page = document.body?.dataset?.authPage || '';
+  const page = document.body?.dataset?.authPage || "";
   const loginForm = document.querySelector('form[action="/auth/dang-nhap"]');
-  const isWorkspace = /^\/(customer|staff|admin|super-admin)(\/|$)/.test(window.location.pathname);
+  const isWorkspace = /^\/(customer|staff|admin|super-admin)(\/|$)/.test(
+    window.location.pathname,
+  );
   if (isWorkspace) {
     clearDraft();
     return;
   }
   if (!loginForm) {
-    if (page !== 'thiet-lap-phien') clearDraft();
+    if (page !== "thiet-lap-phien") clearDraft();
     return;
   }
-  if (document.body.dataset.loginFailed === 'true') clearDraft();
-  else if (new URLSearchParams(window.location.search).get('doiGiaoDien') === '1') {
+  if (document.body.dataset.loginFailed === "true") clearDraft();
+  else if (
+    new URLSearchParams(window.location.search).get("doiGiaoDien") === "1"
+  ) {
     const draft = readDraft();
     if (draft && Date.now() - draft.createdAt < lifetime) {
       const email = loginForm.querySelector('[name="email"]');
@@ -42,12 +46,15 @@
     }
     clearDraft();
   } else clearDraft();
-  loginForm.addEventListener('submit', () => {
-    const email = loginForm.querySelector('[name="email"]')?.value || '';
-    const password = loginForm.querySelector('[name="password"]')?.value || '';
+  loginForm.addEventListener("submit", () => {
+    const email = loginForm.querySelector('[name="email"]')?.value || "";
+    const password = loginForm.querySelector('[name="password"]')?.value || "";
     if (email && password) {
       try {
-        storage.setItem(key, JSON.stringify({ email, password, createdAt: Date.now() }));
+        storage.setItem(
+          key,
+          JSON.stringify({ email, password, createdAt: Date.now() }),
+        );
       } catch {}
     }
   });

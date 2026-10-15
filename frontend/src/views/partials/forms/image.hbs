@@ -5,6 +5,7 @@
     <div
         class="bf-image-upload"
         data-bf-image
+        data-name="{{name}}"
         data-width="{{#if width}}{{width}}{{else}}160{{/if}}"
         data-height="{{#if height}}{{height}}{{else}}160{{/if}}"
         data-multiple="{{multiple}}"
@@ -42,6 +43,7 @@
                 </div>
             {{/if}}
         </div>
+        <div class="bf-image-removed"></div>
     </div>
     <div class="bf-form-error bf-image-error" data-bf-image-error role="alert" hidden></div>
 </div>

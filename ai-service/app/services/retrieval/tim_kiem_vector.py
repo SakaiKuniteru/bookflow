@@ -31,13 +31,27 @@ def _lay_danh_sach(data: Any) -> list[dict[str, Any]]:
 
 
 class TimKiemVectorService:
-    def __init__(self, repository=None, source_repository=None, access_service: LocQuyenTruyCapService | None = None, similarity_threshold: float | None = None):
+    def __init__(
+        self,
+        repository=None,
+        source_repository=None,
+        access_service: LocQuyenTruyCapService | None = None,
+        similarity_threshold: float | None = None,
+    ):
         self.repository = repository or doan_du_lieu_repository
         self.source_repository = source_repository or nguon_du_lieu_repository
         self.access_service = access_service or loc_quyen_truy_cap_service
         self.similarity_threshold = similarity_threshold
 
-    async def tim_kiem(self, query: str, user_context: dict[str, Any] | None = None, filters: dict[str, Any] | None = None, limit: int = 10, offset: int = 0, similarity_threshold: float | None = None) -> dict[str, Any]:
+    async def tim_kiem(
+        self,
+        query: str,
+        user_context: dict[str, Any] | None = None,
+        filters: dict[str, Any] | None = None,
+        limit: int = 10,
+        offset: int = 0,
+        similarity_threshold: float | None = None,
+    ) -> dict[str, Any]:
         query = str(query or "").strip()
         if not query:
             raise AIValidationException("Query tìm kiếm không được để trống")
@@ -56,7 +70,7 @@ class TimKiemVectorService:
             filters=filters or {},
             limit=limit,
             offset=offset,
-            nguong_similarity=threshold
+            nguong_similarity=threshold,
         )
         candidates = _lay_danh_sach(raw_results)
         candidates = self._chuan_hoa_ket_qua(candidates)
@@ -72,8 +86,8 @@ class TimKiemVectorService:
                 "limit": limit,
                 "offset": offset,
                 "similarity_threshold": threshold,
-                "access_scope": list(bo_loc.allowed_scopes)
-            }
+                "access_scope": list(bo_loc.allowed_scopes),
+            },
         }
 
     async def _tao_embedding(self, query: str) -> list[float]:
@@ -110,7 +124,7 @@ class TimKiemVectorService:
                 "semantic_score": score,
                 "version": item.get("version", item.get("source_version")),
                 "metadata": metadata,
-                "citation": None
+                "citation": None,
             }
             for key in ("access_scope", "don_vi_id", "chi_nhanh_id", "owner_id"):
                 if item.get(key) is not None:
@@ -119,7 +133,9 @@ class TimKiemVectorService:
             ket_qua.append(result)
         return ket_qua
 
-    async def _loc_source_khong_hop_le(self, results: list[dict[str, Any]], bo_loc: BoLocTruyCap) -> list[dict[str, Any]]:
+    async def _loc_source_khong_hop_le(
+        self, results: list[dict[str, Any]], bo_loc: BoLocTruyCap
+    ) -> list[dict[str, Any]]:
         source_ids = []
         for result in results:
             source_id = result.get("source_id")

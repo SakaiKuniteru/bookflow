@@ -3,8 +3,12 @@ from uuid import uuid4
 from fastapi import Depends, Header, Request
 from app.core.config import Settings, get_settings
 from app.core.security import xac_thuc_internal
+
+
 def lay_settings() -> Settings:
     return get_settings()
+
+
 def get_internal_request_context(
     request: Request,
     x_request_id: str | None = Header(default=None, alias="X-Request-Id"),
@@ -18,6 +22,8 @@ def get_internal_request_context(
         "trace_id": trace_id,
         "internal_authenticated": True,
     }
+
+
 __all__ = [
     "lay_settings",
     "xac_thuc_internal",

@@ -16,6 +16,7 @@ from app.providers.embeddings import tao_embedding_provider
 from app.providers.llm import tao_llm_provider
 from app.queue.connection import tao_queue_connection
 from app.queue.dispatcher import QueueDispatcher
+
 settings = get_settings()
 kiem_tra_cau_hinh(settings)
 cau_hinh_logging(settings.app_log_level)
@@ -36,6 +37,8 @@ from app.api.internal.tim_kiem import router as tim_kiem_router
 from app.api.internal.goi_y import router as goi_y_router
 from app.api.internal.tro_ly import router as tro_ly_router
 from app.api.internal.phan_hoi import router as phan_hoi_router
+
+
 def _tao_health_checks() -> dict[str, object]:
     return {
         "postgres": postgres.kiem_tra_ket_noi,
@@ -46,6 +49,8 @@ def _tao_health_checks() -> dict[str, object]:
         "embedding": embedding.kiem_tra_ket_noi,
         "queue": queue.ping,
     }
+
+
 @asynccontextmanager
 async def lifespan(application: FastAPI):
     initialized: list[object] = []
@@ -91,6 +96,8 @@ async def lifespan(application: FastAPI):
             except Exception:
                 logger.exception("Không thể đóng dependency: %s", type(dependency).__name__)
         logger.info("AI Service shutdown completed")
+
+
 app = FastAPI(
     title=settings.app_name,
     version="0.1.0",
@@ -98,6 +105,8 @@ app = FastAPI(
     lifespan=lifespan,
 )
 dang_ky_exception_handlers(app)
+
+
 @app.middleware("http")
 async def middleware_request(request: Request, call_next):
     request_id = str(request.headers.get("X-Request-Id") or uuid4())
@@ -117,11 +126,20 @@ async def middleware_request(request: Request, call_next):
         try:
             rate_limiter.kiem_tra(request)
         except Exception as error:
-            return JSONResponse(status_code=429, content={"success": False, "request_id": request_id, "error": {"code": "RATE_LIMIT", "message": str(error)}})
+            return JSONResponse(
+                status_code=429,
+                content={
+                    "success": False,
+                    "request_id": request_id,
+                    "error": {"code": "RATE_LIMIT", "message": str(error)},
+                },
+            )
     response = await call_next(request)
     response.headers["X-Request-Id"] = request_id
     response.headers["X-Trace-Id"] = trace_id
     return response
+
+
 @app.get("/")
 async def root():
     return {
@@ -133,6 +151,8 @@ async def root():
             "status": "running",
         },
     }
+
+
 @app.get("/health")
 async def health():
     return {
@@ -144,6 +164,8 @@ async def health():
             "worker_enabled": settings.worker_enabled,
         },
     }
+
+
 app.include_router(health_router)
 app.include_router(cong_viec_router)
 app.include_router(nguon_du_lieu_router)

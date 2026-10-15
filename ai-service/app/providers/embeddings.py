@@ -24,8 +24,9 @@ class OpenAICompatibleEmbeddingProvider(EmbeddingProvider):
         self.client = httpx.AsyncClient(
             base_url=self.settings.embedding_base_url.rstrip("/"),
             headers=headers,
-            timeout=self.settings.embedding_timeout
+            timeout=self.settings.embedding_timeout,
         )
+
     async def kiem_tra_ket_noi(self) -> bool:
         if not self.san_sang():
             return False
@@ -34,6 +35,7 @@ class OpenAICompatibleEmbeddingProvider(EmbeddingProvider):
             return True
         except AIProviderException:
             return False
+
     async def dong(self) -> None:
         if self.client:
             await self.client.aclose()
@@ -59,17 +61,14 @@ class OpenAICompatibleEmbeddingProvider(EmbeddingProvider):
                     {
                         "model": model_path,
                         "content": {"parts": [{"text": text}]},
-                        "embedContentConfig": {"outputDimensionality": self.settings.embedding_dimension}
+                        "embedContentConfig": {"outputDimensionality": self.settings.embedding_dimension},
                     }
                     for text in texts
                 ]
             }
         else:
             url = f"{self.settings.embedding_base_url.rstrip('/')}/embeddings"
-            payload = {
-                "model": self.settings.embedding_model,
-                "input": texts
-            }
+            payload = {"model": self.settings.embedding_model, "input": texts}
         try:
             response = await self.client.post(url, json=payload)
             response.raise_for_status()
@@ -100,12 +99,15 @@ class OpenAICompatibleEmbeddingProvider(EmbeddingProvider):
             raise AIProviderException("Embedding Provider trả về vector không hợp lệ")
         dimensions = {len(vector) for vector in vectors}
         if dimensions != {self.settings.embedding_dimension}:
-            raise AIProviderException("Dimension embedding không khớp cấu hình và PostgreSQL", details={"expected": self.settings.embedding_dimension, "received": sorted(dimensions)})
+            raise AIProviderException(
+                "Dimension embedding không khớp cấu hình và PostgreSQL",
+                details={"expected": self.settings.embedding_dimension, "received": sorted(dimensions)},
+            )
         return EmbeddingResponse(
             vectors=vectors,
             model=data.get("model") or self.settings.embedding_model,
             usage=data.get("usage") or data.get("usageMetadata"),
-            raw=data
+            raw=data,
         )
 
     async def health_check(self) -> bool:
@@ -124,12 +126,16 @@ class OpenAICompatibleEmbeddingProvider(EmbeddingProvider):
         except ValueError:
             return response.text
 
+
 embedding_provider: OpenAICompatibleEmbeddingProvider | None = None
+
 
 def tao_embedding_provider(settings: Settings) -> OpenAICompatibleEmbeddingProvider:
     global embedding_provider
     if embedding_provider is None:
         embedding_provider = OpenAICompatibleEmbeddingProvider(settings)
     return embedding_provider
+
+
 def get_embedding_provider() -> EmbeddingProvider:
     return embedding_provider

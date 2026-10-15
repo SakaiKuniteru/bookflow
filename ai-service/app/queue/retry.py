@@ -4,6 +4,7 @@ from typing import Awaitable, Callable, TypeVar
 
 T = TypeVar("T")
 
+
 @dataclass(slots=True)
 class RetryPolicy:
     max_attempts: int = 3
@@ -15,10 +16,11 @@ class RetryPolicy:
         delay = self.initial_delay * (self.multiplier ** max(0, attempt - 1))
         return min(delay, self.max_delay)
 
+
 async def chay_retry(
     operation: Callable[[], Awaitable[T]],
     policy: RetryPolicy | None = None,
-    on_error: Callable[[Exception, int], Awaitable[None]] | None = None
+    on_error: Callable[[Exception, int], Awaitable[None]] | None = None,
 ) -> T:
     retry_policy = policy or RetryPolicy()
     last_error: Exception | None = None

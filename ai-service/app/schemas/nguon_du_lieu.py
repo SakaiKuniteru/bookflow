@@ -4,6 +4,7 @@ from typing import Any
 from pydantic import Field
 from app.schemas.dung_chung import Metadata, SchemaCoSo
 
+
 class LoaiNguonDuLieu(str, Enum):
     BOOK = "BOOK"
     DOCUMENT = "DOCUMENT"
@@ -13,6 +14,7 @@ class LoaiNguonDuLieu(str, Enum):
     INTERNAL_DOCUMENT = "INTERNAL_DOCUMENT"
     OTHER = "OTHER"
 
+
 class PhamViTruyCap(str, Enum):
     PUBLIC = "PUBLIC"
     TENANT = "TENANT"
@@ -21,12 +23,14 @@ class PhamViTruyCap(str, Enum):
     USER = "USER"
     PRIVATE = "PRIVATE"
 
+
 class TrangThaiChiMuc(str, Enum):
     CHUA_INDEX = "CHUA_INDEX"
     DANG_INDEX = "DANG_INDEX"
     DA_INDEX = "DA_INDEX"
     LOI = "LOI"
     XOA = "XOA"
+
 
 class QuyenTruyCapNguon(SchemaCoSo):
     visibility: PhamViTruyCap = PhamViTruyCap.TENANT
@@ -35,6 +39,7 @@ class QuyenTruyCapNguon(SchemaCoSo):
     role_names: list[str] = Field(default_factory=list)
     user_ids: list[int] = Field(default_factory=list)
     permission_codes: list[str] = Field(default_factory=list)
+
 
 class NguonDuLieuTao(SchemaCoSo):
     source_type: LoaiNguonDuLieu
@@ -47,12 +52,14 @@ class NguonDuLieuTao(SchemaCoSo):
     version: int = Field(default=1, ge=1)
     checksum: str | None = Field(default=None, max_length=128)
 
+
 class NguonDuLieuCapNhatChiMuc(SchemaCoSo):
     index_status: TrangThaiChiMuc
     indexed_at: datetime | None = None
     index_version: int | None = Field(default=None, ge=1)
     chunk_count: int = Field(default=0, ge=0)
     error: str | None = Field(default=None, max_length=2000)
+
 
 class NguonDuLieu(SchemaCoSo):
     source_id: str = Field(min_length=1, max_length=200)
@@ -71,5 +78,6 @@ class NguonDuLieu(SchemaCoSo):
     indexed_at: datetime | None = None
     created_at: datetime | None = None
     updated_at: datetime | None = None
+
 
 NguonDuLieuTaoRequest = NguonDuLieuTao

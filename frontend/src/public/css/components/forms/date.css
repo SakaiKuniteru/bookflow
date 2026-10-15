@@ -1,451 +1,462 @@
 .bf-date-control {
-    position: relative;
-    display: flex;
-    align-items: center;
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .bf-date-control .bf-date-input {
-    padding-right: 44px;
+  padding-right: 44px;
 }
 
 .bf-date-control.has-leading-icon .bf-input-leading-icon {
-    position: absolute;
-    z-index: 1;
-    top: 50%;
-    left: 14px;
-    display: flex;
-    align-items: center;
-    color: var(--bf-form-text);
-    pointer-events: none;
-    transform: translateY(-50%);
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 14px;
+  display: flex;
+  align-items: center;
+  color: var(--bf-form-text);
+  pointer-events: none;
+  transform: translateY(-50%);
 }
 
 .bf-date-control.has-leading-icon .bf-date-input {
-    padding-left: 42px;
+  padding-left: 42px;
 }
 
 .bf-date-picker-toggle {
-    position: absolute;
-    top: 50%;
-    right: 10px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    padding: 3px;
-    border: 0;
-    background: transparent;
-    color: #718096;
-    cursor: pointer;
-    transform: translateY(-50%);
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 3px;
+  border: 0;
+  background: transparent;
+  color: #718096;
+  cursor: pointer;
+  transform: translateY(-50%);
 }
 
 .bf-date-picker-toggle svg {
-    width: 22px;
-    height: 22px;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.8;
-    stroke-linecap: round;
-    stroke-linejoin: round;
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .bf-date-picker-toggle:hover {
-    color: var(--bf-form-primary);
+  color: var(--bf-form-primary);
 }
 
 .bf-date-picker-toggle:disabled {
-    cursor: not-allowed;
-    opacity: .5;
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .bf-date-picker {
-    position: absolute;
-    z-index: 1100;
-    top: calc(100% + 6px);
-    left: 0;
-    display: none;
-    width: max-content;
-    min-width: 320px;
-    max-width: min(720px, calc(100vw - 24px));
-    overflow: hidden;
-    border: 1px solid #e5e7eb;
-    border-radius: 4px;
-    background: #fff;
-    box-shadow: 0 8px 24px rgba(15, 23, 42, .18);
-    color: #292929;
-    font-family: inherit;
+  position: absolute;
+  z-index: 1100;
+  top: calc(100% + 6px);
+  left: 0;
+  display: none;
+  width: max-content;
+  min-width: 320px;
+  max-width: min(720px, calc(100vw - 24px));
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+  color: #292929;
+  font-family: inherit;
 }
 
 .bf-date-picker.is-open {
-    display: flex;
+  display: flex;
 }
 
 .bf-date-calendar {
-    width: 320px;
-    flex: 0 0 320px;
+  width: 320px;
+  flex: 0 0 320px;
 }
 
 .bf-date-header {
-    display: grid;
-    grid-template-columns: 42px 1fr 42px;
-    align-items: center;
-    height: 52px;
-    border-bottom: 1px solid #eee;
+  display: grid;
+  grid-template-columns: 42px 1fr 42px;
+  align-items: center;
+  height: 38px;
+  border-bottom: 1px solid #eee;
 }
 
 .bf-date-header button {
-    height: 100%;
-    border: 0;
-    background: transparent;
-    color: #b8b8b8;
-    font: inherit;
-    font-size: 24px;
-    cursor: pointer;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  color: #b8b8b8;
+  font: inherit;
+  font-size: 10px;
+  cursor: pointer;
 }
 
 .bf-date-header button:hover {
-    color: #4388f5;
+  color: #4388f5;
 }
 
 .bf-date-header .bf-date-title {
-    color: #292929;
-    font-size: 17px;
-    font-weight: 700;
+  color: #292929;
+  font-size: 10px;
+  font-weight: 700;
 }
 
 .bf-date-calendar-content {
-    min-height: 300px;
-    padding: 12px;
+  height: 190px;
+  min-height: 190px;
+  box-sizing: border-box;
+  padding: 4px 6px;
 }
 
 .bf-date-weekdays,
 .bf-date-days {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    align-items: center;
-    justify-items: center;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  align-items: center;
+  justify-items: center;
 }
 
 .bf-date-weekdays {
-    height: 38px;
-    font-size: 14px;
-    font-weight: 700;
+  height: 38px;
+  font-size: 10px;
+  font-weight: 700;
 }
 
 .bf-date-days {
-    grid-auto-rows: 48px;
+  grid-auto-rows: 24px;
 }
 
 .bf-date-day,
 .bf-date-option,
 .bf-date-time-option {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 36px;
-    min-height: 36px;
-    padding: 0 6px;
-    border: 0;
-    border-radius: 3px;
-    background: transparent;
-    color: #292929;
-    font: inherit;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: #292929;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .bf-date-day:hover,
 .bf-date-option:hover,
 .bf-date-time-option:hover {
-    background: #eef4ff;
+  background: #eef4ff;
 }
 
 .bf-date-day:disabled {
-    color: #c7cbd1;
-    cursor: not-allowed;
+  color: #c7cbd1;
+  cursor: not-allowed;
 }
 
 .bf-date-day:disabled:hover {
-    background: transparent;
+  background: transparent;
 }
 
 .bf-date-day.is-outside {
-    color: #bdbdbd;
+  color: #bdbdbd;
 }
 
 .bf-date-day.is-selected,
 .bf-date-option.is-selected,
 .bf-date-time-option.is-selected {
-    background: #4388f5;
-    color: #fff;
+  background: #4388f5;
+  color: #fff;
 }
 
 .bf-date-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-auto-rows: 72px;
-    align-items: center;
-    justify-items: center;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: 72px;
+  align-items: center;
+  justify-items: center;
 }
 
 .bf-date-grid .bf-date-option {
-    min-width: 82px;
-    font-size: 16px;
+  min-width: 82px;
+  font-size: 10px;
 }
 
 .bf-date-month-grid {
-    grid-auto-rows: 72px;
+  grid-auto-rows: 72px;
 }
 
 .bf-date-time {
-    display: flex;
-    width: 270px;
-    min-width: 0;
-    flex: 1 1 270px;
-    flex-direction: column;
-    border-left: 1px solid #eee;
+  display: flex;
+  width: 270px;
+  min-width: 0;
+  flex: 1 1 270px;
+  flex-direction: column;
+  border-left: 1px solid #eee;
 }
 
 .bf-date-time-title {
-    display: flex;
-    align-items: center;
-    min-height: 52px;
-    padding: 0 16px;
-    border-bottom: 1px solid #eee;
-    font-size: 15px;
-    font-weight: 600;
-    white-space: nowrap;
+  display: flex;
+  align-items: center;
+  min-height: 52px;
+  padding: 0 16px;
+  border-bottom: 1px solid #eee;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .bf-date-time-columns {
-    display: flex;
-    min-height: 0;
-    height: 338px;
+  height: 190px;
+  min-height: 190px;
+  box-sizing: border-box;
 }
 
 .bf-date-time-column {
-    flex: 1;
-    overflow-y: auto;
-    border-right: 1px solid #eee;
-    scrollbar-width: thin;
-    scrollbar-color: #cbd5e1 transparent;
+  flex: 1;
+  overflow-y: auto;
+  border-right: 1px solid #eee;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
 }
 
 .bf-date-time-column:last-child {
-    border-right: 0;
+  border-right: 0;
 }
 
 .bf-date-time-option {
-    display: flex;
-    width: 100%;
-    min-height: 38px;
-    border-radius: 0;
-    font-size: 15px;
-    font-weight: 400;
+  display: flex;
+  width: 100%;
+  min-height: 38px;
+  border-radius: 0;
+  font-size: 10px;
+  font-weight: 400;
 }
 
 .bf-date-time-only {
-    width: 270px;
-    flex: 1 1 270px;
-    border-left: 0;
+  width: 270px;
+  flex: 1 1 270px;
+  border-left: 0;
 }
 
 .bf-date-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-height: 54px;
-    padding: 0 12px;
-    border-top: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 38px;
+  min-height: 38px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  border-top: 1px solid #eee;
 }
 
 .bf-date-now,
 .bf-date-ok {
-    min-height: 36px;
-    padding: 5px 10px;
-    border: 0;
-    border-radius: 3px;
-    font: inherit;
-    font-size: 15px;
-    cursor: pointer;
+  min-height: 36px;
+  padding: 5px 10px;
+  border: 0;
+  border-radius: 3px;
+  font: inherit;
+  font-size: 10px;
+  cursor: pointer;
 }
 
 .bf-date-now {
-    background: transparent;
-    color: #4388f5;
+  background: transparent;
+  color: #4388f5;
 }
 
 .bf-date-now:hover {
-    background: #eef4ff;
+  background: #eef4ff;
 }
 
 .bf-date-ok {
-    background: #4388f5;
-    color: #fff;
+  background: #4388f5;
+  color: #fff;
 }
 
 .bf-date-ok:hover {
-    background: #2874e8;
+  background: #2874e8;
 }
 
 .bf-date-picker {
-    width: max-content;
-    min-width: 0;
-    flex-direction: column;
+  width: max-content;
+  min-width: 0;
+  flex-direction: column;
 }
 
 .bf-date-picker-main {
-    display: flex;
-    align-items: stretch;
+  display: flex;
+  align-items: stretch;
 }
 
 .bf-date-calendar {
-    width: 280px;
-    flex: 0 0 280px;
+  width: 200px;
+  flex: 0 0 200px;
 }
 
 .bf-date-header {
-    grid-template-columns: 30px 30px minmax(0, 1fr) 30px 30px;
-    height: 44px;
+  grid-template-columns: 30px 30px minmax(0, 1fr) 30px 30px;
+  height: 38px;
 }
 
 .bf-date-header button {
-    font-size: 18px;
+  font-size: 14px;
+}
+
+.bf-date-header button:nth-of-type(2),
+.bf-date-header button:nth-of-type(4) {
+  font-size: 22px;
 }
 
 .bf-date-header .bf-date-title {
-    font-size: 15px;
+  font-size: 10px;
 }
 
 .bf-date-calendar-content {
-    min-height: 0;
-    padding: 8px;
+  min-height: 0;
+  padding: 4px 6px;
 }
 
 .bf-date-weekdays {
-    height: 30px;
+  height: 24px;
 }
 
 .bf-date-days {
-    grid-auto-rows: 38px;
+  grid-auto-rows: 24px;
 }
 
 .bf-date-day,
 .bf-date-option,
 .bf-date-time-option {
-    min-width: 32px;
-    min-height: 32px;
-    font-size: 14px;
+  min-width: 32px;
+  min-height: 32px;
+  font-size: 10px;
 }
 
 .bf-date-grid {
-    grid-auto-rows: 52px;
+  grid-auto-rows: 52px;
 }
 
 .bf-date-grid.bf-date-year-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    grid-template-rows: repeat(4, minmax(0, 1fr));
-    min-height: 258px;
-    grid-auto-rows: auto;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+  min-height: 160px;
+  grid-auto-rows: auto;
 }
 
 .bf-date-year-grid .bf-date-option {
-    width: 100%;
-    min-width: 0;
+  width: 100%;
+  min-width: 0;
 }
 
 .bf-date-option.is-outside {
-    color: #bdbdbd;
+  color: #bdbdbd;
 }
 
 .bf-date-footer {
-    align-self: stretch;
-    justify-content: flex-end;
-    gap: 8px;
-    min-height: 46px;
+  align-self: stretch;
+  justify-content: flex-end;
+  gap: 8px;
+  min-height: 38px;
 }
 
 .bf-date-time {
-    width: 150px;
-    flex: 0 0 150px;
+  width: 150px;
+  flex: 0 0 150px;
 }
 
 .bf-date-time-only {
-    width: 150px;
-    flex: 0 0 150px;
+  width: 150px;
+  flex: 0 0 150px;
 }
 
 .bf-date-time-title {
-    min-height: 44px;
-    color: #71817b;
-    font-size: 12px;
-    font-weight: 500;
+  min-height: 44px;
+  color: #71817b;
+  font-size: 10px;
+  font-weight: 500;
 }
 
 .bf-date-time-columns {
-    height: 258px;
+  height: 190px;
 }
 
 .bf-date-time-option {
-    min-height: 32px;
-    font-size: 14px;
+  min-height: 32px;
+  font-size: 10px;
 }
 
 .bf-date-month-grid,
 .bf-date-year-grid,
 .bf-date-decade-grid {
-    min-height: 258px;
-    grid-template-rows: repeat(4, minmax(0, 1fr));
-    grid-auto-rows: auto;
+  height: 190px;
+  min-height: 190px;
+  box-sizing: border-box;
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+  grid-auto-rows: auto;
 }
 
 .bf-date-year-grid,
 .bf-date-decade-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .bf-date-month-grid .bf-date-option,
 .bf-date-year-grid .bf-date-option,
 .bf-date-decade-grid .bf-date-option {
-    width: 100%;
-    min-width: 0;
+  width: 100%;
+  min-width: 0;
 }
 
 .bf-date-option.is-outside {
-    color: #bdbdbd;
+  color: #bdbdbd;
 }
 
 @media (max-width: 600px) {
-    .bf-date-picker.is-open {
-        width: min(100vw - 24px, 360px);
-        flex-direction: column;
-    }
-    .bf-date-calendar {
-        width: 100%;
-        flex-basis: auto;
-    }
-    .bf-date-time {
-        width: 100%;
-        flex-basis: auto;
-        border-top: 1px solid #eee;
-        border-left: 0;
-    }
-    .bf-date-time-columns {
-        height: 180px;
-    }
+  .bf-date-picker.is-open {
+    width: min(calc(100vw - 24px), 360px);
+    flex-direction: column;
+  }
+  .bf-date-calendar {
+    width: 100%;
+    flex-basis: auto;
+  }
+  .bf-date-time {
+    width: 100%;
+    flex-basis: auto;
+    border-top: 1px solid #eee;
+    border-left: 0;
+  }
+  .bf-date-time-columns {
+    height: 180px;
+  }
 
-    .bf-date-picker-main {
-        flex-direction: column;
-    }
-    .bf-date-calendar {
-        width: 100%;
-        flex-basis: auto;
-    }
+  .bf-date-picker-main {
+    flex-direction: column;
+  }
+  .bf-date-calendar {
+    width: 100%;
+    flex-basis: auto;
+  }
 
-    .bf-date-time-columns {
-        height: min(258px, 40vh);
-    }
+  .bf-date-time-columns {
+    height: min(258px, 40vh);
+  }
 }

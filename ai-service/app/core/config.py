@@ -54,6 +54,8 @@ class Settings(BaseSettings):
     worker_poll_timeout: int = Field(default=5, ge=1)
     worker_heartbeat_interval: int = Field(default=15, ge=1)
     queue_name: str = "bookflow:ai"
+
+
 def kiem_tra_cau_hinh(settings: Settings) -> None:
     errors: list[str] = []
     if not settings.backend_base_url.strip():
@@ -84,6 +86,8 @@ def kiem_tra_cau_hinh(settings: Settings) -> None:
         errors.append("STORAGE_ENDPOINT khi WORKER_ENABLED=true")
     if errors:
         raise ValueError("Cấu hình AI Service không hợp lệ: " + ", ".join(errors))
+
+
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
     return Settings()

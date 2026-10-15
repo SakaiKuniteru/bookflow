@@ -101,14 +101,11 @@ METADATA_KEYS_NHAY_CAM = {
 
 
 class UsageEventRepository(Protocol):
-    async def ghi_su_kien(self, event: dict[str, Any]) -> Any:
-        ...
+    async def ghi_su_kien(self, event: dict[str, Any]) -> Any: ...
 
-    async def cap_nhat_su_kien(self, event_id: str, data: dict[str, Any]) -> Any:
-        ...
+    async def cap_nhat_su_kien(self, event_id: str, data: dict[str, Any]) -> Any: ...
 
-    async def lay_su_kien(self, **filters: Any) -> list[dict[str, Any]]:
-        ...
+    async def lay_su_kien(self, **filters: Any) -> list[dict[str, Any]]: ...
 
 
 @dataclass
@@ -188,7 +185,9 @@ class TheoDoiSuDungService:
         update["latency_ms"] = update.get("latency_ms") or self._tinh_latency(event.started_at, update["completed_at"])
         return await self._cap_nhat_event(event, update)
 
-    async def that_bai(self, event_id: str, error_code: str, error_message: str | None = None, data: dict[str, Any] | None = None) -> dict[str, Any]:
+    async def that_bai(
+        self, event_id: str, error_code: str, error_message: str | None = None, data: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         event = await self._lay_event(event_id)
         if event is None:
             raise AIValidationException(f"Không tìm thấy usage event: {event_id}")
@@ -279,15 +278,24 @@ class TheoDoiSuDungService:
         feature_counts = Counter(event.feature or event.event_type for event in events)
         model_counts = Counter(event.model or "UNKNOWN" for event in events)
         provider_counts = Counter(event.provider or "UNKNOWN" for event in events)
-        error_counts = Counter(event.error_code or "UNKNOWN" for event in events if event.status in {"FAILED", "TIMEOUT"})
+        error_counts = Counter(
+            event.error_code or "UNKNOWN" for event in events if event.status in {"FAILED", "TIMEOUT"}
+        )
         tool_counts = Counter(tool for event in events for tool in event.tool_names)
         requests_by_day = Counter(self._lay_ngay(event.started_at or event.created_at) for event in events)
         latencies = [event.latency_ms for event in events if event.latency_ms is not None and event.latency_ms >= 0]
         ratings = [event.rating for event in events if event.rating is not None and 1 <= event.rating <= 5]
         input_tokens = sum(event.input_tokens or 0 for event in events)
         output_tokens = sum(event.output_tokens or 0 for event in events)
-        total_tokens = sum(event.total_tokens if event.total_tokens is not None else (event.input_tokens or 0) + (event.output_tokens or 0) for event in events)
-        estimated_costs = [event.estimated_cost for event in events if event.estimated_cost is not None and event.estimated_cost >= 0]
+        total_tokens = sum(
+            event.total_tokens
+            if event.total_tokens is not None
+            else (event.input_tokens or 0) + (event.output_tokens or 0)
+            for event in events
+        )
+        estimated_costs = [
+            event.estimated_cost for event in events if event.estimated_cost is not None and event.estimated_cost >= 0
+        ]
         feedback_events = [event for event in events if event.feedback_type]
         positive_feedback = sum(1 for event in feedback_events if self._feedback_tich_cuc(event))
         negative_feedback = sum(1 for event in feedback_events if self._feedback_tieu_cuc(event))
@@ -363,8 +371,12 @@ class TheoDoiSuDungService:
                 "by_code": dict(error_counts),
             },
             "retrieval": {
-                "average_source_count": self._lam_tron([event.source_count for event in events if event.source_count is not None]),
-                "average_result_count": self._lam_tron([event.result_count for event in events if event.result_count is not None]),
+                "average_source_count": self._lam_tron(
+                    [event.source_count for event in events if event.source_count is not None]
+                ),
+                "average_result_count": self._lam_tron(
+                    [event.result_count for event in events if event.result_count is not None]
+                ),
             },
             "metadata": {
                 "analysis_version": "usage-analytics-v1",
@@ -399,7 +411,9 @@ class TheoDoiSuDungService:
             return None
         return self.chuan_hoa_su_kien(result)
 
-    async def _lay_danh_sach_event(self, events: list[UsageEvent | dict[str, Any]] | None) -> list[UsageEvent | dict[str, Any]]:
+    async def _lay_danh_sach_event(
+        self, events: list[UsageEvent | dict[str, Any]] | None
+    ) -> list[UsageEvent | dict[str, Any]]:
         if events is not None:
             return events
         if self.repository is not None:
@@ -485,7 +499,11 @@ class TheoDoiSuDungService:
         return currencies.most_common(1)[0][0] if currencies else None
 
     def _xac_dinh_period(self, events: list[UsageEvent]) -> dict[str, Any]:
-        dates = sorted(self._lay_ngay(event.started_at or event.created_at) for event in events if event.started_at or event.created_at)
+        dates = sorted(
+            self._lay_ngay(event.started_at or event.created_at)
+            for event in events
+            if event.started_at or event.created_at
+        )
         if not dates:
             return {"from": None, "to": None}
         return {"from": dates[0], "to": dates[-1]}

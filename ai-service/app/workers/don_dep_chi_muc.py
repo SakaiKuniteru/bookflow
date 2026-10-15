@@ -2,7 +2,10 @@ from __future__ import annotations
 from typing import Any, Awaitable, Callable
 
 JOB_TYPE = "CLEANUP_INDEX"
-WorkerService = Callable[[dict[str, Any], Callable[[dict[str, Any]], Awaitable[None]], dict[str, Any]], Awaitable[dict[str, Any]]]
+WorkerService = Callable[
+    [dict[str, Any], Callable[[dict[str, Any]], Awaitable[None]], dict[str, Any]], Awaitable[dict[str, Any]]
+]
+
 
 def _kiem_tra_payload(payload: Any) -> dict[str, Any]:
     if payload is None:
@@ -21,6 +24,7 @@ def _kiem_tra_payload(payload: Any) -> dict[str, Any]:
         if not isinstance(payload["batch_size"], int) or payload["batch_size"] < 1:
             raise ValueError("CLEANUP_INDEX batch_size không hợp lệ.")
     return payload
+
 
 async def xu_ly(
     job: dict[str, Any],

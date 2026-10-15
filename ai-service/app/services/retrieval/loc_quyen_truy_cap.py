@@ -6,12 +6,7 @@ ACCESS_SCOPE_ORGANIZATION = "ORGANIZATION"
 ACCESS_SCOPE_BRANCH = "BRANCH"
 ACCESS_SCOPE_PRIVATE = "PRIVATE"
 
-ACCESS_SCOPES = frozenset({
-    ACCESS_SCOPE_PUBLIC,
-    ACCESS_SCOPE_ORGANIZATION,
-    ACCESS_SCOPE_BRANCH,
-    ACCESS_SCOPE_PRIVATE
-})
+ACCESS_SCOPES = frozenset({ACCESS_SCOPE_PUBLIC, ACCESS_SCOPE_ORGANIZATION, ACCESS_SCOPE_BRANCH, ACCESS_SCOPE_PRIVATE})
 
 
 def _chuan_hoa_danh_sach(values: Any) -> tuple[Any, ...]:
@@ -85,7 +80,7 @@ class NguoiDungContext:
             allowed_scopes=scopes,
             allowed_organization_ids=_chuan_hoa_danh_sach(allowed_organization_ids),
             allowed_branch_ids=_chuan_hoa_danh_sach(allowed_branch_ids),
-            allowed_entity_ids=_chuan_hoa_danh_sach(allowed_entity_ids)
+            allowed_entity_ids=_chuan_hoa_danh_sach(allowed_entity_ids),
         )
 
 
@@ -107,7 +102,7 @@ class BoLocTruyCap:
             "allowed_scopes": list(self.allowed_scopes),
             "allowed_organization_ids": list(self.allowed_organization_ids),
             "allowed_branch_ids": list(self.allowed_branch_ids),
-            "allowed_entity_ids": list(self.allowed_entity_ids)
+            "allowed_entity_ids": list(self.allowed_entity_ids),
         }
 
     def fingerprint_data(self) -> dict[str, Any]:
@@ -118,7 +113,7 @@ class BoLocTruyCap:
             "allowed_scopes": sorted(self.allowed_scopes),
             "allowed_organization_ids": sorted((str(item) for item in self.allowed_organization_ids)),
             "allowed_branch_ids": sorted((str(item) for item in self.allowed_branch_ids)),
-            "allowed_entity_ids": sorted((str(item) for item in self.allowed_entity_ids))
+            "allowed_entity_ids": sorted((str(item) for item in self.allowed_entity_ids)),
         }
 
 
@@ -137,7 +132,7 @@ class LocQuyenTruyCapService:
             allowed_scopes=context.allowed_scopes,
             allowed_organization_ids=context.allowed_organization_ids,
             allowed_branch_ids=context.allowed_branch_ids,
-            allowed_entity_ids=context.allowed_entity_ids
+            allowed_entity_ids=context.allowed_entity_ids,
         )
 
     def kiem_tra_metadata(self, metadata: dict[str, Any] | None, bo_loc: BoLocTruyCap) -> bool:
@@ -164,7 +159,9 @@ class LocQuyenTruyCapService:
         if scope == ACCESS_SCOPE_PRIVATE:
             entity_id = metadata.get("entity_id", metadata.get("entityId"))
             owner_id = metadata.get("owner_id", metadata.get("ownerId"))
-            return self._nam_trong_danh_sach(entity_id, bo_loc.allowed_entity_ids) or self._nam_trong_danh_sach(owner_id, bo_loc.allowed_entity_ids)
+            return self._nam_trong_danh_sach(entity_id, bo_loc.allowed_entity_ids) or self._nam_trong_danh_sach(
+                owner_id, bo_loc.allowed_entity_ids
+            )
         return False
 
     def loc_ket_qua(self, results: list[dict[str, Any]], bo_loc: BoLocTruyCap) -> list[dict[str, Any]]:
@@ -187,11 +184,19 @@ class LocQuyenTruyCapService:
         if ACCESS_SCOPE_ORGANIZATION in bo_loc.allowed_scopes and bo_loc.allowed_organization_ids:
             dieu_kien.append(f"({alias}.access_scope = %s AND {alias}.don_vi_id = ANY(%s))")
             params.extend([ACCESS_SCOPE_ORGANIZATION, list(bo_loc.allowed_organization_ids)])
-        if ACCESS_SCOPE_BRANCH in bo_loc.allowed_scopes and bo_loc.allowed_organization_ids and bo_loc.allowed_branch_ids:
-            dieu_kien.append(f"({alias}.access_scope = %s AND {alias}.don_vi_id = ANY(%s) AND {alias}.chi_nhanh_id = ANY(%s))")
+        if (
+            ACCESS_SCOPE_BRANCH in bo_loc.allowed_scopes
+            and bo_loc.allowed_organization_ids
+            and bo_loc.allowed_branch_ids
+        ):
+            dieu_kien.append(
+                f"({alias}.access_scope = %s AND {alias}.don_vi_id = ANY(%s) AND {alias}.chi_nhanh_id = ANY(%s))"
+            )
             params.extend([ACCESS_SCOPE_BRANCH, list(bo_loc.allowed_organization_ids), list(bo_loc.allowed_branch_ids)])
         if ACCESS_SCOPE_PRIVATE in bo_loc.allowed_scopes and bo_loc.allowed_entity_ids:
-            dieu_kien.append(f"({alias}.access_scope = %s AND ({alias}.entity_id = ANY(%s) OR {alias}.owner_id = ANY(%s)))")
+            dieu_kien.append(
+                f"({alias}.access_scope = %s AND ({alias}.entity_id = ANY(%s) OR {alias}.owner_id = ANY(%s)))"
+            )
             params.extend([ACCESS_SCOPE_PRIVATE, list(bo_loc.allowed_entity_ids), list(bo_loc.allowed_entity_ids)])
         if not dieu_kien:
             return "FALSE", []

@@ -39,20 +39,29 @@ def _lay_danh_sach(data: Any) -> list[dict[str, Any]]:
 
 
 class BusinessSearchProvider(Protocol):
-    async def tim_kiem(self, query: str, user_context: dict[str, Any] | None, keywords: list[str], filters: dict[str, Any], limit: int) -> list[dict[str, Any]]:
-        ...
+    async def tim_kiem(
+        self, query: str, user_context: dict[str, Any] | None, keywords: list[str], filters: dict[str, Any], limit: int
+    ) -> list[dict[str, Any]]: ...
 
-    async def loc_hien_tai(self, entity_ids: list[Any], user_context: dict[str, Any] | None, filters: dict[str, Any]) -> list[dict[str, Any]]:
-        ...
+    async def loc_hien_tai(
+        self, entity_ids: list[Any], user_context: dict[str, Any] | None, filters: dict[str, Any]
+    ) -> list[dict[str, Any]]: ...
 
 
 class BackendBusinessSearchProvider:
-    def __init__(self, client=None, search_path: str = BACKEND_BUSINESS_SEARCH_PATH, current_filter_path: str = BACKEND_CURRENT_FILTER_PATH):
+    def __init__(
+        self,
+        client=None,
+        search_path: str = BACKEND_BUSINESS_SEARCH_PATH,
+        current_filter_path: str = BACKEND_CURRENT_FILTER_PATH,
+    ):
         self.client = client or backend_client
         self.search_path = search_path
         self.current_filter_path = current_filter_path
 
-    async def tim_kiem(self, query: str, user_context: dict[str, Any] | None, keywords: list[str], filters: dict[str, Any], limit: int) -> list[dict[str, Any]]:
+    async def tim_kiem(
+        self, query: str, user_context: dict[str, Any] | None, keywords: list[str], filters: dict[str, Any], limit: int
+    ) -> list[dict[str, Any]]:
         client = self.client
         if client is None:
             client = tao_backend_client(get_settings())
@@ -62,29 +71,38 @@ class BackendBusinessSearchProvider:
             "keywords": keywords,
             "filters": filters,
             "limit": limit,
-            "user_context": user_context or {}
+            "user_context": user_context or {},
         }
         response = await client.post(self.search_path, json_data=payload)
         return _lay_danh_sach(response)
 
-    async def loc_hien_tai(self, entity_ids: list[Any], user_context: dict[str, Any] | None, filters: dict[str, Any]) -> list[dict[str, Any]]:
+    async def loc_hien_tai(
+        self, entity_ids: list[Any], user_context: dict[str, Any] | None, filters: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         if not entity_ids:
             return []
         client = self.client
         if client is None:
             client = tao_backend_client(get_settings())
             await client.khoi_tao()
-        payload = {
-            "entity_ids": entity_ids,
-            "filters": filters,
-            "user_context": user_context or {}
-        }
+        payload = {"entity_ids": entity_ids, "filters": filters, "user_context": user_context or {}}
         response = await client.post(self.current_filter_path, json_data=payload)
         return _lay_danh_sach(response)
 
 
 class TimKiemKetHopService:
-    def __init__(self, vector_service: TimKiemVectorService | None = None, access_service: LocQuyenTruyCapService | None = None, citation_service: TrichDanService | None = None, business_provider: BusinessSearchProvider | None = None, semantic_weight: float = 0.55, keyword_weight: float = 0.45, exact_match_boost: float = 0.10, cache_enabled: bool = True, cache_ttl: int = 60):
+    def __init__(
+        self,
+        vector_service: TimKiemVectorService | None = None,
+        access_service: LocQuyenTruyCapService | None = None,
+        citation_service: TrichDanService | None = None,
+        business_provider: BusinessSearchProvider | None = None,
+        semantic_weight: float = 0.55,
+        keyword_weight: float = 0.45,
+        exact_match_boost: float = 0.10,
+        cache_enabled: bool = True,
+        cache_ttl: int = 60,
+    ):
         if semantic_weight < 0 or keyword_weight < 0 or semantic_weight + keyword_weight <= 0:
             raise ValueError("Trọng số hybrid không hợp lệ")
         self.vector_service = vector_service or tim_kiem_vector_service
@@ -97,7 +115,17 @@ class TimKiemKetHopService:
         self.cache_enabled = cache_enabled
         self.cache_ttl = cache_ttl
 
-    async def tim_kiem(self, query: str, user_context: dict[str, Any] | None = None, filters: dict[str, Any] | None = None, keywords: list[str] | None = None, intent: str | None = None, entities: dict[str, Any] | None = None, limit: int = 10, offset: int = 0) -> dict[str, Any]:
+    async def tim_kiem(
+        self,
+        query: str,
+        user_context: dict[str, Any] | None = None,
+        filters: dict[str, Any] | None = None,
+        keywords: list[str] | None = None,
+        intent: str | None = None,
+        entities: dict[str, Any] | None = None,
+        limit: int = 10,
+        offset: int = 0,
+    ) -> dict[str, Any]:
         query = str(query or "").strip()
         if not query:
             raise AIValidationException("Query tìm kiếm không được để trống")
@@ -126,15 +154,21 @@ class TimKiemKetHopService:
             logger.warning("Business search thất bại, fallback vector search: %s", business_error)
         if vector_error and business_error:
             if self._can_bo_qua_backend_filter(filters):
-                raise AIBackendException("Không thể thực hiện cả vector search và business search", details={"vector_error": str(vector_error), "business_error": str(business_error)})
-            raise AIBackendException("Không thể xác thực dữ liệu nghiệp vụ hiện tại", details={"vector_error": str(vector_error), "business_error": str(business_error)})
+                raise AIBackendException(
+                    "Không thể thực hiện cả vector search và business search",
+                    details={"vector_error": str(vector_error), "business_error": str(business_error)},
+                )
+            raise AIBackendException(
+                "Không thể xác thực dữ liệu nghiệp vụ hiện tại",
+                details={"vector_error": str(vector_error), "business_error": str(business_error)},
+            )
         merged = self._merge_candidates(vector_items, business_items, query)
         merged = self._loc_hien_tai_neu_can(merged, user_context, filters)
         if asyncio.iscoroutine(merged):
             merged = await merged
         merged = self.access_service.loc_ket_qua(merged, bo_loc)
         merged.sort(key=lambda item: float(item.get("score", 0)), reverse=True)
-        paged = merged[offset:offset + limit]
+        paged = merged[offset : offset + limit]
         paged = await self.citation_service.tao_citations(paged)
         result = {
             "query": query,
@@ -147,23 +181,28 @@ class TimKiemKetHopService:
                 "filters": filters,
                 "vector_count": len(vector_items),
                 "business_count": len(business_items),
-                "fallback": {
-                    "vector": vector_error is not None,
-                    "business": business_error is not None
-                },
+                "fallback": {"vector": vector_error is not None, "business": business_error is not None},
                 "limit": limit,
                 "offset": offset,
-                "access_scope": list(bo_loc.allowed_scopes)
-            }
+                "access_scope": list(bo_loc.allowed_scopes),
+            },
         }
         await self._luu_cache(cache_key, result)
         return result
 
-    async def _tim_vector(self, query: str, user_context: dict[str, Any] | None, filters: dict[str, Any], limit: int, offset: int) -> dict[str, Any]:
-        return await self.vector_service.tim_kiem(query=query, user_context=user_context, filters=filters, limit=min(limit * 2, 50), offset=offset)
+    async def _tim_vector(
+        self, query: str, user_context: dict[str, Any] | None, filters: dict[str, Any], limit: int, offset: int
+    ) -> dict[str, Any]:
+        return await self.vector_service.tim_kiem(
+            query=query, user_context=user_context, filters=filters, limit=min(limit * 2, 50), offset=offset
+        )
 
-    async def _tim_business(self, query: str, user_context: dict[str, Any] | None, keywords: list[str], filters: dict[str, Any], limit: int) -> list[dict[str, Any]]:
-        return await self.business_provider.tim_kiem(query=query, user_context=user_context, keywords=keywords, filters=filters, limit=min(limit * 2, 50))
+    async def _tim_business(
+        self, query: str, user_context: dict[str, Any] | None, keywords: list[str], filters: dict[str, Any], limit: int
+    ) -> list[dict[str, Any]]:
+        return await self.business_provider.tim_kiem(
+            query=query, user_context=user_context, keywords=keywords, filters=filters, limit=min(limit * 2, 50)
+        )
 
     def _phan_tich_keywords(self, query: str, keywords: list[str] | None) -> list[str]:
         if keywords:
@@ -171,7 +210,9 @@ class TimKiemKetHopService:
         words = _WORD_PATTERN.findall(query)
         return list(dict.fromkeys(words))[:20]
 
-    def _merge_candidates(self, vector_items: list[dict[str, Any]], business_items: list[dict[str, Any]], query: str) -> list[dict[str, Any]]:
+    def _merge_candidates(
+        self, vector_items: list[dict[str, Any]], business_items: list[dict[str, Any]], query: str
+    ) -> list[dict[str, Any]]:
         merged: dict[str, dict[str, Any]] = {}
         for item in vector_items:
             normalized = self._chuan_hoa_vector_item(item, query)
@@ -214,8 +255,12 @@ class TimKiemKetHopService:
 
     def _hop_nhat(self, current: dict[str, Any], incoming: dict[str, Any]) -> dict[str, Any]:
         result = dict(current)
-        result["semantic_score"] = max(self._normal_score(current.get("semantic_score", 0)), self._normal_score(incoming.get("semantic_score", 0)))
-        result["keyword_score"] = max(self._normal_score(current.get("keyword_score", 0)), self._normal_score(incoming.get("keyword_score", 0)))
+        result["semantic_score"] = max(
+            self._normal_score(current.get("semantic_score", 0)), self._normal_score(incoming.get("semantic_score", 0))
+        )
+        result["keyword_score"] = max(
+            self._normal_score(current.get("keyword_score", 0)), self._normal_score(incoming.get("keyword_score", 0))
+        )
         result["exact_match"] = bool(current.get("exact_match") or incoming.get("exact_match"))
         result["score"] = self._tinh_score(result)
         for key, value in incoming.items():
@@ -278,7 +323,9 @@ class TimKiemKetHopService:
             return f"chunk:{item['chunk_id']}"
         return f"anonymous:{hashlib.sha256(json.dumps(item, ensure_ascii=False, sort_keys=True, default=str).encode()).hexdigest()}"
 
-    async def _loc_hien_tai_neu_can(self, items: list[dict[str, Any]], user_context: dict[str, Any] | None, filters: dict[str, Any]) -> list[dict[str, Any]]:
+    async def _loc_hien_tai_neu_can(
+        self, items: list[dict[str, Any]], user_context: dict[str, Any] | None, filters: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         if not self._can_bo_qua_backend_filter(filters):
             entity_ids = []
             for item in items:
@@ -301,12 +348,20 @@ class TimKiemKetHopService:
                 if current is None:
                     continue
                 merged = dict(item)
-                merged.update({key: value for key, value in current.items() if key not in ("score", "semantic_score", "keyword_score", "citation")})
+                merged.update(
+                    {
+                        key: value
+                        for key, value in current.items()
+                        if key not in ("score", "semantic_score", "keyword_score", "citation")
+                    }
+                )
                 ket_qua.append(merged)
             return ket_qua
         return items
 
-    def _phan_tich_ket_qua_hien_tai(self, data: list[dict[str, Any]]) -> tuple[set[Any] | None, dict[str, dict[str, Any]]]:
+    def _phan_tich_ket_qua_hien_tai(
+        self, data: list[dict[str, Any]]
+    ) -> tuple[set[Any] | None, dict[str, dict[str, Any]]]:
         if not data:
             return set(), {}
         allowed_ids = set()
@@ -336,11 +391,21 @@ class TimKiemKetHopService:
             "price_current",
             "trang_thai",
             "trang_thai_ton",
-            "current_only"
+            "current_only",
         }
         return not any(key in filters for key in dynamic_keys)
 
-    def _tao_cache_key(self, query: str, bo_loc: BoLocTruyCap, filters: dict[str, Any], keywords: list[str], intent: str | None, entities: dict[str, Any], limit: int, offset: int) -> str:
+    def _tao_cache_key(
+        self,
+        query: str,
+        bo_loc: BoLocTruyCap,
+        filters: dict[str, Any],
+        keywords: list[str],
+        intent: str | None,
+        entities: dict[str, Any],
+        limit: int,
+        offset: int,
+    ) -> str:
         payload = {
             "query": query,
             "access": bo_loc.fingerprint_data(),
@@ -349,7 +414,7 @@ class TimKiemKetHopService:
             "intent": intent,
             "entities": entities,
             "limit": limit,
-            "offset": offset
+            "offset": offset,
         }
         raw = json.dumps(payload, ensure_ascii=False, sort_keys=True, default=str)
         digest = hashlib.sha256(raw.encode()).hexdigest()

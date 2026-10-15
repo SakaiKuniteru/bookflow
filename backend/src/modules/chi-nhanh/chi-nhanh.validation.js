@@ -1,142 +1,274 @@
-const { AppError } = require('../../common/errors/AppError.js');
+const { AppError } = require("../../common/errors/AppError.js");
 
 const MAX_ID = 2147483647;
 const TRUONG_TAO = [
-    'ma_chi_nhanh', 'ten_chi_nhanh', 'loai_chi_nhanh', 'dia_chi_chi_tiet',
-    'ma_tinh_thanh', 'ten_tinh_thanh', 'ma_phuong_xa', 'ten_phuong_xa',
-    'quoc_gia', 'vi_do', 'kinh_do', 'so_dien_thoai', 'email',
-    'cho_nhan_tai_quay', 'cho_ban_truc_tuyen'
+  "ma_chi_nhanh",
+  "ten_chi_nhanh",
+  "loai_chi_nhanh",
+  "dia_chi_chi_tiet",
+  "ma_tinh_thanh",
+  "ten_tinh_thanh",
+  "ma_phuong_xa",
+  "ten_phuong_xa",
+  "quoc_gia",
+  "vi_do",
+  "kinh_do",
+  "so_dien_thoai",
+  "email",
+  "cho_nhan_tai_quay",
+  "cho_ban_truc_tuyen",
 ];
-const TRUONG_SUA = [...TRUONG_TAO.filter(ten => ten !== 'ma_chi_nhanh'), 'quan_ly_thanh_vien_id', 'trang_thai'];
+const TRUONG_SUA = [
+  ...TRUONG_TAO.filter((ten) => ten !== "ma_chi_nhanh"),
+  "quan_ly_thanh_vien_id",
+  "trang_thai",
+];
 const TRUONG_CO_THE_XOA = new Set([
-    'dia_chi_chi_tiet', 'ma_tinh_thanh', 'ten_tinh_thanh', 'ma_phuong_xa',
-    'ten_phuong_xa', 'vi_do', 'kinh_do', 'so_dien_thoai', 'email', 'quan_ly_thanh_vien_id'
+  "dia_chi_chi_tiet",
+  "ma_tinh_thanh",
+  "ten_tinh_thanh",
+  "ma_phuong_xa",
+  "ten_phuong_xa",
+  "vi_do",
+  "kinh_do",
+  "so_dien_thoai",
+  "email",
+  "quan_ly_thanh_vien_id",
 ]);
 const GIOI_HAN = {
-    ma_chi_nhanh: 40, ten_chi_nhanh: 200, dia_chi_chi_tiet: 300,
-    ma_tinh_thanh: 20, ten_tinh_thanh: 100, ma_phuong_xa: 20,
-    ten_phuong_xa: 100, so_dien_thoai: 30, email: 254
+  ma_chi_nhanh: 40,
+  ten_chi_nhanh: 200,
+  dia_chi_chi_tiet: 300,
+  ma_tinh_thanh: 20,
+  ten_tinh_thanh: 100,
+  ma_phuong_xa: 20,
+  ten_phuong_xa: 100,
+  so_dien_thoai: 30,
+  email: 254,
 };
 
 function loiDuLieu(message) {
-    return new AppError({ code: 'INVALID_INPUT', message, status: 422 });
+  return new AppError({ code: "INVALID_INPUT", message, status: 422 });
 }
 
-function idHopLe(value, ten = 'ID') {
-    const dungDinhDang = typeof value === 'number' ? Number.isInteger(value) : typeof value === 'string' && /^[1-9]\d*$/.test(value);
-    const id = Number(value);
-    if (!dungDinhDang || !Number.isSafeInteger(id) || id < 1 || id > MAX_ID) throw loiDuLieu(`${ten} không hợp lệ`);
-    return id;
+function idHopLe(value, ten = "ID") {
+  const dungDinhDang =
+    typeof value === "number"
+      ? Number.isInteger(value)
+      : typeof value === "string" && /^[1-9]\d*$/.test(value);
+  const id = Number(value);
+  if (!dungDinhDang || !Number.isSafeInteger(id) || id < 1 || id > MAX_ID)
+    throw loiDuLieu(`${ten} không hợp lệ`);
+  return id;
 }
 
 function danhSachHopLe(query = {}) {
-    const trang = query.trang == null ? 1 : idHopLe(query.trang, 'Trang');
-    const kichThuoc = query.kich_thuoc == null ? 20 : idHopLe(query.kich_thuoc, 'Kích thước trang');
-    if (kichThuoc > 100) throw loiDuLieu('Kích thước trang tối đa 100');
-    const truongSapXep = ['maChiNhanh', 'tenChiNhanh', 'loaiChiNhanh', 'soDienThoai', 'email', 'tenTinhThanh', 'tenPhuongXa', 'diaChiChiTiet', 'choNhanTaiQuay', 'choBanTrucTuyen', 'trangThai'];
-    const sapXep = query.sort ?? 'tenChiNhanh';
-    if (!truongSapXep.includes(sapXep)) throw loiDuLieu('Trường sắp xếp chi nhánh không hợp lệ');
-    const thuTu = String(query.order ?? 'asc').toLowerCase();
-    if (!['asc', 'desc'].includes(thuTu)) throw loiDuLieu('Thứ tự sắp xếp không hợp lệ');
-    const tuKhoa = query.tu_khoa == null ? '' : String(query.tu_khoa).trim();
-    if (tuKhoa.length > 200) throw loiDuLieu('Từ khóa không được vượt quá 200 ký tự');
-    return { trang, kich_thuoc: kichThuoc, tu_khoa: tuKhoa, sap_xep: sapXep, thu_tu: thuTu };
+  const trang = query.trang == null ? 1 : idHopLe(query.trang, "Trang");
+  const kichThuoc =
+    query.kich_thuoc == null
+      ? 20
+      : idHopLe(query.kich_thuoc, "Kích thước trang");
+  if (kichThuoc > 100) throw loiDuLieu("Kích thước trang tối đa 100");
+  const truongSapXep = [
+    "maChiNhanh",
+    "tenChiNhanh",
+    "loaiChiNhanh",
+    "soDienThoai",
+    "email",
+    "tenTinhThanh",
+    "tenPhuongXa",
+    "diaChiChiTiet",
+    "choNhanTaiQuay",
+    "choBanTrucTuyen",
+    "trangThai",
+  ];
+  const sapXep = query.sort ?? "tenChiNhanh";
+  if (!truongSapXep.includes(sapXep))
+    throw loiDuLieu("Trường sắp xếp chi nhánh không hợp lệ");
+  const thuTu = String(query.order ?? "asc").toLowerCase();
+  if (!["asc", "desc"].includes(thuTu))
+    throw loiDuLieu("Thứ tự sắp xếp không hợp lệ");
+  const tuKhoa = query.tu_khoa == null ? "" : String(query.tu_khoa).trim();
+  if (tuKhoa.length > 200)
+    throw loiDuLieu("Từ khóa không được vượt quá 200 ký tự");
+  return {
+    trang,
+    kich_thuoc: kichThuoc,
+    tu_khoa: tuKhoa,
+    sap_xep: sapXep,
+    thu_tu: thuTu,
+  };
 }
 
 function chuanHoa(body, taoMoi) {
-    if (!body || typeof body !== 'object' || Array.isArray(body)) throw loiDuLieu('Dữ liệu chi nhánh không hợp lệ');
-    const truongChoPhep = taoMoi ? TRUONG_TAO : TRUONG_SUA;
-    const cacTruong = Object.keys(body);
-    if (!cacTruong.length || cacTruong.some(ten => !truongChoPhep.includes(ten))) throw loiDuLieu('Dữ liệu có trường không được phép');
-    const nhan = { ma_chi_nhanh: 'Mã chi nhánh', ten_chi_nhanh: 'Tên chi nhánh', loai_chi_nhanh: 'Loại chi nhánh', dia_chi_chi_tiet: 'Địa chỉ chi tiết', so_dien_thoai: 'Hotline', email: 'Email', ma_tinh_thanh: 'Tỉnh/thành', ma_phuong_xa: 'Xã/phường', quoc_gia: 'Quốc gia', vi_do: 'Vĩ độ', kinh_do: 'Kinh độ', quan_ly_thanh_vien_id: 'Quản lý chi nhánh', cho_nhan_tai_quay: 'Nhận tại quầy', cho_ban_truc_tuyen: 'Bán trực tuyến' };
-    const batBuoc = ['ten_chi_nhanh', 'loai_chi_nhanh', 'dia_chi_chi_tiet', 'so_dien_thoai', 'email'];
-    if (taoMoi) batBuoc.push('ma_chi_nhanh');
-    const loiTruong = [];
-    for (const ten of batBuoc) if (!(ten in body)) loiTruong.push({ field: ten, message: `${nhan[ten]} là bắt buộc` });
-    const ketQua = {};
-    for (const [ten, giaTri] of Object.entries(body)) {
-        try {
-            if (batBuoc.includes(ten) && (giaTri == null || typeof giaTri !== 'string' || !giaTri.trim())) throw loiDuLieu(`${nhan[ten]} là bắt buộc`);
-            if (giaTri === null && TRUONG_CO_THE_XOA.has(ten)) {
-                ketQua[ten] = null;
-                continue;
-            }
-            if (ten === 'quan_ly_thanh_vien_id') {
-                ketQua[ten] = idHopLe(giaTri, 'Quản lý chi nhánh');
-                continue;
-            }
-            if (ten === 'cho_nhan_tai_quay' || ten === 'cho_ban_truc_tuyen') {
-                if (typeof giaTri !== 'boolean') throw loiDuLieu(`${nhan[ten] || ten} phải là boolean`);
-                ketQua[ten] = giaTri;
-                continue;
-            }
-            if (ten === 'trang_thai') {
-                if (!['DANG_DUNG', 'TAM_KHOA'].includes(giaTri)) throw loiDuLieu('Trạng thái chi nhánh không hợp lệ');
-                ketQua[ten] = giaTri;
-                continue;
-            }
-            if (ten === 'vi_do' || ten === 'kinh_do') {
-                const gioiHan = ten === 'vi_do' ? 90 : 180;
-                if (typeof giaTri !== 'number' || !Number.isFinite(giaTri) || Math.abs(giaTri) > gioiHan) throw loiDuLieu(`${nhan[ten]} không hợp lệ`);
-                ketQua[ten] = giaTri;
-                continue;
-            }
-            if (typeof giaTri !== 'string' || !giaTri.trim()) throw loiDuLieu(`${nhan[ten] || ten} không hợp lệ`);
-            let value = giaTri.trim();
-            if (GIOI_HAN[ten] && value.length > GIOI_HAN[ten]) throw loiDuLieu(`${nhan[ten] || ten} vượt quá ${GIOI_HAN[ten]} ký tự`);
-            if (ten === 'ma_chi_nhanh') {
-                value = value.toUpperCase();
-                if (!/^[A-Z0-9][A-Z0-9_-]{1,39}$/.test(value)) throw loiDuLieu('Mã chi nhánh không hợp lệ');
-            }
-            if (ten === 'ten_chi_nhanh' && value.length < 2) throw loiDuLieu('Tên chi nhánh phải có ít nhất 2 ký tự');
-            if (ten === 'loai_chi_nhanh' && !['NHA_SACH', 'THU_VIEN', 'KET_HOP'].includes(value)) throw loiDuLieu('Loại chi nhánh không hợp lệ');
-            if (ten === 'quoc_gia') {
-                value = value.toUpperCase();
-                if (!/^[A-Z]{2}$/.test(value)) throw loiDuLieu('Mã quốc gia không hợp lệ');
-            }
-            if (ten === 'so_dien_thoai' && !/^[0-9+(). -]{9,30}$/.test(value)) throw loiDuLieu('Số điện thoại không hợp lệ');
-            if (ten === 'email') {
-                value = value.toLowerCase();
-                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) throw loiDuLieu('Email không hợp lệ');
-            }
-            ketQua[ten] = value;
-        } catch (error) {
-            loiTruong.push({ field: ten, message: error.message || `${nhan[ten] || ten} không hợp lệ` });
-        }
+  if (!body || typeof body !== "object" || Array.isArray(body))
+    throw loiDuLieu("Dữ liệu chi nhánh không hợp lệ");
+  const truongChoPhep = taoMoi ? TRUONG_TAO : TRUONG_SUA;
+  const cacTruong = Object.keys(body);
+  if (
+    !cacTruong.length ||
+    cacTruong.some((ten) => !truongChoPhep.includes(ten))
+  )
+    throw loiDuLieu("Dữ liệu có trường không được phép");
+  const nhan = {
+    ma_chi_nhanh: "Mã chi nhánh",
+    ten_chi_nhanh: "Tên chi nhánh",
+    loai_chi_nhanh: "Loại chi nhánh",
+    dia_chi_chi_tiet: "Địa chỉ chi tiết",
+    so_dien_thoai: "Hotline",
+    email: "Email",
+    ma_tinh_thanh: "Tỉnh/thành",
+    ma_phuong_xa: "Xã/phường",
+    quoc_gia: "Quốc gia",
+    vi_do: "Vĩ độ",
+    kinh_do: "Kinh độ",
+    quan_ly_thanh_vien_id: "Quản lý chi nhánh",
+    cho_nhan_tai_quay: "Nhận tại quầy",
+    cho_ban_truc_tuyen: "Bán trực tuyến",
+  };
+  const batBuoc = [
+    "ten_chi_nhanh",
+    "loai_chi_nhanh",
+    "dia_chi_chi_tiet",
+    "so_dien_thoai",
+    "email",
+  ];
+  if (taoMoi) batBuoc.push("ma_chi_nhanh");
+  const loiTruong = [];
+  for (const ten of batBuoc)
+    if (!(ten in body))
+      loiTruong.push({ field: ten, message: `${nhan[ten]} là bắt buộc` });
+  const ketQua = {};
+  for (const [ten, giaTri] of Object.entries(body)) {
+    try {
+      if (
+        batBuoc.includes(ten) &&
+        (giaTri == null || typeof giaTri !== "string" || !giaTri.trim())
+      )
+        throw loiDuLieu(`${nhan[ten]} là bắt buộc`);
+      if (giaTri === null && TRUONG_CO_THE_XOA.has(ten)) {
+        ketQua[ten] = null;
+        continue;
+      }
+      if (ten === "quan_ly_thanh_vien_id") {
+        ketQua[ten] = idHopLe(giaTri, "Quản lý chi nhánh");
+        continue;
+      }
+      if (ten === "cho_nhan_tai_quay" || ten === "cho_ban_truc_tuyen") {
+        if (typeof giaTri !== "boolean")
+          throw loiDuLieu(`${nhan[ten] || ten} phải là boolean`);
+        ketQua[ten] = giaTri;
+        continue;
+      }
+      if (ten === "trang_thai") {
+        if (!["DANG_DUNG", "TAM_KHOA"].includes(giaTri))
+          throw loiDuLieu("Trạng thái chi nhánh không hợp lệ");
+        ketQua[ten] = giaTri;
+        continue;
+      }
+      if (ten === "vi_do" || ten === "kinh_do") {
+        const gioiHan = ten === "vi_do" ? 90 : 180;
+        if (
+          typeof giaTri !== "number" ||
+          !Number.isFinite(giaTri) ||
+          Math.abs(giaTri) > gioiHan
+        )
+          throw loiDuLieu(`${nhan[ten]} không hợp lệ`);
+        ketQua[ten] = giaTri;
+        continue;
+      }
+      if (typeof giaTri !== "string" || !giaTri.trim())
+        throw loiDuLieu(`${nhan[ten] || ten} không hợp lệ`);
+      let value = giaTri.trim();
+      if (GIOI_HAN[ten] && value.length > GIOI_HAN[ten])
+        throw loiDuLieu(`${nhan[ten] || ten} vượt quá ${GIOI_HAN[ten]} ký tự`);
+      if (ten === "ma_chi_nhanh") {
+        value = value.toUpperCase();
+        if (!/^[A-Z0-9][A-Z0-9_-]{1,39}$/.test(value))
+          throw loiDuLieu("Mã chi nhánh không hợp lệ");
+      }
+      if (ten === "ten_chi_nhanh" && value.length < 2)
+        throw loiDuLieu("Tên chi nhánh phải có ít nhất 2 ký tự");
+      if (
+        ten === "loai_chi_nhanh" &&
+        !["NHA_SACH", "THU_VIEN", "KET_HOP"].includes(value)
+      )
+        throw loiDuLieu("Loại chi nhánh không hợp lệ");
+      if (ten === "quoc_gia") {
+        value = value.toUpperCase();
+        if (!/^[A-Z]{2}$/.test(value))
+          throw loiDuLieu("Mã quốc gia không hợp lệ");
+      }
+      if (ten === "so_dien_thoai" && !/^[0-9+(). -]{9,30}$/.test(value))
+        throw loiDuLieu("Số điện thoại không hợp lệ");
+      if (ten === "email") {
+        value = value.toLowerCase();
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
+          throw loiDuLieu("Email không hợp lệ");
+      }
+      ketQua[ten] = value;
+    } catch (error) {
+      loiTruong.push({
+        field: ten,
+        message: error.message || `${nhan[ten] || ten} không hợp lệ`,
+      });
     }
-    if (loiTruong.length) {
-        const unique = [...new Map(loiTruong.map(item => [`${item.field}:${item.message}`, item])).values()];
-        throw new AppError({ code: 'INVALID_INPUT', message: unique.map(item => item.message).join('. '), status: 422, details: unique });
-    }
-    return ketQua;
+  }
+  if (loiTruong.length) {
+    const unique = [
+      ...new Map(
+        loiTruong.map((item) => [`${item.field}:${item.message}`, item]),
+      ).values(),
+    ];
+    throw new AppError({
+      code: "INVALID_INPUT",
+      message: unique.map((item) => item.message).join(". "),
+      status: 422,
+      details: unique,
+    });
+  }
+  return ketQua;
 }
 
 function chiNhanhMoiHopLe(body) {
-    return chuanHoa(body, true);
+  return chuanHoa(body, true);
 }
 
 function capNhatChiNhanhHopLe(body) {
-    return chuanHoa(body, false);
+  return chuanHoa(body, false);
 }
 
 function trangThaiChiNhanhHopLe(body) {
-    if (!body || typeof body !== 'object' || Array.isArray(body) || Object.keys(body).length !== 1) throw loiDuLieu('Dữ liệu trạng thái không hợp lệ');
-    if (!['DANG_DUNG', 'TAM_KHOA'].includes(body.trang_thai)) throw loiDuLieu('Trạng thái chi nhánh không hợp lệ');
-    return body.trang_thai;
+  if (
+    !body ||
+    typeof body !== "object" ||
+    Array.isArray(body) ||
+    Object.keys(body).length !== 1
+  )
+    throw loiDuLieu("Dữ liệu trạng thái không hợp lệ");
+  if (!["DANG_DUNG", "TAM_KHOA"].includes(body.trang_thai))
+    throw loiDuLieu("Trạng thái chi nhánh không hợp lệ");
+  return body.trang_thai;
 }
 
 function phanCongHopLe(body) {
-    if (!body || typeof body !== 'object' || Array.isArray(body)) throw loiDuLieu('Dữ liệu phân công không hợp lệ');
-    if (Object.keys(body).some(ten => ten !== 'la_chi_nhanh_chinh')) throw loiDuLieu('Dữ liệu phân công có trường không được phép');
-    if (body.la_chi_nhanh_chinh !== undefined && typeof body.la_chi_nhanh_chinh !== 'boolean') throw loiDuLieu('Chi nhánh chính phải là boolean');
-    return { la_chi_nhanh_chinh: body.la_chi_nhanh_chinh ?? false };
+  if (!body || typeof body !== "object" || Array.isArray(body))
+    throw loiDuLieu("Dữ liệu phân công không hợp lệ");
+  if (Object.keys(body).some((ten) => ten !== "la_chi_nhanh_chinh"))
+    throw loiDuLieu("Dữ liệu phân công có trường không được phép");
+  if (
+    body.la_chi_nhanh_chinh !== undefined &&
+    typeof body.la_chi_nhanh_chinh !== "boolean"
+  )
+    throw loiDuLieu("Chi nhánh chính phải là boolean");
+  return { la_chi_nhanh_chinh: body.la_chi_nhanh_chinh ?? false };
 }
 
 module.exports = {
-    idHopLe,
-    danhSachHopLe,
-    chiNhanhMoiHopLe,
-    capNhatChiNhanhHopLe,
-    trangThaiChiNhanhHopLe,
-    phanCongHopLe
+  idHopLe,
+  danhSachHopLe,
+  chiNhanhMoiHopLe,
+  capNhatChiNhanhHopLe,
+  trangThaiChiNhanhHopLe,
+  phanCongHopLe,
 };

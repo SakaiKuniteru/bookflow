@@ -1,92 +1,138 @@
 function chuoiBatBuoc(env, ten) {
-    const giaTri = env[ten];
-    if (typeof giaTri !== 'string' || !giaTri.trim()) throw new Error(`Thiếu biến môi trường: ${ten}`);
-    return giaTri.trim();
+  const giaTri = env[ten];
+  if (typeof giaTri !== "string" || !giaTri.trim())
+    throw new Error(`Thiếu biến môi trường: ${ten}`);
+  return giaTri.trim();
 }
 
 function congHopLe(env, ten, macDinh) {
-    const giaTri = Number(env[ten] ?? macDinh);
-    if (!Number.isInteger(giaTri) || giaTri < 1 || giaTri > 65535) throw new Error(`${ten} không hợp lệ`);
-    return giaTri;
+  const giaTri = Number(env[ten] ?? macDinh);
+  if (!Number.isInteger(giaTri) || giaTri < 1 || giaTri > 65535)
+    throw new Error(`${ten} không hợp lệ`);
+  return giaTri;
 }
 
 function urlHttp(env, ten) {
-    const giaTri = chuoiBatBuoc(env, ten);
-    let url;
-    try { url = new URL(giaTri); }
-    catch { throw new Error(`${ten} không phải là URL hợp lệ`); }
-    if (!['http:', 'https:'].includes(url.protocol)) throw new Error(`${ten} phải là HTTP hoặc HTTPS`);
-    return url.toString();
+  const giaTri = chuoiBatBuoc(env, ten);
+  let url;
+  try {
+    url = new URL(giaTri);
+  } catch {
+    throw new Error(`${ten} không phải là URL hợp lệ`);
+  }
+  if (!["http:", "https:"].includes(url.protocol))
+    throw new Error(`${ten} phải là HTTP hoặc HTTPS`);
+  return url.toString();
 }
 
 function docMoiTruong(env = process.env) {
-    return {
-        appEnv: env.APP_ENV ?? 'dev',
-        port: congHopLe(env, 'PORT', 3001),
-        database: {
-            host: chuoiBatBuoc(env, 'DB_HOST'),
-            port: congHopLe(env, 'DB_PORT', 5432),
-            user: chuoiBatBuoc(env, 'POSTGRES_USER'),
-            password: chuoiBatBuoc(env, 'POSTGRES_PASSWORD'),
-            name: chuoiBatBuoc(env, 'POSTGRES_DB')
-        },
-        redis: {
-            host: chuoiBatBuoc(env, 'REDIS_HOST'),
-            port: congHopLe(env, 'REDIS_PORT', 16379),
-            password: chuoiBatBuoc(env, 'REDIS_PASSWORD')
-        },
-        storage: {
-            endpoint: urlHttp(env, 'STORAGE_ENDPOINT'),
-            healthUrl: urlHttp(env, 'STORAGE_HEALTH_URL')
-        },
-        email: docCauHinhEmail(env),
-        token: docCauHinhToken(env)
-    };
+  return {
+    appEnv: env.APP_ENV ?? "dev",
+    port: congHopLe(env, "PORT", 3001),
+    database: {
+      host: chuoiBatBuoc(env, "DB_HOST"),
+      port: congHopLe(env, "DB_PORT", 5432),
+      user: chuoiBatBuoc(env, "POSTGRES_USER"),
+      password: chuoiBatBuoc(env, "POSTGRES_PASSWORD"),
+      name: chuoiBatBuoc(env, "POSTGRES_DB"),
+    },
+    redis: {
+      host: chuoiBatBuoc(env, "REDIS_HOST"),
+      port: congHopLe(env, "REDIS_PORT", 16379),
+      password: chuoiBatBuoc(env, "REDIS_PASSWORD"),
+    },
+    storage: {
+      endpoint: urlHttp(env, "STORAGE_ENDPOINT"),
+      healthUrl: urlHttp(env, "STORAGE_HEALTH_URL"),
+    },
+    email: docCauHinhEmail(env),
+    token: docCauHinhToken(env),
+  };
 }
 
 function docCauHinhEmail(env = process.env) {
-    const otpSecret = chuoiBatBuoc(env, 'OTP_SECRET');
-    if (!/^[0-9a-fA-F]{64,}$/.test(otpSecret)) throw new Error('OTP_SECRET phải là chuỗi hex ít nhất 32 byte');
-    return {
-        host: chuoiBatBuoc(env, 'SMTP_HOST'),
-        port: congHopLe(env, 'SMTP_PORT', 587),
-        user: chuoiBatBuoc(env, 'SMTP_USER'),
-        password: chuoiBatBuoc(env, 'SMTP_PASSWORD'),
-        from: chuoiBatBuoc(env, 'SMTP_FROM'),
-        fromName: docCauHinhThuongHieu(null, env).name,
-        loginUrl: urlHttp(env, 'PUBLIC_LOGIN_URL'),
-        otpSecret
-    };
+  const otpSecret = chuoiBatBuoc(env, "OTP_SECRET");
+  if (!/^[0-9a-fA-F]{64,}$/.test(otpSecret))
+    throw new Error("OTP_SECRET phải là chuỗi hex ít nhất 32 byte");
+  return {
+    host: chuoiBatBuoc(env, "SMTP_HOST"),
+    port: congHopLe(env, "SMTP_PORT", 587),
+    user: chuoiBatBuoc(env, "SMTP_USER"),
+    password: chuoiBatBuoc(env, "SMTP_PASSWORD"),
+    from: chuoiBatBuoc(env, "SMTP_FROM"),
+    fromName: docCauHinhThuongHieu(null, env).name,
+    loginUrl: urlHttp(env, "PUBLIC_LOGIN_URL"),
+    otpSecret,
+  };
 }
 
 function docCauHinhThuongHieu(donVi = null, env = process.env) {
-    const tenCauHinh = String(env.APP_NAME ?? '').trim() || String(env.SMTP_FROM_NAME ?? '').trim();
-    const ten = tenCauHinh || String(donVi?.ten_hien_thi ?? '').trim() || 'BookFlow';
-    let goc = 'http://localhost:3000';
-    try {
-        const urlCongKhai = new URL(env.PUBLIC_LOGIN_URL || goc);
-        if (['http:', 'https:'].includes(urlCongKhai.protocol)) goc = urlCongKhai.origin;
-    }
-    catch {}
-    let logoUrl = String(env.APP_LOGO_URL || '').trim();
-    if (!logoUrl && donVi?.id && donVi?.logo_tep_id && /^[1-9]\d*$/.test(String(donVi.logo_tep_id))) logoUrl = `/api/tep-tin/don-vi/${Number(donVi.id)}/logo`;
-    if (!logoUrl) logoUrl = '/brand/logo-symbol.svg';
-    try { logoUrl = new URL(logoUrl, `${goc}/`).toString(); }
-    catch { logoUrl = `${goc}/brand/logo-symbol.svg`; }
-    if (!/^https?:$/.test(new URL(logoUrl).protocol)) logoUrl = `${goc}/brand/logo-symbol.svg`;
-    return { name: ten, logoUrl };
+  const tenCauHinh =
+    String(env.APP_NAME ?? "").trim() ||
+    String(env.SMTP_FROM_NAME ?? "").trim();
+  const ten =
+    tenCauHinh || String(donVi?.ten_hien_thi ?? "").trim() || "BookFlow";
+  let goc = "http://localhost:3000";
+  try {
+    const urlCongKhai = new URL(env.PUBLIC_LOGIN_URL || goc);
+    if (["http:", "https:"].includes(urlCongKhai.protocol))
+      goc = urlCongKhai.origin;
+  } catch {}
+  let logoUrl = String(env.APP_LOGO_URL || "").trim();
+  if (
+    !logoUrl &&
+    donVi?.id &&
+    donVi?.logo_tep_id &&
+    /^[1-9]\d*$/.test(String(donVi.logo_tep_id))
+  )
+    logoUrl = `/api/tep-tin/don-vi/${Number(donVi.id)}/logo`;
+  if (!logoUrl) logoUrl = "/brand/logo-symbol.svg";
+  try {
+    logoUrl = new URL(logoUrl, `${goc}/`).toString();
+  } catch {
+    logoUrl = `${goc}/brand/logo-symbol.svg`;
+  }
+  if (!/^https?:$/.test(new URL(logoUrl).protocol))
+    logoUrl = `${goc}/brand/logo-symbol.svg`;
+  return { name: ten, logoUrl };
 }
 
 function docCauHinhToken(env = process.env) {
-    const jwtAccessSecret = chuoiBatBuoc(env, 'JWT_ACCESS_SECRET');
-    const accessMinutes = Number(env.THOI_GIAN_ACCESS_TOKEN ?? 10);
-    const refreshMinutes = Number(env.THOI_GIAN_REFRESH_TOKEN ?? 120);
-    const feSessionMinutes = Number(env.THOI_GIAN_FE_SESSION ?? 60);
-    if (!/^[0-9a-fA-F]{64,}$/.test(jwtAccessSecret) || jwtAccessSecret.length % 2 !== 0) throw new Error('JWT_ACCESS_SECRET phải là chuỗi hex ít nhất 32 byte');
-    if (!Number.isInteger(accessMinutes) || accessMinutes < 1 || accessMinutes > 60 || !Number.isInteger(refreshMinutes) || refreshMinutes <= accessMinutes || refreshMinutes > 43200 || !Number.isInteger(feSessionMinutes) || feSessionMinutes <= accessMinutes || feSessionMinutes > 43200) {
-        throw new Error('Thời hạn Access Token, Refresh Token hoặc FE Session không hợp lệ');
-    }
-    return { jwtAccessSecret, accessTtlSeconds: accessMinutes * 60, refreshTtlMinutes: refreshMinutes, feSessionTtlMinutes: feSessionMinutes };
+  const jwtAccessSecret = chuoiBatBuoc(env, "JWT_ACCESS_SECRET");
+  const accessMinutes = Number(env.THOI_GIAN_ACCESS_TOKEN ?? 10);
+  const refreshMinutes = Number(env.THOI_GIAN_REFRESH_TOKEN ?? 120);
+  const feSessionMinutes = Number(env.THOI_GIAN_FE_SESSION ?? 60);
+  if (
+    !/^[0-9a-fA-F]{64,}$/.test(jwtAccessSecret) ||
+    jwtAccessSecret.length % 2 !== 0
+  )
+    throw new Error("JWT_ACCESS_SECRET phải là chuỗi hex ít nhất 32 byte");
+  if (
+    !Number.isInteger(accessMinutes) ||
+    accessMinutes < 1 ||
+    accessMinutes > 60 ||
+    !Number.isInteger(refreshMinutes) ||
+    refreshMinutes <= accessMinutes ||
+    refreshMinutes > 43200 ||
+    !Number.isInteger(feSessionMinutes) ||
+    feSessionMinutes <= accessMinutes ||
+    feSessionMinutes > 43200
+  ) {
+    throw new Error(
+      "Thời hạn Access Token, Refresh Token hoặc FE Session không hợp lệ",
+    );
+  }
+  return {
+    jwtAccessSecret,
+    accessTtlSeconds: accessMinutes * 60,
+    refreshTtlMinutes: refreshMinutes,
+    feSessionTtlMinutes: feSessionMinutes,
+  };
 }
 
-module.exports = { docMoiTruong, docCauHinhEmail, docCauHinhToken, docCauHinhThuongHieu };
+module.exports = {
+  docMoiTruong,
+  docCauHinhEmail,
+  docCauHinhToken,
+  docCauHinhThuongHieu,
+};

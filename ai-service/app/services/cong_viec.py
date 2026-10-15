@@ -6,8 +6,11 @@ from app.core.exceptions import AIValidationException, AIServiceException
 from app.queue.connection import queue_connection
 from app.queue.dispatcher import QueueDispatcher
 from app.repositories.cong_viec import cong_viec_repository
+
 QUEUE_NAME = get_settings().queue_name
 dispatcher = QueueDispatcher(queue_connection)
+
+
 def _queue_job(job: dict[str, Any]) -> dict[str, Any]:
     return {
         "job_id": str(job["job_id"]),
@@ -18,6 +21,8 @@ def _queue_job(job: dict[str, Any]) -> dict[str, Any]:
         "request_id": job.get("request_id"),
         "trace_id": job.get("trace_id"),
     }
+
+
 async def tao(payload: dict[str, Any], request_context: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise AIValidationException("Payload job phải là object.")
@@ -47,5 +52,7 @@ async def tao(payload: dict[str, Any], request_context: dict[str, Any]) -> dict[
         raise AIServiceException("Không thể tạo job AI.")
     await dispatcher.dispatch(QUEUE_NAME, _queue_job(job))
     return job
+
+
 async def lay(job_id: str, request_context: dict[str, Any]) -> dict[str, Any] | None:
     return await cong_viec_repository.lay_theo_id(job_id)

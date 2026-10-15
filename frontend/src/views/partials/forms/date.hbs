@@ -12,11 +12,14 @@
             name="{{name}}"
             type="text"
             class="bf-form-control bf-date-input"
+            {{#if frontendOnly}}data-frontend-only="true"{{/if}}
             value="{{value}}"
             placeholder="{{#if placeholder}}{{placeholder}}{{else}}{{#if (eq type "year")}}YYYY{{else}}{{#if (eq type "time")}}{{#if (eq timeFormat "hm")}}HH:mm{{else}}HH:mm:ss{{/if}}{{else}}{{#if (eq type "datetime")}}{{#if (eq timeFormat "hm")}}dd/MM/yyyy HH:mm{{else}}dd/MM/yyyy HH:mm:ss{{/if}}{{else}}dd/MM/yyyy{{/if}}{{/if}}{{/if}}{{/if}}"
             data-date-type="{{type}}"
             data-time-format="{{timeFormat}}"
             data-default-time="{{defaultTime}}"
+            {{#if minYearFrom}}data-min-year-from="{{minYearFrom}}"{{/if}}
+            {{#if maxYearFrom}}data-max-year-from="{{maxYearFrom}}"{{/if}}
             {{#if minDateFrom}}data-min-date-from="{{minDateFrom}}" data-min-date-offset-days="{{minDateOffsetDays}}"{{/if}}
             {{#if maxDateFrom}}data-max-date-from="{{maxDateFrom}}" data-max-date-offset-days="{{maxDateOffsetDays}}"{{/if}}
             {{#if rangeError}}data-range-error="{{rangeError}}"{{/if}}

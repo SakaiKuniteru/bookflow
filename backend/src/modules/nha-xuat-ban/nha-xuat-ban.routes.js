@@ -1,18 +1,58 @@
-const { Router } = require('express');
-const { authenticate } = require('../../common/middlewares/authenticate.js');
-const { authorize } = require('../../common/middlewares/authorize.js');
-const controller = require('./nha-xuat-ban.controller.js');
+const { Router } = require("express");
+const { authenticate } = require("../../common/middlewares/authenticate.js");
+const { authorize } = require("../../common/middlewares/authorize.js");
+const controller = require("./nha-xuat-ban.controller.js");
 const router = Router();
 router.use(authenticate);
-router.get('/', authorize('books.read'), controller.danhSach.bind(controller));
-router.get('/:nhaXuatBanId', authorize('books.read'), controller.chiTiet.bind(controller));
-router.post('/', authorize('books.create'), controller.taoNhaXuatBan.bind(controller));
-router.patch('/:nhaXuatBanId', authorize('books.create'), controller.suaNhaXuatBan.bind(controller));
-router.patch('/:nhaXuatBanId/trang-thai', authorize('books.create'), controller.doiTrangThai.bind(controller));
-router.delete('/:nhaXuatBanId', authorize('books.create'), controller.xoaNhaXuatBan.bind(controller));
-router.get('/:nhaXuatBanId/thuong-hieu', authorize('books.read'), controller.danhSachThuongHieu.bind(controller));
-router.post('/:nhaXuatBanId/thuong-hieu', authorize('books.create'), controller.taoThuongHieu.bind(controller));
-router.patch('/:nhaXuatBanId/thuong-hieu/:thuongHieuId', authorize('books.create'), controller.suaThuongHieu.bind(controller));
-router.patch('/:nhaXuatBanId/thuong-hieu/:thuongHieuId/trang-thai', authorize('books.create'), controller.doiTrangThaiThuongHieu.bind(controller));
-router.delete('/:nhaXuatBanId/thuong-hieu/:thuongHieuId', authorize('books.create'), controller.xoaThuongHieu.bind(controller));
+router.get("/", authorize("books.read"), controller.danhSach.bind(controller));
+router.get(
+  "/:nhaXuatBanId",
+  authorize("books.read"),
+  controller.chiTiet.bind(controller),
+);
+router.post(
+  "/",
+  authorize("books.create"),
+  controller.taoNhaXuatBan.bind(controller),
+);
+router.patch(
+  "/:nhaXuatBanId",
+  authorize("books.create"),
+  controller.suaNhaXuatBan.bind(controller),
+);
+router.patch(
+  "/:nhaXuatBanId/trang-thai",
+  authorize("books.create"),
+  controller.doiTrangThai.bind(controller),
+);
+router.delete(
+  "/:nhaXuatBanId",
+  authorize("books.create"),
+  controller.xoaNhaXuatBan.bind(controller),
+);
+router.get(
+  "/:nhaXuatBanId/thuong-hieu",
+  authorize("books.read"),
+  controller.danhSachThuongHieu.bind(controller),
+);
+router.post(
+  "/:nhaXuatBanId/thuong-hieu",
+  authorize("books.create"),
+  controller.taoThuongHieu.bind(controller),
+);
+router.patch(
+  "/:nhaXuatBanId/thuong-hieu/:thuongHieuId",
+  authorize("books.create"),
+  controller.suaThuongHieu.bind(controller),
+);
+router.patch(
+  "/:nhaXuatBanId/thuong-hieu/:thuongHieuId/trang-thai",
+  authorize("books.create"),
+  controller.doiTrangThaiThuongHieu.bind(controller),
+);
+router.delete(
+  "/:nhaXuatBanId/thuong-hieu/:thuongHieuId",
+  authorize("books.create"),
+  controller.xoaThuongHieu.bind(controller),
+);
 module.exports = router;

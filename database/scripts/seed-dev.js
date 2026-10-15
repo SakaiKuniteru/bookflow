@@ -1,62 +1,61 @@
-const { Client } = require('pg');
-const { createHash, randomBytes } = require('node:crypto');
-const { readFileSync } = require('node:fs');
-const { join } = require('node:path');
-const { bamMatKhau } = require('../../backend/src/common/security/mat-khau.js');
+const { Client } = require("pg");
+const { createHash, randomBytes } = require("node:crypto");
+const { readFileSync } = require("node:fs");
+const { join } = require("node:path");
+const { bamMatKhau } = require("../../backend/src/common/security/mat-khau.js");
 
 async function mot(client, sql, params = []) {
-    const { rows } = await client.query(sql, params);
-    if (!rows[0]) throw new Error('Không tạo được bản ghi seed');
-    return rows[0];
+  const { rows } = await client.query(sql, params);
+  if (!rows[0]) throw new Error("Không tạo được bản ghi seed");
+  return rows[0];
 }
 
 async function main() {
+  const {
+    DB_HOST,
+    DB_PORT,
+    POSTGRES_USER,
+    POSTGRES_PASSWORD,
+    POSTGRES_DB,
+    BOOKFLOW_SEED_PASSWORD,
+  } = process.env;
+
+  if (
+    DB_HOST !== "127.0.0.1" ||
+    Number(DB_PORT) !== 5432 ||
+    POSTGRES_DB !== "bookflow_dev"
+  ) {
+    throw new Error(
+      "Chỉ cho phép seed bookflow_dev trên Postgres.app 127.0.0.1:5432",
+    );
+  }
+
+  if (!BOOKFLOW_SEED_PASSWORD || BOOKFLOW_SEED_PASSWORD.length < 8) {
+    throw new Error("Chưa nhập BOOKFLOW_SEED_PASSWORD hợp lệ");
+  }
+
+  const matKhauBam = bamMatKhau(BOOKFLOW_SEED_PASSWORD);
+
+  if (typeof matKhauBam !== "string") {
+    throw new Error("Hàm băm mật khẩu phải trả về chuỗi");
+  }
+
+  const client = new Client({
+    host: DB_HOST,
+    port: Number(DB_PORT),
+    user: POSTGRES_USER,
+    password: POSTGRES_PASSWORD,
+    database: POSTGRES_DB,
+  });
+
+  await client.connect();
+
+  let dangGiaoDich = false;
+
+  try {
     const {
-        DB_HOST,
-        DB_PORT,
-        POSTGRES_USER,
-        POSTGRES_PASSWORD,
-        POSTGRES_DB,
-        BOOKFLOW_SEED_PASSWORD
-    } = process.env;
-
-    if (
-        DB_HOST !== '127.0.0.1' ||
-        Number(DB_PORT) !== 5432 ||
-        POSTGRES_DB !== 'bookflow_dev'
-    ) {
-        throw new Error(
-            'Chỉ cho phép seed bookflow_dev trên Postgres.app 127.0.0.1:5432'
-        );
-    }
-
-    if (
-        !BOOKFLOW_SEED_PASSWORD ||
-        BOOKFLOW_SEED_PASSWORD.length < 8
-    ) {
-        throw new Error('Chưa nhập BOOKFLOW_SEED_PASSWORD hợp lệ');
-    }
-
-    const matKhauBam = bamMatKhau(BOOKFLOW_SEED_PASSWORD);
-
-    if (typeof matKhauBam !== 'string') {
-        throw new Error('Hàm băm mật khẩu phải trả về chuỗi');
-    }
-
-    const client = new Client({
-        host: DB_HOST,
-        port: Number(DB_PORT),
-        user: POSTGRES_USER,
-        password: POSTGRES_PASSWORD,
-        database: POSTGRES_DB
-    });
-
-    await client.connect();
-
-    let dangGiaoDich = false;
-
-    try {
-        const { rows: [db] } = await client.query(`
+      rows: [db],
+    } = await client.query(`
             SELECT
                 current_database() AS ten,
                 inet_server_port() AS cong,
@@ -64,27 +63,23 @@ async function main() {
                     AS da_migrate
         `);
 
-        if (
-            db.ten !== 'bookflow_dev' ||
-            db.cong !== 5432 ||
-            !db.da_migrate
-        ) {
-            throw new Error('Database không đúng hoặc chưa migrate');
-        }
+    if (db.ten !== "bookflow_dev" || db.cong !== 5432 || !db.da_migrate) {
+      throw new Error("Database không đúng hoặc chưa migrate");
+    }
 
-        const { rows: migration } = await client.query(`
+    const { rows: migration } = await client.query(`
             SELECT 1
             FROM lich_su_migration
             WHERE ten_file = '013_chuyen_sang_access_refresh_token.sql'
         `);
 
-        if (!migration.length) {
-            throw new Error(
-                'Chưa migrate xong 001–013. Chạy migration trước.'
-            );
-        }
+    if (!migration.length) {
+      throw new Error("Chưa migrate xong 001–013. Chạy migration trước.");
+    }
 
-        const { rows: [cotId] } = await client.query(`
+    const {
+      rows: [cotId],
+    } = await client.query(`
             SELECT data_type
             FROM information_schema.columns
             WHERE table_schema = 'public'
@@ -92,63 +87,53 @@ async function main() {
               AND column_name = 'id'
         `);
 
-        if (cotId?.data_type !== 'integer') {
-            throw new Error(
-                'tai_khoan.id chưa là INTEGER, không chạy seed'
-            );
-        }
+    if (cotId?.data_type !== "integer") {
+      throw new Error("tai_khoan.id chưa là INTEGER, không chạy seed");
+    }
 
-        const emails = [
-            'contact.pqh@gmail.com',
-            'huyylksnb@gmail.com',
-            'khoicanhoiylks@gmail.com'
-        ];
+    const emails = [
+      "contact.pqh@gmail.com",
+      "huyylksnb@gmail.com",
+      "khoicanhoiylks@gmail.com",
+    ];
 
-        const { rows: [du] } = await client.query(`
+    const {
+      rows: [du],
+    } = await client.query(
+      `
             SELECT COUNT(*)::int AS so
             FROM tai_khoan
             WHERE lower(email) <> ALL($1::text[])
-        `, [emails]);
+        `,
+      [emails],
+    );
 
-        if (du.so) {
-            throw new Error(
-                `Database còn ${du.so} tài khoản khác. ` +
-                'Script sẽ không tự xóa dữ liệu.'
-            );
-        }
+    if (du.so) {
+      throw new Error(
+        `Database còn ${du.so} tài khoản khác. ` +
+          "Script sẽ không tự xóa dữ liệu.",
+      );
+    }
 
-        await client.query('BEGIN');
-        dangGiaoDich = true;
+    await client.query("BEGIN");
+    dangGiaoDich = true;
 
-        for (const ten of ['quyen.sql', 'quyen-f05.sql']) {
-            const noiDung = readFileSync(
-                join(__dirname, '../seeds', ten),
-                'utf8'
-            );
+    for (const ten of ["quyen.sql", "quyen-f05.sql"]) {
+      const noiDung = readFileSync(join(__dirname, "../seeds", ten), "utf8");
 
-            await client.query(noiDung);
-        }
+      await client.query(noiDung);
+    }
 
-        const taiKhoan = [];
+    const taiKhoan = [];
 
-        for (const [tenDangNhap, email, hoTen] of [
-            [
-                'admin',
-                'contact.pqh@gmail.com',
-                'Quản trị BookFlow'
-            ],
-            [
-                'huy.pq',
-                'huyylksnb@gmail.com',
-                'Nhân viên Huy'
-            ],
-            [
-                'pqhuy',
-                'khoicanhoiylks@gmail.com',
-                'Người dùng PQ Huy'
-            ]
-        ]) {
-            const row = await mot(client, `
+    for (const [tenDangNhap, email, hoTen] of [
+      ["admin", "contact.pqh@gmail.com", "Quản trị BookFlow"],
+      ["huy.pq", "huyylksnb@gmail.com", "Nhân viên Huy"],
+      ["pqhuy", "khoicanhoiylks@gmail.com", "Người dùng PQ Huy"],
+    ]) {
+      const row = await mot(
+        client,
+        `
                 INSERT INTO tai_khoan (
                     ten_dang_nhap,
                     email,
@@ -178,28 +163,30 @@ async function main() {
                     phien_ban_xac_thuc =
                         tai_khoan.phien_ban_xac_thuc + 1
                 RETURNING id, ten_dang_nhap, email
-            `, [
-                tenDangNhap,
-                email,
-                hoTen,
-                matKhauBam
-            ]);
+            `,
+        [tenDangNhap, email, hoTen, matKhauBam],
+      );
 
-            taiKhoan.push(row);
-        }
+      taiKhoan.push(row);
+    }
 
-        const [admin, nhanVien, nguoiDung] = taiKhoan;
+    const [admin, nhanVien, nguoiDung] = taiKhoan;
 
-        await client.query(`
+    await client.query(
+      `
             UPDATE phien_dang_nhap
             SET
                 ngay_thu_hoi = now(),
                 ly_do_thu_hoi = 'DEV_SEED'
             WHERE tai_khoan_id = ANY($1::integer[])
               AND ngay_thu_hoi IS NULL
-        `, [taiKhoan.map(item => item.id)]);
+        `,
+      [taiKhoan.map((item) => item.id)],
+    );
 
-        const donVi = await mot(client, `
+    const donVi = await mot(
+      client,
+      `
             INSERT INTO don_vi (
                 ma_don_vi,
                 ten_hien_thi,
@@ -222,23 +209,19 @@ async function main() {
                 ngay_kich_hoat =
                     COALESCE(don_vi.ngay_kich_hoat, now())
             RETURNING id, ma_don_vi
-        `, [admin.email]);
+        `,
+      [admin.email],
+    );
 
-        const chiNhanh = [];
+    const chiNhanh = [];
 
-        for (const [ma, ten, loai] of [
-            [
-                'CS01',
-                'Chi nhánh trung tâm',
-                'KET_HOP'
-            ],
-            [
-                'CS02',
-                'Chi nhánh số 2',
-                'NHA_SACH'
-            ]
-        ]) {
-            const row = await mot(client, `
+    for (const [ma, ten, loai] of [
+      ["CS01", "Chi nhánh trung tâm", "KET_HOP"],
+      ["CS02", "Chi nhánh số 2", "NHA_SACH"],
+    ]) {
+      const row = await mot(
+        client,
+        `
                 INSERT INTO chi_nhanh (
                     don_vi_id,
                     ma_chi_nhanh,
@@ -254,25 +237,23 @@ async function main() {
                     loai_chi_nhanh = EXCLUDED.loai_chi_nhanh,
                     trang_thai = 'DANG_DUNG'
                 RETURNING id, ma_chi_nhanh
-            `, [
-                donVi.id,
-                ma,
-                ten,
-                loai,
-                admin.id
-            ]);
+            `,
+        [donVi.id, ma, ten, loai, admin.id],
+      );
 
-            chiNhanh.push(row);
-        }
+      chiNhanh.push(row);
+    }
 
-        const vaiTro = {};
+    const vaiTro = {};
 
-        for (const [ma, ten] of [
-            ['QUAN_TRI', 'Quản trị đơn vị'],
-            ['NHAN_VIEN', 'Nhân viên'],
-            ['THU_THU', 'Thủ thư']
-        ]) {
-            vaiTro[ma] = await mot(client, `
+    for (const [ma, ten] of [
+      ["QUAN_TRI", "Quản trị đơn vị"],
+      ["NHAN_VIEN", "Nhân viên"],
+      ["THU_THU", "Thủ thư"],
+    ]) {
+      vaiTro[ma] = await mot(
+        client,
+        `
                 INSERT INTO vai_tro (
                     don_vi_id,
                     ma_vai_tro,
@@ -286,16 +267,14 @@ async function main() {
                     ten_vai_tro = EXCLUDED.ten_vai_tro,
                     trang_thai = 'DANG_DUNG'
                 RETURNING id, ma_vai_tro
-            `, [
-                donVi.id,
-                ma,
-                ten,
-                admin.id
-            ]);
-        }
+            `,
+        [donVi.id, ma, ten, admin.id],
+      );
+    }
 
-        // Admin nhận toàn bộ quyền đang hoạt động của đơn vị.
-        await client.query(`
+    // Admin nhận toàn bộ quyền đang hoạt động của đơn vị.
+    await client.query(
+      `
             INSERT INTO vai_tro_quyen (
                 don_vi_id,
                 vai_tro_id,
@@ -318,19 +297,18 @@ async function main() {
                 pham_vi
             )
             DO NOTHING
-        `, [
-            donVi.id,
-            vaiTro.QUAN_TRI.id,
-            admin.id
-        ]);
+        `,
+      [donVi.id, vaiTro.QUAN_TRI.id, admin.id],
+    );
 
-        // Nhân viên và thủ thư chỉ nhận quyền theo chi nhánh.
-        for (const [maVaiTro, maQuyen] of [
-            ['NHAN_VIEN', 'books.read'],
-            ['THU_THU', 'books.read'],
-            ['THU_THU', 'loans.return']
-        ]) {
-            await client.query(`
+    // Nhân viên và thủ thư chỉ nhận quyền theo chi nhánh.
+    for (const [maVaiTro, maQuyen] of [
+      ["NHAN_VIEN", "books.read"],
+      ["THU_THU", "books.read"],
+      ["THU_THU", "loans.return"],
+    ]) {
+      await client.query(
+        `
                 INSERT INTO vai_tro_quyen (
                     don_vi_id,
                     vai_tro_id,
@@ -353,36 +331,20 @@ async function main() {
                     pham_vi
                 )
                 DO NOTHING
-            `, [
-                donVi.id,
-                vaiTro[maVaiTro].id,
-                admin.id,
-                maQuyen
-            ]);
-        }
+            `,
+        [donVi.id, vaiTro[maVaiTro].id, admin.id, maQuyen],
+      );
+    }
 
-        const thanhVien = [];
+    const thanhVien = [];
 
-        for (const [
-            taiKhoan,
-            ma,
-            chucDanh,
-            nguoiMoiId
-        ] of [
-            [
-                admin,
-                'ADM001',
-                'Quản trị đơn vị',
-                null
-            ],
-            [
-                nhanVien,
-                'NV001',
-                'Nhân viên nhà sách',
-                undefined
-            ]
-        ]) {
-            const row = await mot(client, `
+    for (const [taiKhoan, ma, chucDanh, nguoiMoiId] of [
+      [admin, "ADM001", "Quản trị đơn vị", null],
+      [nhanVien, "NV001", "Nhân viên nhà sách", undefined],
+    ]) {
+      const row = await mot(
+        client,
+        `
                 INSERT INTO thanh_vien_don_vi (
                     don_vi_id,
                     tai_khoan_id,
@@ -411,59 +373,42 @@ async function main() {
                         now()
                     )
                 RETURNING id, tai_khoan_id
-            `, [
-                donVi.id,
-                taiKhoan.id,
-                ma,
-                chucDanh,
-                taiKhoan.email,
-                admin.id,
-                nguoiMoiId === undefined
-                    ? thanhVien[0].id
-                    : nguoiMoiId
-            ]);
+            `,
+        [
+          donVi.id,
+          taiKhoan.id,
+          ma,
+          chucDanh,
+          taiKhoan.email,
+          admin.id,
+          nguoiMoiId === undefined ? thanhVien[0].id : nguoiMoiId,
+        ],
+      );
 
-            thanhVien.push(row);
-        }
+      thanhVien.push(row);
+    }
 
-        // Admin quản lý cả hai chi nhánh.
-        await client.query(`
+    // Admin quản lý cả hai chi nhánh.
+    await client.query(
+      `
             UPDATE chi_nhanh
             SET
                 quan_ly_thanh_vien_id = $1,
                 nguoi_cap_nhat_id = $2
             WHERE don_vi_id = $3
               AND id = ANY($4::integer[])
-        `, [
-            thanhVien[0].id,
-            admin.id,
-            donVi.id,
-            chiNhanh.map(item => item.id)
-        ]);
+        `,
+      [thanhVien[0].id, admin.id, donVi.id, chiNhanh.map((item) => item.id)],
+    );
 
-        // Admin ở CS01 và CS02; nhân viên chỉ ở CS01.
-        for (const [
-            thanhVienId,
-            chiNhanhId,
-            laChinh
-        ] of [
-            [
-                thanhVien[0].id,
-                chiNhanh[0].id,
-                true
-            ],
-            [
-                thanhVien[0].id,
-                chiNhanh[1].id,
-                false
-            ],
-            [
-                thanhVien[1].id,
-                chiNhanh[0].id,
-                true
-            ]
-        ]) {
-            await client.query(`
+    // Admin ở CS01 và CS02; nhân viên chỉ ở CS01.
+    for (const [thanhVienId, chiNhanhId, laChinh] of [
+      [thanhVien[0].id, chiNhanh[0].id, true],
+      [thanhVien[0].id, chiNhanh[1].id, false],
+      [thanhVien[1].id, chiNhanh[0].id, true],
+    ]) {
+      await client.query(
+        `
                 INSERT INTO thanh_vien_chi_nhanh (
                     don_vi_id,
                     thanh_vien_don_vi_id,
@@ -478,33 +423,18 @@ async function main() {
                     CURRENT_DATE, 'HIEU_LUC', $5
                 )
                 ON CONFLICT DO NOTHING
-            `, [
-                donVi.id,
-                thanhVienId,
-                chiNhanhId,
-                laChinh,
-                admin.id
-            ]);
-        }
+            `,
+        [donVi.id, thanhVienId, chiNhanhId, laChinh, admin.id],
+      );
+    }
 
-        // Gán vai trò theo đúng phạm vi.
-        for (const [
-            thanhVienId,
-            vaiTroId,
-            chiNhanhId
-        ] of [
-            [
-                thanhVien[0].id,
-                vaiTro.QUAN_TRI.id,
-                null
-            ],
-            [
-                thanhVien[1].id,
-                vaiTro.NHAN_VIEN.id,
-                chiNhanh[0].id
-            ]
-        ]) {
-            await client.query(`
+    // Gán vai trò theo đúng phạm vi.
+    for (const [thanhVienId, vaiTroId, chiNhanhId] of [
+      [thanhVien[0].id, vaiTro.QUAN_TRI.id, null],
+      [thanhVien[1].id, vaiTro.NHAN_VIEN.id, chiNhanh[0].id],
+    ]) {
+      await client.query(
+        `
                 INSERT INTO thanh_vien_vai_tro (
                     don_vi_id,
                     thanh_vien_don_vi_id,
@@ -515,18 +445,21 @@ async function main() {
                 )
                 VALUES ($1, $2, $3, $4, $5, $6)
                 ON CONFLICT DO NOTHING
-            `, [
-                donVi.id,
-                thanhVienId,
-                vaiTroId,
-                chiNhanhId,
-                admin.id,
-                thanhVien[0].id
-            ]);
-        }
+            `,
+        [
+          donVi.id,
+          thanhVienId,
+          vaiTroId,
+          chiNhanhId,
+          admin.id,
+          thanhVien[0].id,
+        ],
+      );
+    }
 
-        // Lượt phê duyệt mẫu đã dùng để tạo đơn vị.
-        await client.query(`
+    // Lượt phê duyệt mẫu đã dùng để tạo đơn vị.
+    await client.query(
+      `
             INSERT INTO phep_tao_don_vi (
                 tai_khoan_id,
                 ma_phieu_duyet,
@@ -548,23 +481,30 @@ async function main() {
                 don_vi_da_tao_id =
                     EXCLUDED.don_vi_da_tao_id,
                 ngay_su_dung = now()
-        `, [admin.id, donVi.id]);
+        `,
+      [admin.id, donVi.id],
+    );
 
-        // Phiên mẫu: đã thu hồi và hết hạn, không thể đăng nhập.
-        const { rows: phienMau } = await client.query(`
+    // Phiên mẫu: đã thu hồi và hết hạn, không thể đăng nhập.
+    const { rows: phienMau } = await client.query(
+      `
             SELECT id
             FROM phien_dang_nhap
             WHERE tai_khoan_id = $1
               AND thiet_bi = 'BOOKFLOW_DEV_SEED'
             LIMIT 1
-        `, [admin.id]);
+        `,
+      [admin.id],
+    );
 
-        if (!phienMau.length) {
-            const maPhienBam = createHash('sha256')
-                .update(randomBytes(32))
-                .digest('hex');
+    if (!phienMau.length) {
+      const maPhienBam = createHash("sha256")
+        .update(randomBytes(32))
+        .digest("hex");
 
-            const phien = await mot(client, `
+      const phien = await mot(
+        client,
+        `
                 INSERT INTO phien_dang_nhap (
                     tai_khoan_id,
                     ma_phien_bam,
@@ -586,15 +526,12 @@ async function main() {
                     $3, $4, $5
                 )
                 RETURNING id
-            `, [
-                admin.id,
-                maPhienBam,
-                1,
-                donVi.id,
-                chiNhanh[0].id
-            ]);
+            `,
+        [admin.id, maPhienBam, 1, donVi.id, chiNhanh[0].id],
+      );
 
-            await client.query(`
+      await client.query(
+        `
                 INSERT INTO nhat_ky_dang_nhap (
                     tai_khoan_id,
                     email_da_nhap,
@@ -611,29 +548,29 @@ async function main() {
                     'Du lieu mau, khong phai lan dang nhap that',
                     $3
                 )
-            `, [
-                admin.id,
-                admin.email,
-                phien.id
-            ]);
-        }
+            `,
+        [admin.id, admin.email, phien.id],
+      );
+    }
 
-        // OTP mẫu: đã sử dụng và hết hạn, không thể xác minh.
-        const { rows: otpMau } = await client.query(`
+    // OTP mẫu: đã sử dụng và hết hạn, không thể xác minh.
+    const { rows: otpMau } = await client.query(
+      `
             SELECT id
             FROM ma_xac_minh
             WHERE tai_khoan_id = $1
               AND muc_dich = 'DANG_KY'
               AND ngay_su_dung IS NOT NULL
             LIMIT 1
-        `, [admin.id]);
+        `,
+      [admin.id],
+    );
 
-        if (!otpMau.length) {
-            const maBam = createHash('sha256')
-                .update(randomBytes(32))
-                .digest('hex');
+    if (!otpMau.length) {
+      const maBam = createHash("sha256").update(randomBytes(32)).digest("hex");
 
-            await client.query(`
+      await client.query(
+        `
                 INSERT INTO ma_xac_minh (
                     tai_khoan_id,
                     dia_chi_dich,
@@ -656,14 +593,13 @@ async function main() {
                     now() - interval '3 hours',
                     1
                 )
-            `, [
-                admin.id,
-                admin.email,
-                maBam
-            ]);
-        }
+            `,
+        [admin.id, admin.email, maBam],
+      );
+    }
 
-        await client.query(`
+    await client.query(
+      `
             INSERT INTO nhat_ky_he_thong (
                 don_vi_id,
                 tai_khoan_id,
@@ -684,13 +620,15 @@ async function main() {
                 'Dữ liệu mẫu phát triển BookFlow',
                 'WORKER'
             )
-        `, [
-            donVi.id,
-            admin.id
-        ]);
+        `,
+      [donVi.id, admin.id],
+    );
 
-        // Kiểm tra admin có đủ tất cả quyền đang hoạt động.
-        const { rows: [soQuyen] } = await client.query(`
+    // Kiểm tra admin có đủ tất cả quyền đang hoạt động.
+    const {
+      rows: [soQuyen],
+    } = await client.query(
+      `
             SELECT
                 (
                     SELECT COUNT(*)
@@ -704,80 +642,72 @@ async function main() {
                       AND vai_tro_id = $2
                       AND pham_vi = 'DON_VI'
                 ) AS da_gan
-        `, [
-            donVi.id,
-            vaiTro.QUAN_TRI.id
-        ]);
+        `,
+      [donVi.id, vaiTro.QUAN_TRI.id],
+    );
 
-        if (
-            Number(soQuyen.tong) !==
-            Number(soQuyen.da_gan)
-        ) {
-            throw new Error(
-                'Quản trị chưa có đủ quyền của đơn vị'
-            );
-        }
-
-        const tenBang = [
-            'tai_khoan',
-            'don_vi',
-            'chi_nhanh',
-            'thanh_vien_don_vi',
-            'thanh_vien_chi_nhanh',
-            'vai_tro',
-            'quyen',
-            'vai_tro_quyen',
-            'thanh_vien_vai_tro',
-            'phep_tao_don_vi',
-            'nhat_ky_he_thong',
-            'phien_dang_nhap',
-            'ma_xac_minh',
-            'nhat_ky_dang_nhap'
-        ];
-
-        const soBanGhi = {};
-
-        for (const ten of tenBang) {
-            const { rows: [item] } = await client.query(
-                `SELECT COUNT(*)::int AS so FROM public.${ten}`
-            );
-
-            soBanGhi[ten] = item.so;
-
-            if (!item.so) {
-                throw new Error(
-                    `Chưa có dữ liệu trong bảng ${ten}`
-                );
-            }
-        }
-
-        await client.query('COMMIT');
-        dangGiaoDich = false;
-
-        console.log('SEED OK:', {
-            taiKhoan,
-            donVi,
-            chiNhanh,
-            soQuyenAdmin: Number(soQuyen.da_gan),
-            soBanGhi
-        });
-
-        console.log(
-            'Phiên và OTP mẫu đã hết hạn/thu hồi; ' +
-            'không dùng chúng để đăng nhập thật.'
-        );
-    } catch (error) {
-        if (dangGiaoDich) {
-            await client.query('ROLLBACK').catch(() => {});
-        }
-
-        throw error;
-    } finally {
-        await client.end();
+    if (Number(soQuyen.tong) !== Number(soQuyen.da_gan)) {
+      throw new Error("Quản trị chưa có đủ quyền của đơn vị");
     }
+
+    const tenBang = [
+      "tai_khoan",
+      "don_vi",
+      "chi_nhanh",
+      "thanh_vien_don_vi",
+      "thanh_vien_chi_nhanh",
+      "vai_tro",
+      "quyen",
+      "vai_tro_quyen",
+      "thanh_vien_vai_tro",
+      "phep_tao_don_vi",
+      "nhat_ky_he_thong",
+      "phien_dang_nhap",
+      "ma_xac_minh",
+      "nhat_ky_dang_nhap",
+    ];
+
+    const soBanGhi = {};
+
+    for (const ten of tenBang) {
+      const {
+        rows: [item],
+      } = await client.query(`SELECT COUNT(*)::int AS so FROM public.${ten}`);
+
+      soBanGhi[ten] = item.so;
+
+      if (!item.so) {
+        throw new Error(`Chưa có dữ liệu trong bảng ${ten}`);
+      }
+    }
+
+    await client.query("COMMIT");
+    dangGiaoDich = false;
+
+    console.log("SEED OK:", {
+      taiKhoan,
+      donVi,
+      chiNhanh,
+      soQuyenAdmin: Number(soQuyen.da_gan),
+      soBanGhi,
+    });
+
+    console.log(
+      "Phiên và OTP mẫu đã hết hạn/thu hồi; " +
+        "không dùng chúng để đăng nhập thật.",
+    );
+  } catch (error) {
+    if (dangGiaoDich) {
+      await client.query("ROLLBACK").catch(() => {});
+    }
+
+    throw error;
+  } finally {
+    await client.end();
+  }
 }
 
-main().catch(error => {
-    console.error('SEED ERROR:', error.message);
-    process.exitCode = 1;
+main().catch((error) => {
+  console.error("SEED ERROR:", error.message);
+  process.exitCode = 1;
 });

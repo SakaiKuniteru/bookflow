@@ -2,7 +2,10 @@ from __future__ import annotations
 from typing import Any, Awaitable, Callable
 
 JOB_TYPE = "GENERATE_RECOMMENDATION"
-WorkerService = Callable[[dict[str, Any], Callable[[dict[str, Any]], Awaitable[None]], dict[str, Any]], Awaitable[dict[str, Any]]]
+WorkerService = Callable[
+    [dict[str, Any], Callable[[dict[str, Any]], Awaitable[None]], dict[str, Any]], Awaitable[dict[str, Any]]
+]
+
 
 def _kiem_tra_payload(payload: Any) -> dict[str, Any]:
     if not isinstance(payload, dict):
@@ -20,6 +23,7 @@ def _kiem_tra_payload(payload: Any) -> dict[str, Any]:
     if "user_id" in payload and payload["user_id"] is not None and not isinstance(payload["user_id"], (str, int)):
         raise ValueError("GENERATE_RECOMMENDATION user_id không hợp lệ.")
     return payload
+
 
 async def xu_ly(
     job: dict[str, Any],

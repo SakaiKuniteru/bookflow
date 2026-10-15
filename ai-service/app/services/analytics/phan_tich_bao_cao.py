@@ -50,8 +50,7 @@ TREND_TYPES = {
 
 
 class LLMProviderProtocol(Protocol):
-    async def generate(self, messages: Any) -> Any:
-        ...
+    async def generate(self, messages: Any) -> Any: ...
 
 
 @dataclass
@@ -214,7 +213,9 @@ class PhanTichBaoCaoService:
         if result["confidence"] not in {"HIGH", "MEDIUM", "LOW"}:
             raise AIValidationException("Confidence không hợp lệ.")
         for comparison in result["comparisons"]:
-            if comparison.get("percentage_change") is not None and not math.isfinite(float(comparison["percentage_change"])):
+            if comparison.get("percentage_change") is not None and not math.isfinite(
+                float(comparison["percentage_change"])
+            ):
                 raise AIValidationException("Percentage change không hợp lệ.")
         for anomaly in result["anomalies"]:
             if anomaly.get("score") is not None and not math.isfinite(float(anomaly["score"])):
@@ -223,7 +224,10 @@ class PhanTichBaoCaoService:
     def _chuan_hoa_metrics(self, raw_metrics: Any) -> list[dict[str, Any]]:
         result: list[dict[str, Any]] = []
         if isinstance(raw_metrics, dict):
-            items = [{"name": key, **value} if isinstance(value, dict) else {"name": key, "value": value} for key, value in raw_metrics.items()]
+            items = [
+                {"name": key, **value} if isinstance(value, dict) else {"name": key, "value": value}
+                for key, value in raw_metrics.items()
+            ]
         elif isinstance(raw_metrics, list):
             items = raw_metrics
         else:
@@ -235,15 +239,17 @@ class PhanTichBaoCaoService:
             value = self._so_thuc(item.get("value"))
             if not name:
                 continue
-            result.append({
-                "name": name,
-                "label": item.get("label") or name,
-                "value": value,
-                "unit": item.get("unit"),
-                "currency": item.get("currency"),
-                "source": item.get("source") or "BACKEND_REPORT",
-                "metadata": dict(item.get("metadata") or {}),
-            })
+            result.append(
+                {
+                    "name": name,
+                    "label": item.get("label") or name,
+                    "value": value,
+                    "unit": item.get("unit"),
+                    "currency": item.get("currency"),
+                    "source": item.get("source") or "BACKEND_REPORT",
+                    "metadata": dict(item.get("metadata") or {}),
+                }
+            )
         return result
 
     def _chuan_hoa_dimensions(self, raw_dimensions: Any) -> list[dict[str, Any]]:
@@ -252,25 +258,31 @@ class PhanTichBaoCaoService:
             for dimension_name, values in raw_dimensions.items():
                 if isinstance(values, dict):
                     for dimension_value, metrics in values.items():
-                        rows.append({
-                            "dimension": dimension_name,
-                            "value": dimension_value,
-                            "metrics": metrics if isinstance(metrics, dict) else {"value": metrics},
-                        })
+                        rows.append(
+                            {
+                                "dimension": dimension_name,
+                                "value": dimension_value,
+                                "metrics": metrics if isinstance(metrics, dict) else {"value": metrics},
+                            }
+                        )
                 elif isinstance(values, list):
                     for item in values:
                         if isinstance(item, dict):
-                            rows.append({
-                                "dimension": dimension_name,
-                                "value": item.get("value") or item.get("name"),
-                                "metrics": item.get("metrics") or item,
-                            })
+                            rows.append(
+                                {
+                                    "dimension": dimension_name,
+                                    "value": item.get("value") or item.get("name"),
+                                    "metrics": item.get("metrics") or item,
+                                }
+                            )
             return rows
         if isinstance(raw_dimensions, list):
             return [item for item in raw_dimensions if isinstance(item, dict)]
         return []
 
-    def _phan_tich_comparisons(self, report: ReportAnalysisInput, metrics: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    def _phan_tich_comparisons(
+        self, report: ReportAnalysisInput, metrics: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
         comparisons: list[dict[str, Any]] = []
         current_metrics = {item["name"]: item["value"] for item in metrics if item["value"] is not None}
         raw = report.comparisons
@@ -301,7 +313,9 @@ class PhanTichBaoCaoService:
                     comparisons.append(self._tao_comparison(name, current, previous_map[name], {}))
         return comparisons
 
-    def _tao_comparison(self, name: str, current: float | None, previous: float | None, source: dict[str, Any]) -> dict[str, Any]:
+    def _tao_comparison(
+        self, name: str, current: float | None, previous: float | None, source: dict[str, Any]
+    ) -> dict[str, Any]:
         absolute_change = None
         percentage_change = None
         direction = "NO_CHANGE"
@@ -330,28 +344,32 @@ class PhanTichBaoCaoService:
             points = [point for point in series["points"] if point["value"] is not None]
             values = [point["value"] for point in points]
             if len(values) < self.min_series_points:
-                result.append({
-                    "metric": series["metric"],
-                    "trend": "INSUFFICIENT_DATA",
-                    "points": len(values),
-                    "change_percentage": None,
-                    "slope": None,
-                    "periods": [point["period"] for point in points],
-                })
+                result.append(
+                    {
+                        "metric": series["metric"],
+                        "trend": "INSUFFICIENT_DATA",
+                        "points": len(values),
+                        "change_percentage": None,
+                        "slope": None,
+                        "periods": [point["period"] for point in points],
+                    }
+                )
                 continue
             first = values[0]
             last = values[-1]
             change_percentage = None if first == 0 else ((last - first) / abs(first)) * 100
             slope = self._tinh_slope(values)
             trend = self._xac_dinh_trend(values, change_percentage)
-            result.append({
-                "metric": series["metric"],
-                "trend": trend,
-                "points": len(values),
-                "change_percentage": round(change_percentage, 6) if change_percentage is not None else None,
-                "slope": round(slope, 8) if slope is not None else None,
-                "periods": [point["period"] for point in points],
-            })
+            result.append(
+                {
+                    "metric": series["metric"],
+                    "trend": trend,
+                    "points": len(values),
+                    "change_percentage": round(change_percentage, 6) if change_percentage is not None else None,
+                    "slope": round(slope, 8) if slope is not None else None,
+                    "periods": [point["period"] for point in points],
+                }
+            )
         return result
 
     def _phan_tich_anomalies(self, raw_series: Any) -> list[dict[str, Any]]:
@@ -374,18 +392,20 @@ class PhanTichBaoCaoService:
                     if iqr > 0:
                         score = abs(point["value"] - mean_value) / iqr
                 if score is not None and score >= self.anomaly_zscore_threshold:
-                    result.append({
-                        "metric": series["metric"],
-                        "period": point["period"],
-                        "value": point["value"],
-                        "score": round(score, 6),
-                        "baseline_mean": round(mean_value, 6),
-                        "type": "HIGH_SPIKE" if point["value"] > mean_value else "LOW_DROP",
-                        "evidence": {
-                            "sample_count": len(values),
-                            "threshold": self.anomaly_zscore_threshold,
-                        },
-                    })
+                    result.append(
+                        {
+                            "metric": series["metric"],
+                            "period": point["period"],
+                            "value": point["value"],
+                            "score": round(score, 6),
+                            "baseline_mean": round(mean_value, 6),
+                            "type": "HIGH_SPIKE" if point["value"] > mean_value else "LOW_DROP",
+                            "evidence": {
+                                "sample_count": len(values),
+                                "threshold": self.anomaly_zscore_threshold,
+                            },
+                        }
+                    )
         return result
 
     def _phan_tich_phan_bo(self, dimensions: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -413,20 +433,25 @@ class PhanTichBaoCaoService:
             if total <= 0:
                 continue
             ranked = sorted(positive_values, key=lambda item: item[1], reverse=True)
-            items = [{
-                "value": name,
-                "amount": round(value, 6),
-                "share": round(value / total, 6),
-            } for name, value in ranked]
+            items = [
+                {
+                    "value": name,
+                    "amount": round(value, 6),
+                    "share": round(value / total, 6),
+                }
+                for name, value in ranked
+            ]
             top_share = items[0]["share"] if items else 0
-            result.append({
-                "dimension": dimension,
-                "total": round(total, 6),
-                "top_value": items[0]["value"] if items else None,
-                "top_share": top_share,
-                "concentrated": top_share >= self.concentration_threshold,
-                "items": items[:20],
-            })
+            result.append(
+                {
+                    "dimension": dimension,
+                    "total": round(total, 6),
+                    "top_value": items[0]["value"] if items else None,
+                    "top_share": top_share,
+                    "concentrated": top_share >= self.concentration_threshold,
+                    "items": items[:20],
+                }
+            )
         return result
 
     def _phan_tich_tuong_quan(self, raw_series: Any) -> list[dict[str, Any]]:
@@ -437,24 +462,32 @@ class PhanTichBaoCaoService:
                 left = series_list[index]
                 right = series_list[other_index]
                 right_map = {point["period"]: point["value"] for point in right["points"] if point["value"] is not None}
-                pairs = [(point["value"], right_map[point["period"]]) for point in left["points"] if point["value"] is not None and point["period"] in right_map]
+                pairs = [
+                    (point["value"], right_map[point["period"]])
+                    for point in left["points"]
+                    if point["value"] is not None and point["period"] in right_map
+                ]
                 if len(pairs) < self.min_series_points:
                     continue
                 coefficient = self._pearson([pair[0] for pair in pairs], [pair[1] for pair in pairs])
                 if coefficient is None or abs(coefficient) < self.correlation_threshold:
                     continue
-                result.append({
-                    "metric_a": left["metric"],
-                    "metric_b": right["metric"],
-                    "coefficient": round(coefficient, 6),
-                    "strength": self._xac_dinh_correlation_strength(abs(coefficient)),
-                    "direction": "POSITIVE" if coefficient > 0 else "NEGATIVE",
-                    "points": len(pairs),
-                    "interpretation": "Mối liên hệ quan sát được trong dữ liệu, không phải kết luận nhân quả.",
-                })
+                result.append(
+                    {
+                        "metric_a": left["metric"],
+                        "metric_b": right["metric"],
+                        "coefficient": round(coefficient, 6),
+                        "strength": self._xac_dinh_correlation_strength(abs(coefficient)),
+                        "direction": "POSITIVE" if coefficient > 0 else "NEGATIVE",
+                        "points": len(pairs),
+                        "interpretation": "Mối liên hệ quan sát được trong dữ liệu, không phải kết luận nhân quả.",
+                    }
+                )
         return result
 
-    def _kiem_tra_chat_luong_du_lieu(self, report: ReportAnalysisInput, metrics: list[dict[str, Any]]) -> dict[str, Any]:
+    def _kiem_tra_chat_luong_du_lieu(
+        self, report: ReportAnalysisInput, metrics: list[dict[str, Any]]
+    ) -> dict[str, Any]:
         missing_fields = list(report.data_quality.get("missing_fields") or [])
         conflicts = list(report.data_quality.get("conflicts") or [])
         invalid_fields = list(report.data_quality.get("invalid_fields") or [])
@@ -497,15 +530,17 @@ class PhanTichBaoCaoService:
     ) -> list[dict[str, Any]]:
         findings: list[dict[str, Any]] = []
         if data_quality["status"] != "DATA_COMPLETE":
-            findings.append({
-                "type": "DATA_QUALITY",
-                "title": "Dữ liệu báo cáo chưa hoàn toàn đầy đủ",
-                "summary": f"Trạng thái dữ liệu: {data_quality['status']}.",
-                "evidence": data_quality,
-                "importance": "HIGH",
-                "confidence": self._confidence_data_quality(data_quality),
-                "related_metrics": data_quality["invalid_fields"] + data_quality["missing_fields"],
-            })
+            findings.append(
+                {
+                    "type": "DATA_QUALITY",
+                    "title": "Dữ liệu báo cáo chưa hoàn toàn đầy đủ",
+                    "summary": f"Trạng thái dữ liệu: {data_quality['status']}.",
+                    "evidence": data_quality,
+                    "importance": "HIGH",
+                    "confidence": self._confidence_data_quality(data_quality),
+                    "related_metrics": data_quality["invalid_fields"] + data_quality["missing_fields"],
+                }
+            )
         for comparison in comparisons:
             percentage = comparison["percentage_change"]
             if percentage is None:
@@ -519,15 +554,19 @@ class PhanTichBaoCaoService:
             else:
                 insight_type = "CHANGE"
                 title = f"{comparison['metric']} không thay đổi so với kỳ trước"
-            findings.append({
-                "type": insight_type,
-                "title": title,
-                "summary": self._mo_ta_phan_tram(comparison),
-                "evidence": comparison,
-                "importance": self._importance_from_percentage(abs(percentage)),
-                "confidence": "HIGH" if comparison["current"] is not None and comparison["previous"] is not None else "LOW",
-                "related_metrics": [comparison["metric"]],
-            })
+            findings.append(
+                {
+                    "type": insight_type,
+                    "title": title,
+                    "summary": self._mo_ta_phan_tram(comparison),
+                    "evidence": comparison,
+                    "importance": self._importance_from_percentage(abs(percentage)),
+                    "confidence": "HIGH"
+                    if comparison["current"] is not None and comparison["previous"] is not None
+                    else "LOW",
+                    "related_metrics": [comparison["metric"]],
+                }
+            )
         for trend in trends:
             if trend["trend"] == "INCREASING":
                 title = f"{trend['metric']} có xu hướng tăng"
@@ -537,46 +576,54 @@ class PhanTichBaoCaoService:
                 title = f"{trend['metric']} có mức dao động đáng chú ý"
             else:
                 continue
-            findings.append({
-                "type": "TREND",
-                "title": title,
-                "summary": self._mo_ta_trend(trend),
-                "evidence": trend,
-                "importance": "MEDIUM",
-                "confidence": "HIGH" if trend["points"] >= 5 else "MEDIUM",
-                "related_metrics": [trend["metric"]],
-            })
+            findings.append(
+                {
+                    "type": "TREND",
+                    "title": title,
+                    "summary": self._mo_ta_trend(trend),
+                    "evidence": trend,
+                    "importance": "MEDIUM",
+                    "confidence": "HIGH" if trend["points"] >= 5 else "MEDIUM",
+                    "related_metrics": [trend["metric"]],
+                }
+            )
         for anomaly in anomalies:
-            findings.append({
-                "type": "ANOMALY",
-                "title": f"Phát hiện điểm bất thường ở {anomaly['metric']}",
-                "summary": f"Giá trị tại {anomaly['period']} lệch đáng kể so với mức nền của chuỗi dữ liệu được cung cấp.",
-                "evidence": anomaly,
-                "importance": "HIGH",
-                "confidence": "HIGH" if anomaly["score"] >= 3 else "MEDIUM",
-                "related_metrics": [anomaly["metric"]],
-            })
+            findings.append(
+                {
+                    "type": "ANOMALY",
+                    "title": f"Phát hiện điểm bất thường ở {anomaly['metric']}",
+                    "summary": f"Giá trị tại {anomaly['period']} lệch đáng kể so với mức nền của chuỗi dữ liệu được cung cấp.",
+                    "evidence": anomaly,
+                    "importance": "HIGH",
+                    "confidence": "HIGH" if anomaly["score"] >= 3 else "MEDIUM",
+                    "related_metrics": [anomaly["metric"]],
+                }
+            )
         for distribution in distributions:
             if distribution["concentrated"]:
-                findings.append({
-                    "type": "CONCENTRATION",
-                    "title": f"Dữ liệu tập trung tại {distribution['top_value']}",
-                    "summary": f"Giá trị đứng đầu chiếm {round(distribution['top_share'] * 100, 2)}% tổng phạm vi của chiều {distribution['dimension']}.",
-                    "evidence": distribution,
-                    "importance": "MEDIUM",
-                    "confidence": "HIGH",
-                    "related_metrics": [distribution["dimension"]],
-                })
+                findings.append(
+                    {
+                        "type": "CONCENTRATION",
+                        "title": f"Dữ liệu tập trung tại {distribution['top_value']}",
+                        "summary": f"Giá trị đứng đầu chiếm {round(distribution['top_share'] * 100, 2)}% tổng phạm vi của chiều {distribution['dimension']}.",
+                        "evidence": distribution,
+                        "importance": "MEDIUM",
+                        "confidence": "HIGH",
+                        "related_metrics": [distribution["dimension"]],
+                    }
+                )
         for correlation in correlations:
-            findings.append({
-                "type": "CORRELATION",
-                "title": f"{correlation['metric_a']} và {correlation['metric_b']} có mối liên hệ quan sát được",
-                "summary": f"Hệ số tương quan là {round(correlation['coefficient'], 4)} trong dữ liệu được cung cấp.",
-                "evidence": correlation,
-                "importance": "MEDIUM",
-                "confidence": "MEDIUM",
-                "related_metrics": [correlation["metric_a"], correlation["metric_b"]],
-            })
+            findings.append(
+                {
+                    "type": "CORRELATION",
+                    "title": f"{correlation['metric_a']} và {correlation['metric_b']} có mối liên hệ quan sát được",
+                    "summary": f"Hệ số tương quan là {round(correlation['coefficient'], 4)} trong dữ liệu được cung cấp.",
+                    "evidence": correlation,
+                    "importance": "MEDIUM",
+                    "confidence": "MEDIUM",
+                    "related_metrics": [correlation["metric_a"], correlation["metric_b"]],
+                }
+            )
         return findings
 
     def _tao_summary(
@@ -604,7 +651,9 @@ class PhanTichBaoCaoService:
         if not parts:
             if data_quality["status"] == "DATA_COMPLETE":
                 return f"Báo cáo {report.report_type} đã được phân tích từ dữ liệu được Backend cung cấp."
-            return f"Báo cáo {report.report_type} đã được phân tích nhưng dữ liệu có trạng thái {data_quality['status']}."
+            return (
+                f"Báo cáo {report.report_type} đã được phân tích nhưng dữ liệu có trạng thái {data_quality['status']}."
+            )
         return " ".join(parts)
 
     def _tao_warnings(
@@ -718,7 +767,11 @@ class PhanTichBaoCaoService:
         for index in range(1, len(values)):
             difference = values[index] - values[index - 1]
             signs.append(1 if difference > 0 else -1 if difference < 0 else 0)
-        direction_changes = sum(1 for index in range(1, len(signs)) if signs[index] != signs[index - 1] and signs[index] != 0 and signs[index - 1] != 0)
+        direction_changes = sum(
+            1
+            for index in range(1, len(signs))
+            if signs[index] != signs[index - 1] and signs[index] != 0 and signs[index - 1] != 0
+        )
         if direction_changes >= max(2, len(values) // 2):
             return "VOLATILE"
         return "INCREASING" if change_percentage > 0 else "DECREASING"
@@ -738,7 +791,7 @@ class PhanTichBaoCaoService:
             upper_half = ordered[midpoint:]
         else:
             lower_half = ordered[:midpoint]
-            upper_half = ordered[midpoint + 1:]
+            upper_half = ordered[midpoint + 1 :]
         return self._median_list(lower_half), self._median_list(upper_half)
 
     def _median_list(self, values: list[float]) -> float:

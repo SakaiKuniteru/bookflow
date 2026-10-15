@@ -127,8 +127,7 @@ class OCRProvider(Protocol):
         mime_type: str,
         file_name: str,
         page_number: int | None = None,
-    ) -> dict[str, Any]:
-        ...
+    ) -> dict[str, Any]: ...
 
 
 class OCRService:
@@ -259,9 +258,7 @@ class OCRService:
 
     def _kiem_tra_quyen(self, access_verified: bool) -> None:
         if not access_verified:
-            raise AIValidationException(
-                "Extraction yêu cầu file đã được Backend xác thực quyền truy cập."
-            )
+            raise AIValidationException("Extraction yêu cầu file đã được Backend xác thực quyền truy cập.")
 
     def _kiem_tra_file(self, content: bytes, file_name: str) -> None:
         if not content:
@@ -269,9 +266,7 @@ class OCRService:
         if not file_name or not file_name.strip():
             raise AIValidationException("Thiếu tên file.")
         if len(content) > self.max_file_size:
-            raise AIValidationException(
-                f"File vượt quá kích thước cho phép: {self.max_file_size} bytes."
-            )
+            raise AIValidationException(f"File vượt quá kích thước cho phép: {self.max_file_size} bytes.")
 
     def _kiem_tra_mime_type(self, mime_type: str) -> None:
         if mime_type not in SUPPORTED_MIME_TYPES:
@@ -298,6 +293,7 @@ class OCRService:
         if mime_type == "application/json":
             try:
                 import json
+
                 parsed = json.loads(text)
                 return json.dumps(parsed, ensure_ascii=False, indent=2)
             except Exception:
@@ -307,6 +303,7 @@ class OCRService:
     def _doc_text_docx(self, content: bytes) -> str:
         try:
             import zipfile
+
             with zipfile.ZipFile(io.BytesIO(content)) as archive:
                 xml_content = archive.read("word/document.xml")
         except Exception as exc:
@@ -364,9 +361,7 @@ class OCRService:
         mime_type: str,
     ) -> OCRResult:
         if self.provider is None:
-            raise AIProviderException(
-                "Chưa cấu hình OCR provider cho file không có text layer."
-            )
+            raise AIProviderException("Chưa cấu hình OCR provider cho file không có text layer.")
         response = await self.provider.recognize(
             content=content,
             mime_type=mime_type,
@@ -406,9 +401,7 @@ class OCRService:
                     )
                 )
                 if mime_type == "application/pdf":
-                    warnings.append(
-                        "OCR provider không trả page boundary; page_number chỉ là vùng kết quả tổng hợp."
-                    )
+                    warnings.append("OCR provider không trả page boundary; page_number chỉ là vùng kết quả tổng hợp.")
         successful_pages = [page for page in pages if page.status == OCR_STATUS_COMPLETED]
         failed_pages = [page for page in pages if page.status == OCR_STATUS_FAILED]
         if failed_pages and successful_pages:
@@ -420,9 +413,7 @@ class OCRService:
         if not pages and not errors:
             errors.append("OCR provider không trả về nội dung.")
             status = OCR_STATUS_FAILED
-        raw_text = "\n\n".join(
-            page.text.strip() for page in pages if page.text and page.text.strip()
-        )
+        raw_text = "\n\n".join(page.text.strip() for page in pages if page.text and page.text.strip())
         return OCRResult(
             source_file_id=None,
             source_version=None,
@@ -483,9 +474,7 @@ class OCRService:
         errors: list[str],
         metadata: dict[str, Any],
     ) -> OCRResult:
-        raw_text = "\n\n".join(
-            page.text.strip() for page in pages if page.text and page.text.strip()
-        )
+        raw_text = "\n\n".join(page.text.strip() for page in pages if page.text and page.text.strip())
         return OCRResult(
             source_file_id=source_file_id,
             source_version=source_version,

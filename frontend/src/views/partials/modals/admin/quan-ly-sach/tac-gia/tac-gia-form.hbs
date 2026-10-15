@@ -8,7 +8,6 @@
     loading=false
 }}
     <form id="catalog-form" class="bf-modal-form bf-modal-form-grid" data-catalog-form novalidate>
-        <p class="bf-form-error bf-modal-form-error bf-form-grid-full" data-catalog-form-error role="alert" hidden></p>
         <p class="bf-form-help bf-form-grid-full" data-catalog-form-notice role="status" hidden></p>
         <div class="bf-profile-image-layout bf-form-grid-full bf-author-profile-layout">
             {{> forms/image
@@ -42,46 +41,17 @@
                     icon="user"
                 }}
                 {{> forms/input
-                    id="author-display-name"
-                    name="tenHienThi"
+                    id="author-original-name"
+                    name="tenGoc"
                     type="text"
-                    label="Tên hiển thị"
-                    placeholder="Để trống để dùng họ và tên"
+                    label="Tên gốc"
+                    placeholder="Nhập tên gốc"
                     maxlength=200
-                    icon="user"
+                    icon="edit"
+                    required=true
                 }}
             </div>
         </div>
-        <div class="bf-form-grid-full">
-            <h3 class="bf-author-section-title">Tên gọi</h3>
-        </div>
-        {{> forms/input
-            id="author-original-name"
-            name="tenGoc"
-            type="text"
-            label="Tên gốc"
-            placeholder="Nhập tên gốc"
-            maxlength=200
-            icon="edit"
-        }}
-        {{> forms/input
-            id="author-sort-name"
-            name="tenSapXep"
-            type="text"
-            label="Tên sắp xếp"
-            placeholder="Nhập tên sắp xếp"
-            maxlength=200
-            icon="edit"
-        }}
-        {{> forms/input
-            id="author-other-name"
-            name="tenKhac"
-            type="text"
-            label="Tên khác"
-            placeholder="Nhập tên khác"
-            maxlength=200
-            icon="edit"
-        }}
         <div class="bf-form-grid-full">
             <h3 class="bf-author-section-title">Thông tin cá nhân và địa chỉ</h3>
         </div>
@@ -132,6 +102,7 @@
             icon="globe"
             addressRole="country"
             addressGroup="author-nationality"
+            required=true
         }}
         {{> forms/select
             id="author-origin-country"
@@ -142,6 +113,7 @@
             icon="globe"
             addressRole="country"
             addressGroup="author-origin"
+            required=true
         }}
         {{> forms/input
             id="author-language"
@@ -152,13 +124,17 @@
             maxlength=15
             icon="globe"
         }}
-        {{> forms/textarea
+        {{> forms/select
             id="author-field"
             name="linhVucSangTac"
             label="Lĩnh vực sáng tác"
             placeholder="Nhập lĩnh vực sáng tác"
-            maxlength=2000
-            rows=2
+            search=true
+            optionsEndpoint="/api/the-loai"
+            optionsRowsKey="theLoai"
+            optionsValueKey="id"
+            optionsLabelKey="tenTheLoai"
+            frontendOnly=true
             icon="book"
         }}
         <div class="bf-form-grid-full">
@@ -221,6 +197,7 @@
             className="bf-form-grid-full"
             icon="check"
         }}
+        {{> forms/catalog-active}}
     </form>
     <footer class="bf-modal-footer">
         <button type="button" class="bf-btn bf-btn-secondary bf-btn-md" data-bf-modal-close>Hủy</button>

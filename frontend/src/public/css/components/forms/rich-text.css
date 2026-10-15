@@ -1,182 +1,187 @@
 .bf-rich-text {
-    overflow: hidden;
-    border: 1px solid var(--bf-form-border);
-    border-radius: var(--bf-form-radius);
-    background: var(--bf-form-bg);
+  overflow: hidden;
+  border: 1px solid var(--bf-form-border);
+  border-radius: var(--bf-form-radius);
+  background: var(--bf-form-bg);
 }
 
 .bf-rich-toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 3px;
-    padding: 6px;
-    border-bottom: 1px solid var(--bf-form-border);
-    background: #fafbfc;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px;
+  padding: 6px;
+  border-bottom: 1px solid var(--bf-form-border);
+  background: #fafbfc;
 }
 
 .bf-rich-toolbar button,
 .bf-rich-toolbar select,
 .bf-rich-font-size {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 30px;
-    height: 30px;
-    padding: 3px 7px;
-    border: 1px solid transparent;
-    border-radius: 5px;
-    background: transparent;
-    color: var(--bf-form-text);
-    font: inherit;
-    font-size: 13px;
-    cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  height: 30px;
+  padding: 3px 7px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--bf-form-text);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
 }
 
 .bf-rich-toolbar button:hover,
 .bf-rich-toolbar select:hover,
 .bf-rich-font-size:focus {
-    border-color: var(--bf-form-border);
-    background: var(--bf-form-hover);
-    color: var(--bf-form-primary);
+  border-color: var(--bf-form-border);
+  background: var(--bf-form-hover);
+  color: var(--bf-form-primary);
 }
 
 .bf-rich-toolbar select {
-    max-width: 130px;
+  max-width: 130px;
 }
 
 .bf-rich-font-size {
-    width: 52px;
-    border-color: var(--bf-form-border);
-    background: #fff;
-    cursor: text;
+  width: 52px;
+  border-color: var(--bf-form-border);
+  background: #fff;
+  cursor: text;
 }
 
 .bf-rich-color {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 30px;
-    height: 30px;
-    border-radius: 5px;
-    color: var(--bf-form-text);
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 5px;
+  color: var(--bf-form-text);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 .bf-rich-color:hover {
-    background: var(--bf-form-hover);
+  background: var(--bf-form-hover);
 }
 
 .bf-rich-color input {
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    width: 13px;
-    height: 5px;
-    padding: 0;
-    border: 0;
-    cursor: pointer;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 13px;
+  height: 5px;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
 }
 
 .bf-rich-divider {
-    width: 1px;
-    height: 20px;
-    margin: 0 3px;
-    background: var(--bf-form-border);
+  width: 1px;
+  height: 20px;
+  margin: 0 3px;
+  background: var(--bf-form-border);
 }
 
 .bf-rich-editor {
-    min-height: 220px;
-    padding: 12px;
-    outline: none;
-    color: var(--bf-form-text);
-    font-size: 14px;
-    line-height: 1.65;
-    overflow-wrap: anywhere;
+  min-height: 220px;
+  padding: 12px;
+  outline: none;
+  color: var(--bf-form-text);
+  font-size: 14px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
 }
 
 .bf-rich-editor:empty::before {
-    content: attr(data-placeholder);
-    color: #9ca3af;
-    pointer-events: none;
+  content: attr(data-placeholder);
+  color: #9ca3af;
+  pointer-events: none;
 }
 
 .bf-rich-editor img {
-    max-width: 100%;
-    height: auto;
+  max-width: 100%;
+  height: auto;
 }
 
 .bf-rich-editor table,
 .bf-rich-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 10px 0;
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0;
 }
 
 .bf-rich-editor td,
 .bf-rich-editor th {
-    min-width: 50px;
-    padding: 7px;
-    border: 1px solid var(--bf-form-border);
+  min-width: 50px;
+  padding: 7px;
+  border: 1px solid var(--bf-form-border);
 }
 
 .bf-rich-editor blockquote {
-    margin: 10px 0;
-    padding: 8px 14px;
-    border-left: 4px solid var(--bf-form-primary);
-    background: var(--bf-form-hover);
+  margin: 10px 0;
+  padding: 8px 14px;
+  border-left: 4px solid var(--bf-form-primary);
+  background: var(--bf-form-hover);
 }
 
 .bf-rich-editor pre.bf-rich-code {
-    overflow: auto;
-    margin: 10px 0;
-    padding: 12px;
-    border-radius: 6px;
-    background: #111827;
-    color: #e5e7eb;
-    font: 13px/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    white-space: pre;
-    tab-size: 4;
+  overflow: auto;
+  margin: 10px 0;
+  padding: 12px;
+  border-radius: 6px;
+  background: #111827;
+  color: #e5e7eb;
+  font:
+    13px/1.6 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Consolas,
+    monospace;
+  white-space: pre;
+  tab-size: 4;
 }
 
 .bf-rich-editor pre.bf-rich-code code {
-    color: inherit;
-    font: inherit;
+  color: inherit;
+  font: inherit;
 }
 
 .bf-rich-editor .bf-code-keyword {
-    color: #c4b5fd;
+  color: #c4b5fd;
 }
 
 .bf-rich-editor .bf-code-string {
-    color: #86efac;
+  color: #86efac;
 }
 
 .bf-rich-editor .bf-code-comment {
-    color: #9ca3af;
-    font-style: italic;
+  color: #9ca3af;
+  font-style: italic;
 }
 
 .bf-rich-editor .bf-code-number {
-    color: #fca5a5;
+  color: #fca5a5;
 }
 
 .bf-rich-editor .bf-code-tag {
-    color: #7dd3fc;
+  color: #7dd3fc;
 }
 
 .bf-rich-hidden {
-    display: none;
+  display: none;
 }
 
 @media (max-width: 640px) {
-    .bf-rich-toolbar {
-        gap: 2px;
-    }
-    .bf-rich-toolbar select {
-        max-width: 105px;
-    }
+  .bf-rich-toolbar {
+    gap: 2px;
+  }
+  .bf-rich-toolbar select {
+    max-width: 105px;
+  }
 }

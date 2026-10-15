@@ -5,7 +5,7 @@ from app.services.recommendations.tao_ung_vien import (
     RecommendationContext,
     RECOMMENDATION_MODE_BORROW,
     RECOMMENDATION_MODE_PURCHASE,
-    RECOMMENDATION_MODE_RENT
+    RECOMMENDATION_MODE_RENT,
 )
 
 EXPLANATION_MAP = {
@@ -18,7 +18,7 @@ EXPLANATION_MAP = {
     "CONTEXT_MATCH": "Phù hợp với ngữ cảnh recommendation hiện tại.",
     "BUSINESS_MATCH": "Phù hợp với điều kiện nghiệp vụ của yêu cầu.",
     "SIMILAR_TO_HISTORY": "Có điểm tương đồng với những sách bạn đã quan tâm.",
-    "POPULAR_IN_CONTEXT": "Phù hợp với dữ liệu phổ biến trong ngữ cảnh hiện tại."
+    "POPULAR_IN_CONTEXT": "Phù hợp với dữ liệu phổ biến trong ngữ cảnh hiện tại.",
 }
 
 
@@ -26,7 +26,9 @@ class GiaiThichService:
     def __init__(self, max_reasons: int = 3):
         self.max_reasons = max(1, max_reasons)
 
-    async def tao_giai_thich(self, recommendations: list[dict[str, Any]] | dict[str, Any], context: RecommendationContext | dict[str, Any]) -> dict[str, Any]:
+    async def tao_giai_thich(
+        self, recommendations: list[dict[str, Any]] | dict[str, Any], context: RecommendationContext | dict[str, Any]
+    ) -> dict[str, Any]:
         context = context if isinstance(context, RecommendationContext) else RecommendationContext.tu_dict(context)
         if isinstance(recommendations, dict):
             recommendations = recommendations.get("recommendations", recommendations.get("results", []))
@@ -41,23 +43,19 @@ class GiaiThichService:
             item["matched_features"] = list(dict.fromkeys(item.get("matched_features", [])))
             item["reasons"] = reasons
             item["reason"] = " ".join(reasons)
-            item["explanation"] = {
-                "type": "RULE_BASED",
-                "features": item["matched_features"],
-                "reasons": reasons
-            }
+            item["explanation"] = {"type": "RULE_BASED", "features": item["matched_features"], "reasons": reasons}
             result.append(item)
         self.kiem_tra_ket_qua(result, context)
         return {
             "context": context.to_dict(),
             "recommendations": result,
             "total": len(result),
-            "metadata": {
-                "explanation_type": "RULE_BASED"
-            }
+            "metadata": {"explanation_type": "RULE_BASED"},
         }
 
-    def kiem_tra_ket_qua(self, recommendations: list[dict[str, Any]], context: RecommendationContext | dict[str, Any] | None = None) -> None:
+    def kiem_tra_ket_qua(
+        self, recommendations: list[dict[str, Any]], context: RecommendationContext | dict[str, Any] | None = None
+    ) -> None:
         da_co = set()
         for item in recommendations:
             book_id = item.get("book_id")
@@ -73,12 +71,16 @@ class GiaiThichService:
             except (TypeError, ValueError):
                 raise AIValidationException("Recommendation có score không hợp lệ", details={"book_id": book_id})
             if score < 0 or score > 1:
-                raise AIValidationException("Recommendation có score ngoài khoảng 0 đến 1", details={"book_id": book_id})
+                raise AIValidationException(
+                    "Recommendation có score ngoài khoảng 0 đến 1", details={"book_id": book_id}
+                )
             if not str(item.get("reason", "")).strip():
                 raise AIValidationException("Recommendation thiếu lý do giải thích", details={"book_id": book_id})
 
     def _tao_reasons(self, item: dict[str, Any], context: RecommendationContext) -> list[str]:
-        features = [str(feature).strip().upper() for feature in item.get("matched_features", []) if str(feature).strip()]
+        features = [
+            str(feature).strip().upper() for feature in item.get("matched_features", []) if str(feature).strip()
+        ]
         reasons = []
         for feature in features:
             if feature == "SIMILAR_TO_HISTORY" and not context.personalization_allowed:
@@ -93,11 +95,15 @@ class GiaiThichService:
             reasons.append(business_reason)
         if not reasons:
             reasons.append("Được xếp hạng phù hợp với ngữ cảnh recommendation hiện tại.")
-        return reasons[:self.max_reasons]
+        return reasons[: self.max_reasons]
 
     def _tao_business_reason(self, item: dict[str, Any], context: RecommendationContext) -> str | None:
         business = item.get("business") or {}
-        if business.get("allowed") is not True and business.get("duoc_phep") is not True and business.get("hop_le") is not True:
+        if (
+            business.get("allowed") is not True
+            and business.get("duoc_phep") is not True
+            and business.get("hop_le") is not True
+        ):
             return None
         if context.recommendation_mode == RECOMMENDATION_MODE_PURCHASE:
             if business.get("sale_enabled") is True or business.get("co_the_mua") is True:

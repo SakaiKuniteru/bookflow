@@ -42,6 +42,7 @@ JOB_TIMEOUTS: dict[str, float] = {
     CLEANUP_INDEX: 600.0,
 }
 
+
 @dataclass(slots=True)
 class WorkerServices:
     lap_chi_muc_sach: WorkerService
@@ -62,6 +63,7 @@ class WorkerServices:
         if not callable(service):
             raise RuntimeError(f"Không có service cho job type: {job_type}")
         return service
+
 
 class WorkerRunner:
     def __init__(
@@ -131,7 +133,14 @@ class WorkerRunner:
         if status_code in {429, 502, 503, 504}:
             return True
         error_name = error.__class__.__name__.lower()
-        if error_name in {"validationerror", "authorizationerror", "authenticationerror", "notfounderror", "conflicterror", "nonretryableerror"}:
+        if error_name in {
+            "validationerror",
+            "authorizationerror",
+            "authenticationerror",
+            "notfounderror",
+            "conflicterror",
+            "nonretryableerror",
+        }:
             return False
         if error_name in {"timeouterror", "dependencyerror", "providererror", "connectionerror"}:
             return True
@@ -264,6 +273,7 @@ class WorkerRunner:
 
     async def _ghi_thanh_cong(self, job_id: str, result: dict[str, Any]) -> None:
         completed_at = self._utc_now()
+
         async def operation() -> Any:
             return await self._goi(
                 self.cong_viec_repository.cap_nhat,
@@ -273,6 +283,7 @@ class WorkerRunner:
                 completed_at=completed_at,
                 worker_id=self.worker_id,
             )
+
         await chay_retry(
             operation,
             policy=RetryPolicy(max_attempts=3, initial_delay=0.5, max_delay=5.0, multiplier=2.0),
@@ -280,6 +291,7 @@ class WorkerRunner:
 
     async def _ghi_that_bai(self, job_id: str, error_code: str, error_message: str) -> None:
         completed_at = self._utc_now()
+
         async def operation() -> Any:
             return await self._goi(
                 self.cong_viec_repository.cap_nhat,
@@ -290,6 +302,7 @@ class WorkerRunner:
                 completed_at=completed_at,
                 worker_id=self.worker_id,
             )
+
         await chay_retry(
             operation,
             policy=RetryPolicy(max_attempts=3, initial_delay=0.5, max_delay=5.0, multiplier=2.0),
@@ -352,8 +365,10 @@ class WorkerRunner:
             service = self.services.lay_theo_job_type(job_type)
             context = self._tao_worker_context(job)
             progress_state: dict[str, Any] = {"percentage": 0}
+
             async def cap_nhat_tien_do(progress: dict[str, Any]) -> None:
                 await self._cap_nhat_tien_do(job_id, progress_state, progress)
+
             await cap_nhat_tien_do({"percentage": 0})
             heartbeat_task = asyncio.create_task(self._heartbeat(job_id, progress_state))
             timeout = float(self.job_timeouts.get(job_type, 600.0))
@@ -498,6 +513,7 @@ class WorkerRunner:
                     logger.exception("Job lỗi trong graceful shutdown.")
         logger.info("Worker đã dừng worker_id=%s", self.worker_id)
 
+
 async def chay_worker(
     queue_dispatcher: QueueDispatcher,
     cong_viec_repository: CongViecRepository,
@@ -524,6 +540,7 @@ async def chay_worker(
     )
     await runner.chay()
 
+
 async def khoi_dong_worker() -> None:
     from app.core.config import get_settings
     from app.core.logging import cau_hinh_logging
@@ -542,8 +559,10 @@ async def khoi_dong_worker() -> None:
     from app.services.indexing.tai_lieu import tai_lieu_indexing_service
     from app.services.extraction.trich_xuat_thong_tin import trich_xuat_thong_tin_service
     from app.services.recommendations.tao_ung_vien import tao_ung_vien_service
+
     settings = get_settings()
     from app.core.config import kiem_tra_cau_hinh
+
     kiem_tra_cau_hinh(settings)
     cau_hinh_logging(settings.app_log_level)
     postgres = tao_postgres_client(settings)
@@ -578,6 +597,7 @@ async def khoi_dong_worker() -> None:
         initialized.append(queue)
         repository = tao_cong_viec_repository(postgres)
         dispatcher = QueueDispatcher(queue)
+
         async def index_book(payload, progress, context):
             result = await sach_indexing_service.index_sach(
                 payload["book_id"],
@@ -588,6 +608,7 @@ async def khoi_dong_worker() -> None:
             )
             await progress({"processed": 1, "total": 1, "percentage": 100, "message": "Index sách hoàn tất."})
             return result
+
         async def index_document(payload, progress, context):
             result = await tai_lieu_indexing_service.index_tai_lieu(
                 payload["file_id"],
@@ -598,6 +619,7 @@ async def khoi_dong_worker() -> None:
             )
             await progress({"processed": 1, "total": 1, "percentage": 100, "message": "Index tài liệu hoàn tất."})
             return result
+
         async def extract_information(payload, progress, context):
             result = await trich_xuat_thong_tin_service.trich_xuat(
                 ocr_result=payload["ocr_result"],
@@ -608,6 +630,7 @@ async def khoi_dong_worker() -> None:
             )
             await progress({"processed": 1, "total": 1, "percentage": 100, "message": "Extraction hoàn tất."})
             return result
+
         async def generate_recommendation(payload, progress, context):
             result = await tao_ung_vien_service.tao_ung_vien(
                 payload.get("context") or payload,
@@ -616,6 +639,7 @@ async def khoi_dong_worker() -> None:
             )
             await progress({"processed": 1, "total": 1, "percentage": 100, "message": "Recommendation hoàn tất."})
             return result
+
         async def cleanup_index(payload, progress, context):
             source_id = payload.get("source_id")
             if source_id:
@@ -625,6 +649,7 @@ async def khoi_dong_worker() -> None:
                 chunk_count = 0
             await progress({"processed": 1, "total": 1, "percentage": 100, "message": "Cleanup index hoàn tất."})
             return {"source_id": source_id, "affected_chunks": chunk_count}
+
         services = WorkerServices(
             lap_chi_muc_sach=index_book,
             lap_chi_muc_tai_lieu=index_document,
@@ -644,6 +669,9 @@ async def khoi_dong_worker() -> None:
     finally:
         for dependency in reversed(initialized):
             await dependency.dong()
+
+
 if __name__ == "__main__":
     import asyncio
+
     asyncio.run(khoi_dong_worker())

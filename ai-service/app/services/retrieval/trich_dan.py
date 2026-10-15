@@ -53,7 +53,7 @@ class Citation:
             "chapter": self.chapter,
             "section": self.section,
             "url": self.url,
-            "excerpt": self.excerpt
+            "excerpt": self.excerpt,
         }
 
 
@@ -93,19 +93,21 @@ class TrichDanService:
             if citation_id in da_co:
                 continue
             da_co.add(citation_id)
-            sources.append({
-                "citation_id": citation_id,
-                "source_id": citation.get("source_id"),
-                "chunk_id": citation.get("chunk_id"),
-                "entity_id": citation.get("entity_id"),
-                "title": citation.get("title"),
-                "source_type": citation.get("source_type"),
-                "page": citation.get("page"),
-                "chapter": citation.get("chapter"),
-                "section": citation.get("section"),
-                "excerpt": citation.get("excerpt"),
-                "url": citation.get("url")
-            })
+            sources.append(
+                {
+                    "citation_id": citation_id,
+                    "source_id": citation.get("source_id"),
+                    "chunk_id": citation.get("chunk_id"),
+                    "entity_id": citation.get("entity_id"),
+                    "title": citation.get("title"),
+                    "source_type": citation.get("source_type"),
+                    "page": citation.get("page"),
+                    "chapter": citation.get("chapter"),
+                    "section": citation.get("section"),
+                    "excerpt": citation.get("excerpt"),
+                    "url": citation.get("url"),
+                }
+            )
         return sources
 
     async def _lay_sources(self, source_ids: list[Any]) -> dict[str, dict[str, Any]]:
@@ -117,7 +119,11 @@ class TrichDanService:
             logger.warning("Không lấy được metadata nguồn citation: %s", error)
             return {}
         sources = _lay_danh_sach(raw_sources)
-        return {str(item.get("id", item.get("source_id", item.get("nguon_id")))): item for item in sources if item.get("id", item.get("source_id", item.get("nguon_id"))) is not None}
+        return {
+            str(item.get("id", item.get("source_id", item.get("nguon_id")))): item
+            for item in sources
+            if item.get("id", item.get("source_id", item.get("nguon_id"))) is not None
+        }
 
     def _tao_citation(self, result: dict[str, Any], source: dict[str, Any] | None) -> Citation | None:
         source_id = result.get("source_id")
@@ -151,7 +157,7 @@ class TrichDanService:
             chapter=chapter,
             section=section,
             url=url,
-            excerpt=excerpt
+            excerpt=excerpt,
         )
 
     def _tao_citation_id(self, source_id: Any, chunk_id: Any) -> str:
@@ -167,7 +173,7 @@ class TrichDanService:
             return None
         if len(text) <= self.max_excerpt_chars:
             return text
-        return text[:self.max_excerpt_chars].rstrip() + "..."
+        return text[: self.max_excerpt_chars].rstrip() + "..."
 
 
 trich_dan_service = TrichDanService()

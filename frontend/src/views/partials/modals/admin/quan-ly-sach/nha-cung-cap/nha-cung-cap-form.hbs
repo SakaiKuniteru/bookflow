@@ -8,7 +8,6 @@
     loading=false
 }}
     <form id="catalog-form" class="bf-modal-form bf-modal-form-grid" data-catalog-form novalidate>
-        <p class="bf-form-error bf-modal-form-error bf-form-grid-full" data-catalog-form-error role="alert" hidden></p>
         <p class="bf-form-help bf-form-grid-full" data-catalog-form-notice role="status" hidden></p>
         {{> forms/input
             id="catalog-ma-nha-cung-cap"
@@ -38,24 +37,7 @@
             placeholder="Nhập tên pháp lý"
             maxlength="255"
             icon="edit"
-        }}
-        {{> forms/input
-            id="catalog-ten-giao-dich"
-            name="tenGiaoDich"
-            type="text"
-            label="Tên giao dịch"
-            placeholder="Nhập tên giao dịch"
-            maxlength="255"
-            icon="edit"
-        }}
-        {{> forms/input
-            id="catalog-ten-viet-tat"
-            name="tenVietTat"
-            type="text"
-            label="Tên viết tắt"
-            placeholder="Nhập tên viết tắt"
-            maxlength="100"
-            icon="edit"
+            required=true
         }}
         {{> forms/select
             id="catalog-loai-nha-cung-cap"
@@ -65,6 +47,7 @@
             search=true
             options=(lookup formOptions "loaiNhaCungCap")
             icon="grid"
+            required=true
         }}
         {{> forms/input
             id="catalog-ma-so-thue"
@@ -73,31 +56,6 @@
             label="Mã số thuế"
             placeholder="Nhập mã số thuế"
             maxlength="40"
-            icon="edit"
-        }}
-        {{> forms/input
-            id="catalog-ma-dang-ky-kinh-doanh"
-            name="maDangKyKinhDoanh"
-            type="text"
-            label="Mã đăng ký kinh doanh"
-            placeholder="Nhập mã đăng ký kinh doanh"
-            maxlength="80"
-            icon="edit"
-        }}
-        {{> forms/date
-            id="catalog-ngay-cap-dang-ky"
-            name="ngayCapDangKy"
-            label="Ngày cấp đăng ký"
-            placeholder="Nhập ngày cấp đăng ký"
-            icon="calendar"
-        }}
-        {{> forms/input
-            id="catalog-noi-cap-dang-ky"
-            name="noiCapDangKy"
-            type="text"
-            label="Nơi cấp đăng ký"
-            placeholder="Nhập nơi cấp đăng ký"
-            maxlength="255"
             icon="edit"
         }}
         {{> forms/select
@@ -109,41 +67,20 @@
             addressRole="country"
             addressGroup="supplier"
             icon="globe"
+            required=true
         }}
-        {{> forms/select
-            id="catalog-ma-tinh-thanh"
-            name="maTinhThanh"
-            label="Tỉnh/thành"
-            placeholder="Nhập tỉnh/thành"
-            search=true
-            addressRole="province"
-            addressGroup="supplier"
-            addressLabelName="tenTinhThanh"
-            frontendOnly=true
-            icon="map"
-        }}
-        {{> forms/select
-            id="catalog-ma-phuong-xa"
-            name="maPhuongXa"
-            label="Xã/phường"
-            placeholder="Nhập xã/phường"
-            search=true
-            addressRole="ward"
-            addressGroup="supplier"
-            addressLabelName="tenPhuongXa"
-            frontendOnly=true
-            icon="map-pin"
-        }}
-        {{> forms/input
+        {{> forms/textarea
             id="catalog-dia-chi-chi-tiet"
             name="diaChiChiTiet"
-            type="text"
             label="Địa chỉ chi tiết"
             placeholder="Nhập địa chỉ chi tiết"
-            maxlength="350"
+            rows="3"
+            maxlength="2000"
+            className="bf-form-grid-full"
             icon="edit"
+            required=true
         }}
-        {{> forms/input
+        {{> forms/email
             id="catalog-email"
             name="email"
             type="email"
@@ -158,17 +95,6 @@
             type="tel"
             label="Số điện thoại"
             placeholder="Nhập số điện thoại"
-            inputmode="tel"
-            phoneCharsOnly=true
-            maxlength="30"
-            icon="phone"
-        }}
-        {{> forms/input
-            id="catalog-so-dien-thoai-phu"
-            name="soDienThoaiPhu"
-            type="tel"
-            label="Số điện thoại phụ"
-            placeholder="Nhập số điện thoại phụ"
             inputmode="tel"
             phoneCharsOnly=true
             maxlength="30"
@@ -202,24 +128,6 @@
             icon="edit"
         }}
         {{> forms/input
-            id="catalog-nhom-nha-cung-cap"
-            name="nhomNhaCungCap"
-            type="text"
-            label="Nhóm nhà cung cấp"
-            placeholder="Nhập nhóm nhà cung cấp"
-            maxlength="80"
-            icon="edit"
-        }}
-        {{> forms/input
-            id="catalog-xep-hang-noi-bo"
-            name="xepHangNoiBo"
-            type="text"
-            label="Xếp hạng nội bộ"
-            placeholder="Nhập xếp hạng nội bộ"
-            maxlength="30"
-            icon="edit"
-        }}
-        {{> forms/input
             id="catalog-don-vi-tien-te"
             name="donViTienTe"
             type="text"
@@ -227,24 +135,6 @@
             placeholder="Nhập đơn vị tiền tệ"
             maxlength="3"
             icon="edit"
-        }}
-        {{> forms/number
-            id="catalog-han-muc-cong-no"
-            name="hanMucCongNo"
-            label="Hạn mức công nợ"
-            placeholder="Nhập hạn mức công nợ"
-            decimals="2"
-            min="0"
-            icon="info"
-        }}
-        {{> forms/number
-            id="catalog-so-ngay-cong-no"
-            name="soNgayCongNo"
-            label="Số ngày công nợ"
-            placeholder="Nhập số ngày công nợ"
-            type="integer"
-            min="0"
-            icon="info"
         }}
         {{> forms/select
             id="catalog-phuong-thuc-thanh-toan-uu-tien"
@@ -314,13 +204,18 @@
             name="ngayBatDauHopTac"
             label="Ngày bắt đầu hợp tác"
             placeholder="Nhập ngày bắt đầu hợp tác"
+            maxDateFrom="catalog-ngay-ket-thuc-hop-tac"
+            rangeError="Ngày bắt đầu không được sau ngày kết thúc hợp tác."
             icon="calendar"
+            required=true
         }}
         {{> forms/date
             id="catalog-ngay-ket-thuc-hop-tac"
             name="ngayKetThucHopTac"
             label="Ngày kết thúc hợp tác"
             placeholder="Nhập ngày kết thúc hợp tác"
+            minDateFrom="catalog-ngay-bat-dau-hop-tac"
+            rangeError="Ngày kết thúc không được trước ngày bắt đầu hợp tác."
             icon="calendar"
         }}
         {{> forms/textarea
@@ -332,6 +227,7 @@
             className="bf-form-grid-full"
             icon="edit"
         }}
+        {{> forms/catalog-active}}
     </form>
     <footer class="bf-modal-footer">
         <button type="button" class="bf-btn bf-btn-secondary bf-btn-md" data-bf-modal-close>Hủy</button>

@@ -5,6 +5,7 @@ from psycopg.rows import dict_row
 from psycopg_pool import AsyncConnectionPool
 from app.core.config import Settings
 
+
 class PostgresClient:
     def __init__(self, settings: Settings):
         self.settings = settings
@@ -18,7 +19,7 @@ class PostgresClient:
             min_size=self.settings.database_pool_min_size,
             max_size=self.settings.database_pool_max_size,
             open=False,
-            kwargs={"row_factory": dict_row}
+            kwargs={"row_factory": dict_row},
         )
         await self.pool.open()
 
@@ -47,7 +48,9 @@ class PostgresClient:
         except Exception:
             return False
 
+
 postgres_client: PostgresClient | None = None
+
 
 def tao_postgres_client(settings: Settings) -> PostgresClient:
     global postgres_client

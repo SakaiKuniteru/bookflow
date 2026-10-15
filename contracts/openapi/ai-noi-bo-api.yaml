@@ -36,16 +36,16 @@ paths:
       security: []
 
       parameters:
-        - $ref: '#/components/parameters/RequestIdKhongBatBuoc'
+        - $ref: "#/components/parameters/RequestIdKhongBatBuoc"
 
       responses:
-        '200':
+        "200":
           description: FastAPI đang hoạt động
 
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HealthResponse'
+                $ref: "#/components/schemas/HealthResponse"
 
               example:
                 success: true
@@ -60,78 +60,78 @@ paths:
       security:
         - TokenNoiBo: []
       parameters:
-        - $ref: '#/components/parameters/RequestIdBatBuoc'
+        - $ref: "#/components/parameters/RequestIdBatBuoc"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TroLyRequest'
+              $ref: "#/components/schemas/TroLyRequest"
       responses:
-        '200':
+        "200":
           description: Kết quả trợ lý
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
-        '401':
-          $ref: '#/components/responses/LoiApi'
-        '422':
-          $ref: '#/components/responses/LoiApi'
-        '502':
-          $ref: '#/components/responses/LoiApi'
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/LoiApi"
+        "422":
+          $ref: "#/components/responses/LoiApi"
+        "502":
+          $ref: "#/components/responses/LoiApi"
   /internal/tim-kiem:
     post:
       operationId: timKiem
       security:
         - TokenNoiBo: []
       parameters:
-        - $ref: '#/components/parameters/RequestIdBatBuoc'
+        - $ref: "#/components/parameters/RequestIdBatBuoc"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TimKiemRequest'
+              $ref: "#/components/schemas/TimKiemRequest"
       responses:
-        '200':
+        "200":
           description: Kết quả tìm kiếm
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
-        '401':
-          $ref: '#/components/responses/LoiApi'
-        '422':
-          $ref: '#/components/responses/LoiApi'
-        '502':
-          $ref: '#/components/responses/LoiApi'
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/LoiApi"
+        "422":
+          $ref: "#/components/responses/LoiApi"
+        "502":
+          $ref: "#/components/responses/LoiApi"
   /internal/goi-y:
     post:
       operationId: goiYSach
       security:
         - TokenNoiBo: []
       parameters:
-        - $ref: '#/components/parameters/RequestIdBatBuoc'
+        - $ref: "#/components/parameters/RequestIdBatBuoc"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GoiYRequest'
+              $ref: "#/components/schemas/GoiYRequest"
       responses:
-        '200':
+        "200":
           description: Danh sách gợi ý
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
-        '401':
-          $ref: '#/components/responses/LoiApi'
-        '422':
-          $ref: '#/components/responses/LoiApi'
-        '502':
-          $ref: '#/components/responses/LoiApi'
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/LoiApi"
+        "422":
+          $ref: "#/components/responses/LoiApi"
+        "502":
+          $ref: "#/components/responses/LoiApi"
 
 components:
   securitySchemes:
@@ -186,7 +186,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '../schemas/loi-api.schema.json'
+            $ref: "../schemas/loi-api.schema.json"
 
   schemas:
     HealthResponse:
@@ -286,12 +286,12 @@ components:
         ket_qua:
           type:
             - object
-            - 'null'
+            - "null"
 
         ma_loi:
           type:
             - string
-            - 'null'
+            - "null"
 
     PhanHoiTacVu:
       type: object
@@ -310,4 +310,4 @@ components:
           minLength: 1
 
         data:
-          $ref: '#/components/schemas/TacVu'
+          $ref: "#/components/schemas/TacVu"

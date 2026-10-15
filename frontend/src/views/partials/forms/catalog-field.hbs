@@ -1,13 +1,13 @@
 {{#if (eq type "textarea")}}
-    {{> forms/textarea id=id name=name label=label placeholder=placeholder required=required maxlength=maxlength rows=rows className=className readonlyOnEdit=readonlyOnEdit icon=icon}}
+    {{> forms/textarea id=id name=name label=label placeholder=placeholder required=required maxlength=maxlength rows=rows className=className readonlyOnEdit=readonlyOnEdit frontendOnly=frontendOnly icon=icon}}
 {{else if (eq type "select")}}
-    {{> forms/select id=id name=name label=label placeholder=placeholder required=required options=options search=true multiple=multiple icon=icon className=className readonlyOnEdit=readonlyOnEdit optionsEndpoint=optionsEndpoint optionsRowsKey=optionsRowsKey optionsValueKey=optionsValueKey optionsLabelKey=optionsLabelKey optionsSecondaryKey=optionsSecondaryKey dependsOn=dependsOn addressRole=addressRole addressGroup=addressGroup addressMode=addressMode addressCodeName=addressCodeName addressLabelName=addressLabelName frontendOnly=frontendOnly includeEmpty=includeEmpty}}
+    {{> forms/select id=id name=name label=label placeholder=placeholder required=required options=options search=true multiple=multiple expandSelected=expandSelected icon=icon className=className readonlyOnEdit=readonlyOnEdit optionsEndpoint=optionsEndpoint optionsRowsKey=optionsRowsKey optionsValueKey=optionsValueKey optionsLabelKey=optionsLabelKey optionsSecondaryKey=optionsSecondaryKey dependsOn=dependsOn addressRole=addressRole addressGroup=addressGroup addressMode=addressMode addressCodeName=addressCodeName addressLabelName=addressLabelName frontendOnly=frontendOnly includeEmpty=includeEmpty}}
 {{else if (eq type "date")}}
-    {{> forms/date id=id name=name label=label placeholder=placeholder required=required type=dateType className=className yearFrom=yearFrom readonlyOnEdit=readonlyOnEdit icon=icon}}
+    {{> forms/date id=id name=name label=label placeholder=placeholder required=required type=dateType className=className yearFrom=yearFrom minYearFrom=minYearFrom maxYearFrom=maxYearFrom minDateFrom=minDateFrom maxDateFrom=maxDateFrom minDateOffsetDays=minDateOffsetDays maxDateOffsetDays=maxDateOffsetDays rangeError=rangeError readonlyOnEdit=readonlyOnEdit frontendOnly=frontendOnly icon=icon}}
 {{else if (eq type "number")}}
-    {{> forms/number id=id name=name label=label placeholder=placeholder required=required type=numberType decimals=decimals min=min max=max maxlength=maxlength minlength=minlength className=className icon=icon readonlyOnEdit=readonlyOnEdit}}
+    {{> forms/number id=id name=name label=label placeholder=placeholder required=required type=numberType decimals=decimals min=min max=max maxlength=maxlength minlength=minlength className=className icon=icon readonlyOnEdit=readonlyOnEdit frontendOnly=frontendOnly}}
 {{else if (eq type "image")}}
     {{> forms/image id=id name=name label=label required=required multiple=multiple width=width height=height className=className imageTarget=imageTarget uploadType=uploadType maxFiles=maxFiles value=value}}
 {{else}}
-    {{> forms/input id=id name=name type=type label=label placeholder=placeholder required=required maxlength=maxlength minlength=minlength className=className readonlyOnEdit=readonlyOnEdit icon=icon inputmode=inputmode phoneCharsOnly=phoneCharsOnly}}
+    {{> forms/input id=id name=name type=type label=label placeholder=placeholder required=required maxlength=maxlength minlength=minlength className=className readonlyOnEdit=readonlyOnEdit frontendOnly=frontendOnly icon=icon inputmode=inputmode phoneCharsOnly=phoneCharsOnly}}
 {{/if}}

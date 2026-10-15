@@ -1,57 +1,104 @@
-import config from '../config/index.js';
-import authService from '../services/auth.service.js';
-import { maHoaBanNhap, giaiMaBanNhap } from '../security/registration-draft.js';
+import config from "../config/index.js";
+import authService from "../services/auth.service.js";
+import { maHoaBanNhap, giaiMaBanNhap } from "../security/registration-draft.js";
 
 const cookieOptions = {
   httpOnly: config.env.sessionCookieHttpOnly,
   secure: config.env.authCookieSecure,
   sameSite: config.env.authCookieSameSite,
   maxAge: config.env.authCookieMaxAge,
-  path: '/'
+  path: "/",
 };
 
-const authEventOptions = { httpOnly: false, secure: config.env.authCookieSecure, sameSite: config.env.authCookieSameSite, path: '/', maxAge: 315360000000 };
+const authEventOptions = {
+  httpOnly: false,
+  secure: config.env.authCookieSecure,
+  sameSite: config.env.authCookieSameSite,
+  path: "/",
+  maxAge: 315360000000,
+};
 function notifyAuthTabs(res) {
-  res.cookie('bookflow_auth_event', String(Date.now()), authEventOptions);
+  res.cookie("bookflow_auth_event", String(Date.now()), authEventOptions);
 }
 
 function renderAuth(res, page, title, locals = {}, status = 200) {
-  return res.status(status).render(`pages/auth/${page}`, { layout: 'auth', authPage: page, title, ...locals });
+  return res.status(status).render(`pages/auth/${page}`, {
+    layout: "auth",
+    authPage: page,
+    title,
+    ...locals,
+  });
 }
 function layTokenTiepTucDangKy(response) {
   const data = response?.data || response || {};
-  return data.registrationResumeToken || '';
+  return data.registrationResumeToken || "";
 }
 function safeRedirect(value) {
-  return typeof value === 'string' && value.startsWith('/') && !value.startsWith('//') ? value : null;
+  return typeof value === "string" &&
+    value.startsWith("/") &&
+    !value.startsWith("//")
+    ? value
+    : null;
 }
 function urlDoiEmail(path, email) {
-  return `${path}?email=${encodeURIComponent(email || '')}`;
+  return `${path}?email=${encodeURIComponent(email || "")}`;
 }
 
 function layMaVaiTro(context) {
   const vaiTro = context?.vaiTro || [];
-  return vaiTro.map(item => typeof item === 'string' ? item : item?.maVaiTro).filter(Boolean);
+  return vaiTro
+    .map((item) => (typeof item === "string" ? item : item?.maVaiTro))
+    .filter(Boolean);
 }
 function layMaQuyen(context) {
   const quyen = context?.quyen || context?.permissions || [];
-  return quyen.map(item => typeof item === 'string' ? item : item?.maQuyen).filter(Boolean);
+  return quyen
+    .map((item) => (typeof item === "string" ? item : item?.maQuyen))
+    .filter(Boolean);
 }
 function interfaceOptions(context) {
   const vaiTro = layMaVaiTro(context);
   const quyen = layMaQuyen(context);
-  const isSuperAdmin = vaiTro.includes('SUPER_ADMIN') || quyen.some(item => item.startsWith('SUPER_ADMIN_'));
-  const isAdmin = vaiTro.includes('QUAN_TRI');
-  const isStaff = vaiTro.includes('NHAN_VIEN') || vaiTro.includes('THU_THU');
+  const isSuperAdmin =
+    vaiTro.includes("SUPER_ADMIN") ||
+    quyen.some((item) => item.startsWith("SUPER_ADMIN_"));
+  const isAdmin = vaiTro.includes("QUAN_TRI");
+  const isStaff = vaiTro.includes("NHAN_VIEN") || vaiTro.includes("THU_THU");
   const options = [];
-  if (isSuperAdmin) options.push({ value: 'super-admin', label: 'Super Admin', description: 'Quản trị toàn nền tảng' });
-  if (isSuperAdmin || isAdmin) options.push({ value: 'admin', label: 'Admin', description: 'Quản trị đơn vị và hoạt động' });
-  if (isSuperAdmin || isAdmin || isStaff) options.push({ value: 'staff', label: 'Nhân viên', description: 'Thực hiện nghiệp vụ tại đơn vị' });
-  options.push({ value: 'customer', label: 'Người dùng', description: 'Khám phá, mượn và quản lý sách' });
+  if (isSuperAdmin)
+    options.push({
+      value: "super-admin",
+      label: "Super Admin",
+      description: "Quản trị toàn nền tảng",
+    });
+  if (isSuperAdmin || isAdmin)
+    options.push({
+      value: "admin",
+      label: "Admin",
+      description: "Quản trị đơn vị và hoạt động",
+    });
+  if (isSuperAdmin || isAdmin || isStaff)
+    options.push({
+      value: "staff",
+      label: "Nhân viên",
+      description: "Thực hiện nghiệp vụ tại đơn vị",
+    });
+  options.push({
+    value: "customer",
+    label: "Người dùng",
+    description: "Khám phá, mượn và quản lý sách",
+  });
   return options;
 }
 function destinationForInterface(value) {
-  return { 'super-admin': '/super-admin/tong-quan', admin: '/admin/tong-quan', staff: '/staff/tong-quan', customer: '/customer/tong-quan' }[value] || '/customer/tong-quan';
+  return (
+    {
+      "super-admin": "/super-admin/tong-quan",
+      admin: "/admin/tong-quan",
+      staff: "/staff/tong-quan",
+      customer: "/customer/tong-quan",
+    }[value] || "/customer/tong-quan"
+  );
 }
 function selectedOrganizationId(context) {
   return context?.donViDangChonId || null;
@@ -60,17 +107,30 @@ function selectedBranchId(context) {
   return context?.chiNhanhDangChonId || null;
 }
 function accessibleBranches(context) {
-  return context?.chiNhanhDuocTruyCap || context?.data?.chiNhanhDuocTruyCap || [];
+  return (
+    context?.chiNhanhDuocTruyCap || context?.data?.chiNhanhDuocTruyCap || []
+  );
 }
 async function finishLogin(req, res, token, context) {
   res.cookie(config.env.authCookieName, token, cookieOptions);
   const refreshToken = context?.refreshToken;
-  if (refreshToken) res.cookie(config.env.authRefreshCookieName, refreshToken, { httpOnly: true, secure: config.env.authCookieSecure, sameSite: config.env.authCookieSameSite, maxAge: config.env.authRefreshCookieMaxAge, path: '/' });
+  if (refreshToken)
+    res.cookie(config.env.authRefreshCookieName, refreshToken, {
+      httpOnly: true,
+      secure: config.env.authCookieSecure,
+      sameSite: config.env.authCookieSameSite,
+      maxAge: config.env.authRefreshCookieMaxAge,
+      path: "/",
+    });
   notifyAuthTabs(res);
   const organizations = context?.donViThamGia || [];
-  if (organizations.length > 1 && !selectedOrganizationId(context)) return res.redirect('/auth/thiet-lap-phien');
+  if (organizations.length > 1 && !selectedOrganizationId(context))
+    return res.redirect("/auth/thiet-lap-phien");
   if (organizations.length === 1 && !selectedOrganizationId(context)) {
-    const result = await authService.selectOrganization(token, organizations[0].id);
+    const result = await authService.selectOrganization(
+      token,
+      organizations[0].id,
+    );
     context = result.data || result;
   }
   const branches = accessibleBranches(context);
@@ -80,54 +140,70 @@ async function finishLogin(req, res, token, context) {
   }
   const options = interfaceOptions(context);
   if (options.length === 1) {
-    req.session.activeInterface = 'customer';
+    req.session.activeInterface = "customer";
     delete req.session.pendingLoginIdentifier;
-    return res.redirect('/customer/tong-quan');
+    return res.redirect("/customer/tong-quan");
   }
-  return res.redirect('/auth/thiet-lap-phien');
+  return res.redirect("/auth/thiet-lap-phien");
 }
 const authController = {
   async loginPage(req, res) {
     if (req.user) return await finishLogin(req, res, req.authToken, req.user);
     if (req.session) delete req.session.registrationDraft;
-    return renderAuth(res, 'dang-nhap', 'Đăng nhập', {
-      redirect: req.query.redirect || '/',
-      values: { email: req.session?.pendingLoginIdentifier || '' },
+    return renderAuth(res, "dang-nhap", "Đăng nhập", {
+      redirect: req.query.redirect || "/",
+      values: { email: req.session?.pendingLoginIdentifier || "" },
       allowRegistration: true,
-      registered: req.query.registered === '1',
-      reset: req.query.reset === '1'
+      registered: req.query.registered === "1",
+      reset: req.query.reset === "1",
     });
   },
   async login(req, res) {
     try {
       const result = await authService.login({
         dinhDanh: req.body.email,
-        matKhau: req.body.password
+        matKhau: req.body.password,
       });
       const data = result.data || result;
-      if (data.yeuCauKichHoat) return res.redirect(`/auth/kich-hoat-nhan-vien?dinhDanh=${encodeURIComponent(req.body.email || '')}`);
-      if (data.yeuCauDoiMatKhau) return res.redirect(`/auth/doi-mat-khau-tam?dinhDanh=${encodeURIComponent(req.body.email || '')}`);
+      if (data.yeuCauKichHoat)
+        return res.redirect(
+          `/auth/kich-hoat-nhan-vien?dinhDanh=${encodeURIComponent(req.body.email || "")}`,
+        );
+      if (data.yeuCauDoiMatKhau)
+        return res.redirect(
+          `/auth/doi-mat-khau-tam?dinhDanh=${encodeURIComponent(req.body.email || "")}`,
+        );
       const token = data.accessToken;
       if (!token) {
-        const error = new Error('Backend không trả access token.');
+        const error = new Error("Backend không trả access token.");
         error.status = 502;
         throw error;
       }
-      req.session.pendingLoginIdentifier = String(req.body.email || '').trim().slice(0, 254);
+      req.session.pendingLoginIdentifier = String(req.body.email || "")
+        .trim()
+        .slice(0, 254);
       return await finishLogin(req, res, token, data);
     } catch (error) {
-    return renderAuth(res, 'dang-nhap', 'Đăng nhập', {
-      error: error.message,
-      values: { email: req.body.email || req.session?.pendingLoginIdentifier || '' },
-      redirect: safeRedirect(req.body.redirect) || '/',
-      allowRegistration: true,
-      loginFailed: true
-    }, error.status >= 400 && error.status < 500 ? error.status : 500);
+      return renderAuth(
+        res,
+        "dang-nhap",
+        "Đăng nhập",
+        {
+          error: error.message,
+          values: {
+            email: req.body.email || req.session?.pendingLoginIdentifier || "",
+          },
+          redirect: safeRedirect(req.body.redirect) || "/",
+          allowRegistration: true,
+          loginFailed: true,
+        },
+        error.status >= 400 && error.status < 500 ? error.status : 500,
+      );
     }
   },
   registerPage(req, res) {
-    if (req.user) return res.redirect('/');
-    const resume = req.query.resume === '1';
+    if (req.user) return res.redirect("/");
+    const resume = req.query.resume === "1";
     if (req.session) {
       if (resume) req.session.registrationResumeMode = true;
       else delete req.session.registrationResumeMode;
@@ -140,26 +216,44 @@ const authController = {
       } catch {}
     }
     if (req.session) delete req.session.registrationDraft;
-    return renderAuth(res, 'dang-ky', 'Đăng ký', { values: resume ? draft : {}, resumeRegistration: resume });
+    return renderAuth(res, "dang-ky", "Đăng ký", {
+      values: resume ? draft : {},
+      resumeRegistration: resume,
+    });
   },
   async register(req, res) {
     try {
-      if (!req.body.acceptTerms) throw Object.assign(new Error('Bạn cần đồng ý với điều khoản sử dụng.'), { status: 400, field: 'acceptTerms' });
-      if (req.body.password !== req.body.passwordConfirm) throw Object.assign(new Error('Mật khẩu xác nhận chưa khớp.'), { status: 400, field: 'passwordConfirm' });
+      if (!req.body.acceptTerms)
+        throw Object.assign(
+          new Error("Bạn cần đồng ý với điều khoản sử dụng."),
+          { status: 400, field: "acceptTerms" },
+        );
+      if (req.body.password !== req.body.passwordConfirm)
+        throw Object.assign(new Error("Mật khẩu xác nhận chưa khớp."), {
+          status: 400,
+          field: "passwordConfirm",
+        });
       const draft = {
-        fullName: req.body.fullName || '',
-        username: req.body.username || '',
-        email: req.body.email || '',
-        phone: req.body.phone || '',
-        password: req.body.password || '',
-        passwordConfirm: req.body.passwordConfirm || '',
-        acceptTerms: Boolean(req.body.acceptTerms)
+        fullName: req.body.fullName || "",
+        username: req.body.username || "",
+        email: req.body.email || "",
+        phone: req.body.phone || "",
+        password: req.body.password || "",
+        passwordConfirm: req.body.passwordConfirm || "",
+        acceptTerms: Boolean(req.body.acceptTerms),
       };
       req.session.registrationDraft = maHoaBanNhap(draft);
-            const dangSuaDangKy = req.body.resumeRegistration === '1' || req.session?.registrationResumeMode === true;
+      const dangSuaDangKy =
+        req.body.resumeRegistration === "1" ||
+        req.session?.registrationResumeMode === true;
       if (dangSuaDangKy) {
         if (!req.session.registrationResumeToken) {
-          throw Object.assign(new Error('Phiên đăng ký đã hết hạn. Vui lòng bắt đầu đăng ký lại.'), { status: 410 });
+          throw Object.assign(
+            new Error(
+              "Phiên đăng ký đã hết hạn. Vui lòng bắt đầu đăng ký lại.",
+            ),
+            { status: 410 },
+          );
         }
         const ketQuaDoiEmail = await authService.changeRegistrationEmail({
           token: req.session.registrationResumeToken,
@@ -167,12 +261,19 @@ const authController = {
           tenDangNhap: req.body.username,
           email: req.body.email,
           soDienThoai: req.body.phone,
-          matKhau: req.body.password
+          matKhau: req.body.password,
         });
-        req.session.registrationResumeToken = layTokenTiepTucDangKy(ketQuaDoiEmail);
-        if (!req.session.registrationResumeToken) throw Object.assign(new Error('Backend không trả token tiếp tục đăng ký.'), { status: 502 });
+        req.session.registrationResumeToken =
+          layTokenTiepTucDangKy(ketQuaDoiEmail);
+        if (!req.session.registrationResumeToken)
+          throw Object.assign(
+            new Error("Backend không trả token tiếp tục đăng ký."),
+            { status: 502 },
+          );
         delete req.session.registrationResumeEmail;
-        return res.redirect(`/auth/xac-minh-dang-ky?email=${encodeURIComponent(req.body.email)}&sent=1`);
+        return res.redirect(
+          `/auth/xac-minh-dang-ky?email=${encodeURIComponent(req.body.email)}&sent=1`,
+        );
       }
       delete req.session.registrationResumeEmail;
       const ketQuaDangKy = await authService.register({
@@ -180,102 +281,210 @@ const authController = {
         email: req.body.email,
         tenDangNhap: req.body.username,
         soDienThoai: req.body.phone,
-        matKhau: req.body.password
+        matKhau: req.body.password,
       });
       req.session.registrationResumeToken = layTokenTiepTucDangKy(ketQuaDangKy);
-      if (!req.session.registrationResumeToken) throw Object.assign(new Error('Backend không trả token tiếp tục đăng ký.'), { status: 502 });
-      return res.redirect(`/auth/xac-minh-dang-ky?email=${encodeURIComponent(req.body.email)}&sent=1`);
+      if (!req.session.registrationResumeToken)
+        throw Object.assign(
+          new Error("Backend không trả token tiếp tục đăng ký."),
+          { status: 502 },
+        );
+      return res.redirect(
+        `/auth/xac-minh-dang-ky?email=${encodeURIComponent(req.body.email)}&sent=1`,
+      );
     } catch (error) {
       const backendError = error.data?.error;
-      const tenTruongFrontend = { hoTen: 'fullName', email: 'email', tenDangNhap: 'username', soDienThoai: 'phone', matKhau: 'password' };
-      const fieldErrors = Object.fromEntries((backendError?.details || []).filter(item => item.field).map(item => { const field = item.field; return [tenTruongFrontend[field] || field, item.message]; }));
+      const tenTruongFrontend = {
+        hoTen: "fullName",
+        email: "email",
+        tenDangNhap: "username",
+        soDienThoai: "phone",
+        matKhau: "password",
+      };
+      const fieldErrors = Object.fromEntries(
+        (backendError?.details || [])
+          .filter((item) => item.field)
+          .map((item) => {
+            const field = item.field;
+            return [tenTruongFrontend[field] || field, item.message];
+          }),
+      );
       if (error.field) fieldErrors[error.field] = error.message;
-      if (!fieldErrors.email && backendError?.code === 'EMAIL_EXISTS') fieldErrors.email = 'Email này đã được đăng ký';
-      if (!fieldErrors.username && backendError?.code === 'USERNAME_EXISTS') fieldErrors.username = 'Tên đăng nhập này đã được sử dụng';
-      if (!fieldErrors.phone && backendError?.code === 'PHONE_EXISTS') fieldErrors.phone = 'Số điện thoại này đã được đăng ký';
-      return renderAuth(res, 'dang-ky', 'Đăng ký', {
-        fieldErrors,
-        formError: Object.keys(fieldErrors).length ? '' : (backendError?.message || error.message),
-        resumeRegistration: req.body.resumeRegistration === '1' || req.session?.registrationResumeMode === true,
-        values: {
-          fullName: req.body.fullName || '',
-          username: req.body.username || '',
-          email: req.body.email || '',
-          phone: req.body.phone || '',
-          password: req.body.password || '',
-          passwordConfirm: req.body.passwordConfirm || ''
-        }
-      }, error.status >= 400 && error.status < 500 ? error.status : 500);
+      if (!fieldErrors.email && backendError?.code === "EMAIL_EXISTS")
+        fieldErrors.email = "Email này đã được đăng ký";
+      if (!fieldErrors.username && backendError?.code === "USERNAME_EXISTS")
+        fieldErrors.username = "Tên đăng nhập này đã được sử dụng";
+      if (!fieldErrors.phone && backendError?.code === "PHONE_EXISTS")
+        fieldErrors.phone = "Số điện thoại này đã được đăng ký";
+      return renderAuth(
+        res,
+        "dang-ky",
+        "Đăng ký",
+        {
+          fieldErrors,
+          formError: Object.keys(fieldErrors).length
+            ? ""
+            : backendError?.message || error.message,
+          resumeRegistration:
+            req.body.resumeRegistration === "1" ||
+            req.session?.registrationResumeMode === true,
+          values: {
+            fullName: req.body.fullName || "",
+            username: req.body.username || "",
+            email: req.body.email || "",
+            phone: req.body.phone || "",
+            password: req.body.password || "",
+            passwordConfirm: req.body.passwordConfirm || "",
+          },
+        },
+        error.status >= 400 && error.status < 500 ? error.status : 500,
+      );
     }
   },
   verifyRegistrationPage(req, res) {
-    return renderAuth(res, 'xac-minh-dang-ky', 'Xác minh email', { email: req.query.email || '', codeSent: req.query.sent === '1', changeEmailUrl: '/auth/dang-ky?resume=1' });
+    return renderAuth(res, "xac-minh-dang-ky", "Xác minh email", {
+      email: req.query.email || "",
+      codeSent: req.query.sent === "1",
+      changeEmailUrl: "/auth/dang-ky?resume=1",
+    });
   },
   async verifyRegistration(req, res) {
     try {
-      await authService.verifyRegistration({ email: req.body.email, otp: req.body.otp });
+      await authService.verifyRegistration({
+        email: req.body.email,
+        otp: req.body.otp,
+      });
       delete req.session.registrationDraft;
       delete req.session.registrationResumeToken;
       delete req.session.registrationResumeEmail;
-      return res.redirect('/auth/dang-nhap?registered=1'); 
+      return res.redirect("/auth/dang-nhap?registered=1");
     } catch (error) {
-            return renderAuth(res, 'xac-minh-dang-ky', 'Xác minh email', { email: req.body.email || '', otpError: error.message, changeEmailUrl: '/auth/dang-ky?resume=1' }, error.status >= 400 && error.status < 500 ? error.status : 500);
+      return renderAuth(
+        res,
+        "xac-minh-dang-ky",
+        "Xác minh email",
+        {
+          email: req.body.email || "",
+          otpError: error.message,
+          changeEmailUrl: "/auth/dang-ky?resume=1",
+        },
+        error.status >= 400 && error.status < 500 ? error.status : 500,
+      );
     }
   },
   async resendRegistrationOtp(req, res) {
     try {
       await authService.resendRegistrationOtp({ email: req.body.email });
-      return res.redirect(`/auth/xac-minh-dang-ky?email=${encodeURIComponent(req.body.email)}&sent=1`);
+      return res.redirect(
+        `/auth/xac-minh-dang-ky?email=${encodeURIComponent(req.body.email)}&sent=1`,
+      );
     } catch (error) {
-      return renderAuth(res, 'xac-minh-dang-ky', 'Xác minh email', { email: req.body.email || '', resendError: error.message, changeEmailUrl: '/auth/dang-ky?resume=1' }, error.status >= 400 && error.status < 500 ? error.status : 500);
+      return renderAuth(
+        res,
+        "xac-minh-dang-ky",
+        "Xác minh email",
+        {
+          email: req.body.email || "",
+          resendError: error.message,
+          changeEmailUrl: "/auth/dang-ky?resume=1",
+        },
+        error.status >= 400 && error.status < 500 ? error.status : 500,
+      );
     }
   },
   employeeActivationPage(req, res) {
-    return renderAuth(res, 'kich-hoat-nhan-vien', 'Kích hoạt tài khoản nhân viên', { identifier: req.query.dinhDanh || '' });
+    return renderAuth(
+      res,
+      "kich-hoat-nhan-vien",
+      "Kích hoạt tài khoản nhân viên",
+      { identifier: req.query.dinhDanh || "" },
+    );
   },
   async completeEmployeeActivation(req, res) {
     try {
-      if (req.body.newPassword !== req.body.confirmNewPassword) throw Object.assign(new Error('Mật khẩu xác nhận chưa khớp.'), { status: 400 });
-      const result = await authService.completeEmployeeActivation({ dinhDanh: req.body.identifier, matKhauTam: req.body.temporaryPassword, otp: req.body.otp, matKhauMoi: req.body.newPassword });
+      if (req.body.newPassword !== req.body.confirmNewPassword)
+        throw Object.assign(new Error("Mật khẩu xác nhận chưa khớp."), {
+          status: 400,
+        });
+      const result = await authService.completeEmployeeActivation({
+        dinhDanh: req.body.identifier,
+        matKhauTam: req.body.temporaryPassword,
+        otp: req.body.otp,
+        matKhauMoi: req.body.newPassword,
+      });
       const data = result.data || result;
       const token = data.accessToken;
-      if (!token) throw new Error('Backend không trả access token sau khi kích hoạt.');
+      if (!token)
+        throw new Error("Backend không trả access token sau khi kích hoạt.");
       return await finishLogin(req, res, token, data);
     } catch (error) {
-      return renderAuth(res, 'kich-hoat-nhan-vien', 'Kích hoạt tài khoản nhân viên', { identifier: req.body.identifier || '', error: error.message }, error.status >= 400 && error.status < 500 ? error.status : 500);
+      return renderAuth(
+        res,
+        "kich-hoat-nhan-vien",
+        "Kích hoạt tài khoản nhân viên",
+        { identifier: req.body.identifier || "", error: error.message },
+        error.status >= 400 && error.status < 500 ? error.status : 500,
+      );
     }
   },
   temporaryEmployeePasswordPage(req, res) {
-      return renderAuth(res, 'doi-mat-khau-tam', 'Đổi mật khẩu tạm', { identifier: req.query.dinhDanh || '' });
+    return renderAuth(res, "doi-mat-khau-tam", "Đổi mật khẩu tạm", {
+      identifier: req.query.dinhDanh || "",
+    });
   },
   async completeTemporaryEmployeePasswordChange(req, res) {
-      try {
-          if (req.body.newPassword !== req.body.confirmNewPassword) throw Object.assign(new Error('Mật khẩu xác nhận chưa khớp.'), { status: 400 });
-          const result = await authService.changeTemporaryEmployeePassword({ dinhDanh: req.body.identifier, matKhauTam: req.body.temporaryPassword, matKhauMoi: req.body.newPassword });
-          const data = result.data || result;
-          if (!data.accessToken) throw new Error('Backend không trả access token sau khi đổi mật khẩu.');
-          return await finishLogin(req, res, data.accessToken, data);
-      } catch (error) {
-          return renderAuth(res, 'doi-mat-khau-tam', 'Đổi mật khẩu tạm', { identifier: req.body.identifier || '', error: error.message }, error.status >= 400 && error.status < 500 ? error.status : 500);
-      }
+    try {
+      if (req.body.newPassword !== req.body.confirmNewPassword)
+        throw Object.assign(new Error("Mật khẩu xác nhận chưa khớp."), {
+          status: 400,
+        });
+      const result = await authService.changeTemporaryEmployeePassword({
+        dinhDanh: req.body.identifier,
+        matKhauTam: req.body.temporaryPassword,
+        matKhauMoi: req.body.newPassword,
+      });
+      const data = result.data || result;
+      if (!data.accessToken)
+        throw new Error("Backend không trả access token sau khi đổi mật khẩu.");
+      return await finishLogin(req, res, data.accessToken, data);
+    } catch (error) {
+      return renderAuth(
+        res,
+        "doi-mat-khau-tam",
+        "Đổi mật khẩu tạm",
+        { identifier: req.body.identifier || "", error: error.message },
+        error.status >= 400 && error.status < 500 ? error.status : 500,
+      );
+    }
   },
   async workspaceSetupPage(req, res) {
-    if (!req.user) return res.redirect('/auth/dang-nhap');
+    if (!req.user) return res.redirect("/auth/dang-nhap");
     const organizations = req.user.donViThamGia || [];
     if (organizations.length === 1 && !selectedOrganizationId(req.user)) {
-      const result = await authService.selectOrganization(req.authToken, organizations[0].id);
-      return res.redirect('/auth/thiet-lap-phien');
+      const result = await authService.selectOrganization(
+        req.authToken,
+        organizations[0].id,
+      );
+      return res.redirect("/auth/thiet-lap-phien");
     }
     const options = interfaceOptions(req.user);
-    if (options.length === 1) return res.redirect('/customer/tong-quan');
-    return renderAuth(res, 'thiet-lap-phien', 'Thiết lập phiên làm việc', {
+    if (options.length === 1) return res.redirect("/customer/tong-quan");
+    return renderAuth(res, "thiet-lap-phien", "Thiết lập phiên làm việc", {
       sessionSetup: true,
-      showOrganization: organizations.length > 1 && !selectedOrganizationId(req.user),
-      organizationOptions: organizations.map(item => ({ value: item.id, label: item.tenHienThi || item.tenDonVi || item.maDonVi })),
-      showBranch: accessibleBranches(req.user).length > 1 && !selectedBranchId(req.user),
-      branchOptions: accessibleBranches(req.user).map(item => ({ value: item.id, label: item.tenChiNhanh || item.maChiNhanh })),
+      showOrganization:
+        organizations.length > 1 && !selectedOrganizationId(req.user),
+      organizationOptions: organizations.map((item) => ({
+        value: item.id,
+        label: item.tenHienThi || item.tenDonVi || item.maDonVi,
+      })),
+      showBranch:
+        accessibleBranches(req.user).length > 1 && !selectedBranchId(req.user),
+      branchOptions: accessibleBranches(req.user).map((item) => ({
+        value: item.id,
+        label: item.tenChiNhanh || item.maChiNhanh,
+      })),
       interfaceOptions: options,
-      error: req.query.error || ''
+      error: req.query.error || "",
     });
   },
   async confirmWorkspaceSetup(req, res) {
@@ -283,101 +492,221 @@ const authController = {
       let context = req.user;
       const organizations = context?.donViThamGia || [];
       if (organizations.length > 1 && !selectedOrganizationId(context)) {
-        if (!req.body.donViId) return res.redirect('/auth/thiet-lap-phien?error=Vui+l%C3%B2ng+ch%E1%BB%8Dn+%C4%91%C6%A1n+v%E1%BB%8B');
+        if (!req.body.donViId)
+          return res.redirect(
+            "/auth/thiet-lap-phien?error=Vui+l%C3%B2ng+ch%E1%BB%8Dn+%C4%91%C6%A1n+v%E1%BB%8B",
+          );
         await authService.selectOrganization(req.authToken, req.body.donViId);
-        return res.redirect('/auth/thiet-lap-phien');
+        return res.redirect("/auth/thiet-lap-phien");
       }
       let branches = accessibleBranches(context);
       if (branches.length > 1 && !selectedBranchId(context)) {
-        const branch = branches.find(item => String(item.id) === String(req.body.chiNhanhId));
-        if (!branch) return res.redirect('/auth/thiet-lap-phien?error=Vui+l%C3%B2ng+ch%E1%BB%8Dn+chi+nh%C3%A1nh');
+        const branch = branches.find(
+          (item) => String(item.id) === String(req.body.chiNhanhId),
+        );
+        if (!branch)
+          return res.redirect(
+            "/auth/thiet-lap-phien?error=Vui+l%C3%B2ng+ch%E1%BB%8Dn+chi+nh%C3%A1nh",
+          );
         const result = await authService.selectBranch(req.authToken, branch.id);
         context = result.data || result;
       } else if (branches.length === 1 && !selectedBranchId(context)) {
-        const result = await authService.selectBranch(req.authToken, branches[0].id);
+        const result = await authService.selectBranch(
+          req.authToken,
+          branches[0].id,
+        );
         context = result.data || result;
       }
-      const option = interfaceOptions(context).find(item => item.value === req.body.interface);
-      if (!option) return res.status(403).redirect('/auth/thiet-lap-phien?error=Giao+di%E1%BB%87n+kh%C3%B4ng+h%E1%BB%A3p+l%E1%BB%87+v%E1%BB%9Bi+quy%E1%BB%81n+t%C3%A0i+kho%E1%BA%A3n');
+      const option = interfaceOptions(context).find(
+        (item) => item.value === req.body.interface,
+      );
+      if (!option)
+        return res
+          .status(403)
+          .redirect(
+            "/auth/thiet-lap-phien?error=Giao+di%E1%BB%87n+kh%C3%B4ng+h%E1%BB%A3p+l%E1%BB%87+v%E1%BB%9Bi+quy%E1%BB%81n+t%C3%A0i+kho%E1%BA%A3n",
+          );
       req.session.activeInterface = option.value;
       delete req.session.pendingLoginIdentifier;
       return res.redirect(destinationForInterface(option.value));
     } catch (error) {
-      return res.redirect(`/auth/thiet-lap-phien?error=${encodeURIComponent(error.message || 'Không thể thiết lập phiên làm việc')}`);
+      return res.redirect(
+        `/auth/thiet-lap-phien?error=${encodeURIComponent(error.message || "Không thể thiết lập phiên làm việc")}`,
+      );
     }
   },
   async organizationPage(req, res) {
-    if (!req.user) return res.redirect('/auth/dang-nhap');
+    if (!req.user) return res.redirect("/auth/dang-nhap");
     const organizations = req.user.donViThamGia || [];
-    if (organizations.length === 1) return await finishLogin(req, res, req.authToken, req.user);
-    return renderAuth(res, 'chon-don-vi', 'Chọn đơn vị', { redirect: safeRedirect(req.query.redirect) || '/', organizationOptions: organizations.map(item => ({ value: item.id, label: item.tenHienThi || item.tenDonVi || item.maDonVi })) });
+    if (organizations.length === 1)
+      return await finishLogin(req, res, req.authToken, req.user);
+    return renderAuth(res, "chon-don-vi", "Chọn đơn vị", {
+      redirect: safeRedirect(req.query.redirect) || "/",
+      organizationOptions: organizations.map((item) => ({
+        value: item.id,
+        label: item.tenHienThi || item.tenDonVi || item.maDonVi,
+      })),
+    });
   },
   async selectOrganization(req, res) {
     try {
-      const result = await authService.selectOrganization(req.authToken, req.body.donViId);
+      const result = await authService.selectOrganization(
+        req.authToken,
+        req.body.donViId,
+      );
       return await finishLogin(req, res, req.authToken, result.data || result);
     } catch (error) {
       const organizations = req.user?.donViThamGia || [];
-      return renderAuth(res, 'chon-don-vi', 'Chọn đơn vị', { redirect: safeRedirect(req.body.redirect) || '/', organizationOptions: organizations.map(item => ({ value: item.id, label: item.tenHienThi || item.tenDonVi || item.maDonVi })), error: error.message }, error.status >= 400 && error.status < 500 ? error.status : 500);
+      return renderAuth(
+        res,
+        "chon-don-vi",
+        "Chọn đơn vị",
+        {
+          redirect: safeRedirect(req.body.redirect) || "/",
+          organizationOptions: organizations.map((item) => ({
+            value: item.id,
+            label: item.tenHienThi || item.tenDonVi || item.maDonVi,
+          })),
+          error: error.message,
+        },
+        error.status >= 400 && error.status < 500 ? error.status : 500,
+      );
     }
   },
   async branchPage(req, res) {
     const branches = accessibleBranches(req.user);
-    if (branches.length < 2 || req.user?.chiNhanhDangChonId) return await finishLogin(req, res, req.authToken, req.user);
-    return renderAuth(res, 'chon-chi-nhanh', 'Chọn chi nhánh', { branches, redirect: safeRedirect(req.query.redirect) || '/' });
+    if (branches.length < 2 || req.user?.chiNhanhDangChonId)
+      return await finishLogin(req, res, req.authToken, req.user);
+    return renderAuth(res, "chon-chi-nhanh", "Chọn chi nhánh", {
+      branches,
+      redirect: safeRedirect(req.query.redirect) || "/",
+    });
   },
   async selectBranch(req, res) {
     try {
-      const result = await authService.selectBranch(req.authToken, req.body.chiNhanhId);
-      return res.redirect(safeRedirect(req.body.redirect) && safeRedirect(req.body.redirect) !== '/' ? safeRedirect(req.body.redirect) : destinationFor(result.data || result));
+      const result = await authService.selectBranch(
+        req.authToken,
+        req.body.chiNhanhId,
+      );
+      return res.redirect(
+        safeRedirect(req.body.redirect) &&
+          safeRedirect(req.body.redirect) !== "/"
+          ? safeRedirect(req.body.redirect)
+          : destinationFor(result.data || result),
+      );
     } catch (error) {
-      return renderAuth(res, 'chon-chi-nhanh', 'Chọn chi nhánh', { branches: accessibleBranches(req.user), redirect: safeRedirect(req.body.redirect) || '/', error: error.message }, error.status >= 400 && error.status < 500 ? error.status : 500);
+      return renderAuth(
+        res,
+        "chon-chi-nhanh",
+        "Chọn chi nhánh",
+        {
+          branches: accessibleBranches(req.user),
+          redirect: safeRedirect(req.body.redirect) || "/",
+          error: error.message,
+        },
+        error.status >= 400 && error.status < 500 ? error.status : 500,
+      );
     }
   },
   forgotPasswordPage(req, res) {
-    return renderAuth(res, 'quen-mat-khau', 'Quên mật khẩu', { values: { email: req.query.email || '' } });
+    return renderAuth(res, "quen-mat-khau", "Quên mật khẩu", {
+      values: { email: req.query.email || "" },
+    });
   },
   async forgotPassword(req, res) {
     try {
       await authService.forgotPassword({ email: req.body.email });
-      return res.redirect(`/auth/dat-lai-mat-khau?email=${encodeURIComponent(req.body.email)}&sent=1`);
+      return res.redirect(
+        `/auth/dat-lai-mat-khau?email=${encodeURIComponent(req.body.email)}&sent=1`,
+      );
     } catch (error) {
-      return renderAuth(res, 'quen-mat-khau', 'Quên mật khẩu', { emailError: error.message, values: { email: req.body.email || '' } }, error.status >= 400 && error.status < 500 ? error.status : 500);
+      return renderAuth(
+        res,
+        "quen-mat-khau",
+        "Quên mật khẩu",
+        { emailError: error.message, values: { email: req.body.email || "" } },
+        error.status >= 400 && error.status < 500 ? error.status : 500,
+      );
     }
   },
   resetPasswordPage(req, res) {
-    return renderAuth(res, 'dat-lai-mat-khau', 'Đặt lại mật khẩu', { email: req.query.email || '', requiresOtp: true, codeSent: req.query.sent === '1', values: {}, changeEmailUrl: urlDoiEmail('/auth/quen-mat-khau', req.query.email) });
+    return renderAuth(res, "dat-lai-mat-khau", "Đặt lại mật khẩu", {
+      email: req.query.email || "",
+      requiresOtp: true,
+      codeSent: req.query.sent === "1",
+      values: {},
+      changeEmailUrl: urlDoiEmail("/auth/quen-mat-khau", req.query.email),
+    });
   },
   async resetPassword(req, res) {
     try {
       if (req.body.newPassword !== req.body.confirmNewPassword) {
-        return renderAuth(res, 'dat-lai-mat-khau', 'Đặt lại mật khẩu', { email: req.body.email || '', requiresOtp: true, values: { otp: req.body.otp || '' }, showPasswordStep: true, passwordError: 'Mật khẩu xác nhận chưa khớp.', changeEmailUrl: urlDoiEmail('/auth/quen-mat-khau', req.body.email) }, 400);
+        return renderAuth(
+          res,
+          "dat-lai-mat-khau",
+          "Đặt lại mật khẩu",
+          {
+            email: req.body.email || "",
+            requiresOtp: true,
+            values: { otp: req.body.otp || "" },
+            showPasswordStep: true,
+            passwordError: "Mật khẩu xác nhận chưa khớp.",
+            changeEmailUrl: urlDoiEmail("/auth/quen-mat-khau", req.body.email),
+          },
+          400,
+        );
       }
-      await authService.resetPassword({ email: req.body.email, otp: req.body.otp, matKhauMoi: req.body.newPassword });
-      return res.redirect('/auth/dang-nhap?reset=1');
+      await authService.resetPassword({
+        email: req.body.email,
+        otp: req.body.otp,
+        matKhauMoi: req.body.newPassword,
+      });
+      return res.redirect("/auth/dang-nhap?reset=1");
     } catch (error) {
-      return renderAuth(res, 'dat-lai-mat-khau', 'Đặt lại mật khẩu', { email: req.body.email || '', requiresOtp: true, values: { otp: req.body.otp || '' }, otpError: error.message, changeEmailUrl: urlDoiEmail('/auth/quen-mat-khau', req.body.email) }, error.status >= 400 && error.status < 500 ? error.status : 500);
+      return renderAuth(
+        res,
+        "dat-lai-mat-khau",
+        "Đặt lại mật khẩu",
+        {
+          email: req.body.email || "",
+          requiresOtp: true,
+          values: { otp: req.body.otp || "" },
+          otpError: error.message,
+          changeEmailUrl: urlDoiEmail("/auth/quen-mat-khau", req.body.email),
+        },
+        error.status >= 400 && error.status < 500 ? error.status : 500,
+      );
     }
   },
   async refreshSession(req, res) {
     const refreshToken = req.cookies?.[config.env.authRefreshCookieName];
     const accessToken = req.cookies?.[config.env.authCookieName];
-    if (!refreshToken && !accessToken) return res.status(401).json({ success: false, message: 'Phiên đăng nhập đã hết hạn' });
+    if (!refreshToken && !accessToken)
+      return res
+        .status(401)
+        .json({ success: false, message: "Phiên đăng nhập đã hết hạn" });
     try {
       const result = await authService.refresh(refreshToken, accessToken);
       const data = result.data || result;
       const accessTokenMoi = data.accessToken;
       const refreshTokenMoi = data.refreshToken;
-      if (!accessTokenMoi || !refreshTokenMoi) return res.status(502).json({ success: false, message: 'Backend không trả đủ token để gia hạn phiên' });
-      res.cookie(config.env.authCookieName, accessTokenMoi, { ...cookieOptions, maxAge: config.env.authCookieMaxAge });
+      if (!accessTokenMoi || !refreshTokenMoi)
+        return res.status(502).json({
+          success: false,
+          message: "Backend không trả đủ token để gia hạn phiên",
+        });
+      res.cookie(config.env.authCookieName, accessTokenMoi, {
+        ...cookieOptions,
+        maxAge: config.env.authCookieMaxAge,
+      });
       res.cookie(config.env.authRefreshCookieName, refreshTokenMoi, {
         httpOnly: true,
         secure: config.env.authCookieSecure,
         sameSite: config.env.authCookieSameSite,
         maxAge: config.env.authRefreshCookieMaxAge,
-        path: '/'
+        path: "/",
       });
-      res.set('Cache-Control', 'no-store');
+      res.set("Cache-Control", "no-store");
       return res.json({ success: true, accessToken: accessTokenMoi });
     } catch (error) {
       if (error.status === 401) {
@@ -385,7 +714,10 @@ const authController = {
         res.clearCookie(config.env.authRefreshCookieName, cookieOptions);
         notifyAuthTabs(res);
       }
-      return res.status(error.status || 500).json({ success: false, message: error.message || 'Không làm mới được phiên đăng nhập' });
+      return res.status(error.status || 500).json({
+        success: false,
+        message: error.message || "Không làm mới được phiên đăng nhập",
+      });
     }
   },
   async logout(req, res, next) {
@@ -398,16 +730,18 @@ const authController = {
       res.clearCookie(config.env.authCookieName, cookieOptions);
       res.clearCookie(config.env.authRefreshCookieName, cookieOptions);
       notifyAuthTabs(res);
-      const quayVeDangNhap = req.body?.dangNhapLai === '1';
+      const quayVeDangNhap = req.body?.dangNhapLai === "1";
       if (req.session) {
         delete req.session.activeInterface;
         if (!quayVeDangNhap) delete req.session.pendingLoginIdentifier;
       }
-      return res.redirect(quayVeDangNhap ? '/auth/dang-nhap?doiGiaoDien=1' : '/');
+      return res.redirect(
+        quayVeDangNhap ? "/auth/dang-nhap?doiGiaoDien=1" : "/",
+      );
     } catch (error) {
       return next(error);
     }
-  }
+  },
 };
 
 export default authController;

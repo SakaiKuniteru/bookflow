@@ -93,8 +93,14 @@ class RecommendationContext:
         excluded = data.get("excluded_book_ids", data.get("excludedBookIds", []))
         if not isinstance(excluded, (list, tuple, set)):
             excluded = [excluded]
-        context_type = str(data.get("context_type", data.get("contextType", RECOMMENDATION_CONTEXT_HOME))).strip().upper()
-        recommendation_mode = str(data.get("recommendation_mode", data.get("recommendationMode", RECOMMENDATION_MODE_ANY))).strip().upper()
+        context_type = (
+            str(data.get("context_type", data.get("contextType", RECOMMENDATION_CONTEXT_HOME))).strip().upper()
+        )
+        recommendation_mode = (
+            str(data.get("recommendation_mode", data.get("recommendationMode", RECOMMENDATION_MODE_ANY)))
+            .strip()
+            .upper()
+        )
         limit = max(1, min(int(data.get("limit", 10) or 10), 50))
         return cls(
             context_type=context_type,
@@ -103,11 +109,15 @@ class RecommendationContext:
             query=str(data.get("query", "")).strip() or None,
             filters=dict(data.get("filters") or {}),
             recommendation_mode=recommendation_mode,
-            personalization_allowed=bool(data.get("personalization_allowed", data.get("personalizationAllowed", False))),
-            business_validation_required=bool(data.get("business_validation_required", data.get("businessValidationRequired", False))),
+            personalization_allowed=bool(
+                data.get("personalization_allowed", data.get("personalizationAllowed", False))
+            ),
+            business_validation_required=bool(
+                data.get("business_validation_required", data.get("businessValidationRequired", False))
+            ),
             excluded_book_ids=tuple(item for item in excluded if item is not None),
             limit=limit,
-            metadata=dict(data.get("metadata") or {})
+            metadata=dict(data.get("metadata") or {}),
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -122,22 +132,27 @@ class RecommendationContext:
             "business_validation_required": self.business_validation_required,
             "excluded_book_ids": list(self.excluded_book_ids),
             "limit": self.limit,
-            "metadata": self.metadata
+            "metadata": self.metadata,
         }
 
 
 class RecommendationDataProvider(Protocol):
-    async def lay_sach(self, book_id: Any, user_context: dict[str, Any] | None = None) -> dict[str, Any]:
-        ...
+    async def lay_sach(self, book_id: Any, user_context: dict[str, Any] | None = None) -> dict[str, Any]: ...
 
-    async def lay_lich_su(self, user_id: Any, user_context: dict[str, Any] | None = None) -> list[dict[str, Any]]:
-        ...
+    async def lay_lich_su(self, user_id: Any, user_context: dict[str, Any] | None = None) -> list[dict[str, Any]]: ...
 
-    async def tao_ung_vien_nghiep_vu(self, context: RecommendationContext, source_book: dict[str, Any] | None, history: list[dict[str, Any]], user_context: dict[str, Any] | None, limit: int) -> list[dict[str, Any]]:
-        ...
+    async def tao_ung_vien_nghiep_vu(
+        self,
+        context: RecommendationContext,
+        source_book: dict[str, Any] | None,
+        history: list[dict[str, Any]],
+        user_context: dict[str, Any] | None,
+        limit: int,
+    ) -> list[dict[str, Any]]: ...
 
-    async def kiem_tra_kha_dung(self, book_ids: list[Any], context: RecommendationContext, user_context: dict[str, Any] | None) -> list[dict[str, Any]]:
-        ...
+    async def kiem_tra_kha_dung(
+        self, book_ids: list[Any], context: RecommendationContext, user_context: dict[str, Any] | None
+    ) -> list[dict[str, Any]]: ...
 
 
 class BackendRecommendationDataProvider:
@@ -178,14 +193,21 @@ class BackendRecommendationDataProvider:
             return []
         return _lay_danh_sach(response)
 
-    async def tao_ung_vien_nghiep_vu(self, context: RecommendationContext, source_book: dict[str, Any] | None, history: list[dict[str, Any]], user_context: dict[str, Any] | None, limit: int) -> list[dict[str, Any]]:
+    async def tao_ung_vien_nghiep_vu(
+        self,
+        context: RecommendationContext,
+        source_book: dict[str, Any] | None,
+        history: list[dict[str, Any]],
+        user_context: dict[str, Any] | None,
+        limit: int,
+    ) -> list[dict[str, Any]]:
         client = await self._lay_client()
         payload = {
             "context": context.to_dict(),
             "source_book": source_book or None,
             "history": history if context.personalization_allowed else [],
             "user_context": user_context or {},
-            "limit": limit
+            "limit": limit,
         }
         try:
             response = await client.post(BACKEND_CANDIDATE_PATH, json_data=payload)
@@ -193,15 +215,13 @@ class BackendRecommendationDataProvider:
             raise AIBackendException("Không thể tạo candidate nghiệp vụ từ Backend", details=str(error)) from error
         return _lay_danh_sach(response)
 
-    async def kiem_tra_kha_dung(self, book_ids: list[Any], context: RecommendationContext, user_context: dict[str, Any] | None) -> list[dict[str, Any]]:
+    async def kiem_tra_kha_dung(
+        self, book_ids: list[Any], context: RecommendationContext, user_context: dict[str, Any] | None
+    ) -> list[dict[str, Any]]:
         if not book_ids:
             return []
         client = await self._lay_client()
-        payload = {
-            "book_ids": book_ids,
-            "context": context.to_dict(),
-            "user_context": user_context or {}
-        }
+        payload = {"book_ids": book_ids, "context": context.to_dict(), "user_context": user_context or {}}
         try:
             response = await client.post(BACKEND_VALIDATE_PATH, json_data=payload)
         except Exception as error:
@@ -210,12 +230,22 @@ class BackendRecommendationDataProvider:
 
 
 class TaoUngVienService:
-    def __init__(self, retrieval_service: TimKiemKetHopService | None = None, access_service: LocQuyenTruyCapService | None = None, data_provider: RecommendationDataProvider | None = None):
+    def __init__(
+        self,
+        retrieval_service: TimKiemKetHopService | None = None,
+        access_service: LocQuyenTruyCapService | None = None,
+        data_provider: RecommendationDataProvider | None = None,
+    ):
         self.retrieval_service = retrieval_service or tim_kiem_ket_hop_service
         self.access_service = access_service or loc_quyen_truy_cap_service
         self.data_provider = data_provider or BackendRecommendationDataProvider()
 
-    async def tao_ung_vien(self, context: RecommendationContext | dict[str, Any], user_context: dict[str, Any] | None = None, limit: int | None = None) -> dict[str, Any]:
+    async def tao_ung_vien(
+        self,
+        context: RecommendationContext | dict[str, Any],
+        user_context: dict[str, Any] | None = None,
+        limit: int | None = None,
+    ) -> dict[str, Any]:
         context = context if isinstance(context, RecommendationContext) else RecommendationContext.tu_dict(context)
         limit = max(1, min(int(limit or context.limit or 20), 100))
         bo_loc = self.access_service.tao_bo_loc(user_context)
@@ -239,7 +269,7 @@ class TaoUngVienService:
                     intent="GOI_Y_SACH",
                     entities={"source_book_id": context.source_book_id},
                     limit=min(limit * 3, 50),
-                    offset=0
+                    offset=0,
                 )
                 retrieval_result = retrieval_response.get("results", [])
             except Exception as error:
@@ -253,16 +283,19 @@ class TaoUngVienService:
                 source_book=source_book,
                 history=history,
                 user_context=user_context,
-                limit=min(limit * 3, 100)
+                limit=min(limit * 3, 100),
             )
         except Exception as error:
             business_error = error
             logger.warning("Không thể lấy candidate nghiệp vụ: %s", error)
         if retrieval_error and business_error:
-            raise AIBackendException("Không thể tạo danh sách ứng viên recommendation", details={"retrieval_error": str(retrieval_error), "business_error": str(business_error)})
+            raise AIBackendException(
+                "Không thể tạo danh sách ứng viên recommendation",
+                details={"retrieval_error": str(retrieval_error), "business_error": str(business_error)},
+            )
         candidates = self._merge_candidates(retrieval_result, business_result, context, history)
         candidates = self._loc_candidate_khong_hop_le(candidates, bo_loc, context)
-        candidates = candidates[:min(limit * 3, 100)]
+        candidates = candidates[: min(limit * 3, 100)]
         return {
             "context": context.to_dict(),
             "candidates": candidates,
@@ -272,11 +305,13 @@ class TaoUngVienService:
                 "retrieval_fallback": retrieval_error is not None,
                 "business_source_used": business_error is None,
                 "personalization_used": bool(context.personalization_allowed and history),
-                "access_scopes": list(bo_loc.allowed_scopes)
-            }
+                "access_scopes": list(bo_loc.allowed_scopes),
+            },
         }
 
-    def _tao_query(self, context: RecommendationContext, source_book: dict[str, Any] | None, history: list[dict[str, Any]]) -> str | None:
+    def _tao_query(
+        self, context: RecommendationContext, source_book: dict[str, Any] | None, history: list[dict[str, Any]]
+    ) -> str | None:
         parts = []
         if context.query:
             parts.append(context.query)
@@ -306,7 +341,13 @@ class TaoUngVienService:
             return None
         return query[:5000]
 
-    def _merge_candidates(self, retrieval_result: list[dict[str, Any]], business_result: list[dict[str, Any]], context: RecommendationContext, history: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    def _merge_candidates(
+        self,
+        retrieval_result: list[dict[str, Any]],
+        business_result: list[dict[str, Any]],
+        context: RecommendationContext,
+        history: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
         merged: dict[str, dict[str, Any]] = {}
         for item in retrieval_result:
             candidate = self._chuan_hoa_candidate(item, CANDIDATE_SOURCE_VECTOR, context, history)
@@ -319,7 +360,9 @@ class TaoUngVienService:
                 self._merge_one(merged, candidate)
         return list(merged.values())
 
-    def _chuan_hoa_candidate(self, item: dict[str, Any], source: str, context: RecommendationContext, history: list[dict[str, Any]]) -> dict[str, Any] | None:
+    def _chuan_hoa_candidate(
+        self, item: dict[str, Any], source: str, context: RecommendationContext, history: list[dict[str, Any]]
+    ) -> dict[str, Any] | None:
         nested_book = item.get("book") if isinstance(item.get("book"), dict) else {}
         data = {**nested_book, **item}
         book_id = _lay_id(data)
@@ -342,15 +385,22 @@ class TaoUngVienService:
             CANDIDATE_SOURCE_RELATED_BOOK: "RELATED_BOOK",
             CANDIDATE_SOURCE_USER_HISTORY: "SIMILAR_TO_HISTORY",
             CANDIDATE_SOURCE_CONTEXT: "CONTEXT_MATCH",
-            CANDIDATE_SOURCE_BUSINESS: "BUSINESS_MATCH"
+            CANDIDATE_SOURCE_BUSINESS: "BUSINESS_MATCH",
         }
         feature = feature_from_source.get(source)
         if feature and feature not in matched_features:
             matched_features.append(feature)
-        if context.personalization_allowed and history and source == CANDIDATE_SOURCE_VECTOR and "SIMILAR_TO_HISTORY" not in matched_features:
+        if (
+            context.personalization_allowed
+            and history
+            and source == CANDIDATE_SOURCE_VECTOR
+            and "SIMILAR_TO_HISTORY" not in matched_features
+        ):
             matched_features.append("SIMILAR_TO_HISTORY")
         source_score = self._score(data.get("source_score", data.get("score", data.get("relevance_score", 0))))
-        semantic_score = self._score(data.get("semantic_score", source_score if source == CANDIDATE_SOURCE_VECTOR else 0))
+        semantic_score = self._score(
+            data.get("semantic_score", source_score if source == CANDIDATE_SOURCE_VECTOR else 0)
+        )
         context_score = self._score(data.get("context_score", 0))
         history_score = self._score(data.get("history_score", 0))
         if "SIMILAR_TO_HISTORY" in matched_features:
@@ -370,7 +420,7 @@ class TaoUngVienService:
             "matched_features": matched_features,
             "metadata": metadata,
             "business": dict(data.get("business") or {}),
-            "sources": [source]
+            "sources": [source],
         }
 
     def _merge_one(self, merged: dict[str, dict[str, Any]], candidate: dict[str, Any]) -> None:
@@ -383,7 +433,9 @@ class TaoUngVienService:
         current["semantic_score"] = max(current.get("semantic_score", 0), candidate.get("semantic_score", 0))
         current["context_score"] = max(current.get("context_score", 0), candidate.get("context_score", 0))
         current["history_score"] = max(current.get("history_score", 0), candidate.get("history_score", 0))
-        current["matched_features"] = list(dict.fromkeys(current.get("matched_features", []) + candidate.get("matched_features", [])))
+        current["matched_features"] = list(
+            dict.fromkeys(current.get("matched_features", []) + candidate.get("matched_features", []))
+        )
         current["sources"] = list(dict.fromkeys(current.get("sources", []) + candidate.get("sources", [])))
         current["metadata"] = {**current.get("metadata", {}), **candidate.get("metadata", {})}
         current["business"] = {**current.get("business", {}), **candidate.get("business", {})}
@@ -391,7 +443,9 @@ class TaoUngVienService:
             if current.get(key_name) in (None, "", []):
                 current[key_name] = candidate.get(key_name)
 
-    def _loc_candidate_khong_hop_le(self, candidates: list[dict[str, Any]], bo_loc: BoLocTruyCap, context: RecommendationContext) -> list[dict[str, Any]]:
+    def _loc_candidate_khong_hop_le(
+        self, candidates: list[dict[str, Any]], bo_loc: BoLocTruyCap, context: RecommendationContext
+    ) -> list[dict[str, Any]]:
         excluded = {str(item) for item in context.excluded_book_ids}
         if context.source_book_id is not None:
             excluded.add(str(context.source_book_id))
